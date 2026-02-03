@@ -29,12 +29,13 @@ import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.monitor._private.MInstance;
 
 public class LifebeatRequestHandler extends WORequestHandler {
+
 	private static final Logger log = LoggerFactory.getLogger( LifebeatRequestHandler.class );
 
-	InetAddress myInetAddress;
-	String myName;
-	Application theApplication;
-	WOResponse BadLifebeatResponse, GoodResponse, DieResponse;
+	private final InetAddress myInetAddress;
+	private final String myName;
+	private final Application theApplication;
+	private final WOResponse BadLifebeatResponse, GoodResponse, DieResponse;
 
 	public LifebeatRequestHandler() {
 		super();
