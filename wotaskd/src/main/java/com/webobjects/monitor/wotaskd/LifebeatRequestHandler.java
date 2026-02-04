@@ -14,6 +14,7 @@ SUCH DAMAGE.
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,6 @@ import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.monitor._private.MInstance;
 
@@ -59,39 +59,46 @@ public class LifebeatRequestHandler extends WORequestHandler {
 
 	@Override
 	public WOResponse handleRequest( WORequest aRequest ) {
+
 		// Sadly, we do regenerate in the case of random lifebeats. Hopefully this won't be too often.
 		// Didn't pull this out so that we can rely on isUsingWebServer to catch some bad requests
-		if( (!aRequest.isUsingWebServer()) && (WOHostUtilities.isLocalInetAddress( aRequest._originatingAddress(), true )) ) {
-			Object lock = WOApplication.application().requestHandlingLock();
+		if( !aRequest.isUsingWebServer() && WOHostUtilities.isLocalInetAddress( aRequest._originatingAddress(), true ) ) {
+			final Object lock = WOApplication.application().requestHandlingLock();
+
 			if( lock != null ) {
 				synchronized( lock ) {
 					return _handleRequest( aRequest );
 				}
 			}
+
 			return _handleRequest( aRequest );
 		}
+
 		return null;
 	}
 
 	private WOResponse _handleRequest( WORequest aRequest ) {
+
 		WOResponse aResponse = BadLifebeatResponse;
 
 		// http://localhost:1085/cgi-bin/WebObjects/wotaskd.woa/wlb?<notification name>&<instance name>&<hostname>&<port>
 		// <notification name> = "hasStarted", "lifebeat", "willStop", "willCrash"
 
-		NSArray values = NSArray.componentsSeparatedByString( aRequest.queryString(), "&" );
-		if( (values == null) || (values.count() != 4) ) {
+		final List<String> values = NSArray.componentsSeparatedByString( aRequest.queryString(), "&" );
+
+		if( (values == null) || (values.size() != 4) ) {
 			theApplication.siteConfig().globalErrorDictionary.takeValueForKey( (myName + ": Received bad lifebeat: " + aRequest.queryString()), aRequest.queryString() );
 			log.error( "{}: Received bad lifebeat: {}", myName, aRequest.queryString() );
 		}
 		else {
-			String notificationType = (String)values.objectAtIndex( 0 );
-			String instanceName = (String)values.objectAtIndex( 1 );
-			String host = (String)values.objectAtIndex( 2 );
-			String port = (String)values.objectAtIndex( 3 );
+			final String notificationType = values.get( 0 );
+			final String instanceName = values.get( 1 );
+			final String host = values.get( 2 );
+			final String port = values.get( 3 );
 
-			if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelInformational, NSLog.DebugGroupDeployment ) )
-				NSLog.debug.appendln( "@@@@@ Received Lifebeat: " + notificationType + " " + instanceName + " " + host + " " + port );
+			if( log.isDebugEnabled() ) {
+				log.debug( "Received app comms: %s %s %s %s".formatted( notificationType, instanceName, host, port) );
+			}
 
 			if( notificationType.equals( "lifebeat" ) ) {
 				// app is still alive - update registration
@@ -124,6 +131,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 				log.error( "{}: Received bad lifebeat: {}", myName, aRequest.queryString() );
 			}
 		}
+
 		if( "HTTP/1.0".equals( aRequest.httpVersion() ) ) {
 			aResponse = null;
 		}
@@ -131,23 +139,15 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		return aResponse;
 	}
 
-	private InetAddress addressForName( String name ) {
-		try {
-			return InetAddress.getByName( name );
-		}
-		catch( UnknownHostException uhe ) {
-			log.error( "Unknown host: {}", name );
-		}
-		return null;
-	}
-
 	private void registerStart( String instanceName, String host, String port ) {
+
 		// KH - can we cache this for better speed?
-		InetAddress hostAddress = addressForName( host );
+		final InetAddress hostAddress = addressForName( host );
 
 		theApplication._lock.startReading();
+
 		try {
-			MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.startRegistration( new NSTimestamp() );
@@ -163,12 +163,14 @@ public class LifebeatRequestHandler extends WORequestHandler {
 	}
 
 	private boolean registerLifebeat( String instanceName, String host, String port ) {
+
 		// KH - can we cache this for better speed?
-		InetAddress hostAddress = addressForName( host );
+		final InetAddress hostAddress = addressForName( host );
 
 		theApplication._lock.startReading();
+
 		try {
-			MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.updateRegistration( new NSTimestamp() );
@@ -184,12 +186,15 @@ public class LifebeatRequestHandler extends WORequestHandler {
 	}
 
 	private void registerStop( String instanceName, String host, String port ) {
+
 		// app will stop in a good way - we requested it.
-		InetAddress hostAddress = addressForName( host );
+		final InetAddress hostAddress = addressForName( host );
 
 		theApplication._lock.startReading();
+
 		try {
-			MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+
 			if( instance != null ) {
 				instance.registerStop( new NSTimestamp() );
 				instance.setShouldDie( false );
@@ -202,14 +207,15 @@ public class LifebeatRequestHandler extends WORequestHandler {
 	}
 
 	private void registerCrash( String instanceName, String host, String port ) {
-		NSLog.err.appendln( "App '" + instanceName + "' on " + host + ":" + port + " received 'willCrash' notification." );
+		log.error( "App '" + instanceName + "' on " + host + ":" + port + " received 'willCrash' notification." );
 
 		// app will stop in a bad way - notify if necessary
-		InetAddress hostAddress = addressForName( host );
+		final InetAddress hostAddress = addressForName( host );
 
 		theApplication._lock.startReading();
+
 		try {
-			MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.registerCrash( new NSTimestamp() );
@@ -220,5 +226,16 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		finally {
 			theApplication._lock.endReading();
 		}
+	}
+
+	private InetAddress addressForName( String name ) {
+		try {
+			return InetAddress.getByName( name );
+		}
+		catch( UnknownHostException uhe ) {
+			log.error( "Unknown host: {}", name );
+		}
+
+		return null;
 	}
 }
