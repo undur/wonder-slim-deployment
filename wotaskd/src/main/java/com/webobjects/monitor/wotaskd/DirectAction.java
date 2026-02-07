@@ -45,21 +45,22 @@ import com.webobjects.monitor._private.MonitorException;
 import x.ResponseWrapper;
 
 public class DirectAction extends WODirectAction {
+
 	private NSMutableDictionary hostResponse;
 	private NSDictionary element;
 
-	static private String _hostName;
-	static private Object[] hostQueryKeys;
-	static private Object[] appQueryKeys;
-	static private Object[] instanceQueryKeys;
-	static private NSDictionary successElement;
-	static public Object[] errorKeys;
-	static private String _accessDenied;
-	static private String _invalidPassword;
-	static private String _invalidXML;
-	static private String _emptyXML;
-	static private NSDictionary _argumentNumberCommandError;
-	static private NSTimestampFormatter aFormat = null;
+	private static String _hostName;
+	private static Object[] hostQueryKeys;
+	private static Object[] appQueryKeys;
+	private static Object[] instanceQueryKeys;
+	private static NSDictionary successElement;
+	public static Object[] errorKeys;
+	private static String _accessDenied;
+	private static String _invalidPassword;
+	private static String _invalidXML;
+	private static String _emptyXML;
+	private static NSDictionary _argumentNumberCommandError;
+	private static NSTimestampFormatter aFormat = null;
 
 	static {
 		// get the hostname for the error messages
