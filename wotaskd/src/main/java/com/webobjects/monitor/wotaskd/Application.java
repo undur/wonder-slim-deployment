@@ -382,14 +382,6 @@ public class Application extends ERXApplication {
 		listenThread.start();
 	}
 
-	// cleans up after the Application (specifically the ListenThread)
-	@Override
-	public void finalize() throws Throwable {
-		listenThread.closeRequestSocket();
-		listenThread.stop();
-		super.finalize();
-	}
-
 	// Overridden createRequest because WO ObjC apps send 'GET /... HTTP/1.0 ' (note extra space) which doesn't parse very well.
 	public WORequest createRequest( String aMethod, String aURL, String anHTTPVersion, NSDictionary someHeaders, NSData aContent, NSDictionary someInfo ) {
 		if( (anHTTPVersion == null) && (aURL != null) && (aURL.endsWith( " HTTP/1.0" )) ) {
