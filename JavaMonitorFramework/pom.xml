@@ -9,9 +9,6 @@
 	<properties>
 		<webobjects.group>com.webobjects</webobjects.group>
 		<webobjects.version>5.4.3</webobjects.version>
-
-		<wonder.core.group>wonder.core</wonder.core.group>
-		<wonder.version>8.0.0.slim-SNAPSHOT</wonder.version>
 	</properties>
 	<build>
 		<plugins>
@@ -29,11 +26,6 @@
 	</build>
 
 	<dependencies>
-		<dependency>
-			<groupId>${wonder.core.group}</groupId>
-			<artifactId>ERExtensions</artifactId>
-			<version>${wonder.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaWebObjects</artifactId>

@@ -33,8 +33,8 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
+import com.webobjects.foundation.NSProperties;
 
-import er.extensions.foundation.ERXProperties;
 import x.ResponseWrapper;
 
 public class MHost extends MObject {
@@ -45,7 +45,13 @@ public class MHost extends MObject {
 	 * FIXME: Move to wherever we decide to eventually keep properties // Hugi 2024-11-04
 	 */
 	@Deprecated
-	private static final int RECEIVE_TIMEOUT = ERXProperties.intForKeyWithDefault( "JavaMonitor.receiveTimeout", 10000 );
+	private static final int RECEIVE_TIMEOUT = readReceiveTimeout();
+
+	@Deprecated
+	private static int readReceiveTimeout() {
+		final String prop = NSProperties.getProperty( "JavaMonitor.receiveTimeout", "10000" );
+		return Integer.parseInt( prop );
+	}
 
 	/**
 	 * FIXME: It doesn't look like this variable is ever actually read in a meaningful way. Delete? // Hugi 2024-11-02
