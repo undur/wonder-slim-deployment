@@ -9,6 +9,9 @@
 	<packaging>woapplication</packaging>
 
 	<properties>
+		<maven.compiler.release>25</maven.compiler.release>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
 		<webobjects.group>com.webobjects</webobjects.group>
 		<webobjects.version>5.4.3</webobjects.version>
 
@@ -27,15 +30,6 @@
 				<extensions>true</extensions>
 				<configuration>
 					<woresourcesFolderName>resources</woresourcesFolderName>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<source>25</source>
-					<target>25</target>
 				</configuration>
 			</plugin>
 		</plugins>

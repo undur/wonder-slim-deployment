@@ -9,6 +9,9 @@
 	<packaging>woapplication</packaging>
 
 	<properties>
+		<maven.compiler.release>25</maven.compiler.release>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
 		<webobjects.group>com.webobjects</webobjects.group>
 		<webobjects.version>5.4.3</webobjects.version>
 
@@ -24,14 +27,6 @@
 				<artifactId>vermilingua-maven-plugin</artifactId>
 				<version>1.1.0</version>
 				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>25</source>
-					<target>25</target>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
