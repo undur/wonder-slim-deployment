@@ -28,9 +28,6 @@
 				<artifactId>vermilingua-maven-plugin</artifactId>
 				<version>1.1.4</version>
 				<extensions>true</extensions>
-				<configuration>
-					<woresourcesFolderName>resources</woresourcesFolderName>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
