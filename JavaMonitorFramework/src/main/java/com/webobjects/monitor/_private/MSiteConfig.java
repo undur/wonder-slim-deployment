@@ -48,6 +48,8 @@ import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.foundation._NSStringUtilities;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 
+import x.CoderWrapper;
+
 public class MSiteConfig extends MObject {
 
 	private static final Logger logger = LoggerFactory.getLogger( MSiteConfig.class );

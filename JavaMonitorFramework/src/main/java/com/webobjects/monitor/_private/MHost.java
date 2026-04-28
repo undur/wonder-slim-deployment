@@ -35,6 +35,7 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSProperties;
 
+import x.CoderWrapper;
 import x.ResponseWrapper;
 
 public class MHost extends MObject {

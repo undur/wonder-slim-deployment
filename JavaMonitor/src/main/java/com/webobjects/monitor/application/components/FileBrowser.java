@@ -35,7 +35,6 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.xml.WOXMLException;
 import com.webobjects.foundation.NSPathUtilities;
-import com.webobjects.monitor._private.CoderWrapper;
 import com.webobjects.monitor._private.MHost;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor.application.MonitorComponent;
@@ -43,6 +42,7 @@ import com.webobjects.monitor.application.components.FileBrowser.RemoteBrowseCli
 import com.webobjects.monitor.application.components.FileBrowser.RemoteBrowseClient.RemoteResult;
 import com.webobjects.monitor.util.WOTaskdHandler;
 
+import x.CoderWrapper;
 import x.ResponseWrapper;
 
 public class FileBrowser extends MonitorComponent {

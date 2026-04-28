@@ -16,7 +16,6 @@ import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
-import com.webobjects.monitor._private.CoderWrapper;
 import com.webobjects.monitor._private.MApplication;
 import com.webobjects.monitor._private.MHost;
 import com.webobjects.monitor._private.MInstance;
@@ -26,6 +25,7 @@ import com.webobjects.monitor.application.components.AppDetailPage;
 import com.webobjects.monitor.application.components.ApplicationsPage;
 import com.webobjects.monitor.application.components.HostsPage;
 
+import x.CoderWrapper;
 import x.ResponseWrapper;
 
 public class WOTaskdHandler {

@@ -1,8 +1,6 @@
-package com.webobjects.monitor._private;
+package x;
 
 import com.webobjects.foundation.NSData;
-
-import x.FoundationCoder;
 
 /**
  * Thin façade around {@link FoundationCoder}. Originally introduced to consolidate the

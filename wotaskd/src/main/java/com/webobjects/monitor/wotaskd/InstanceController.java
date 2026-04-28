@@ -44,7 +44,6 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSSocketUtilities;
 import com.webobjects.foundation.NSTimestamp;
-import com.webobjects.monitor._private.CoderWrapper;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MApplication;
 import com.webobjects.monitor._private.MHost;
@@ -55,6 +54,7 @@ import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.StringExtensions;
 
 import er.extensions.foundation.ERXProperties;
+import x.CoderWrapper;
 import x.ResponseWrapper;
 
 public class InstanceController implements IInstanceController {

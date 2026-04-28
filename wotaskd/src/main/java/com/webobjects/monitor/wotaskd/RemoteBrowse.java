@@ -23,7 +23,8 @@ import com.webobjects.foundation.NSComparator;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSPathUtilities;
-import com.webobjects.monitor._private.CoderWrapper;
+
+import x.CoderWrapper;
 
 public class RemoteBrowse extends WODirectAction {
 	private Object[] fileKeys = new Object[] { "file", "fileType", "fileSize" };
