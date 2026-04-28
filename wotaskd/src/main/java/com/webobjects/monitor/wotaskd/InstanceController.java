@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,6 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSSocketUtilities;
 import com.webobjects.foundation.NSTimestamp;
-import com.webobjects.foundation._NSCollectionReaderWriterLock;
 import com.webobjects.monitor._private.CoderWrapper;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MApplication;
@@ -110,7 +110,7 @@ public class InstanceController implements IInstanceController {
 	 * outside wotaskd's control.
 	 */
 	private final NSMutableDictionary _unknownApplications = new NSMutableDictionary();
-	private final _NSCollectionReaderWriterLock _unknownAppLock = new _NSCollectionReaderWriterLock();
+	private final ReentrantReadWriteLock _unknownAppLock = new ReentrantReadWriteLock();
 
 	private static final int FORCE_QUIT_DELAY = ERXProperties.intForKeyWithDefault( "WOTaskd.killTimeout", 120000 );
 	private static final int RECEIVE_TIMEOUT = ERXProperties.intForKeyWithDefault( "WOTaskd.receiveTimeout", 5000 );
@@ -160,7 +160,7 @@ public class InstanceController implements IInstanceController {
 	}
 
 	public void registerUnknownInstance( String name, String host, String port ) {
-		_unknownAppLock.startWriting();
+		_unknownAppLock.writeLock().lock();
 
 		try {
 			NSTimestamp currentTime = new NSTimestamp();
@@ -179,12 +179,12 @@ public class InstanceController implements IInstanceController {
 			// Just ignore it - unregistered instances are second class citizens anyway
 		}
 		finally {
-			_unknownAppLock.endWriting();
+			_unknownAppLock.writeLock().unlock();
 		}
 	}
 
 	public String portForUnregisteredAppNamed( String name ) {
-		_unknownAppLock.startReading();
+		_unknownAppLock.readLock().lock();
 
 		try {
 			NSDictionary appDict = (NSDictionary)_unknownApplications.valueForKey( name );
@@ -197,12 +197,12 @@ public class InstanceController implements IInstanceController {
 			return null;
 		}
 		finally {
-			_unknownAppLock.endReading();
+			_unknownAppLock.readLock().unlock();
 		}
 	}
 
 	public void triageUnknownInstances() {
-		_unknownAppLock.startWriting();
+		_unknownAppLock.writeLock().lock();
 
 		try {
 			NSMutableDictionary unknownApps = _unknownApplications;
@@ -230,7 +230,7 @@ public class InstanceController implements IInstanceController {
 			}
 		}
 		finally {
-			_unknownAppLock.endWriting();
+			_unknownAppLock.writeLock().unlock();
 		}
 	}
 
@@ -239,13 +239,13 @@ public class InstanceController implements IInstanceController {
 	public StringBuffer generateAdaptorConfigXML() {
 		StringBuffer sb = null;
 
-		_unknownAppLock.startReading();
+		_unknownAppLock.readLock().lock();
 		try {
 			NSMutableDictionary unknownApps = _unknownApplications;
 			sb = new StringBuffer();
 
 			if( (unknownApps.count() == 0) ) {
-				// we endReading in the finally block
+				// the read lock is released in the finally block
 				return sb;
 			}
 
@@ -275,7 +275,7 @@ public class InstanceController implements IInstanceController {
 			} // end Application Enumeration
 		}
 		finally {
-			_unknownAppLock.endReading();
+			_unknownAppLock.readLock().unlock();
 		}
 		return sb;
 	}
