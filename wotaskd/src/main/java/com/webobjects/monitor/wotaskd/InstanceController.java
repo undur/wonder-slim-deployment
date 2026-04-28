@@ -68,7 +68,47 @@ public class InstanceController implements IInstanceController {
 	private String spawningGrounds = null;
 	private final Application theApplication = (Application)WOApplication.application();
 
-	/********** Unregistered Applications **********/
+	/**
+	 * Registry of running app instances that wotaskd <em>didn't</em> start — apps that
+	 * showed up via lifebeat (heartbeat) without a corresponding entry in the SiteConfig.
+	 *
+	 * <h4>How an instance ends up here</h4>
+	 * <p>The lifebeat handler accepts pings from any instance running on the local
+	 * machine, even ones wotaskd has no record of, and stuffs them in here. That happens
+	 * in two scenarios:
+	 * <ul>
+	 *   <li>An admin started a {@code .woa} from the shell directly instead of through
+	 *       JavaMonitor.</li>
+	 *   <li>A leftover JVM from a previous SiteConfig is still alive and pinging after
+	 *       its instance entry was removed from the config.</li>
+	 * </ul>
+	 *
+	 * <h4>What we do with them</h4>
+	 * <ol>
+	 *   <li><b>Adaptor routing.</b> {@link #generateAdaptorConfigXML()} emits these as
+	 *       {@code <application>}/{@code <instance>} entries (with a negative {@code id}
+	 *       sentinel) so the {@code mod_WebObjects} adaptor can route incoming HTTP
+	 *       requests to manually-started apps too.</li>
+	 *   <li><b>Lookup by name.</b> {@link #portForUnregisteredAppNamed(String)} returns
+	 *       any known port for a given app name; called from
+	 *       {@code DirectAction#defaultAction} when handling requests for apps that have
+	 *       no managed instance.</li>
+	 * </ol>
+	 *
+	 * <h4>Triage</h4>
+	 * <p>{@link #triageUnknownInstances()} runs periodically and drops entries whose last
+	 * lifebeat is older than 45 seconds — twice the default 30-second lifebeat interval,
+	 * so two missed pings count as dead. Keeps the registry from growing without bound.
+	 *
+	 * <h4>Shape</h4>
+	 * <p>{@code appName -> { port -> lastLifebeatTimestamp }}. Concurrent access is
+	 * gated by {@link #_unknownAppLock}.
+	 *
+	 * <h4>Is it pulling its weight?</h4>
+	 * <p>If your deployment is JavaMonitor-only and nobody starts apps from the shell,
+	 * this whole subsystem is dead weight. It only matters when something runs a WO app
+	 * outside wotaskd's control.
+	 */
 	private final NSMutableDictionary _unknownApplications = new NSMutableDictionary();
 	private final _NSCollectionReaderWriterLock _unknownAppLock = new _NSCollectionReaderWriterLock();
 
