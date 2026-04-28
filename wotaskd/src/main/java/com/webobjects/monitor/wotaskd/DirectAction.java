@@ -34,12 +34,12 @@ import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.foundation._NSUtilities;
-import com.webobjects.monitor._private.MApplication;
-import com.webobjects.monitor._private.MHost;
-import com.webobjects.monitor._private.MInstance;
-import com.webobjects.monitor._private.MObject;
-import com.webobjects.monitor._private.MSiteConfig;
 import com.webobjects.monitor._private.MonitorException;
+import com.webobjects.monitor._private.model.MApplication;
+import com.webobjects.monitor._private.model.MHost;
+import com.webobjects.monitor._private.model.MInstance;
+import com.webobjects.monitor._private.model.MObject;
+import com.webobjects.monitor._private.model.MSiteConfig;
 
 import x.CoderWrapper;
 import x.ResponseWrapper;

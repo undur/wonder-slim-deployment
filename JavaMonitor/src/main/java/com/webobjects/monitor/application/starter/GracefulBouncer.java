@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.webobjects.monitor._private.MApplication;
-import com.webobjects.monitor._private.MHost;
-import com.webobjects.monitor._private.MInstance;
+import com.webobjects.monitor._private.model.MApplication;
+import com.webobjects.monitor._private.model.MHost;
+import com.webobjects.monitor._private.model.MInstance;
 
 /**
  * Bounces an application gracefully. It does so by starting at least one inactive instance

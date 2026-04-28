@@ -10,7 +10,7 @@ The Apple Software is provided by Apple on an "AS IS" basis.  APPLE MAKES NO WAR
 IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE, REPRODUCTION, MODIFICATION AND/OR DISTRIBUTION OF THE APPLE SOFTWARE, HOWEVER CAUSED AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN  ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
  */
-package com.webobjects.monitor._private;
+package com.webobjects.monitor._private.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -47,6 +47,8 @@ import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.foundation._NSStringUtilities;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
+import com.webobjects.monitor._private.IInstanceController;
+import com.webobjects.monitor._private.MonitorException;
 
 import x.CoderWrapper;
 

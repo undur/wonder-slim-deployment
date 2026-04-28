@@ -16,7 +16,7 @@ import java.util.List;
  */
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.monitor._private.MInstance;
+import com.webobjects.monitor._private.model.MInstance;
 import com.webobjects.monitor.application.MonitorComponent.InstComponent;
 
 public class InstDeathPage extends InstComponent {

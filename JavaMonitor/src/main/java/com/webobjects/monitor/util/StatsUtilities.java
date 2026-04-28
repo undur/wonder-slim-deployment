@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
-import com.webobjects.monitor._private.MApplication;
-import com.webobjects.monitor._private.MInstance;
+import com.webobjects.monitor._private.model.MApplication;
+import com.webobjects.monitor._private.model.MInstance;
 
 public class StatsUtilities {
 

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.webobjects.appserver.WOContext;
-import com.webobjects.monitor._private.MApplication;
-import com.webobjects.monitor._private.MHost;
-import com.webobjects.monitor._private.MInstance;
-import com.webobjects.monitor._private.MObject;
+import com.webobjects.monitor._private.model.MApplication;
+import com.webobjects.monitor._private.model.MHost;
+import com.webobjects.monitor._private.model.MInstance;
+import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor.application.components.AppDetailPage;
 import com.webobjects.monitor.application.components.ApplicationsPage;
 

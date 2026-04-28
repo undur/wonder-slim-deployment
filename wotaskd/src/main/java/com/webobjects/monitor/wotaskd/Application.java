@@ -42,8 +42,8 @@ import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation._NSCollectionReaderWriterLock;
-import com.webobjects.monitor._private.MSiteConfig;
 import com.webobjects.monitor._private.StringExtensions;
+import com.webobjects.monitor._private.model.MSiteConfig;
 
 import er.extensions.appserver.ERXApplication;
 

@@ -16,8 +16,8 @@ import java.util.List;
  */
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.monitor._private.MHost;
-import com.webobjects.monitor._private.MObject;
+import com.webobjects.monitor._private.model.MHost;
+import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor.application.MonitorComponent;
 
 import er.extensions.appserver.ERXApplication;

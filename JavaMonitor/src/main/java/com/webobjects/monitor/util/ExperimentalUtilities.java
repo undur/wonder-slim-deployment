@@ -8,7 +8,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.List;
 
-import com.webobjects.monitor._private.MInstance;
+import com.webobjects.monitor._private.model.MInstance;
 
 /**
  * Home for some experimental functionality (that will probably get a different home later

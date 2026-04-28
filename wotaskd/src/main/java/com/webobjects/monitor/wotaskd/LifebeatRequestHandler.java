@@ -26,7 +26,7 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSTimestamp;
-import com.webobjects.monitor._private.MInstance;
+import com.webobjects.monitor._private.model.MInstance;
 
 public class LifebeatRequestHandler extends WORequestHandler {
 

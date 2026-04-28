@@ -45,13 +45,13 @@ import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSSocketUtilities;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.monitor._private.IInstanceController;
-import com.webobjects.monitor._private.MApplication;
-import com.webobjects.monitor._private.MHost;
-import com.webobjects.monitor._private.MInstance;
-import com.webobjects.monitor._private.MObject;
-import com.webobjects.monitor._private.MSiteConfig;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.StringExtensions;
+import com.webobjects.monitor._private.model.MApplication;
+import com.webobjects.monitor._private.model.MHost;
+import com.webobjects.monitor._private.model.MInstance;
+import com.webobjects.monitor._private.model.MObject;
+import com.webobjects.monitor._private.model.MSiteConfig;
 
 import er.extensions.foundation.ERXProperties;
 import x.CoderWrapper;

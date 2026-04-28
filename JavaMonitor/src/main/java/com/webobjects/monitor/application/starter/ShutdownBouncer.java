@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.webobjects.monitor._private.MApplication;
-import com.webobjects.monitor._private.MHost;
-import com.webobjects.monitor._private.MInstance;
+import com.webobjects.monitor._private.model.MApplication;
+import com.webobjects.monitor._private.model.MHost;
+import com.webobjects.monitor._private.model.MInstance;
 
 /**
  * Bounces an application by refusing new sessions, waiting a while, shutting down all instances, then starting the same instances again.

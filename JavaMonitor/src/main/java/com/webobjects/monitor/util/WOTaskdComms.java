@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.monitor._private.MHost;
-import com.webobjects.monitor._private.MSiteConfig;
+import com.webobjects.monitor._private.model.MHost;
+import com.webobjects.monitor._private.model.MSiteConfig;
 
 import x.CoderWrapper;
 import x.ResponseWrapper;

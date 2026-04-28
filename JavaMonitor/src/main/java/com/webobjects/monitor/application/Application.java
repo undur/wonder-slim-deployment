@@ -17,8 +17,8 @@ import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation._NSUtilities;
-import com.webobjects.monitor._private.MApplication;
-import com.webobjects.monitor._private.MSiteConfig;
+import com.webobjects.monitor._private.model.MApplication;
+import com.webobjects.monitor._private.model.MSiteConfig;
 import com.webobjects.monitor.application.admin.AdminAction;
 import com.webobjects.monitor.util.WOTaskdHandler;
 

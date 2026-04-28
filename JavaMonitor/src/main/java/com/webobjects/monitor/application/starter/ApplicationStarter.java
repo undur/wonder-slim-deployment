@@ -8,7 +8,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.monitor._private.MApplication;
+import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor.util.WOTaskdHandler;
 import com.webobjects.monitor.util.WOTaskdHandler.ErrorCollector;
 

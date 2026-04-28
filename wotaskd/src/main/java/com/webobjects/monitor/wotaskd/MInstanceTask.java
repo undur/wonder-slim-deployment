@@ -4,8 +4,8 @@ import java.util.TimerTask;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSLog;
-import com.webobjects.monitor._private.MInstance;
 import com.webobjects.monitor._private.MonitorException;
+import com.webobjects.monitor._private.model.MInstance;
 
 public abstract class MInstanceTask extends TimerTask {
 

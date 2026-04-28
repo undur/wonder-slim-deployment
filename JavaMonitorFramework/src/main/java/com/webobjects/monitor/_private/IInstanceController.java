@@ -12,6 +12,8 @@ SUCH DAMAGE.
  */
 package com.webobjects.monitor._private;
 
+import com.webobjects.monitor._private.model.MInstance;
+
 import x.ResponseWrapper;
 
 public interface IInstanceController {

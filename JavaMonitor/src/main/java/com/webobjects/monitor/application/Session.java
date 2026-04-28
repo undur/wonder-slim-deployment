@@ -23,7 +23,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
-import com.webobjects.monitor._private.MSiteConfig;
+import com.webobjects.monitor._private.model.MSiteConfig;
 import com.webobjects.monitor.application.components.JMLoginPage;
 import com.webobjects.monitor.util.WOTaskdHandler;
 import com.webobjects.monitor.util.WOTaskdHandler.ErrorCollector;

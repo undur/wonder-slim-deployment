@@ -21,8 +21,8 @@ import com.webobjects.appserver.WOActionResults;
  */
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.monitor._private.MApplication;
 import com.webobjects.monitor._private.StringExtensions;
+import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor.application.MonitorComponent;
 import com.webobjects.monitor.application.components.ConfirmationPage.ConfirmationDelegate;
 
