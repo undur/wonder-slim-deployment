@@ -57,14 +57,14 @@ import x.ResponseWrapper;
 
 public class InstanceController implements IInstanceController {
 
-	WOTimer aScheduleTimer;
-	WOTimer anAutoRecoverTimer;
-	WOTimer anAutoRecoverStartupTimer;
-	String _hostName;
-	boolean _isOnWindows = false;
-	boolean _shouldUseSpawn = true;
-	String spawningGrounds = null;
-	Application theApplication = (Application)WOApplication.application();
+	private WOTimer aScheduleTimer;
+	private WOTimer anAutoRecoverTimer;
+	private WOTimer anAutoRecoverStartupTimer;
+	private final String _hostName;
+	private boolean _isOnWindows = false;
+	private boolean _shouldUseSpawn = true;
+	private String spawningGrounds = null;
+	private final Application theApplication = (Application)WOApplication.application();
 
 	private static final int FORCE_QUIT_DELAY = ERXProperties.intForKeyWithDefault( "WOTaskd.killTimeout", 120000 );
 	private static final int RECEIVE_TIMEOUT = ERXProperties.intForKeyWithDefault( "WOTaskd.receiveTimeout", 5000 );
