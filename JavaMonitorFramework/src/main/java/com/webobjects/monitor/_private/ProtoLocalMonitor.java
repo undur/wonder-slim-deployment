@@ -14,15 +14,15 @@ package com.webobjects.monitor._private;
 
 import x.ResponseWrapper;
 
-public abstract class ProtoLocalMonitor {
+public interface ProtoLocalMonitor {
 
-	public abstract String startInstance( MInstance anInstance ) throws MonitorException;
+	public String startInstance( MInstance anInstance ) throws MonitorException;
 
-	public abstract ResponseWrapper terminateInstance( MInstance anInstance ) throws MonitorException;
+	public ResponseWrapper terminateInstance( MInstance anInstance ) throws MonitorException;
 
-	public abstract ResponseWrapper stopInstance( MInstance anInstance ) throws MonitorException;
+	public ResponseWrapper stopInstance( MInstance anInstance ) throws MonitorException;
 
-	public abstract ResponseWrapper queryInstance( MInstance anInstance ) throws MonitorException;
+	public ResponseWrapper queryInstance( MInstance anInstance ) throws MonitorException;
 
-	public abstract StringBuffer generateAdaptorConfigXML();
+	public StringBuffer generateAdaptorConfigXML();
 }

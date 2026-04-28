@@ -55,7 +55,7 @@ import com.webobjects.monitor._private.StringExtensions;
 import er.extensions.foundation.ERXProperties;
 import x.ResponseWrapper;
 
-public class LocalMonitor extends ProtoLocalMonitor {
+public class LocalMonitor implements ProtoLocalMonitor {
 	WOTimer aScheduleTimer;
 	WOTimer anAutoRecoverTimer;
 	WOTimer anAutoRecoverStartupTimer;
