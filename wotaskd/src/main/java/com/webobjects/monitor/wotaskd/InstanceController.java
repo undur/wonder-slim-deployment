@@ -68,6 +68,10 @@ public class InstanceController implements IInstanceController {
 	private String spawningGrounds = null;
 	private final Application theApplication = (Application)WOApplication.application();
 
+	/********** Unregistered Applications **********/
+	private final NSMutableDictionary _unknownApplications = new NSMutableDictionary();
+	private final _NSCollectionReaderWriterLock _unknownAppLock = new _NSCollectionReaderWriterLock();
+
 	private static final int FORCE_QUIT_DELAY = ERXProperties.intForKeyWithDefault( "WOTaskd.killTimeout", 120000 );
 	private static final int RECEIVE_TIMEOUT = ERXProperties.intForKeyWithDefault( "WOTaskd.receiveTimeout", 5000 );
 	private static final boolean FORCE_QUIT_TASK_ENABLED = ERXProperties.booleanForKeyWithDefault( "WOTaskd.forceQuitTaskEnabled", false );
@@ -114,10 +118,6 @@ public class InstanceController implements IInstanceController {
 
 		return new NSTimestamp( currentYear, currentMonth, currentDayOfMonth, currentHourOfDay + 1, 0, 0, currentTimeZone );
 	}
-
-	/********** Unregistered Applications **********/
-	NSMutableDictionary _unknownApplications = new NSMutableDictionary();
-	_NSCollectionReaderWriterLock _unknownAppLock = new _NSCollectionReaderWriterLock();
 
 	public void registerUnknownInstance( String name, String host, String port ) {
 		_unknownAppLock.startWriting();
@@ -239,8 +239,6 @@ public class InstanceController implements IInstanceController {
 		}
 		return sb;
 	}
-
-	/**********/
 
 	/********** Timer Targets **********/
 	public void _checkAutoRecover() {
@@ -420,8 +418,6 @@ public class InstanceController implements IInstanceController {
 		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
 			NSLog.debug.appendln( "_checkSchedules STOP" );
 	}
-
-	/**********/
 
 	/********** Controlling Instances **********/
 	// Returns null if success
@@ -677,5 +673,4 @@ public class InstanceController implements IInstanceController {
 		}
 		return true;
 	}
-	/**********/
 }
