@@ -2,6 +2,8 @@ package x;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -205,8 +207,15 @@ public class FoundationCoder {
 	private void encodeDictionaryForKey( StringBuilder buffer, int tabCount, Map<?,?> map, String key ) {
 		appendTabs( buffer, tabCount );
 		buffer.append( '<' ).append( key ).append( " type=\"" ).append( TYPE_DICTIONARY ).append( "\">\n" );
-		for( Map.Entry<?,?> entry : map.entrySet() ) {
-			encodeObjectForKey( buffer, tabCount + 1, entry.getValue(), entry.getKey().toString() );
+		// Emit dictionary entries in alphabetical key order so the on-disk output is
+		// stable across runs/JVMs/Map implementations and diffs cleanly.
+		final List<String> sortedKeys = new ArrayList<>( map.size() );
+		for( Object k : map.keySet() ) {
+			sortedKeys.add( k.toString() );
+		}
+		Collections.sort( sortedKeys );
+		for( String entryKey : sortedKeys ) {
+			encodeObjectForKey( buffer, tabCount + 1, map.get( entryKey ), entryKey );
 		}
 		appendTabs( buffer, tabCount );
 		buffer.append( "</" ).append( key ).append( ">\n" );
