@@ -26,6 +26,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -35,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOHostUtilities;
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSLog;
@@ -149,9 +149,9 @@ public class InstanceController implements IInstanceController {
 		try {
 			NSDictionary appDict = (NSDictionary)_unknownApplications.valueForKey( name );
 			if( appDict != null ) {
-				NSArray keysArray = appDict.allKeys();
-				if( (keysArray != null) && (keysArray.count() > 0) ) {
-					return (String)keysArray.objectAtIndex( 0 );
+				List<String> keysArray = appDict.allKeys();
+				if( (keysArray != null) && (keysArray.size() > 0) ) {
+					return (String)keysArray.get( 0 );
 				}
 			}
 			return null;
@@ -169,13 +169,13 @@ public class InstanceController implements IInstanceController {
 			// Should make this configurable?
 			NSTimestamp cutOffDate = new NSTimestamp( System.currentTimeMillis() - 45000 );
 
-			NSArray<String> unknownAppKeys = unknownApps.allKeys();
+			List<String> unknownAppKeys = unknownApps.allKeys();
 
 			for( String unknownAppKey : unknownAppKeys ) {
 				NSMutableDictionary appDict = (NSMutableDictionary)unknownApps.valueForKey( unknownAppKey );
 
 				if( appDict != null ) {
-					NSArray<String> appDictKeys = appDict.allKeys();
+					List<String> appDictKeys = appDict.allKeys();
 
 					for( String appDictKey : appDictKeys ) {
 						NSTimestamp lastLifebeat = (NSTimestamp)appDict.valueForKey( appDictKey );
@@ -250,11 +250,11 @@ public class InstanceController implements IInstanceController {
 		try {
 			MHost theHost = theApplication.siteConfig().localHost();
 			if( theHost != null ) {
-				NSArray instArray = theHost.instanceArray();
-				int instArrayCount = instArray.count();
+				List<MInstance> instArray = theHost.instanceArray();
+				int instArrayCount = instArray.size();
 
 				for( int i = 0; i < instArrayCount; i++ ) {
-					MInstance anInst = (MInstance)instArray.objectAtIndex( i );
+					MInstance anInst = instArray.get( i );
 
 					if( (!anInst.isRunning_W()) && (anInst.state != MObject.STARTING) &&
 							((anInst.isAutoRecovering()) || (anInst.isScheduled())) ) {
@@ -279,8 +279,8 @@ public class InstanceController implements IInstanceController {
 		theApplication._lock.startReading();
 		try {
 			MSiteConfig aConfig = theApplication.siteConfig();
-			final NSArray appArray = aConfig.applicationArray();
-			int appArrayCount = appArray.count();
+			final List<MApplication> appArray = aConfig.applicationArray();
+			int appArrayCount = appArray.size();
 			final InstanceController localMonitor = this;
 
 			Thread[] workers = new Thread[appArrayCount];
@@ -289,7 +289,7 @@ public class InstanceController implements IInstanceController {
 				final int j = i;
 				Runnable work = new Runnable() {
 					public void run() {
-						localMonitor._autoRecoverApplication( (MApplication)appArray.objectAtIndex( j ) );
+						localMonitor._autoRecoverApplication( (MApplication)appArray.get( j ) );
 					}
 				};
 				workers[j] = new Thread( work );
@@ -323,8 +323,8 @@ public class InstanceController implements IInstanceController {
 	}
 
 	private void _autoRecoverApplication( MApplication anApplication ) {
-		NSArray instArray = anApplication.instanceArray();
-		int instArrayCount = instArray.count();
+		List<MInstance> instArray = anApplication.instanceArray();
+		int instArrayCount = instArray.size();
 
 		long timeForStartup;
 		Integer tfs = anApplication.timeForStartup();
@@ -343,7 +343,7 @@ public class InstanceController implements IInstanceController {
 		}
 
 		for( int i = 0; i < instArrayCount; i++ ) {
-			MInstance anInst = (MInstance)instArray.objectAtIndex( i );
+			MInstance anInst = instArray.get( i );
 
 			if( (anInst.isLocal_W()) && (!anInst.isRunning_W()) && (anInst.state != MObject.STARTING) &&
 					((anInst.isAutoRecovering()) || (anInst.isScheduled())) ) {
@@ -369,8 +369,8 @@ public class InstanceController implements IInstanceController {
 
 			MHost theHost = theApplication.siteConfig().localHost();
 			if( theHost != null ) {
-				final NSArray instArray = theHost.instanceArray();
-				int instArrayCount = instArray.count();
+				final List<MInstance> instArray = theHost.instanceArray();
+				int instArrayCount = instArray.size();
 
 				if( instArrayCount == 0 )
 					return;
@@ -384,7 +384,7 @@ public class InstanceController implements IInstanceController {
 					Runnable work = new Runnable() {
 						public void run() {
 							try {
-								MInstance anInst = (MInstance)instArray.objectAtIndex( j );
+								MInstance anInst = (MInstance)instArray.get( j );
 								if( (anInst.isScheduled()) && (anInst.nearNextScheduledShutdown( rightNow )) ) {
 									if( anInst.isGracefullyScheduled() ) {
 										localMonitor.stopInstance( anInst );
