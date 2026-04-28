@@ -625,7 +625,7 @@ public class DirectAction extends WODirectAction {
 	}
 
 	private void getStatisticsForInstanceArray( NSArray instArray, NSMutableArray errorResponse ) {
-		final LocalMonitor localMonitor = ((Application)WOApplication.application()).localMonitor();
+		final InstanceController localMonitor = ((Application)WOApplication.application()).localMonitor();
 
 		final NSArray instanceArray = instArray;
 		int theCount = instanceArray.count();
@@ -844,7 +844,7 @@ public class DirectAction extends WODirectAction {
 
 	// This will stop all instances in parallel, and return after each stopInstance call has returned.
 	private void stopAllInstances() {
-		final LocalMonitor localMonitor = ((Application)WOApplication.application()).localMonitor();
+		final InstanceController localMonitor = ((Application)WOApplication.application()).localMonitor();
 
 		final NSArray instanceArray = ((Application)WOApplication.application()).siteConfig().instanceArray();
 		int theCount = instanceArray.count();

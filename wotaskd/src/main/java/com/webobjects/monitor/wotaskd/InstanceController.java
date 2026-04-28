@@ -49,13 +49,14 @@ import com.webobjects.monitor._private.MInstance;
 import com.webobjects.monitor._private.MObject;
 import com.webobjects.monitor._private.MSiteConfig;
 import com.webobjects.monitor._private.MonitorException;
-import com.webobjects.monitor._private.ProtoLocalMonitor;
+import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.StringExtensions;
 
 import er.extensions.foundation.ERXProperties;
 import x.ResponseWrapper;
 
-public class LocalMonitor implements ProtoLocalMonitor {
+public class InstanceController implements IInstanceController {
+
 	WOTimer aScheduleTimer;
 	WOTimer anAutoRecoverTimer;
 	WOTimer anAutoRecoverStartupTimer;
@@ -69,7 +70,7 @@ public class LocalMonitor implements ProtoLocalMonitor {
 	private static final int RECEIVE_TIMEOUT = ERXProperties.intForKeyWithDefault( "WOTaskd.receiveTimeout", 5000 );
 	private static final boolean FORCE_QUIT_TASK_ENABLED = ERXProperties.booleanForKeyWithDefault( "WOTaskd.forceQuitTaskEnabled", false );
 
-	public LocalMonitor() {
+	public InstanceController() {
 		MSiteConfig aConfig = theApplication.siteConfig();
 
 		if( System.getProperties().getProperty( "os.name" ).toLowerCase().startsWith( "win" ) ) {
@@ -278,7 +279,7 @@ public class LocalMonitor implements ProtoLocalMonitor {
 			MSiteConfig aConfig = theApplication.siteConfig();
 			final NSArray appArray = aConfig.applicationArray();
 			int appArrayCount = appArray.count();
-			final LocalMonitor localMonitor = this;
+			final InstanceController localMonitor = this;
 
 			Thread[] workers = new Thread[appArrayCount];
 
@@ -374,7 +375,7 @@ public class LocalMonitor implements ProtoLocalMonitor {
 
 				final NSTimestamp rightNow = new NSTimestamp( System.currentTimeMillis(), java.util.TimeZone.getDefault() );
 				Thread[] workers = new Thread[instArrayCount];
-				final LocalMonitor localMonitor = this;
+				final InstanceController localMonitor = this;
 
 				for( int i = 0; i < instArrayCount; i++ ) {
 					final int j = i;
@@ -545,7 +546,7 @@ public class LocalMonitor implements ProtoLocalMonitor {
 			throw new MonitorException( _hostName + ": " + anInstance.displayName() + " is not running" );
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger( LocalMonitor.class );
+	private static final Logger logger = LoggerFactory.getLogger( InstanceController.class );
 
 	private static ResponseWrapper sendInstanceRequest( final String hostName, final MInstance anInstance, final NSDictionary xmlDict ) throws MonitorException {
 

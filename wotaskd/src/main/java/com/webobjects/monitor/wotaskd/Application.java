@@ -53,7 +53,7 @@ public class Application extends ERXApplication {
 	
 	private static final String _HTTP1 = "HTTP/1.0";
 
-	private LocalMonitor _localMonitor;
+	private InstanceController _localMonitor;
 	private MSiteConfig _siteConfig;
 	private ListenThread listenThread;
 	private LifebeatRequestHandler _lifebeatRequestHandler;
@@ -123,7 +123,7 @@ public class Application extends ERXApplication {
 		_siteConfig = aConfig;
 	}
 
-	public LocalMonitor localMonitor() {
+	public InstanceController localMonitor() {
 		return _localMonitor;
 	}
 
@@ -181,7 +181,7 @@ public class Application extends ERXApplication {
 		_siteConfig.archiveSiteConfig();
 
 		// creating the localMonitor (used to control and query instances)
-		_localMonitor = new LocalMonitor();
+		_localMonitor = new InstanceController();
 
 		// checking to see if we should save WOConfig.xml to disk for the adaptors.
 		String WOSavesAdaptorConfig = System.getProperties().getProperty( "WOSavesAdaptorConfiguration" );

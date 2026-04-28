@@ -443,7 +443,7 @@ public class MSiteConfig extends MObject {
 	public void removeInstance_W( MInstance anInstance ) {
 
 		if( (anInstance._host == _localHost) && anInstance.isRunning_W() ) {
-			final ProtoLocalMonitor plMonitor = (ProtoLocalMonitor)WOApplication.application().valueForKey( "localMonitor" );
+			final IInstanceController plMonitor = (IInstanceController)WOApplication.application().valueForKey( "localMonitor" );
 
 			try {
 				plMonitor.stopInstance( anInstance );
@@ -1030,7 +1030,7 @@ public class MSiteConfig extends MObject {
 
 		if( shouldIncludeUnregisteredInstances ) {
 			// For unknown/unregistered instances
-			final ProtoLocalMonitor plMonitor = (ProtoLocalMonitor)WOApplication.application().valueForKey( "localMonitor" );
+			final IInstanceController plMonitor = (IInstanceController)WOApplication.application().valueForKey( "localMonitor" );
 			if( plMonitor != null ) {
 				final StringBuffer unknownSB = plMonitor.generateAdaptorConfigXML();
 				if( unknownSB.length() > 0 ) {

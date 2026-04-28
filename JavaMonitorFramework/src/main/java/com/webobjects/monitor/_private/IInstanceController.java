@@ -14,7 +14,7 @@ package com.webobjects.monitor._private;
 
 import x.ResponseWrapper;
 
-public interface ProtoLocalMonitor {
+public interface IInstanceController {
 
 	public String startInstance( MInstance anInstance ) throws MonitorException;
 

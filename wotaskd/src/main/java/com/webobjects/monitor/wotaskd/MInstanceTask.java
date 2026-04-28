@@ -53,7 +53,7 @@ public abstract class MInstanceTask extends TimerTask {
 
 			Application app = (Application)WOApplication.application();
 			app._lock.startReading();
-			LocalMonitor localMonitor = app.localMonitor();
+			InstanceController localMonitor = app.localMonitor();
 			try {
 
 				if( retries >= _numberOfRetriesBeforeForceQuit ) {
