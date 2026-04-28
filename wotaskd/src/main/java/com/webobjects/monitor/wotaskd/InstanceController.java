@@ -25,6 +25,8 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.slf4j.Logger;
@@ -43,13 +45,13 @@ import com.webobjects.foundation.NSSocketUtilities;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation._NSCollectionReaderWriterLock;
 import com.webobjects.monitor._private.CoderWrapper;
+import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MApplication;
 import com.webobjects.monitor._private.MHost;
 import com.webobjects.monitor._private.MInstance;
 import com.webobjects.monitor._private.MObject;
 import com.webobjects.monitor._private.MSiteConfig;
 import com.webobjects.monitor._private.MonitorException;
-import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.StringExtensions;
 
 import er.extensions.foundation.ERXProperties;
@@ -496,7 +498,7 @@ public class InstanceController implements IInstanceController {
 		}
 
 		catchInstanceErrors( anInstance );
-		NSDictionary xmlDict = createInstanceRequestDictionary( "TERMINATE", null, anInstance );
+		final Map<String,Object> xmlDict = createInstanceRequestDictionary( "TERMINATE", null, anInstance );
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
@@ -519,20 +521,20 @@ public class InstanceController implements IInstanceController {
 		}
 
 		catchInstanceErrors( anInstance );
-		NSDictionary xmlDict = createInstanceRequestDictionary( "REFUSE", null, anInstance );
+		final Map<String,Object> xmlDict = createInstanceRequestDictionary( "REFUSE", null, anInstance );
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
 	public ResponseWrapper setAcceptInstance( MInstance anInstance ) throws MonitorException {
 		catchInstanceErrors( anInstance );
-		NSDictionary xmlDict = createInstanceRequestDictionary( "ACCEPT", null, anInstance );
+		final Map<String,Object> xmlDict = createInstanceRequestDictionary( "ACCEPT", null, anInstance );
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
 	@Override
 	public ResponseWrapper queryInstance( MInstance anInstance ) throws MonitorException {
 		catchInstanceErrors( anInstance );
-		NSDictionary xmlDict = createInstanceRequestDictionary( null, "STATISTICS", anInstance );
+		final Map<String,Object> xmlDict = createInstanceRequestDictionary( null, "STATISTICS", anInstance );
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
@@ -548,7 +550,7 @@ public class InstanceController implements IInstanceController {
 
 	private static final Logger logger = LoggerFactory.getLogger( InstanceController.class );
 
-	private static ResponseWrapper sendInstanceRequest( final String hostName, final MInstance anInstance, final NSDictionary xmlDict ) throws MonitorException {
+	private static ResponseWrapper sendInstanceRequest( final String hostName, final MInstance anInstance, final Map<String,Object> xmlDict ) throws MonitorException {
 
 		final String requestContentXML = new CoderWrapper().encodeRootObjectForKey( xmlDict, "instanceRequest" );
 		final String urlString = MObject.ADMIN_ACTION_STRING_PREFIX + anInstance.applicationName() + MObject.ADMIN_ACTION_STRING_POSTFIX;
@@ -597,21 +599,68 @@ public class InstanceController implements IInstanceController {
 		return responseWrapper;
 	}
 
-	private NSMutableDictionary createInstanceRequestDictionary( String commandString, String queryString, MInstance anInstance ) {
-		NSMutableDictionary instanceRequest = new NSMutableDictionary( 2 );
+	/**
+	 * Builds the request body wotaskd sends to a running instance's
+	 * {@code /cgi-bin/WebObjects/<App>.woa/womp/instanceRequest} endpoint.
+	 *
+	 * <p>Exactly one of {@code commandString} and {@code queryString} should be non-null.
+	 * Passing both produces a hybrid request with a {@code commandInstance} <em>and</em>
+	 * a {@code queryInstance} entry; the instance only acts on whichever it sees first,
+	 * so the dual form isn't useful in practice.
+	 *
+	 * <h4>Command form ({@code commandString} non-null)</h4>
+	 * <p>Wraps the command in a nested dictionary under the {@code commandInstance} key:
+	 * <pre>
+	 * {
+	 *   "commandInstance": {
+	 *     "command": &lt;commandString&gt;,
+	 *     // when commandString is "REFUSE", also:
+	 *     "minimumActiveSessionsCount": &lt;int&gt;
+	 *   }
+	 * }
+	 * </pre>
+	 * <p>Recognised commands: {@code TERMINATE} (immediate kill), {@code REFUSE} (graceful
+	 * shutdown — stop accepting new sessions, exit when the active-session count drops to
+	 * the configured minimum), {@code ACCEPT} (resume taking new sessions, cancelling a
+	 * prior REFUSE).
+	 *
+	 * <h4>Query form ({@code queryString} non-null)</h4>
+	 * <p>Stores the query verb directly under {@code queryInstance}:
+	 * <pre>
+	 * {
+	 *   "queryInstance": &lt;queryString&gt;
+	 * }
+	 * </pre>
+	 * <p>The only query verb in use is {@code STATISTICS}, which asks the instance to
+	 * return its runtime statistics.
+	 *
+	 * @param commandString {@code TERMINATE} / {@code REFUSE} / {@code ACCEPT}, or
+	 *                      {@code null} to skip the command leg.
+	 * @param queryString   {@code STATISTICS}, or {@code null} to skip the query leg.
+	 * @param anInstance    the target instance; only consulted when {@code commandString}
+	 *                      is {@code "REFUSE"}, to embed its
+	 *                      {@code minimumActiveSessionsCount}.
+	 * @return a fresh dictionary; the caller hands it to
+	 *         {@link CoderWrapper#encodeRootObjectForKey} under the root tag
+	 *         {@code "instanceRequest"} before posting.
+	 */
+	private Map<String,Object> createInstanceRequestDictionary( final String commandString, final String queryString, final MInstance anInstance ) {
+		final Map<String,Object> instanceRequest = new HashMap<>( 2 );
 
 		if( commandString != null ) {
-			NSMutableDictionary commandInstance = new NSMutableDictionary( 2 );
-			commandInstance.takeValueForKey( commandString, "command" );
+			final Map<String,Object> commandInstance = new HashMap<>( 2 );
+
+			commandInstance.put( "command", commandString );
+
 			if( commandString.equals( "REFUSE" ) ) {
-				commandInstance.takeValueForKey( anInstance.minimumActiveSessionsCount(), "minimumActiveSessionsCount" );
+				commandInstance.put( "minimumActiveSessionsCount", anInstance.minimumActiveSessionsCount() );
 			}
-			instanceRequest.takeValueForKey( commandInstance, "commandInstance" );
+
+			instanceRequest.put( "commandInstance", commandInstance );
 		}
 
 		if( queryString != null ) {
-			String queryInstance = queryString;
-			instanceRequest.takeValueForKey( queryInstance, "queryInstance" );
+			instanceRequest.put( "queryInstance", queryString );
 		}
 
 		return instanceRequest;
