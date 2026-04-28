@@ -1,23 +1,24 @@
 package com.webobjects.monitor._private;
 
-import com.webobjects.appserver.xml._JavaMonitorCoder;
-import com.webobjects.appserver.xml._JavaMonitorDecoder;
 import com.webobjects.foundation.NSData;
 
+import x.FoundationCoder;
+
 /**
- * Thin façade around the WebObjects {@code _JavaMonitorCoder} / {@code _JavaMonitorDecoder}
- * pair. Originally introduced to consolidate the codebase's use of Apple's XML coding into
- * one place so the dependency could later be lifted; the eventual replacement
- * ({@code x.FoundationCoder}) is now in the tree alongside this class.
+ * Thin façade around {@link FoundationCoder}. Originally introduced to consolidate the
+ * codebase's use of Apple's {@code _JavaMonitorCoder} / {@code _JavaMonitorDecoder} into
+ * one place so the dependency could later be lifted; now retained only as a stable name
+ * for the call sites that still reach for it. New code should construct
+ * {@link FoundationCoder} directly.
  *
  * <h2>API quirks worth knowing about</h2>
  * <ul>
  *   <li><b>{@link #decodeRootObject(String)} loads from a URL.</b> The String argument is
  *       a SAX systemId (URL or filesystem path resolved against the JVM working
- *       directory) — <em>not</em> the XML content. This is inherited from
- *       {@code WOXMLDecoder} and is preserved here so existing call sites (e.g.
- *       {@code MSiteConfig} reading {@code SiteConfig.xml} from disk) continue to work.
- *       To decode an in-memory payload, use {@link #decodeRootObject(byte[])}.</li>
+ *       directory) — <em>not</em> the XML content. Inherited from {@code WOXMLDecoder}
+ *       and preserved here so existing call sites (e.g. {@code MSiteConfig} reading
+ *       {@code SiteConfig.xml} from disk) keep working. Pass {@code byte[]} or
+ *       {@link NSData} for in-memory payloads.</li>
  *   <li><b>The wire format treats Booleans as the strings {@code "YES"} and {@code "NO"}.</b>
  *       The encoder writes them that way and the decoder rewrites those exact tokens back
  *       to {@link Boolean#TRUE} / {@link Boolean#FALSE}. A genuine String containing the
@@ -28,31 +29,27 @@ import com.webobjects.foundation.NSData;
  *       original {@link Number} subtype on the encode side is not preserved.</li>
  *   <li><b>Decoded dictionaries are {@code NSMutableDictionary} and arrays are
  *       {@code NSMutableArray}.</b> Existing call sites cast to {@code NSDictionary} /
- *       {@code NSArray}; that's why those casts work.</li>
+ *       {@code NSArray}; that's why those casts work. This is a temporary stopgap while
+ *       the {@code M*} data model is migrated off Foundation — see the FIXME notes in
+ *       {@link FoundationCoder}.</li>
  * </ul>
  *
  * <h2>Supported value types</h2>
  * <p>The deployment wire protocol only carries {@code NSDictionary}, {@code NSArray},
  * {@code NSString}, {@code NSNumber}, and the {@code "YES"}/{@code "NO"} pseudo-Booleans.
- * The reference coder also supports {@code NSData}, {@code NSTimestamp}, and
+ * The reference coder also supported {@code NSData}, {@code NSTimestamp}, and
  * {@code EOEnterpriseObject}, but none of those are exercised here.
  */
 public class CoderWrapper {
 
-	private _JavaMonitorCoder _wrappedCoder;
-	private _JavaMonitorDecoder _wrappedDecoder;
-
-	public CoderWrapper() {
-		_wrappedCoder = new _JavaMonitorCoder();
-		_wrappedDecoder = new _JavaMonitorDecoder();
-	}
+	private final FoundationCoder _coder = new FoundationCoder();
 
 	/**
 	 * Decodes {@code bytes} as a UTF-8 XML document. Use this overload for in-memory
 	 * payloads such as HTTP request/response bodies.
 	 */
 	public Object decodeRootObject( byte[] bytes ) {
-		return _wrappedDecoder.decodeRootObject( new NSData( bytes ) );
+		return _coder.decodeRootObject( bytes );
 	}
 
 	/**
@@ -61,7 +58,7 @@ public class CoderWrapper {
 	 */
 	@Deprecated
 	public Object decodeRootObject( NSData data ) {
-		return _wrappedDecoder.decodeRootObject( data );
+		return _coder.decodeRootObject( data );
 	}
 
 	/**
@@ -72,8 +69,8 @@ public class CoderWrapper {
 	 * String of XML, encode it to UTF-8 bytes and pass it through
 	 * {@link #decodeRootObject(byte[])} instead.
 	 */
-	public Object decodeRootObject( String string ) {
-		return _wrappedDecoder.decodeRootObject( string );
+	public Object decodeRootObject( String systemId ) {
+		return _coder.decodeRootObject( systemId );
 	}
 
 	/**
@@ -82,6 +79,6 @@ public class CoderWrapper {
 	 * {@code "NO"}; see the class Javadoc for the rest of the type rules.
 	 */
 	public String encodeRootObjectForKey( Object object, String key ) {
-		return _wrappedCoder.encodeRootObjectForKey( object, key );
+		return _coder.encodeRootObjectForKey( object, key );
 	}
 }
