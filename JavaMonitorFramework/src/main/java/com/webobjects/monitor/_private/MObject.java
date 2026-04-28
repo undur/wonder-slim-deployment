@@ -44,23 +44,23 @@ public class MObject {
 
 	protected MSiteConfig _siteConfig;
 
-	protected NSMutableDictionary<String, ?> values;
-	protected _NSThreadsafeMutableDictionary<String, ?> adaptorValues = new _NSThreadsafeMutableDictionary<>( new NSMutableDictionary<>() );
+	protected NSMutableDictionary<String, Object> values;
+	protected _NSThreadsafeMutableDictionary<String, Object> adaptorValues = new _NSThreadsafeMutableDictionary<>( new NSMutableDictionary<>() );
 
 	public MSiteConfig siteConfig() {
 		return _siteConfig;
 	}
 
-	public NSMutableDictionary<String, ?> values() {
+	public NSMutableDictionary<String, Object> values() {
 		return values;
 	}
 
-	public void setValues( NSMutableDictionary<String, ?> newValues ) {
+	public void setValues( NSMutableDictionary<String, Object> newValues ) {
 		values = newValues;
 		_siteConfig.dataHasChanged();
 	}
 
-	public void updateValues( NSDictionary<String, ?> aDict ) {
+	public void updateValues( NSDictionary<String, Object> aDict ) {
 		values = new NSMutableDictionary<>( aDict );
 		_siteConfig.dataHasChanged();
 	}
