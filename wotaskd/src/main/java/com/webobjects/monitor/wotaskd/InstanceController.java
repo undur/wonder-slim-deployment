@@ -15,6 +15,7 @@ SUCH DAMAGE.
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -42,7 +43,6 @@ import com.webobjects.foundation.NSForwardException;
 import x.FLog;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
-import com.webobjects.foundation.NSSocketUtilities;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MonitorException;
@@ -703,14 +703,12 @@ public class InstanceController implements IInstanceController {
 	}
 
 	private boolean _testConnection( MInstance anInstance ) {
-		try {
-			Socket aSocket = NSSocketUtilities.getSocketWithTimeout( anInstance.host().name(), anInstance.port().intValue(), 1000 );
-			aSocket.close();
-			aSocket = null;
+		try( Socket aSocket = new Socket() ) {
+			aSocket.connect( new InetSocketAddress( anInstance.host().name(), anInstance.port() ), 1000 );
+			return true;
 		}
-		catch( Exception e ) {
+		catch( IOException e ) {
 			return false;
 		}
-		return true;
 	}
 }
