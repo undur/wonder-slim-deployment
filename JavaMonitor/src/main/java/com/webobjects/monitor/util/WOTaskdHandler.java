@@ -12,7 +12,7 @@ import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.xml.WOXMLException;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSLog;
+import x.FLog;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
@@ -329,8 +329,8 @@ public class WOTaskdHandler {
 			final ResponseWrapper[] responses = collector.sendRequest( monitorRequest, wotaskdArray, false );
 			final NSDictionary[] responseDicts = generateResponseDictionaries( responses );
 
-			if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) ) {
-				NSLog.debug.appendln( "OUT: " + NSPropertyListSerialization.stringFromPropertyList( monitorRequest ) + "\n\nIN: " + NSPropertyListSerialization.stringFromPropertyList( new NSArray( responseDicts ) ) );
+			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
+				FLog.debug.appendln( "OUT: " + NSPropertyListSerialization.stringFromPropertyList( monitorRequest ) + "\n\nIN: " + NSPropertyListSerialization.stringFromPropertyList( new NSArray( responseDicts ) ) );
 			}
 
 			collector.getCommandErrors( responseDicts );
@@ -457,8 +457,8 @@ public class WOTaskdHandler {
 			}
 		}
 
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) ) {
-			NSLog.debug.appendln( "##### getUpdateErrors: " + errorArray );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
+			FLog.debug.appendln( "##### getUpdateErrors: " + errorArray );
 		}
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
@@ -508,8 +508,8 @@ public class WOTaskdHandler {
 			}
 		}
 
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) ) {
-			NSLog.debug.appendln( "##### getCommandErrors: " + errorArray );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
+			FLog.debug.appendln( "##### getCommandErrors: " + errorArray );
 		}
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
@@ -547,8 +547,8 @@ public class WOTaskdHandler {
 //			}
 //		}
 //
-//		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) ) {
-//			NSLog.debug.appendln( "##### getQueryErrors: " + errorArray );
+//		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
+//			FLog.debug.appendln( "##### getQueryErrors: " + errorArray );
 //		}
 //
 //		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
@@ -582,7 +582,7 @@ public class WOTaskdHandler {
 						responseDictionary = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 					}
 					catch( WOXMLException wxe ) {
-						NSLog.err.appendln( "MonitorComponent pageWithName(AppDetailPage) Error decoding response: " + responses[i].contentString() );
+						FLog.err.appendln( "MonitorComponent pageWithName(AppDetailPage) Error decoding response: " + responses[i].contentString() );
 						responseDictionary = responseParsingFailed;
 					}
 				}
@@ -632,8 +632,8 @@ public class WOTaskdHandler {
 				}
 			}
 
-			if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) ) {
-				NSLog.debug.appendln( "##### pageWithName(AppDetailPage) errors: " + errorArray );
+			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
+				FLog.debug.appendln( "##### pageWithName(AppDetailPage) errors: " + errorArray );
 			}
 
 			errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
@@ -657,7 +657,7 @@ public class WOTaskdHandler {
 					responseDict = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 				}
 				catch( WOXMLException wxe ) {
-					NSLog.err.appendln( "MonitorComponent pageWithName(HostsPage) Error decoding response: " + responses[i].contentString() );
+					FLog.err.appendln( "MonitorComponent pageWithName(HostsPage) Error decoding response: " + responses[i].contentString() );
 					responseDict = responseParsingFailed;
 				}
 			}
@@ -676,8 +676,8 @@ public class WOTaskdHandler {
 			}
 		}
 
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) ) {
-			NSLog.debug.appendln( "##### pageWithName(HostsPage) errors: " + errorArray );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
+			FLog.debug.appendln( "##### pageWithName(HostsPage) errors: " + errorArray );
 		}
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
@@ -702,7 +702,7 @@ public class WOTaskdHandler {
 					queryResponseDictionary = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 				}
 				catch( WOXMLException wxe ) {
-					NSLog.err.appendln( "MonitorComponent pageWithName(ApplicationsPage) Error decoding response: " + responses[i].contentString() );
+					FLog.err.appendln( "MonitorComponent pageWithName(ApplicationsPage) Error decoding response: " + responses[i].contentString() );
 					queryResponseDictionary = responseParsingFailed;
 				}
 			}
@@ -728,8 +728,8 @@ public class WOTaskdHandler {
 			}
 		}
 
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) ) {
-			NSLog.debug.appendln( "##### pageWithName(ApplicationsPage) errors: " + errorArray );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
+			FLog.debug.appendln( "##### pageWithName(ApplicationsPage) errors: " + errorArray );
 		}
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );

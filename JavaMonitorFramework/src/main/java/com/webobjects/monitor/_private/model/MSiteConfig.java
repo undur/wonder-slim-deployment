@@ -40,7 +40,7 @@ import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
-import com.webobjects.foundation.NSLog;
+import x.FLog;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
@@ -678,7 +678,7 @@ public class MSiteConfig extends MObject {
 			}
 			catch( final NumberFormatException e ) {
 				// go with the default
-				NSLog._conditionallyLogPrivateException( e );
+				FLog._conditionallyLogPrivateException( e );
 			}
 		}
 		_lastConfig = generateSiteConfigXML();
@@ -819,8 +819,8 @@ public class MSiteConfig extends MObject {
 
 					aConfig = new MSiteConfig( siteDict );
 
-					if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) ) {
-						NSLog.debug.appendln( "the SiteConfig is \n" + aConfig.generateSiteConfigXML() );
+					if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
+						FLog.debug.appendln( "the SiteConfig is \n" + aConfig.generateSiteConfigXML() );
 					}
 				}
 				catch( final Throwable ex ) {

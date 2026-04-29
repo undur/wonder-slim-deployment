@@ -3,7 +3,7 @@ package com.webobjects.monitor.wotaskd;
 import java.util.TimerTask;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.foundation.NSLog;
+import x.FLog;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.model.MInstance;
 
@@ -76,7 +76,7 @@ public abstract class MInstanceTask extends TimerTask {
 
 			}
 			catch( MonitorException e ) {
-				NSLog.err.appendln( "Exception while scheduling forceQuit: " + e.getMessage() );
+				FLog.err.appendln( "Exception while scheduling forceQuit: " + e.getMessage() );
 			}
 			finally {
 				++retries;

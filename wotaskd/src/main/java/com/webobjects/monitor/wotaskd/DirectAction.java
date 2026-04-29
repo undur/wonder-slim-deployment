@@ -25,7 +25,7 @@ import com.webobjects.appserver.xml.WOXMLException;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSLog;
+import x.FLog;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
@@ -99,9 +99,9 @@ public class DirectAction extends WODirectAction {
 
 		// Aren't allowed to call this through the Web server.
 		if( aRequest.isUsingWebServer() ) {
-			NSLog.debug.appendln( "Attempt to call DirectAction: monitorRequestAction through Web server" );
-			if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelCritical, NSLog.DebugGroupDeployment ) )
-				NSLog.debug.appendln( aRequest.contentString() );
+			FLog.debug.appendln( "Attempt to call DirectAction: monitorRequestAction through Web server" );
+			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelCritical, FLog.DebugGroupDeployment ) )
+				FLog.debug.appendln( aRequest.contentString() );
 			aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 			aResponse.appendContentString( _accessDenied );
 			return aResponse;
@@ -112,7 +112,7 @@ public class DirectAction extends WODirectAction {
 		try {
 			String passwordHeader = aRequest.headerForKey( "password" );
 			if( !aConfig.comparePasswordWithPassword( passwordHeader ) ) {
-				NSLog.debug.appendln( "Attempt to call DirectAction: monitorRequestAction with incorrect password." );
+				FLog.debug.appendln( "Attempt to call DirectAction: monitorRequestAction with incorrect password." );
 				aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 				aResponse.appendContentString( _invalidPassword );
 				// we endReading at the finally block
@@ -128,17 +128,17 @@ public class DirectAction extends WODirectAction {
 			requestDict = (NSDictionary)new FoundationCoder().decodeRootObject( aRequest.content().bytes() );
 		}
 		catch( Exception e ) {
-			NSLog.err.appendln( "Wotaskd monitorRequestAction: Error parsing request" );
-			if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelInformational, NSLog.DebugGroupDeployment ) )
-				NSLog.debug.appendln( "Wotaskd monitorRequestAction: " + aRequest.contentString() );
+			FLog.err.appendln( "Wotaskd monitorRequestAction: Error parsing request" );
+			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) )
+				FLog.debug.appendln( "Wotaskd monitorRequestAction: " + aRequest.contentString() );
 			aResponse.appendContentString( _invalidXML );
 			return aResponse;
 		}
 
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelInformational, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "\n@@@@@ monitorRequestAction received request from Monitor" );
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "@@@@@ monitorRequestAction requestDict: " + requestDict + "\n" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "\n@@@@@ monitorRequestAction received request from Monitor" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "@@@@@ monitorRequestAction requestDict: " + requestDict + "\n" );
 
 		// These 2 get used for everything else - the global response object and the global error object.
 		NSMutableDictionary monitorResponse = new NSMutableDictionary();
@@ -616,10 +616,10 @@ public class DirectAction extends WODirectAction {
 			monitorResponse.takeValueForKey( errorResponse, "errorResponse" );
 		}
 
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelInformational, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "@@@@@ monitorRequestAction returning response to Monitor" );
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "@@@@@ monitorRequestAction responseDict: " + monitorResponse + "\n" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "@@@@@ monitorRequestAction returning response to Monitor" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "@@@@@ monitorRequestAction responseDict: " + monitorResponse + "\n" );
 		aResponse.appendContentString( (new FoundationCoder()).encodeRootObjectForKey( monitorResponse, "monitorResponse" ) );
 		return aResponse;
 	}
@@ -646,8 +646,8 @@ public class DirectAction extends WODirectAction {
 					catch( MonitorException me ) {
 						MInstance badInstance = ((MInstance)instanceArray.objectAtIndex( j ));
 						if( (!badInstance.isRunning_W()) &&
-								(NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelCritical, NSLog.DebugGroupDeployment )) ) {
-							NSLog.debug.appendln( "Exception getting Statistics for instance: " + ((MInstance)instanceArray.objectAtIndex( j )).displayName() );
+								(FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelCritical, FLog.DebugGroupDeployment )) ) {
+							FLog.debug.appendln( "Exception getting Statistics for instance: " + ((MInstance)instanceArray.objectAtIndex( j )).displayName() );
 						}
 						//if we get an exception and the instance state is running, that could mean the app may have been too 
 						//busy to respond of may have locked up in either case, we need to notify 
@@ -687,17 +687,17 @@ public class DirectAction extends WODirectAction {
 					instanceResponse = (NSDictionary)new FoundationCoder().decodeRootObject( aResponse.content() );
 				}
 				catch( NullPointerException npe ) {
-					NSLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: No content returned from " + anInstance.displayName() );
+					FLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: No content returned from " + anInstance.displayName() );
 					continue;
 				}
 				catch( Exception e ) {
 					try {
 						Object o = NSPropertyListSerialization.propertyListFromString( new String( aResponse.content() ) );
 						errorResponse.addObject( anInstance.displayName() + " is probably an older application that doesn't conform to the current Monitor Protocol. Please update and restart the instance." );
-						NSLog.err.appendln( "Got old-style response from instance: " + anInstance.displayName() );
+						FLog.err.appendln( "Got old-style response from instance: " + anInstance.displayName() );
 					}
 					catch( Throwable t ) {
-						NSLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: Error parsing: " + new String( aResponse.content() ) + " from " + anInstance.displayName() );
+						FLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: Error parsing: " + new String( aResponse.content() ) + " from " + anInstance.displayName() );
 					}
 					continue;
 				}
@@ -731,7 +731,7 @@ public class DirectAction extends WODirectAction {
 				}
 				catch( Exception e ) {
 					// Do nothing - assume we died trying to parse the plist
-					NSLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: Error parsing PList: " + queryInstanceResponse + " from " + anInstance.displayName() );
+					FLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: Error parsing PList: " + queryInstanceResponse + " from " + anInstance.displayName() );
 				}
 			}
 			else if( anInstance.isRunning_M() ) {
@@ -891,7 +891,7 @@ public class DirectAction extends WODirectAction {
 			// Check for correct password
 			String passwordHeader = aRequest.headerForKey( "password" );
 			if( !aConfig.comparePasswordWithPassword( passwordHeader ) ) {
-				NSLog.debug.appendln( "Attempt to call Direct Action: defaultAction with incorrect password." );
+				FLog.debug.appendln( "Attempt to call Direct Action: defaultAction with incorrect password." );
 				aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 				aResponse.appendContentString( "Attempt to call Direct Action: defaultAction on wotaskd with incorrect password." );
 				// we endReading at the finally block
@@ -964,8 +964,8 @@ public class DirectAction extends WODirectAction {
 		aResponse.appendContentString( xml );
 		aResponse.setHeader( "text/xml", "content-type" );
 		aResponse.setHeader( aFormat.format( new NSTimestamp() ), "Last-Modified" );
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "woConfigAction returned: " + xml );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "woConfigAction returned: " + xml );
 
 		return aResponse;
 	}

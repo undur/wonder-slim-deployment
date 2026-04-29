@@ -39,7 +39,7 @@ import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
-import com.webobjects.foundation.NSLog;
+import x.FLog;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSSocketUtilities;
@@ -282,8 +282,8 @@ public class InstanceController implements IInstanceController {
 
 	/********** Timer Targets **********/
 	public void _checkAutoRecover() {
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "_checkAutoRecover START" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "_checkAutoRecover START" );
 		theApplication._lock.startReading();
 		try {
 			MHost theHost = theApplication.siteConfig().localHost();
@@ -306,14 +306,14 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.endReading();
 		}
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "_checkAutoRecover STOP" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "_checkAutoRecover STOP" );
 	}
 
 	// This only runs once, on startup - then it starts the regular timer
 	public void _checkAutoRecoverStartup() {
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "_checkAutoRecoverStartup START" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "_checkAutoRecoverStartup START" );
 		theApplication._lock.startReading();
 		try {
 			MSiteConfig aConfig = theApplication.siteConfig();
@@ -356,8 +356,8 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.endReading();
 		}
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "_checkAutoRecoverStartup STOP" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "_checkAutoRecoverStartup STOP" );
 	}
 
 	private void _autoRecoverApplication( MApplication anApplication ) {
@@ -400,8 +400,8 @@ public class InstanceController implements IInstanceController {
 	}
 
 	public void _checkSchedules() {
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "_checkSchedules START" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "_checkSchedules START" );
 		theApplication._lock.startReading();
 		try {
 
@@ -434,7 +434,7 @@ public class InstanceController implements IInstanceController {
 								}
 							}
 							catch( MonitorException me ) {
-								NSLog.err.appendln( "Exception while scheduling: " + me.getMessage() );
+								FLog.err.appendln( "Exception while scheduling: " + me.getMessage() );
 							}
 						}
 					};
@@ -455,8 +455,8 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.endReading();
 		}
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
-			NSLog.debug.appendln( "_checkSchedules STOP" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
+			FLog.debug.appendln( "_checkSchedules STOP" );
 	}
 
 	/********** Controlling Instances **********/
@@ -505,12 +505,12 @@ public class InstanceController implements IInstanceController {
 		}
 
 		try {
-			if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelCritical, NSLog.DebugGroupDeployment ) )
-				NSLog.debug.appendln( "Starting Instance: " + aLaunchPath );
+			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelCritical, FLog.DebugGroupDeployment ) )
+				FLog.debug.appendln( "Starting Instance: " + aLaunchPath );
 			Runtime.getRuntime().exec( aLaunchPath );
 		}
 		catch( IOException ioe ) {
-			NSLog.err.appendln( "Failed to start " + anInstance.displayName() + ": " + ioe );
+			FLog.err.appendln( "Failed to start " + anInstance.displayName() + ": " + ioe );
 			return _hostName + ": Failed to start " + anInstance.displayName() + ": " + ioe;
 		}
 		return null;
@@ -529,7 +529,7 @@ public class InstanceController implements IInstanceController {
 				anInstance.scheduleForceQuit( new MInstanceTask.ForceQuit( anInstance ), FORCE_QUIT_DELAY );
 			}
 			else {
-				NSLog.err.appendln( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
+				FLog.err.appendln( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
 			}
 		}
 
@@ -552,7 +552,7 @@ public class InstanceController implements IInstanceController {
 				anInstance.scheduleRefuseTask( new MInstanceTask.Refuse( anInstance, ERXProperties.intForKeyWithDefault( "WOTaskd.refuseNumRetries", 3 ) ), FORCE_QUIT_DELAY, FORCE_QUIT_DELAY );
 			}
 			else {
-				NSLog.err.appendln( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
+				FLog.err.appendln( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
 			}
 		}
 

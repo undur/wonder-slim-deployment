@@ -13,7 +13,7 @@ SUCH DAMAGE.
  */
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.foundation.NSLog;
+import x.FLog;
 
 public class SiteConfig implements SiteConfigMBean {
 
@@ -32,7 +32,7 @@ public class SiteConfig implements SiteConfigMBean {
 			theApplication.readSiteConfigXML();
 		}
 		catch( Exception ex ) {
-			NSLog.err.appendln( "ERROR: Problems reading the site config" );
+			FLog.err.appendln( "ERROR: Problems reading the site config" );
 			//ex.printStackTrace();			
 		}
 	}

@@ -23,7 +23,7 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOMailDelivery;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSLog;
+import x.FLog;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
@@ -763,7 +763,7 @@ public class MInstance extends MObject {
 
 		final String message = "Application '" + displayName() + "' on " + _host.name() + ":" + port() + " stopped running at " + (currentDate) + ".\n" + "The app's current state was: " + INSTANCE_STATES[state] + ".\n" + assumedToBeDead + "The last successful communication occurred at: " + _lastRegistration.toString() + ". " + "This may be the result of a crash or an intentional shutdown from outside of wotaskd";
 
-		NSLog.err.appendln( message );
+		FLog.err.appendln( message );
 
 		boolean shouldEmail = false;
 		final Boolean aBool = _application.notificationEmailEnabled();
@@ -796,7 +796,7 @@ public class MInstance extends MObject {
 				}
 			}
 			catch( Throwable e ) {
-				NSLog.err.appendln( "Error attempting to send email: " + e );
+				FLog.err.appendln( "Error attempting to send email: " + e );
 			}
 		}
 	}
@@ -996,13 +996,13 @@ public class MInstance extends MObject {
 		final long halfHourAsSeconds = 1800;
 
 		if( temp < halfHourAsSeconds ) {
-			if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelInformational, NSLog.DebugGroupDeployment ) ) {
-				NSLog.debug.appendln( "nearNextScheduledShutdown TRUE" );
+			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) ) {
+				FLog.debug.appendln( "nearNextScheduledShutdown TRUE" );
 			}
 			return true;
 		}
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelInformational, NSLog.DebugGroupDeployment ) ) {
-			NSLog.debug.appendln( "nearNextScheduledShutdown FALSE" );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) ) {
+			FLog.debug.appendln( "nearNextScheduledShutdown FALSE" );
 		}
 		return false;
 	}
@@ -1097,8 +1097,8 @@ public class MInstance extends MObject {
 			setNextScheduledShutdown( new NSTimestamp( currentYear, currentMonth, currentDayOfMonth, startTime, 0, 0, currentTimeZone ) );
 
 		}
-		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelInformational, NSLog.DebugGroupDeployment ) ) {
-			NSLog.debug.appendln( "calculateNextScheduledShutdown: " + _nextScheduledShutdown );
+		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) ) {
+			FLog.debug.appendln( "calculateNextScheduledShutdown: " + _nextScheduledShutdown );
 		}
 	}
 
