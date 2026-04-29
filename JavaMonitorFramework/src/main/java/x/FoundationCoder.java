@@ -17,7 +17,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
@@ -163,18 +162,6 @@ public class FoundationCoder {
 		}
 	}
 
-	/**
-	 * Convenience overload retained for callers still holding {@link NSData}; delegates
-	 * straight to {@link #decodeRootObject(byte[])}.
-	 *
-	 * @deprecated will be removed once the deployment data model no longer carries
-	 *             Foundation types — prefer {@link #decodeRootObject(byte[])}.
-	 */
-	@Deprecated
-	public Object decodeRootObject( NSData data ) {
-		return decodeRootObject( data.bytes() );
-	}
-
 	private void encodeObjectForKey( StringBuilder buffer, int tabCount, Object value, String key ) {
 		if( value == null ) {
 			encodeStringInTag( buffer, tabCount, "null", key, "?" );
@@ -184,7 +171,7 @@ public class FoundationCoder {
 			encodeStringInTag( buffer, tabCount, escape( s ), key, TYPE_STRING );
 			return;
 		}
-		if( value instanceof Map<?,?> m ) {
+		if( value instanceof Map<?, ?> m ) {
 			encodeDictionaryForKey( buffer, tabCount, m, key );
 			return;
 		}
@@ -204,7 +191,7 @@ public class FoundationCoder {
 				value.getClass().getName() + " is not a type that FoundationCoder can encode" );
 	}
 
-	private void encodeDictionaryForKey( StringBuilder buffer, int tabCount, Map<?,?> map, String key ) {
+	private void encodeDictionaryForKey( StringBuilder buffer, int tabCount, Map<?, ?> map, String key ) {
 		appendTabs( buffer, tabCount );
 		buffer.append( '<' ).append( key ).append( " type=\"" ).append( TYPE_DICTIONARY ).append( "\">\n" );
 		// Emit dictionary entries in alphabetical key order so the on-disk output is
@@ -287,13 +274,13 @@ public class FoundationCoder {
 		};
 	}
 
-	private Map<String,Object> decodeDictionary( Element element ) {
+	private Map<String, Object> decodeDictionary( Element element ) {
 		// FIXME: The decoder should return a plain LinkedHashMap once the M* data model
 		// no longer relies on NSMutableDictionary. Until that migration is done we hand
 		// back an NSMutableDictionary so existing (NSDictionary) casts on decoded values
 		// continue to work as a drop-in replacement for _JavaMonitorDecoder.
 		// final Map<String,Object> map = new LinkedHashMap<>();
-		final Map<String,Object> map = new NSMutableDictionary<>();
+		final Map<String, Object> map = new NSMutableDictionary<>();
 		final NodeList children = element.getChildNodes();
 		for( int i = 0; i < children.getLength(); i++ ) {
 			final Node child = children.item( i );

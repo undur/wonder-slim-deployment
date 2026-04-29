@@ -125,9 +125,9 @@ public class DirectAction extends WODirectAction {
 
 		NSDictionary requestDict;
 		try {
-			requestDict = (NSDictionary)new FoundationCoder().decodeRootObject( aRequest.content() );
+			requestDict = (NSDictionary)new FoundationCoder().decodeRootObject( aRequest.content().bytes() );
 		}
-		catch( WOXMLException wxe ) {
+		catch( Exception e ) {
 			NSLog.err.appendln( "Wotaskd monitorRequestAction: Error parsing request" );
 			if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelInformational, NSLog.DebugGroupDeployment ) )
 				NSLog.debug.appendln( "Wotaskd monitorRequestAction: " + aRequest.contentString() );
@@ -683,23 +683,22 @@ public class DirectAction extends WODirectAction {
 				}
 
 				NSDictionary instanceResponse = null;
-				NSData responseContent = new NSData( aResponse.content() );
 				try {
-					instanceResponse = (NSDictionary)new FoundationCoder().decodeRootObject( responseContent );
+					instanceResponse = (NSDictionary)new FoundationCoder().decodeRootObject( aResponse.content() );
 				}
-				catch( WOXMLException wxe ) {
+				catch( NullPointerException npe ) {
+					NSLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: No content returned from " + anInstance.displayName() );
+					continue;
+				}
+				catch( Exception e ) {
 					try {
-						Object o = NSPropertyListSerialization.propertyListFromString( new String( responseContent.bytes() ) );
+						Object o = NSPropertyListSerialization.propertyListFromString( new String( aResponse.content() ) );
 						errorResponse.addObject( anInstance.displayName() + " is probably an older application that doesn't conform to the current Monitor Protocol. Please update and restart the instance." );
 						NSLog.err.appendln( "Got old-style response from instance: " + anInstance.displayName() );
 					}
 					catch( Throwable t ) {
-						NSLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: Error parsing: " + new String( responseContent.bytes() ) + " from " + anInstance.displayName() );
+						NSLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: Error parsing: " + new String( aResponse.content() ) + " from " + anInstance.displayName() );
 					}
-					continue;
-				}
-				catch( NullPointerException npe ) {
-					NSLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: No content returned from " + anInstance.displayName() );
 					continue;
 				}
 
