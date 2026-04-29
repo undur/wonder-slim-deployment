@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -39,13 +40,11 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSForwardException;
 import x.FLog;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
-import com.webobjects.foundation._NSStringUtilities;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MonitorException;
@@ -805,10 +804,17 @@ public class MSiteConfig extends MObject {
 
 		// The file may not exist, but we can create it.
 		// It is awkward to do the file creation here, in this way, but this stuff needs to be factored properly.
-		// This may throw an exception when it tries to create the file. Go to the utility method to see the exception being dropped.
+		// If creation fails (typically a permission problem on the parent directory) we
+		// rethrow as RuntimeException — same effective behaviour as before, with a
+		// proper cause chain.
 		if( !fileForSiteConfig().exists() ) {
 			final String emptySiteConfig = new FoundationCoder().encodeRootObjectForKey( NSDictionary.EmptyDictionary, "SiteConfig" );
-			_NSStringUtilities.writeToFile( fileForSiteConfig(), emptySiteConfig );
+			try {
+				Files.writeString( fileForSiteConfig().toPath(), emptySiteConfig, StandardCharsets.UTF_8 );
+			}
+			catch( final IOException e ) {
+				throw new RuntimeException( "Failed to create empty SiteConfig at " + fileForSiteConfig(), e );
+			}
 		}
 
 		// Now, the file should exist, or we have an error.
@@ -850,16 +856,13 @@ public class MSiteConfig extends MObject {
 	}
 
 	private static void backupSiteConfig() {
-		try {
-			final File sc = fileForSiteConfig();
-			if( sc.exists() ) {
-				final NSTimestampFormatter formatter = new NSTimestampFormatter( "%Y%m%d%H%M%S%F" ); // FIXME: Replace with java.time // Hugi 2024-11-10
-				final File renamedFile = new File( pathForSiteConfig() + "." + formatter.format( new NSTimestamp() ) );
-				sc.renameTo( renamedFile );
+		final File sc = fileForSiteConfig();
+		if( sc.exists() ) {
+			final NSTimestampFormatter formatter = new NSTimestampFormatter( "%Y%m%d%H%M%S%F" ); // FIXME: Replace with java.time // Hugi 2024-11-10
+			final File renamedFile = new File( pathForSiteConfig() + "." + formatter.format( new NSTimestamp() ) );
+			if( !sc.renameTo( renamedFile ) ) {
+				logger.error( "Cannot backup file {}. Possible Permissions Problem.", pathForSiteConfig() );
 			}
-		}
-		catch( final NSForwardException ne ) {
-			logger.error( "Cannot backup file {}. Possible Permissions Problem.", pathForSiteConfig() );
 		}
 	}
 
@@ -881,7 +884,7 @@ public class MSiteConfig extends MObject {
 				stringToGZippedFile( serialisedSiteConfig, siteConfigFile );
 			}
 			else {
-				_NSStringUtilities.writeToFile( siteConfigFile, serialisedSiteConfig );
+				Files.writeString( siteConfigFile.toPath(), serialisedSiteConfig, StandardCharsets.UTF_8 );
 			}
 
 			globalErrorDictionary.takeValueForKey( null, "archiveSiteConfig" );
@@ -891,11 +894,6 @@ public class MSiteConfig extends MObject {
 			logger.error( message );
 			final String pre = WOApplication.application().name() + " - " + localHostName;
 			globalErrorDictionary.takeValueForKey( pre + message, "archiveSiteConfig" );
-		}
-		catch( final NSForwardException ne ) {
-			logger.error( "Cannot write to file {}. Possible Permissions Problem.", siteConfigFile.getAbsolutePath() );
-			final String pre = WOApplication.application().name() + " - " + localHostName;
-			globalErrorDictionary.takeValueForKey( pre + " Cannot write to file " + siteConfigFile.getAbsolutePath() + ". Possible Permissions Problem.", "archiveSiteConfig" );
 		}
 	}
 
@@ -920,13 +918,14 @@ public class MSiteConfig extends MObject {
 				globalErrorDictionary.takeValueForKey( pre + " Don't have permission to write to file " + fileForAdaptorConfig() + "as this user, please change the permissions.", "archiveSiteConfig" );
 				return;
 			}
-			_NSStringUtilities.writeToFile( fileForAdaptorConfig(), generateAdaptorConfigXML( false, false ) );
+			Files.writeString( fileForAdaptorConfig().toPath(), generateAdaptorConfigXML( false, false ), StandardCharsets.UTF_8 );
 			globalErrorDictionary.takeValueForKey( null, "archiveAdaptorConfig" );
 		}
-		catch( final NSForwardException ne ) {
-			logger.error( "Cannot write to file {}. Possible Permissions Problem.", pathForAdaptorConfig() );
+		catch( final IOException e ) {
+			final String message = "Cannot write to file " + pathForAdaptorConfig() + ". IOException: " + e.getLocalizedMessage();
+			logger.error( message );
 			final String pre = WOApplication.application().name() + " - " + localHostName;
-			globalErrorDictionary.takeValueForKey( pre + " Cannot write to file " + pathForAdaptorConfig() + ". Possible Permissions Problem.", "archiveAdaptorConfig" );
+			globalErrorDictionary.takeValueForKey( pre + " " + message, "archiveAdaptorConfig" );
 		}
 	}
 

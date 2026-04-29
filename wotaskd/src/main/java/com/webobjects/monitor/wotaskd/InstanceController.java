@@ -39,7 +39,6 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSForwardException;
 import x.FLog;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
@@ -620,12 +619,9 @@ public class InstanceController implements IInstanceController {
 			
 			anInstance.succeededInConnection();
 		}
-		catch( NSForwardException ne ) {
-			if( ne.originalException() instanceof IOException ) {
-				anInstance.failedToConnect();
-				throw new MonitorException( hostName + ": Timeout while connecting to " + anInstance.displayName() );
-			}
-			throw ne;
+		catch( java.net.http.HttpTimeoutException te ) {
+			anInstance.failedToConnect();
+			throw new MonitorException( hostName + ": Timeout while connecting to " + anInstance.displayName() );
 		}
 		catch( Exception e ) {
 			anInstance.failedToConnect();
