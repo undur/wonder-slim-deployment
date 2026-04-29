@@ -41,7 +41,7 @@ import com.webobjects.monitor._private.model.MInstance;
 import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
-import x.CoderWrapper;
+import x.FoundationCoder;
 import x.ResponseWrapper;
 
 public class DirectAction extends WODirectAction {
@@ -74,10 +74,10 @@ public class DirectAction extends WODirectAction {
 		errorKeys = new Object[] { "success", "errorMessage" };
 
 		// Pre-cache error messages
-		_accessDenied = (new CoderWrapper()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + ": wotaskd may not be accessed through a Web server - Access Denied" ), "errorResponse" ), "monitorResponse" );
-		_invalidPassword = (new CoderWrapper()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + ": Invalid Password - Access Denied" ), "errorResponse" ), "monitorResponse" );
-		_invalidXML = (new CoderWrapper()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" ), "errorResponse" ), "monitorResponse" );
-		_emptyXML = (new CoderWrapper()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + " - INTERNAL ERROR: Request from Monitor was Empty" ), "errorResponse" ), "monitorResponse" );
+		_accessDenied = (new FoundationCoder()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + ": wotaskd may not be accessed through a Web server - Access Denied" ), "errorResponse" ), "monitorResponse" );
+		_invalidPassword = (new FoundationCoder()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + ": Invalid Password - Access Denied" ), "errorResponse" ), "monitorResponse" );
+		_invalidXML = (new FoundationCoder()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" ), "errorResponse" ), "monitorResponse" );
+		_emptyXML = (new FoundationCoder()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + " - INTERNAL ERROR: Request from Monitor was Empty" ), "errorResponse" ), "monitorResponse" );
 		_argumentNumberCommandError = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" }, errorKeys );
 
 		// get the formatter setup
@@ -125,7 +125,7 @@ public class DirectAction extends WODirectAction {
 
 		NSDictionary requestDict;
 		try {
-			requestDict = (NSDictionary)new CoderWrapper().decodeRootObject( aRequest.content() );
+			requestDict = (NSDictionary)new FoundationCoder().decodeRootObject( aRequest.content() );
 		}
 		catch( WOXMLException wxe ) {
 			NSLog.err.appendln( "Wotaskd monitorRequestAction: Error parsing request" );
@@ -620,7 +620,7 @@ public class DirectAction extends WODirectAction {
 			NSLog.debug.appendln( "@@@@@ monitorRequestAction returning response to Monitor" );
 		if( NSLog.debugLoggingAllowedForLevelAndGroups( NSLog.DebugLevelDetailed, NSLog.DebugGroupDeployment ) )
 			NSLog.debug.appendln( "@@@@@ monitorRequestAction responseDict: " + monitorResponse + "\n" );
-		aResponse.appendContentString( (new CoderWrapper()).encodeRootObjectForKey( monitorResponse, "monitorResponse" ) );
+		aResponse.appendContentString( (new FoundationCoder()).encodeRootObjectForKey( monitorResponse, "monitorResponse" ) );
 		return aResponse;
 	}
 
@@ -685,7 +685,7 @@ public class DirectAction extends WODirectAction {
 				NSDictionary instanceResponse = null;
 				NSData responseContent = new NSData( aResponse.content() );
 				try {
-					instanceResponse = (NSDictionary)new CoderWrapper().decodeRootObject( responseContent );
+					instanceResponse = (NSDictionary)new FoundationCoder().decodeRootObject( responseContent );
 				}
 				catch( WOXMLException wxe ) {
 					try {

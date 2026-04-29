@@ -24,7 +24,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSPathUtilities;
 
-import x.CoderWrapper;
+import x.FoundationCoder;
 
 public class RemoteBrowse extends WODirectAction {
 	private Object[] fileKeys = new Object[] { "file", "fileType", "fileSize" };
@@ -52,7 +52,7 @@ public class RemoteBrowse extends WODirectAction {
 			rootArray.addObject( aFileDict );
 		}
 
-		xmlRoots = ((new CoderWrapper()).encodeRootObjectForKey( rootArray, "pathArray" )) + " \r\n";
+		xmlRoots = ((new FoundationCoder()).encodeRootObjectForKey( rootArray, "pathArray" )) + " \r\n";
 	}
 
 	public NSArray fileListForStartingPath( String aStartingPath, boolean showFiles ) {
@@ -139,7 +139,7 @@ public class RemoteBrowse extends WODirectAction {
 				aResponse.appendContentString( "ERROR" );
 			}
 			else {
-				CoderWrapper aCoder = new CoderWrapper();
+				FoundationCoder aCoder = new FoundationCoder();
 				String anXMLString = null;
 				anXMLString = aCoder.encodeRootObjectForKey( anArray, "pathArray" );
 				anXMLString = (anXMLString) + " \r\n";

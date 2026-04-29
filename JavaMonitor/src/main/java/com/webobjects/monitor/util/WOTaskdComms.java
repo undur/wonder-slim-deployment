@@ -8,7 +8,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
-import x.CoderWrapper;
+import x.FoundationCoder;
 import x.ResponseWrapper;
 
 public class WOTaskdComms {
@@ -94,7 +94,7 @@ public class WOTaskdComms {
 		final NSMutableDictionary<String, NSDictionary> data = new NSMutableDictionary<>( siteConfig.dictionaryForArchive(), "SiteConfig" );
 		final NSMutableDictionary<String, NSMutableDictionary<String, NSDictionary>> updateWotaskd = new NSMutableDictionary<String, NSMutableDictionary<String, NSDictionary>>( data, "sync" );
 		final NSMutableDictionary<String, NSMutableDictionary<String, NSMutableDictionary<String, NSDictionary>>> monitorRequest = new NSMutableDictionary<>( updateWotaskd, "updateWotaskd" );
-		final String syncRequestString = new CoderWrapper().encodeRootObjectForKey( monitorRequest, "monitorRequest" );
+		final String syncRequestString = new FoundationCoder().encodeRootObjectForKey( monitorRequest, "monitorRequest" );
 		return syncRequestString;
 	}
 }

@@ -54,7 +54,7 @@ import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
 import er.extensions.foundation.ERXProperties;
-import x.CoderWrapper;
+import x.FoundationCoder;
 import x.ResponseWrapper;
 
 public class InstanceController implements IInstanceController {
@@ -588,7 +588,7 @@ public class InstanceController implements IInstanceController {
 
 	private static ResponseWrapper sendInstanceRequest( final String hostName, final MInstance anInstance, final Map<String,Object> xmlDict ) throws MonitorException {
 
-		final String requestContentXML = new CoderWrapper().encodeRootObjectForKey( xmlDict, "instanceRequest" );
+		final String requestContentXML = new FoundationCoder().encodeRootObjectForKey( xmlDict, "instanceRequest" );
 		final String urlString = MObject.ADMIN_ACTION_STRING_PREFIX + anInstance.applicationName() + MObject.ADMIN_ACTION_STRING_POSTFIX;
 
 		// FIXME: We should not have to create this here...
@@ -677,7 +677,7 @@ public class InstanceController implements IInstanceController {
 	 *                      is {@code "REFUSE"}, to embed its
 	 *                      {@code minimumActiveSessionsCount}.
 	 * @return a fresh dictionary; the caller hands it to
-	 *         {@link CoderWrapper#encodeRootObjectForKey} under the root tag
+	 *         {@link FoundationCoder#encodeRootObjectForKey} under the root tag
 	 *         {@code "instanceRequest"} before posting.
 	 */
 	private Map<String,Object> createInstanceRequestDictionary( final String commandString, final String queryString, final MInstance anInstance ) {

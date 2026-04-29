@@ -25,7 +25,7 @@ import com.webobjects.monitor.application.components.AppDetailPage;
 import com.webobjects.monitor.application.components.ApplicationsPage;
 import com.webobjects.monitor.application.components.HostsPage;
 
-import x.CoderWrapper;
+import x.FoundationCoder;
 import x.ResponseWrapper;
 
 public class WOTaskdHandler {
@@ -197,7 +197,7 @@ public class WOTaskdHandler {
 	}
 
 	private ResponseWrapper[] sendRequest( NSDictionary monitorRequest, List<MHost> wotaskdArray, boolean willChange ) {
-		final String encodedString = new CoderWrapper().encodeRootObjectForKey( monitorRequest, "monitorRequest" );
+		final String encodedString = new FoundationCoder().encodeRootObjectForKey( monitorRequest, "monitorRequest" );
 		return WOTaskdComms.sendRequestToWotaskdArray( encodedString, wotaskdArray, willChange );
 	}
 
@@ -390,7 +390,7 @@ public class WOTaskdHandler {
 
 			if( currentResponse != null && currentResponse.content() != null ) {
 				try {
-					responseDicts[i] = (NSDictionary)new CoderWrapper().decodeRootObject( currentResponse.content() );
+					responseDicts[i] = (NSDictionary)new FoundationCoder().decodeRootObject( currentResponse.content() );
 				}
 				catch( WOXMLException wxe ) {
 					responseDicts[i] = responseParsingFailed;
@@ -579,7 +579,7 @@ public class WOTaskdHandler {
 				}
 				else {
 					try {
-						responseDictionary = (NSDictionary)new CoderWrapper().decodeRootObject( responses[i].content() );
+						responseDictionary = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 					}
 					catch( WOXMLException wxe ) {
 						NSLog.err.appendln( "MonitorComponent pageWithName(AppDetailPage) Error decoding response: " + responses[i].contentString() );
@@ -654,7 +654,7 @@ public class WOTaskdHandler {
 			}
 			else {
 				try {
-					responseDict = (NSDictionary)new CoderWrapper().decodeRootObject( responses[i].content() );
+					responseDict = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 				}
 				catch( WOXMLException wxe ) {
 					NSLog.err.appendln( "MonitorComponent pageWithName(HostsPage) Error decoding response: " + responses[i].contentString() );
@@ -699,7 +699,7 @@ public class WOTaskdHandler {
 			}
 			else {
 				try {
-					queryResponseDictionary = (NSDictionary)new CoderWrapper().decodeRootObject( responses[i].content() );
+					queryResponseDictionary = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 				}
 				catch( WOXMLException wxe ) {
 					NSLog.err.appendln( "MonitorComponent pageWithName(ApplicationsPage) Error decoding response: " + responses[i].contentString() );

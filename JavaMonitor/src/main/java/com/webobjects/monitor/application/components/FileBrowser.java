@@ -42,7 +42,7 @@ import com.webobjects.monitor.application.components.FileBrowser.RemoteBrowseCli
 import com.webobjects.monitor.application.components.FileBrowser.RemoteBrowseClient.RemoteResult;
 import com.webobjects.monitor.util.WOTaskdHandler;
 
-import x.CoderWrapper;
+import x.FoundationCoder;
 import x.ResponseWrapper;
 
 public class FileBrowser extends MonitorComponent {
@@ -185,7 +185,7 @@ public class FileBrowser extends MonitorComponent {
 					final byte[] evilHackCombined = new byte[responseContentBytes.length + EVIL_HACK.length];
 					System.arraycopy( EVIL_HACK, 0, evilHackCombined, 0, EVIL_HACK.length );
 					System.arraycopy( responseContentBytes, 0, evilHackCombined, EVIL_HACK.length, responseContentBytes.length );
-					deserializedResponseContent = (List<Map<String,?>>)new CoderWrapper().decodeRootObject( evilHackCombined );
+					deserializedResponseContent = (List<Map<String,?>>)new FoundationCoder().decodeRootObject( evilHackCombined );
 				}
 				catch( WOXMLException wxe ) {
 					logger.error( "RemoteBrowseClient _getFileListOutOfResponse Error decoding response: " + responseContentString );

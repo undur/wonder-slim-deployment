@@ -50,7 +50,7 @@ import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MonitorException;
 
-import x.CoderWrapper;
+import x.FoundationCoder;
 
 public class MSiteConfig extends MObject {
 
@@ -807,7 +807,7 @@ public class MSiteConfig extends MObject {
 		// It is awkward to do the file creation here, in this way, but this stuff needs to be factored properly.
 		// This may throw an exception when it tries to create the file. Go to the utility method to see the exception being dropped.
 		if( !fileForSiteConfig().exists() ) {
-			final String emptySiteConfig = new CoderWrapper().encodeRootObjectForKey( NSDictionary.EmptyDictionary, "SiteConfig" );
+			final String emptySiteConfig = new FoundationCoder().encodeRootObjectForKey( NSDictionary.EmptyDictionary, "SiteConfig" );
 			_NSStringUtilities.writeToFile( fileForSiteConfig(), emptySiteConfig );
 		}
 
@@ -815,7 +815,7 @@ public class MSiteConfig extends MObject {
 		if( fileForSiteConfig().exists() ) {
 			if( fileForSiteConfig().canRead() ) {
 				try {
-					final NSDictionary siteDict = (NSDictionary)new CoderWrapper().decodeRootObject( pathForSiteConfig() );
+					final NSDictionary siteDict = (NSDictionary)new FoundationCoder().decodeRootObject( pathForSiteConfig() );
 
 					aConfig = new MSiteConfig( siteDict );
 
@@ -1048,7 +1048,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public String generateSiteConfigXML() {
-		return new CoderWrapper().encodeRootObjectForKey( dictionaryForArchive(), "SiteConfig" );
+		return new FoundationCoder().encodeRootObjectForKey( dictionaryForArchive(), "SiteConfig" );
 	}
 
 	private String _lastConfig;
