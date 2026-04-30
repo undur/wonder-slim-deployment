@@ -161,7 +161,6 @@ public class ApplicationsPage extends MonitorComponent {
 	public int totalInstancesRunning() {
 		int total = 0;
 
-		// use for-loop to preserve compile-time error-checking instead of using valueForKey("runningInstancesCount.@sum")
 		for( MApplication mApplication : applications() ) {
 			total += mApplication.runningInstancesCount();
 		}
