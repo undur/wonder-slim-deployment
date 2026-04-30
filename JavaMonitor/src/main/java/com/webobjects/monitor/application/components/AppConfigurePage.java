@@ -55,7 +55,7 @@ public class AppConfigurePage extends AppComponent {
 	public WOComponent defaultsUpdateClicked() {
 
 		handler().whileReading( () -> {
-			myApplication().setValues( appDefaults.values() );
+			myApplication().updateValues( appDefaults.values() );
 			handler().sendUpdateApplicationToWotaskds( myApplication(), allHosts() );
 		});
 
@@ -129,7 +129,7 @@ public class AppConfigurePage extends AppComponent {
 	public WOComponent defaultsPushClicked() {
 
 		handler().whileReading( () -> {
-			myApplication().setValues( appDefaults.values() );
+			myApplication().updateValues( appDefaults.values() );
 			myApplication().pushValuesToInstances();
 			_defaultsPush();
 		});
