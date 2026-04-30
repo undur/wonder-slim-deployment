@@ -20,6 +20,7 @@ import java.net.MulticastSocket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -40,7 +41,6 @@ import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation._NSCollectionReaderWriterLock;
 import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
@@ -62,7 +62,7 @@ public class Application extends ERXApplication {
 	private String _multicastAddress;
 	private boolean _shouldWriteAdaptorConfig;
 	private boolean _shouldRespondToMulticast;
-	public _NSCollectionReaderWriterLock _lock;
+	public ReentrantReadWriteLock _lock;
 
 	//========================================================================================
 	//     JMX Instance Variables 
@@ -143,7 +143,7 @@ public class Application extends ERXApplication {
 			System.setProperty( "WODeploymentConfigurationDirectory", "/Users/hugi/Desktop/woconfig" );
 		}
 
-		_lock = new _NSCollectionReaderWriterLock();
+		_lock = new ReentrantReadWriteLock();
 
 		com.webobjects.appserver._private.WOHttpIO._alwaysAppendContentLength = false;
 
@@ -347,7 +347,7 @@ public class Application extends ERXApplication {
 	// if requested, it will also write the new adaptorConfig to disk as WOConfig.xml
 	@Override
 	public void sleep() {
-		_lock.startReading();
+		_lock.readLock().lock();
 		try {
 			if( (_siteConfig != null) && (_siteConfig.hasChanges()) ) {
 				// archiving the siteConfig
@@ -359,7 +359,7 @@ public class Application extends ERXApplication {
 			}
 		}
 		finally {
-			_lock.endReading();
+			_lock.readLock().unlock();
 		}
 	}
 

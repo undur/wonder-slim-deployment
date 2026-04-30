@@ -26,14 +26,14 @@ public abstract class MInstanceTask extends TimerTask {
 		@Override
 		public void run() {
 			Application app = (Application)WOApplication.application();
-			app._lock.startReading();
+			app._lock.readLock().lock();
 			try {
 				_instance.setShouldDie( true );
 				_instance.setForceQuitTask( null );
 				cancel();
 			}
 			finally {
-				app._lock.endReading();
+				app._lock.readLock().unlock();
 			}
 		}
 
@@ -53,7 +53,7 @@ public abstract class MInstanceTask extends TimerTask {
 		public void run() {
 
 			Application app = (Application)WOApplication.application();
-			app._lock.startReading();
+			app._lock.readLock().lock();
 			InstanceController localMonitor = app.localMonitor();
 			try {
 
@@ -81,7 +81,7 @@ public abstract class MInstanceTask extends TimerTask {
 			}
 			finally {
 				++retries;
-				app._lock.endReading();
+				app._lock.readLock().unlock();
 			}
 
 		}

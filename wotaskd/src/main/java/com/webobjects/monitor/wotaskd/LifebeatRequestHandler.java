@@ -144,7 +144,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// KH - can we cache this for better speed?
 		final InetAddress hostAddress = addressForName( host );
 
-		theApplication._lock.startReading();
+		theApplication._lock.readLock().lock();
 
 		try {
 			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
@@ -158,7 +158,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			}
 		}
 		finally {
-			theApplication._lock.endReading();
+			theApplication._lock.readLock().unlock();
 		}
 	}
 
@@ -167,7 +167,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// KH - can we cache this for better speed?
 		final InetAddress hostAddress = addressForName( host );
 
-		theApplication._lock.startReading();
+		theApplication._lock.readLock().lock();
 
 		try {
 			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
@@ -180,7 +180,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			((Application)WOApplication.application()).localMonitor().registerUnknownInstance( instanceName, host, port );
 		}
 		finally {
-			theApplication._lock.endReading();
+			theApplication._lock.readLock().unlock();
 		}
 		return true;
 	}
@@ -190,7 +190,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// app will stop in a good way - we requested it.
 		final InetAddress hostAddress = addressForName( host );
 
-		theApplication._lock.startReading();
+		theApplication._lock.readLock().lock();
 
 		try {
 			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
@@ -202,7 +202,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			}
 		}
 		finally {
-			theApplication._lock.endReading();
+			theApplication._lock.readLock().unlock();
 		}
 	}
 
@@ -212,7 +212,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// app will stop in a bad way - notify if necessary
 		final InetAddress hostAddress = addressForName( host );
 
-		theApplication._lock.startReading();
+		theApplication._lock.readLock().lock();
 
 		try {
 			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
@@ -224,7 +224,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			}
 		}
 		finally {
-			theApplication._lock.endReading();
+			theApplication._lock.readLock().unlock();
 		}
 	}
 

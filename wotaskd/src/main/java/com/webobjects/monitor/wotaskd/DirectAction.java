@@ -104,19 +104,19 @@ public class DirectAction extends WODirectAction {
 		}
 
 		// Checking to see if the password was corrent
-		theApplication._lock.startReading();
+		theApplication._lock.readLock().lock();
 		try {
 			String passwordHeader = aRequest.headerForKey( "password" );
 			if( !aConfig.comparePasswordWithPassword( passwordHeader ) ) {
 				FLog.debug.appendln( "Attempt to call DirectAction: monitorRequestAction with incorrect password." );
 				aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 				aResponse.appendContentString( _invalidPassword );
-				// we endReading at the finally block
+				// the read lock is released in the finally block
 				return aResponse;
 			}
 		}
 		finally {
-			theApplication._lock.endReading();
+			theApplication._lock.readLock().unlock();
 		}
 
 		NSDictionary requestDict;
@@ -143,7 +143,7 @@ public class DirectAction extends WODirectAction {
 
 		// Checking for Updates
 		if( updateWotaskdDict != null ) {
-			theApplication._lock.startWriting();
+			theApplication._lock.writeLock().lock();
 			try {
 				NSMutableDictionary updateWotaskdResponse = new NSMutableDictionary( 2 );
 
@@ -374,7 +374,7 @@ public class DirectAction extends WODirectAction {
 				monitorResponse.takeValueForKey( updateWotaskdResponse, "updateWotaskdResponse" );
 			}
 			finally {
-				theApplication._lock.endWriting();
+				theApplication._lock.writeLock().unlock();
 			}
 		}
 
@@ -404,7 +404,7 @@ public class DirectAction extends WODirectAction {
 					NSDictionary instDict = (NSDictionary)commandWotaskdArray.objectAtIndex( i );
 					String hostName = (String)instDict.valueForKey( "hostName" );
 					Integer port = (Integer)instDict.valueForKey( "port" );
-					theApplication._lock.startReading();
+					theApplication._lock.readLock().lock();
 					try {
 						MInstance anInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
 						if( anInstance != null ) {
@@ -461,7 +461,7 @@ public class DirectAction extends WODirectAction {
 						}
 					}
 					finally {
-						theApplication._lock.endReading();
+						theApplication._lock.readLock().unlock();
 					}
 				}
 			}
@@ -473,12 +473,12 @@ public class DirectAction extends WODirectAction {
 			NSMutableDictionary queryWotaskdResponse = new NSMutableDictionary( 1 );
 
 			if( queryWotaskdString.equals( "SITE" ) ) {
-				theApplication._lock.startReading();
+				theApplication._lock.readLock().lock();
 				try {
 					queryWotaskdResponse.takeValueForKey( aConfig.dictionaryForArchive(), "SiteConfig" );
 				}
 				finally {
-					theApplication._lock.endReading();
+					theApplication._lock.readLock().unlock();
 				}
 			}
 			else if( queryWotaskdString.equals( "HOST" ) ) {
@@ -490,7 +490,7 @@ public class DirectAction extends WODirectAction {
 
 					hostResponse = new NSMutableDictionary( new Object[] { runningInstances, processorType, operatingSystem }, hostQueryKeys );
 				}
-				theApplication._lock.startReading();
+				theApplication._lock.readLock().lock();
 				try {
 					if( aConfig.localHost() != null ) {
 						hostResponse.takeValueForKey( aConfig.localHost().runningInstancesCount_W(), "runningInstances" );
@@ -500,13 +500,13 @@ public class DirectAction extends WODirectAction {
 					}
 				}
 				finally {
-					theApplication._lock.endReading();
+					theApplication._lock.readLock().unlock();
 				}
 				queryWotaskdResponse.takeValueForKey( hostResponse, "hostResponse" );
 			}
 			else if( queryWotaskdString.equals( "APPLICATION" ) ) {
 				NSMutableArray applicationResponse = null;
-				theApplication._lock.startReading();
+				theApplication._lock.readLock().lock();
 				try {
 					NSArray appArray = aConfig.applicationArray();
 					int appArrayCount = appArray.count();
@@ -527,14 +527,14 @@ public class DirectAction extends WODirectAction {
 					}
 				}
 				finally {
-					theApplication._lock.endReading();
+					theApplication._lock.readLock().unlock();
 				}
 
 				queryWotaskdResponse.takeValueForKey( applicationResponse, "applicationResponse" );
 			}
 			else if( queryWotaskdString.equals( "INSTANCE" ) ) {
 				NSMutableArray instanceResponse = null;
-				theApplication._lock.startReading();
+				theApplication._lock.readLock().lock();
 				try {
 					NSArray instanceArray = (aConfig.localHost() != null) ? aConfig.localHost().instanceArray() : NSArray.EmptyArray;
 					int instanceArrayCount = instanceArray.count();
@@ -588,7 +588,7 @@ public class DirectAction extends WODirectAction {
 					}
 				}
 				finally {
-					theApplication._lock.endReading();
+					theApplication._lock.readLock().unlock();
 				}
 
 				queryWotaskdResponse.takeValueForKey( instanceResponse, "instanceResponse" );
@@ -875,7 +875,7 @@ public class DirectAction extends WODirectAction {
 		WORequest aRequest = request();
 		MSiteConfig aConfig = theApplication.siteConfig();
 
-		theApplication._lock.startReading();
+		theApplication._lock.readLock().lock();
 		try {
 
 			// Check for correct password
@@ -884,7 +884,7 @@ public class DirectAction extends WODirectAction {
 				FLog.debug.appendln( "Attempt to call Direct Action: defaultAction with incorrect password." );
 				aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 				aResponse.appendContentString( "Attempt to call Direct Action: defaultAction on wotaskd with incorrect password." );
-				// we endReading at the finally block
+				// the read lock is released in the finally block
 				return aResponse;
 			}
 
@@ -927,7 +927,7 @@ public class DirectAction extends WODirectAction {
 			aResponse.appendContentString( "</pre><br><br></body></html>" );
 		}
 		finally {
-			theApplication._lock.endReading();
+			theApplication._lock.readLock().unlock();
 		}
 
 		return aResponse;
@@ -942,13 +942,13 @@ public class DirectAction extends WODirectAction {
 		// We aren't going to regenerate the list, though, since this gets called a lot.
 		boolean shouldIncludeUnregisteredInstances = WOHostUtilities.isAnyLocalInetAddress( aRequest._originatingAddress(), false );
 
-		theApplication._lock.startReading();
+		theApplication._lock.readLock().lock();
 		String xml;
 		try {
 			xml = ((Application)WOApplication.application()).siteConfig().generateAdaptorConfigXML( true, shouldIncludeUnregisteredInstances );
 		}
 		finally {
-			theApplication._lock.endReading();
+			theApplication._lock.readLock().unlock();
 		}
 		WOResponse aResponse = WOApplication.application().createResponseInContext( null );
 		aResponse.appendContentString( xml );

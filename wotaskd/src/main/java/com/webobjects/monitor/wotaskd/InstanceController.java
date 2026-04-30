@@ -282,7 +282,7 @@ public class InstanceController implements IInstanceController {
 	/********** Timer Targets **********/
 	public void _checkAutoRecover() {
 		FLog.debug.appendln( "_checkAutoRecover START" );
-		theApplication._lock.startReading();
+		theApplication._lock.readLock().lock();
 		try {
 			MHost theHost = theApplication.siteConfig().localHost();
 			if( theHost != null ) {
@@ -302,7 +302,7 @@ public class InstanceController implements IInstanceController {
 			triageUnknownInstances();
 		}
 		finally {
-			theApplication._lock.endReading();
+			theApplication._lock.readLock().unlock();
 		}
 		FLog.debug.appendln( "_checkAutoRecover STOP" );
 	}
@@ -310,7 +310,7 @@ public class InstanceController implements IInstanceController {
 	// This only runs once, on startup - then it starts the regular timer
 	public void _checkAutoRecoverStartup() {
 		FLog.debug.appendln( "_checkAutoRecoverStartup START" );
-		theApplication._lock.startReading();
+		theApplication._lock.readLock().lock();
 		try {
 			MSiteConfig aConfig = theApplication.siteConfig();
 			final List<MApplication> appArray = aConfig.applicationArray();
@@ -350,7 +350,7 @@ public class InstanceController implements IInstanceController {
 
 		}
 		finally {
-			theApplication._lock.endReading();
+			theApplication._lock.readLock().unlock();
 		}
 		FLog.debug.appendln( "_checkAutoRecoverStartup STOP" );
 	}
@@ -396,7 +396,7 @@ public class InstanceController implements IInstanceController {
 
 	public void _checkSchedules() {
 		FLog.debug.appendln( "_checkSchedules START" );
-		theApplication._lock.startReading();
+		theApplication._lock.readLock().lock();
 		try {
 
 			MHost theHost = theApplication.siteConfig().localHost();
@@ -447,7 +447,7 @@ public class InstanceController implements IInstanceController {
 			}
 		}
 		finally {
-			theApplication._lock.endReading();
+			theApplication._lock.readLock().unlock();
 		}
 		FLog.debug.appendln( "_checkSchedules STOP" );
 	}
