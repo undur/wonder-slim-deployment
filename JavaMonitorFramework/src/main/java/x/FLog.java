@@ -4,8 +4,8 @@ import com.webobjects.foundation.NSLog;
 
 /**
  * Drop-in stand-in for {@code com.webobjects.foundation.NSLog}, exposing only the
- * three logger fields ({@code .debug}, {@code .err}, {@code .out}) and the
- * private-exception helper actually used by the deployment code.
+ * three logger fields ({@code .debug}, {@code .err}, {@code .out}) the deployment
+ * code actually writes to.
  *
  * <p>Currently a thin pass-through to {@link NSLog}. The point isn't to remove the
  * Foundation dependency yet — that comes in a follow-up pass that inlines each call
@@ -34,10 +34,6 @@ public final class FLog {
 	public static final NSLog.Logger debug = NSLog.debug;
 	public static final NSLog.Logger err = NSLog.err;
 	public static final NSLog.Logger out = NSLog.out;
-
-	public static void _conditionallyLogPrivateException( final Throwable t ) {
-		NSLog._conditionallyLogPrivateException( t );
-	}
 
 	private FLog() {
 		// not instantiable

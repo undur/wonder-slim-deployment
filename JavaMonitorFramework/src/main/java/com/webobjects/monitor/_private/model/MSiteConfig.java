@@ -676,8 +676,7 @@ public class MSiteConfig extends MObject {
 				_appIsDeadMultiplier = tempInt.intValue() * 1000;
 			}
 			catch( final NumberFormatException e ) {
-				// go with the default
-				FLog._conditionallyLogPrivateException( e );
+				logger.debug( "WOAssumeApplicationIsDeadMultiplier is not a valid integer: '{}'. Using default.", WOAssumeAppIsDeadMultiplier );
 			}
 		}
 		_lastConfig = generateSiteConfigXML();
