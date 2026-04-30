@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.appserver.xml.WOXMLException;
 import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.model.MHost;
@@ -187,9 +186,9 @@ public class FileBrowser extends MonitorComponent {
 					System.arraycopy( responseContentBytes, 0, evilHackCombined, EVIL_HACK.length, responseContentBytes.length );
 					deserializedResponseContent = (List<Map<String,?>>)new FoundationCoder().decodeRootObject( evilHackCombined );
 				}
-				catch( WOXMLException wxe ) {
+				catch( Exception e ) {
 					logger.error( "RemoteBrowseClient _getFileListOutOfResponse Error decoding response: " + responseContentString );
-					throw new MonitorException( "Host returned bad response for path " + sourcePath, wxe );
+					throw new MonitorException( "Host returned bad response for path " + sourcePath, e );
 				}
 			}
 			else {

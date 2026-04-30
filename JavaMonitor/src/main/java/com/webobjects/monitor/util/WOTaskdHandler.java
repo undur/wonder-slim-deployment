@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOComponent;
-import com.webobjects.appserver.xml.WOXMLException;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
@@ -390,7 +389,7 @@ public class WOTaskdHandler {
 				try {
 					responseDicts[i] = (NSDictionary)new FoundationCoder().decodeRootObject( currentResponse.content() );
 				}
-				catch( WOXMLException wxe ) {
+				catch( Exception e ) {
 					responseDicts[i] = responseParsingFailed;
 				}
 			}
@@ -575,7 +574,7 @@ public class WOTaskdHandler {
 					try {
 						responseDictionary = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 					}
-					catch( WOXMLException wxe ) {
+					catch( Exception e ) {
 						FLog.err.appendln( "MonitorComponent pageWithName(AppDetailPage) Error decoding response: " + responses[i].contentString() );
 						responseDictionary = responseParsingFailed;
 					}
@@ -648,7 +647,7 @@ public class WOTaskdHandler {
 				try {
 					responseDict = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 				}
-				catch( WOXMLException wxe ) {
+				catch( Exception e ) {
 					FLog.err.appendln( "MonitorComponent pageWithName(HostsPage) Error decoding response: " + responses[i].contentString() );
 					responseDict = responseParsingFailed;
 				}
@@ -691,7 +690,7 @@ public class WOTaskdHandler {
 				try {
 					queryResponseDictionary = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 				}
-				catch( WOXMLException wxe ) {
+				catch( Exception e ) {
 					FLog.err.appendln( "MonitorComponent pageWithName(ApplicationsPage) Error decoding response: " + responses[i].contentString() );
 					queryResponseDictionary = responseParsingFailed;
 				}
