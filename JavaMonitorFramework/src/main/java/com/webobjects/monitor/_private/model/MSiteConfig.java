@@ -61,11 +61,6 @@ public class MSiteConfig extends MObject {
 		return values;
 	}
 
-	public void setValues( NSMutableDictionary<String, Object> newValues ) {
-		values = newValues;
-		_siteConfig.dataHasChanged();
-	}
-
 	public void updateValues( NSDictionary<String, Object> aDict ) {
 		values = new NSMutableDictionary<>( aDict );
 		_siteConfig.dataHasChanged();

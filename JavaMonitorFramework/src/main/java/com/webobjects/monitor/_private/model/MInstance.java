@@ -945,20 +945,6 @@ public class MInstance extends MObject {
 
 	/**
 	 * Overridden for Scheduling
-	 *
-	 * FIXME: I don't think this ever gets invoked? // Hugi 2024-11-10
-	 */
-	public void setValues( NSMutableDictionary newValues ) {
-		values = newValues;
-		_siteConfig.dataHasChanged();
-
-		if( isScheduled() ) {
-			calculateNextScheduledShutdown();
-		}
-	}
-
-	/**
-	 * Overridden for Scheduling
 	 */
 	public void updateValues( NSDictionary aDict ) {
 		values = new NSMutableDictionary<>( aDict );
