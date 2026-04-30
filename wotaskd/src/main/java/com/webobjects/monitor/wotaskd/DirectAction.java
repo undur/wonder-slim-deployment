@@ -30,7 +30,6 @@ import com.webobjects.foundation.NSTimeZone;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
-import com.webobjects.foundation._NSUtilities;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.model.MApplication;
@@ -497,7 +496,7 @@ public class DirectAction extends WODirectAction {
 						hostResponse.takeValueForKey( aConfig.localHost().runningInstancesCount_W(), "runningInstances" );
 					}
 					else {
-						hostResponse.takeValueForKey( _NSUtilities.IntegerForInt( 0 ), "runningInstances" );
+						hostResponse.takeValueForKey( Integer.valueOf( 0 ), "runningInstances" );
 					}
 				}
 				finally {
