@@ -29,11 +29,20 @@ import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSTimeZone;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
+import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 
 import x.FLog;
 
 public class MInstance extends MObject {
+
+	// Old common code
+	protected NSMutableDictionary<String, Object> values;
+	protected _NSThreadsafeMutableDictionary<String, Object> adaptorValues = new _NSThreadsafeMutableDictionary<>( new NSMutableDictionary<>() );
+
+	public NSMutableDictionary<String, Object> values() {
+		return values;
+	}
 
 	//	String hostName;
 	//	Integer id;
@@ -939,9 +948,10 @@ public class MInstance extends MObject {
 	 *
 	 * FIXME: I don't think this ever gets invoked? // Hugi 2024-11-10
 	 */
-	@Override
 	public void setValues( NSMutableDictionary newValues ) {
-		super.setValues( newValues );
+		values = newValues;
+		_siteConfig.dataHasChanged();
+
 		if( isScheduled() ) {
 			calculateNextScheduledShutdown();
 		}
@@ -950,9 +960,10 @@ public class MInstance extends MObject {
 	/**
 	 * Overridden for Scheduling
 	 */
-	@Override
 	public void updateValues( NSDictionary aDict ) {
-		super.updateValues( aDict );
+		values = new NSMutableDictionary<>( aDict );
+		_siteConfig.dataHasChanged();
+
 		if( isScheduled() ) {
 			calculateNextScheduledShutdown();
 		}

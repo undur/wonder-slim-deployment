@@ -54,6 +54,24 @@ import x.FoundationCoder;
 
 public class MSiteConfig extends MObject {
 
+	// Old common code
+	protected NSMutableDictionary<String, Object> values;
+	protected _NSThreadsafeMutableDictionary<String, Object> adaptorValues = new _NSThreadsafeMutableDictionary<>( new NSMutableDictionary<>() );
+
+	public NSMutableDictionary<String, Object> values() {
+		return values;
+	}
+
+	public void setValues( NSMutableDictionary<String, Object> newValues ) {
+		values = newValues;
+		_siteConfig.dataHasChanged();
+	}
+
+	public void updateValues( NSDictionary<String, Object> aDict ) {
+		values = new NSMutableDictionary<>( aDict );
+		_siteConfig.dataHasChanged();
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger( MSiteConfig.class );
 
 	/*
