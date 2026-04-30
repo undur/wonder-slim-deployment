@@ -15,7 +15,6 @@ package com.webobjects.monitor.application;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
-import x.FLog;
 import com.webobjects.foundation._NSUtilities;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MSiteConfig;

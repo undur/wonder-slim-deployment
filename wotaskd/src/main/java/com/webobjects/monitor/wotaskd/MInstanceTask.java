@@ -3,9 +3,10 @@ package com.webobjects.monitor.wotaskd;
 import java.util.TimerTask;
 
 import com.webobjects.appserver.WOApplication;
-import x.FLog;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.model.MInstance;
+
+import x.FLog;
 
 public abstract class MInstanceTask extends TimerTask {
 

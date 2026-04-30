@@ -13,6 +13,7 @@ SUCH DAMAGE.
  */
 
 import com.webobjects.appserver.WOApplication;
+
 import x.FLog;
 
 public class SiteConfig implements SiteConfigMBean {

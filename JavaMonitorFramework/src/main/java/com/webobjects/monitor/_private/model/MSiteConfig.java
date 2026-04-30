@@ -40,7 +40,6 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
-import x.FLog;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
@@ -49,6 +48,7 @@ import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MonitorException;
 
+import x.FLog;
 import x.FoundationCoder;
 
 public class MSiteConfig extends MObject {
