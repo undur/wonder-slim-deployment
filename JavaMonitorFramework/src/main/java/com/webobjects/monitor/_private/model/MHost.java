@@ -34,7 +34,6 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSProperties;
-import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 
 import x.FoundationCoder;
@@ -44,7 +43,6 @@ public class MHost extends MObject {
 
 	// Old common code
 	protected NSMutableDictionary<String, Object> values;
-	protected _NSThreadsafeMutableDictionary<String, Object> adaptorValues = new _NSThreadsafeMutableDictionary<>( new NSMutableDictionary<>() );
 
 	public NSMutableDictionary<String, Object> values() {
 		return values;

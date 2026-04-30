@@ -56,7 +56,6 @@ public class MSiteConfig extends MObject {
 
 	// Old common code
 	protected NSMutableDictionary<String, Object> values;
-	protected _NSThreadsafeMutableDictionary<String, Object> adaptorValues = new _NSThreadsafeMutableDictionary<>( new NSMutableDictionary<>() );
 
 	public NSMutableDictionary<String, Object> values() {
 		return values;
