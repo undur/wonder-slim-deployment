@@ -463,10 +463,6 @@ public class MInstance extends MObject {
 		return null;
 	}
 
-	public NSDictionary dictionaryForArchive() {
-		return values;
-	}
-
 	public void extractAdaptorValuesFromApplication() {
 		// get my instance settings
 		adaptorValues.takeValueForKey( values.valueForKey( "sendTimeout" ), "sendTimeout" );

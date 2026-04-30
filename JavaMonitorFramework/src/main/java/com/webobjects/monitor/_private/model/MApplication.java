@@ -556,13 +556,6 @@ public class MApplication extends MObject {
 		}
 	}
 
-	/**
-	 * Archiving Support
-	 */
-	public NSDictionary dictionaryForArchive() {
-		return values;
-	}
-
 	public void extractAdaptorValuesFromSiteConfig() {
 		// get my application settings
 		adaptorValues.takeValueForKey( values.valueForKey( "retries" ), "retries" );

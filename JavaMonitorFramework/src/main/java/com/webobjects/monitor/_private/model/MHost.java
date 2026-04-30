@@ -317,10 +317,6 @@ public class MHost extends MObject {
 		return new FoundationCoder().encodeRootObjectForKey( new NSDictionary<>( new NSArray<>( "Failed to contact " + host.name() + "-" + WOApplication.application().lifebeatDestinationPort() ), "errorResponse" ), "instanceResponse" );
 	}
 
-	public NSDictionary dictionaryForArchive() {
-		return values;
-	}
-
 	@Override
 	public String toString() {
 		return "MHost@" + _address;
