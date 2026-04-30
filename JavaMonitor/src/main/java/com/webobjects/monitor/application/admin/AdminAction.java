@@ -7,9 +7,9 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MInstance;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor._private.model.MSiteConfig;
 import com.webobjects.monitor.application.Session;
 import com.webobjects.monitor.application.components.AppDetailPage;
@@ -367,7 +367,7 @@ public class AdminAction extends WODirectAction {
 			result += "\"id\": \"" + minstance.id() + "\", ";
 			result += "\"host\": \"" + minstance.hostName() + "\", ";
 			result += "\"port\": \"" + minstance.port() + "\", ";
-			result += "\"state\": \"" + MObject.INSTANCE_STATES[minstance.state] + "\", ";
+			result += "\"state\": \"" + MUtil.INSTANCE_STATES[minstance.state] + "\", ";
 			result += "\"deaths\": \"" + minstance.deathCount() + "\", ";
 			result += "\"refusingNewSessions\": " + minstance.isRefusingNewSessions() + ", ";
 			result += "\"scheduled\": " + minstance.isScheduled() + ", ";
@@ -415,7 +415,7 @@ public class AdminAction extends WODirectAction {
 		}
 		int instancesAlive = 0;
 		for( MInstance minstance : instances ) {
-			if( minstance.state == MObject.ALIVE ) {
+			if( minstance.state == MUtil.ALIVE ) {
 				instancesAlive++;
 			}
 		}
@@ -430,7 +430,7 @@ public class AdminAction extends WODirectAction {
 		WOResponse woresponse = new WOResponse();
 		woresponse.setContent( "YES" );
 		for( MInstance minstance : instances ) {
-			if( minstance.state == MObject.DEAD )
+			if( minstance.state == MUtil.DEAD )
 				continue;
 			woresponse.setContent( "NO" );
 			woresponse.setStatus( 417 );

@@ -1,8 +1,30 @@
 package com.webobjects.monitor._private;
 
-import com.webobjects.monitor._private.model.MObject;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MUtil {
+
+	public static final List<String> LOAD_SCHEDULERS = new ArrayList<>( List.of( "Default", "Round Robin", "Random", "Load Average", "Custom" ) );
+	public static final List<String> LOAD_SCHEDULER_VALUES = new ArrayList<>( List.of( "DEFAULT", "ROUNDROBIN", "RANDOM", "LOADAVERAGE", "CUSTOM" ) );
+	public static final List<String> HOST_TYPES = new ArrayList<>( List.of( "MacOSX", "Windows", "Unix" ) );
+	public static final List<Integer> URL_VERSIONS = new ArrayList<>( List.of( 4, 3 ) );
+	public static final List<String> WEEKDAYS = new ArrayList<>( List.of( "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ) );
+	public static final List<String> TIMES_OF_DAY = new ArrayList<>( List.of( "0000", "0100", "0200", "0300", "0400", "0500", "0600", "0700", "0800", "0900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1700", "1800", "1900", "2000", "2100", "2200", "2300" ) );
+	public static final List<Integer> SCHEDULING_INTERVALS = new ArrayList<>( List.of( 1, 2, 3, 4, 6, 8, 12 ) );
+	public static final List<String> SCHEDULING_TYPES = new ArrayList<>( List.of( "HOURLY", "DAILY", "WEEKLY" ) );
+	public static final String[] INSTANCE_STATES = new String[] { "UNKNOWN", "STARTING", "ALIVE", "STOPPING", "DEAD", "CRASHING" };
+
+	public static final int UNKNOWN = 0;
+	public static final int STARTING = 1;
+	public static final int ALIVE = 2;
+	public static final int STOPPING = 3;
+	public static final int DEAD = 4;
+	public static final int CRASHING = 5;
+
+	public static final String WOTASKD_DIRECT_ACTION_URL = "/cgi-bin/WebObjects/wotaskd.woa/wa/monitorRequest";
+	public static final String ADMIN_ACTION_STRING_PREFIX = "/cgi-bin/WebObjects/";
+	public static final String ADMIN_ACTION_STRING_POSTFIX = ".woa/womp/instanceRequest";
 
 	public static Integer validatedInteger( final Integer value ) {
 
@@ -88,7 +110,7 @@ public class MUtil {
 
 	// Our array is from 0-23, but the display is for '12 AM' to '11 PM'
 	public static Integer morphedSchedulingStartTime( String value ) {
-		int i = MObject.TIMES_OF_DAY.indexOf( value );
+		int i = TIMES_OF_DAY.indexOf( value );
 
 		if( i != -1 ) {
 			return Integer.valueOf( i );
@@ -100,7 +122,7 @@ public class MUtil {
 	public static String morphedSchedulingStartTime( Integer value ) {
 
 		if( value != null ) {
-			return MObject.TIMES_OF_DAY.get( value.intValue() );
+			return TIMES_OF_DAY.get( value.intValue() );
 		}
 
 		return null;
@@ -122,7 +144,7 @@ public class MUtil {
 	// Java normally returns 1-7, ObjC returned 0-6, JavaFoundation will return 0-6
 	// Our array is from 0-6
 	public static Integer morphedSchedulingStartDay( String value ) {
-		int i = MObject.WEEKDAYS.indexOf( value );
+		int i = WEEKDAYS.indexOf( value );
 
 		if( i != -1 ) {
 			return Integer.valueOf( i );
@@ -134,7 +156,7 @@ public class MUtil {
 	public static String morphedSchedulingStartDay( Integer value ) {
 
 		if( value != null ) {
-			return MObject.WEEKDAYS.get( value.intValue() );
+			return WEEKDAYS.get( value.intValue() );
 		}
 
 		return null;

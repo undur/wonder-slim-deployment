@@ -71,7 +71,7 @@ public class MInstance extends MObject {
 	private NSTimestamp _lastRegistration = NSTimestamp.DistantPast;
 	private NSMutableArray<String> _deaths = new NSMutableArray<>();
 	private boolean isRefusingNewSessions = false;
-	public int state = MObject.DEAD;
+	public int state = MUtil.DEAD;
 	private NSMutableDictionary _statistics = new NSMutableDictionary();
 	private Timer _taskTimer;
 	private TimerTask _forceQuitTask;
@@ -600,7 +600,7 @@ public class MInstance extends MObject {
 	 * Startup Calculations
 	 */
 	public void willAttemptToStart() {
-		state = MObject.STARTING;
+		state = MUtil.STARTING;
 		long timeForStartup;
 		Integer tfs = _application.timeForStartup();
 
@@ -619,7 +619,7 @@ public class MInstance extends MObject {
 
 		// FIXME: The number of failures required to consider the instance dead should be a constant (or at least documented) // Hugi 2024-11-04
 		if( _connectFailureCount > 2 ) {
-			state = MObject.DEAD;
+			state = MUtil.DEAD;
 			_lastRegistration = NSTimestamp.DistantPast;
 		}
 	}
@@ -629,7 +629,7 @@ public class MInstance extends MObject {
 	}
 
 	public boolean isRunning_M() {
-		return (state == MObject.ALIVE);
+		return (state == MUtil.ALIVE);
 	}
 
 	public int lifebeatCheckInterval() {
@@ -645,13 +645,13 @@ public class MInstance extends MObject {
 		long cutOffTime = _lastRegistration.getTime() + lifebeatCheckInterval();
 		long finishStartingByTime = _finishStartingByDate.getTime();
 
-		if( state == MObject.STARTING ) {
+		if( state == MUtil.STARTING ) {
 			// I'm still trying to start
 			if( currentTime < finishStartingByTime ) {
 				if( currentTime > cutOffTime ) {
 					return false;
 				}
-				state = MObject.ALIVE;
+				state = MUtil.ALIVE;
 				return true;
 				// I'm finished trying to start
 			}
@@ -660,35 +660,35 @@ public class MInstance extends MObject {
 				addDeath();
 				sendDeathNotificationEmail();
 				setShouldDie( false );
-				state = MObject.DEAD;
+				state = MUtil.DEAD;
 				return false;
 			}
-			state = MObject.ALIVE;
+			state = MUtil.ALIVE;
 			return true;
 		}
-		else if( state == MObject.ALIVE ) {
+		else if( state == MUtil.ALIVE ) {
 			if( currentTime > cutOffTime ) {
 				addDeath();
 				sendDeathNotificationEmail();
 				setShouldDie( false );
-				state = MObject.DEAD;
+				state = MUtil.DEAD;
 				return false;
 			}
 			return true;
 		}
-		else if( state == MObject.CRASHING ) {
+		else if( state == MUtil.CRASHING ) {
 			addDeath();
 			sendDeathNotificationEmail();
-			state = MObject.DEAD;
+			state = MUtil.DEAD;
 			return false;
 		}
 		else { // UNKNOWN, DEAD, STOPPING
 			if( currentTime > cutOffTime ) {
-				state = MObject.DEAD;
+				state = MUtil.DEAD;
 				return false;
 			}
 			// KH - I've returned to life - what should I do?
-			state = MObject.ALIVE;
+			state = MUtil.ALIVE;
 			return true;
 		}
 	}
@@ -740,13 +740,13 @@ public class MInstance extends MObject {
 	public void registerStop( NSTimestamp registrationDate ) {
 		succeededInConnection();
 		_lastRegistration = NSTimestamp.DistantPast;
-		state = MObject.DEAD;
+		state = MUtil.DEAD;
 	}
 
 	public void registerCrash( NSTimestamp registrationDate ) {
 		succeededInConnection();
 		_lastRegistration = NSTimestamp.DistantPast;
-		state = MObject.CRASHING;
+		state = MUtil.CRASHING;
 	}
 
 	public void sendDeathNotificationEmail() {
@@ -763,7 +763,7 @@ public class MInstance extends MObject {
 			assumedToBeDead = "The app did not respond for " + secondsDifference + " seconds " + "which is greater than the allowed threshold of " + lifebeatCheckInterval() + " seconds " + "(Lifebeat Interval * WOAssumeApplicationIsDeadMultiplier) so it is assumed to be dead.\n";
 		}
 
-		final String message = "Application '" + displayName() + "' on " + _host.name() + ":" + port() + " stopped running at " + (currentDate) + ".\n" + "The app's current state was: " + INSTANCE_STATES[state] + ".\n" + assumedToBeDead + "The last successful communication occurred at: " + _lastRegistration.toString() + ". " + "This may be the result of a crash or an intentional shutdown from outside of wotaskd";
+		final String message = "Application '" + displayName() + "' on " + _host.name() + ":" + port() + " stopped running at " + (currentDate) + ".\n" + "The app's current state was: " + MUtil.INSTANCE_STATES[state] + ".\n" + assumedToBeDead + "The last successful communication occurred at: " + _lastRegistration.toString() + ". " + "This may be the result of a crash or an intentional shutdown from outside of wotaskd";
 
 		FLog.err.appendln( message );
 

@@ -17,8 +17,8 @@ import java.util.List;
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.StringExtensions;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor.application.MonitorComponent;
 
 import er.extensions.appserver.ERXRedirect;
@@ -31,9 +31,9 @@ public class ConfigurePage extends MonitorComponent {
 	public boolean isBackupSectionVisible = false;
 	public String _loadSchedulerSelection = null;
 	public String loadSchedulerItem;
-	public List<String> loadSchedulerList = MObject.LOAD_SCHEDULERS;
+	public List<String> loadSchedulerList = MUtil.LOAD_SCHEDULERS;
 	public Integer urlVersionItem;
-	public List<Integer> urlVersionList = MObject.URL_VERSIONS;
+	public List<Integer> urlVersionList = MUtil.URL_VERSIONS;
 	public String customSchedulerName;
 	public String adaptorInfoUsername;
 	public String adaptorInfoPassword;
@@ -54,7 +54,7 @@ public class ConfigurePage extends MonitorComponent {
 
 	public String loadSchedulerSelection() {
 		if( (application() != null) && (siteConfig().scheduler() != null) ) {
-			int indexOfScheduler = MObject.LOAD_SCHEDULER_VALUES.indexOf( siteConfig().scheduler() );
+			int indexOfScheduler = MUtil.LOAD_SCHEDULER_VALUES.indexOf( siteConfig().scheduler() );
 			if( indexOfScheduler != -1 ) {
 				_loadSchedulerSelection = loadSchedulerList.get( indexOfScheduler );
 			}
@@ -99,7 +99,7 @@ public class ConfigurePage extends MonitorComponent {
 			}
 		}
 		else {
-			newValue = MObject.LOAD_SCHEDULER_VALUES.get( i );
+			newValue = MUtil.LOAD_SCHEDULER_VALUES.get( i );
 		}
 		siteConfig().setScheduler( newValue );
 

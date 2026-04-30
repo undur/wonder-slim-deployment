@@ -247,7 +247,7 @@ public class MHost extends MObject {
 
 			final Builder requestBuilder = HttpRequest
 					.newBuilder()
-					.uri( URI.create( "http://%s:%s%s".formatted( name(), WOApplication.application().lifebeatDestinationPort(), MObject.WOTASKD_DIRECT_ACTION_URL ) ) )
+					.uri( URI.create( "http://%s:%s%s".formatted( name(), WOApplication.application().lifebeatDestinationPort(), MUtil.WOTASKD_DIRECT_ACTION_URL ) ) )
 					.timeout( Duration.ofMillis( RECEIVE_TIMEOUT ) )
 					.POST( BodyPublishers.ofString( contentString ) );
 

@@ -20,7 +20,6 @@ import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MInstance;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor._private.model.MSiteConfig;
 import com.webobjects.monitor.application.MonitorComponent.AppComponent;
 
@@ -338,13 +337,13 @@ public class AppConfigurePage extends AppComponent {
 
 	public MInstance currentScheduledInstance;
 
-	public List<String> weekList = MObject.WEEKDAYS;
+	public List<String> weekList = MUtil.WEEKDAYS;
 
-	public List<String> timeOfDayList = MObject.TIMES_OF_DAY;
+	public List<String> timeOfDayList = MUtil.TIMES_OF_DAY;
 
-	public List<String> schedulingTypeList = MObject.SCHEDULING_TYPES;
+	public List<String> schedulingTypeList = MUtil.SCHEDULING_TYPES;
 
-	public List<Integer> schedulingIntervalList = MObject.SCHEDULING_INTERVALS;
+	public List<Integer> schedulingIntervalList = MUtil.SCHEDULING_INTERVALS;
 
 	public String weekSelection() {
 		return MUtil.morphedSchedulingStartDay( currentScheduledInstance.schedulingStartDay() );
@@ -396,17 +395,17 @@ public class AppConfigurePage extends AppComponent {
 
 	public String loadSchedulerItem;
 
-	public List<String> loadSchedulerList = MObject.LOAD_SCHEDULERS;
+	public List<String> loadSchedulerList = MUtil.LOAD_SCHEDULERS;
 
 	public Integer urlVersionItem;
 
-	public List<Integer> urlVersionList = MObject.URL_VERSIONS;
+	public List<Integer> urlVersionList = MUtil.URL_VERSIONS;
 
 	public String customSchedulerName;
 
 	public String loadSchedulerSelection() {
 		if( myApplication().scheduler() != null ) {
-			int indexOfScheduler = MObject.LOAD_SCHEDULER_VALUES.indexOf( myApplication().scheduler() );
+			int indexOfScheduler = MUtil.LOAD_SCHEDULER_VALUES.indexOf( myApplication().scheduler() );
 			if( indexOfScheduler != -1 ) {
 				_loadSchedulerSelection = loadSchedulerList.get( indexOfScheduler );
 			}
@@ -447,7 +446,7 @@ public class AppConfigurePage extends AppComponent {
 				}
 			}
 			else {
-				newValue = MObject.LOAD_SCHEDULER_VALUES.get( i );
+				newValue = MUtil.LOAD_SCHEDULER_VALUES.get( i );
 			}
 			myApplication().setScheduler( newValue );
 

@@ -15,10 +15,10 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor._private.model.MInstance;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor._private.model.MSiteConfig;
 import com.webobjects.monitor.application.components.AppDetailPage;
 import com.webobjects.monitor.application.components.ApplicationsPage;
@@ -602,8 +602,8 @@ public class WOTaskdHandler {
 							final MInstance anInstance = siteConfig().instanceWithHostnameAndPort( host, port );
 
 							if( anInstance != null ) {
-								for( int k = 0; k < MObject.INSTANCE_STATES.length; k++ ) {
-									if( MObject.INSTANCE_STATES[k].equals( runningState ) ) {
+								for( int k = 0; k < MUtil.INSTANCE_STATES.length; k++ ) {
+									if( MUtil.INSTANCE_STATES[k].equals( runningState ) ) {
 										anInstance.state = k;
 										break;
 									}

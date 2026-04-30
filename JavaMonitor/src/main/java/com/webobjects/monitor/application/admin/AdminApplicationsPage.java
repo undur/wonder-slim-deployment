@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.webobjects.appserver.WOContext;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor._private.model.MInstance;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor.application.components.AppDetailPage;
 import com.webobjects.monitor.application.components.ApplicationsPage;
 
@@ -175,7 +175,7 @@ public class AdminApplicationsPage extends ApplicationsPage {
 
 	public void forceQuit( List<MInstance> nsarray ) {
 		for( MInstance minstance : nsarray ) {
-			minstance.state = MObject.STOPPING;
+			minstance.state = MUtil.STOPPING;
 			processedInstance( minstance );
 		}
 		sendCommandInstancesToWotaskds( "QUIT" );
@@ -183,8 +183,8 @@ public class AdminApplicationsPage extends ApplicationsPage {
 
 	public void stop( List<MInstance> nsarray ) {
 		for( MInstance minstance : nsarray ) {
-			if( minstance.state == MObject.ALIVE || minstance.state == MObject.STARTING ) {
-				minstance.state = MObject.STOPPING;
+			if( minstance.state == MUtil.ALIVE || minstance.state == MUtil.STARTING ) {
+				minstance.state = MUtil.STOPPING;
 				processedInstance( minstance );
 			}
 		}
@@ -193,8 +193,8 @@ public class AdminApplicationsPage extends ApplicationsPage {
 
 	public void start( List<MInstance> nsarray ) {
 		for( MInstance minstance : nsarray ) {
-			if( minstance.state == MObject.DEAD || minstance.state == MObject.STOPPING || minstance.state == MObject.CRASHING || minstance.state == MObject.UNKNOWN ) {
-				minstance.state = MObject.STARTING;
+			if( minstance.state == MUtil.DEAD || minstance.state == MUtil.STOPPING || minstance.state == MUtil.CRASHING || minstance.state == MUtil.UNKNOWN ) {
+				minstance.state = MUtil.STARTING;
 				processedInstance( minstance );
 			}
 		}

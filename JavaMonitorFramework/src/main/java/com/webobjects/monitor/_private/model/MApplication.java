@@ -658,7 +658,7 @@ public class MApplication extends MObject {
 	public boolean isStopped_M() {
 
 		for( final MInstance instance : _instanceArray ) {
-			if( instance.state != MObject.DEAD ) {
+			if( instance.state != MUtil.DEAD ) {
 				return false;
 			}
 		}

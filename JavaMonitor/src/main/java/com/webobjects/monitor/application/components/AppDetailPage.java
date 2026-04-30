@@ -14,10 +14,10 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver._private.WOProperties;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor._private.model.MInstance;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor.application.MonitorComponent.AppComponent;
 import com.webobjects.monitor.application.components.ConfirmationPage.ConfirmationDelegate;
 import com.webobjects.monitor.application.starter.ApplicationStarter;
@@ -298,11 +298,11 @@ public class AppDetailPage extends AppComponent {
 
 	public WOComponent startInstance() {
 
-		final boolean canBeStarted = (currentInstance.state == MObject.DEAD) || (currentInstance.state == MObject.STOPPING) || (currentInstance.state == MObject.CRASHING) || (currentInstance.state == MObject.UNKNOWN);
+		final boolean canBeStarted = (currentInstance.state == MUtil.DEAD) || (currentInstance.state == MUtil.STOPPING) || (currentInstance.state == MUtil.CRASHING) || (currentInstance.state == MUtil.UNKNOWN);
 
 		if( canBeStarted ) {
 			handler().sendStartInstancesToWotaskds( List.of( currentInstance ), List.of( currentInstance.host() ) );
-			currentInstance.state = MObject.STARTING;
+			currentInstance.state = MUtil.STARTING;
 		}
 
 		return newDetailPage();
@@ -310,11 +310,11 @@ public class AppDetailPage extends AppComponent {
 
 	public WOComponent stopInstance() {
 
-		final boolean canBeStopped = (currentInstance.state == MObject.ALIVE) || (currentInstance.state == MObject.STARTING);
+		final boolean canBeStopped = (currentInstance.state == MUtil.ALIVE) || (currentInstance.state == MUtil.STARTING);
 
 		if( canBeStopped ) {
 			handler().sendStopInstancesToWotaskds( List.of( currentInstance ), List.of( currentInstance.host() ) );
-			currentInstance.state = MObject.STOPPING;
+			currentInstance.state = MUtil.STOPPING;
 		}
 
 		return newDetailPage();
@@ -397,7 +397,7 @@ public class AppDetailPage extends AppComponent {
 		final List<MInstance> instances = new ArrayList<>();
 
 		for( MInstance anInstance : possibleInstances ) {
-			if( (anInstance.state == MObject.DEAD) || (anInstance.state == MObject.STOPPING) || (anInstance.state == MObject.CRASHING) || (anInstance.state == MObject.UNKNOWN) ) {
+			if( (anInstance.state == MUtil.DEAD) || (anInstance.state == MUtil.STOPPING) || (anInstance.state == MUtil.CRASHING) || (anInstance.state == MUtil.UNKNOWN) ) {
 				instances.add( anInstance );
 			}
 		}
@@ -406,8 +406,8 @@ public class AppDetailPage extends AppComponent {
 			handler().sendStartInstancesToWotaskds( instances, myApplication().hostArray() );
 
 			for( MInstance anInstance : instances ) {
-				if( anInstance.state != MObject.ALIVE ) {
-					anInstance.state = MObject.STARTING;
+				if( anInstance.state != MUtil.ALIVE ) {
+					anInstance.state = MUtil.STARTING;
 				}
 			}
 		}
@@ -430,8 +430,8 @@ public class AppDetailPage extends AppComponent {
 						}
 
 						for( final MInstance instance : instances ) {
-							if( instance.state != MObject.DEAD ) {
-								instance.state = MObject.STOPPING;
+							if( instance.state != MUtil.DEAD ) {
+								instance.state = MUtil.STOPPING;
 							}
 						}
 					}
@@ -587,22 +587,22 @@ public class AppDetailPage extends AppComponent {
 
 	public String instanceStatusImage() {
 		return switch( currentInstance.state ) {
-			case MObject.DEAD -> "PowerSwitch_Off.gif";
-			case MObject.ALIVE -> "PowerSwitch_On.gif";
-			case MObject.STOPPING -> "Turning_Off.gif";
-			case MObject.CRASHING -> "Turning_Off.gif";
-			case MObject.STARTING -> "Turning_On.gif";
+			case MUtil.DEAD -> "PowerSwitch_Off.gif";
+			case MUtil.ALIVE -> "PowerSwitch_On.gif";
+			case MUtil.STOPPING -> "Turning_Off.gif";
+			case MUtil.CRASHING -> "Turning_Off.gif";
+			case MUtil.STARTING -> "Turning_On.gif";
 			default -> throw new IllegalStateException( "Unknown instance state: " + currentInstance.state );
 		};
 	}
 
 	public String instanceStatusImageText() {
 		return switch( currentInstance.state ) {
-			case MObject.DEAD -> "OFF";
-			case MObject.ALIVE -> "ON";
-			case MObject.STOPPING -> "STOPPING";
-			case MObject.CRASHING -> "CRASHING";
-			case MObject.STARTING -> "STARTING";
+			case MUtil.DEAD -> "OFF";
+			case MUtil.ALIVE -> "ON";
+			case MUtil.STOPPING -> "STOPPING";
+			case MUtil.CRASHING -> "CRASHING";
+			case MUtil.STARTING -> "STARTING";
 			default -> throw new IllegalStateException( "Unknown instance state: " + currentInstance.state );
 		};
 	}

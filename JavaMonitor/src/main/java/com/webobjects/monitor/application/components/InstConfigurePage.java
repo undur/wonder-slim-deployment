@@ -16,10 +16,10 @@ import java.util.List;
  */
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor._private.model.MInstance;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor.application.MonitorComponent.InstComponent;
 
 public class InstConfigurePage extends InstComponent {
@@ -65,7 +65,7 @@ public class InstConfigurePage extends InstComponent {
 	public void setPort( Integer value ) {
 		if( value != null ) {
 			if( !value.equals( myInstance().port() ) ) {
-				if( myInstance().state != MObject.DEAD ) {
+				if( myInstance().state != MUtil.DEAD ) {
 					session().addErrorIfAbsent( "This instance is still running; unable to change port" );
 					return;
 				}

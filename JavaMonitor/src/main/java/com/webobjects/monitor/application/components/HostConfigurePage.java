@@ -16,8 +16,8 @@ import java.util.List;
  */
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.model.MHost;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor.application.MonitorComponent;
 
 import er.extensions.appserver.ERXApplication;
@@ -25,7 +25,7 @@ import er.extensions.appserver.ERXApplication;
 public class HostConfigurePage extends MonitorComponent {
 
 	private String _hostTypeSelection;
-	public List<String> hostTypeList = MObject.HOST_TYPES;
+	public List<String> hostTypeList = MUtil.HOST_TYPES;
 	private MHost _myHost;
 
 	public HostConfigurePage( WOContext aWocontext ) {

@@ -43,12 +43,12 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.monitor._private.IInstanceController;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor._private.model.MInstance;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
 import er.extensions.foundation.ERXProperties;
@@ -292,7 +292,7 @@ public class InstanceController implements IInstanceController {
 				for( int i = 0; i < instArrayCount; i++ ) {
 					MInstance anInst = instArray.get( i );
 
-					if( (!anInst.isRunning_W()) && (anInst.state != MObject.STARTING) &&
+					if( (!anInst.isRunning_W()) && (anInst.state != MUtil.STARTING) &&
 							((anInst.isAutoRecovering()) || (anInst.isScheduled())) ) {
 						anInst.setRefusingNewSessions( false );
 						startInstance( anInst );
@@ -378,7 +378,7 @@ public class InstanceController implements IInstanceController {
 		for( int i = 0; i < instArrayCount; i++ ) {
 			MInstance anInst = instArray.get( i );
 
-			if( (anInst.isLocal_W()) && (!anInst.isRunning_W()) && (anInst.state != MObject.STARTING) &&
+			if( (anInst.isLocal_W()) && (!anInst.isRunning_W()) && (anInst.state != MUtil.STARTING) &&
 					((anInst.isAutoRecovering()) || (anInst.isScheduled())) ) {
 				anInst.setRefusingNewSessions( false );
 				startInstance( anInst );
@@ -464,7 +464,7 @@ public class InstanceController implements IInstanceController {
 		if( anInstance.isRunning_W() )
 			//            return _hostName + ": " + anInstance.displayName() + " is already running";
 			return null;
-		if( anInstance.state == MObject.STARTING )
+		if( anInstance.state == MUtil.STARTING )
 			//            return _hostName + ": " + anInstance.displayName() + " is currently starting";
 			return null;
 		if( _testConnection( anInstance ) )
@@ -581,7 +581,7 @@ public class InstanceController implements IInstanceController {
 	private static ResponseWrapper sendInstanceRequest( final String hostName, final MInstance anInstance, final Map<String,Object> xmlDict ) throws MonitorException {
 
 		final String requestContentXML = new FoundationCoder().encodeRootObjectForKey( xmlDict, "instanceRequest" );
-		final String urlString = MObject.ADMIN_ACTION_STRING_PREFIX + anInstance.applicationName() + MObject.ADMIN_ACTION_STRING_POSTFIX;
+		final String urlString = MUtil.ADMIN_ACTION_STRING_PREFIX + anInstance.applicationName() + MUtil.ADMIN_ACTION_STRING_POSTFIX;
 
 		// FIXME: We should not have to create this here...
 		ResponseWrapper responseWrapper = null;

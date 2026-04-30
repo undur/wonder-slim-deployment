@@ -31,11 +31,11 @@ import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.foundation._NSUtilities;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor._private.model.MInstance;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
 import x.FLog;
@@ -578,7 +578,7 @@ public class DirectAction extends WODirectAction {
 						id = anInstance.id();
 						host = anInstance.hostName();
 						port = anInstance.port();
-						runningState = MObject.INSTANCE_STATES[anInstance.state];
+						runningState = MUtil.INSTANCE_STATES[anInstance.state];
 						statistics = anInstance.statistics();
 						refusingNewSessions = (anInstance.isRefusingNewSessions()) ? Boolean.TRUE : Boolean.FALSE;
 						deaths = anInstance.deaths();

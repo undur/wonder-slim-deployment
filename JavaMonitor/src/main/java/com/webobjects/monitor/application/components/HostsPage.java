@@ -9,9 +9,9 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MHost;
-import com.webobjects.monitor._private.model.MObject;
 import com.webobjects.monitor.application.MonitorComponent;
 import com.webobjects.monitor.application.components.ConfirmationPage.ConfirmationDelegate;
 import com.webobjects.monitor.util.JMUtil;
@@ -21,7 +21,7 @@ public class HostsPage extends MonitorComponent {
 	public MHost currentHost;
 	public String newHostName;
 	public String hostTypeSelection = "Unix";
-	public List<String> hostTypeList = MObject.HOST_TYPES;
+	public List<String> hostTypeList = MUtil.HOST_TYPES;
 
 	public HostsPage( WOContext aWocontext ) {
 		super( aWocontext );
