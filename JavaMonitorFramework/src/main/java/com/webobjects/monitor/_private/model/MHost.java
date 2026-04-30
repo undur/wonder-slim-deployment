@@ -34,6 +34,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSProperties;
+import com.webobjects.monitor._private.MUtil;
 
 import x.FoundationCoder;
 import x.ResponseWrapper;
@@ -115,7 +116,7 @@ public class MHost extends MObject {
 	}
 
 	public void setOsType( String value ) {
-		values.takeValueForKey( MObject.validatedHostType( value ), "type" );
+		values.takeValueForKey( MUtil.validatedHostType( value ), "type" );
 		_siteConfig.dataHasChanged();
 	}
 

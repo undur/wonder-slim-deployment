@@ -46,6 +46,7 @@ import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.IInstanceController;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
 
 import x.FLog;
@@ -130,7 +131,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setViewRefreshRate( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "viewRefreshRate" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "viewRefreshRate" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -139,7 +140,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setSequence( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "sequence" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "sequence" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -148,7 +149,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setRetries( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "retries" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "retries" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -166,7 +167,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setDormant( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "dormant" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "dormant" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -184,7 +185,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setSendTimeout( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "sendTimeout" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "sendTimeout" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -193,7 +194,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setRecvTimeout( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "recvTimeout" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "recvTimeout" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -202,7 +203,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setCnctTimeout( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "cnctTimeout" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "cnctTimeout" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -211,7 +212,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setSendBufSize( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "sendBufSize" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "sendBufSize" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -220,7 +221,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setRecvBufSize( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "recvBufSize" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "recvBufSize" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -229,7 +230,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setPoolsize( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "poolsize" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "poolsize" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -238,7 +239,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public void setUrlVersion( Integer value ) {
-		values.takeValueForKey( MObject.validatedUrlVersion( value ), "urlVersion" );
+		values.takeValueForKey( MUtil.validatedUrlVersion( value ), "urlVersion" );
 		_siteConfig.dataHasChanged();
 	}
 

@@ -18,6 +18,7 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
+import com.webobjects.monitor._private.MUtil;
 
 public class MApplication extends MObject {
 
@@ -101,7 +102,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setStartingPort( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "startingPort" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "startingPort" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -110,7 +111,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setTimeForStartup( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "timeForStartup" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "timeForStartup" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -137,7 +138,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setMinimumActiveSessionsCount( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "minimumActiveSessionsCount" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "minimumActiveSessionsCount" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -191,7 +192,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setAdaptorThreads( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "adaptorThreads" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "adaptorThreads" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -200,7 +201,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setListenQueueSize( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "listenQueueSize" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "listenQueueSize" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -209,7 +210,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setAdaptorThreadsMin( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "adaptorThreadsMin" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "adaptorThreadsMin" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -218,7 +219,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setAdaptorThreadsMax( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "adaptorThreadsMax" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "adaptorThreadsMax" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -236,7 +237,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setSessionTimeOut( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "sessionTimeOut" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "sessionTimeOut" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -299,7 +300,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setLifebeatInterval( Integer value ) {
-		values.takeValueForKey( MObject.validatedLifebeatInterval( value ), "lifebeatInterval" );
+		values.takeValueForKey( MUtil.validatedLifebeatInterval( value ), "lifebeatInterval" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -335,7 +336,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setRetries( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "retries" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "retries" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -353,7 +354,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setDormant( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "dormant" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "dormant" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -371,7 +372,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setSendTimeout( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "sendTimeout" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "sendTimeout" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -380,7 +381,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setRecvTimeout( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "recvTimeout" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "recvTimeout" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -389,7 +390,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setCnctTimeout( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "cnctTimeout" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "cnctTimeout" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -398,7 +399,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setSendBufSize( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "sendBufSize" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "sendBufSize" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -407,7 +408,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setRecvBufSize( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "recvBufSize" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "recvBufSize" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -416,7 +417,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setPoolsize( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "poolsize" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "poolsize" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -425,7 +426,7 @@ public class MApplication extends MObject {
 	}
 
 	public void setUrlVersion( Integer value ) {
-		values.takeValueForKey( MObject.validatedUrlVersion( value ), "urlVersion" );
+		values.takeValueForKey( MUtil.validatedUrlVersion( value ), "urlVersion" );
 		_siteConfig.dataHasChanged();
 	}
 

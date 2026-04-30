@@ -29,6 +29,7 @@ import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSTimeZone;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
+import com.webobjects.monitor._private.MUtil;
 
 import x.FLog;
 
@@ -129,7 +130,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setId( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "id" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "id" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -138,7 +139,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setPort( Integer value ) {
-		Integer valVal = MObject.validatedInteger( value );
+		Integer valVal = MUtil.validatedInteger( value );
 		if( !valVal.equals( port() ) ) {
 			setOldport( port() );
 			values.takeValueForKey( valVal, "port" );
@@ -169,7 +170,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setMinimumActiveSessionsCount( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "minimumActiveSessionsCount" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "minimumActiveSessionsCount" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -205,7 +206,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setOutputPath( String value ) {
-		values.takeValueForKey( MObject.validatedOutputPath( value ), "outputPath" );
+		values.takeValueForKey( MUtil.validatedOutputPath( value ), "outputPath" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -223,7 +224,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setLifebeatInterval( Integer value ) {
-		values.takeValueForKey( MObject.validatedLifebeatInterval( value ), "lifebeatInterval" );
+		values.takeValueForKey( MUtil.validatedLifebeatInterval( value ), "lifebeatInterval" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -250,7 +251,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setSchedulingType( String value ) {
-		values.takeValueForKey( MObject.validatedSchedulingType( value ), "schedulingType" );
+		values.takeValueForKey( MUtil.validatedSchedulingType( value ), "schedulingType" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -259,7 +260,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setSchedulingHourlyStartTime( Integer value ) {
-		values.takeValueForKey( MObject.validatedSchedulingStartTime( value ), "schedulingHourlyStartTime" );
+		values.takeValueForKey( MUtil.validatedSchedulingStartTime( value ), "schedulingHourlyStartTime" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -268,7 +269,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setSchedulingDailyStartTime( Integer value ) {
-		values.takeValueForKey( MObject.validatedSchedulingStartTime( value ), "schedulingDailyStartTime" );
+		values.takeValueForKey( MUtil.validatedSchedulingStartTime( value ), "schedulingDailyStartTime" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -277,7 +278,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setSchedulingWeeklyStartTime( Integer value ) {
-		values.takeValueForKey( MObject.validatedSchedulingStartTime( value ), "schedulingWeeklyStartTime" );
+		values.takeValueForKey( MUtil.validatedSchedulingStartTime( value ), "schedulingWeeklyStartTime" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -286,7 +287,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setSchedulingStartDay( Integer value ) {
-		values.takeValueForKey( MObject.validatedSchedulingStartDay( value ), "schedulingStartDay" );
+		values.takeValueForKey( MUtil.validatedSchedulingStartDay( value ), "schedulingStartDay" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -295,7 +296,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setSchedulingInterval( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "schedulingInterval" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "schedulingInterval" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -313,7 +314,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setSendTimeout( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "sendTimeout" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "sendTimeout" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -322,7 +323,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setRecvTimeout( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "recvTimeout" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "recvTimeout" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -331,7 +332,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setCnctTimeout( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "cnctTimeout" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "cnctTimeout" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -340,7 +341,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setSendBufSize( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "sendBufSize" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "sendBufSize" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -349,7 +350,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setRecvBufSize( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "recvBufSize" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "recvBufSize" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -366,7 +367,7 @@ public class MInstance extends MObject {
 	 */
 	@Deprecated
 	public void setOldport( Integer value ) {
-		values.takeValueForKey( MObject.validatedInteger( value ), "oldport" );
+		values.takeValueForKey( MUtil.validatedInteger( value ), "oldport" );
 		_siteConfig.dataHasChanged();
 	}
 
@@ -852,7 +853,7 @@ public class MInstance extends MObject {
 		anArray.add( "-WODebuggingEnabled" );
 		anArray.add( booleanAsYNString( debuggingEnabled() ) );
 		anArray.add( "-WOOutputPath" );
-		anArray.add( MObject.validatedOutputPath( outputPath() ) );
+		anArray.add( MUtil.validatedOutputPath( outputPath() ) );
 		anArray.add( "-WOAutoOpenInBrowser" );
 		anArray.add( booleanAsYNString( autoOpenInBrowser() ) );
 		anArray.add( "-WOAutoOpenClientApplication" );

@@ -16,6 +16,7 @@ import java.util.List;
  */
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MInstance;
@@ -346,35 +347,35 @@ public class AppConfigurePage extends AppComponent {
 	public List<Integer> schedulingIntervalList = MObject.SCHEDULING_INTERVALS;
 
 	public String weekSelection() {
-		return MObject.morphedSchedulingStartDay( currentScheduledInstance.schedulingStartDay() );
+		return MUtil.morphedSchedulingStartDay( currentScheduledInstance.schedulingStartDay() );
 	}
 
 	public void setWeekSelection( String value ) {
-		currentScheduledInstance.setSchedulingStartDay( MObject.morphedSchedulingStartDay( value ) );
+		currentScheduledInstance.setSchedulingStartDay( MUtil.morphedSchedulingStartDay( value ) );
 	}
 
 	public String timeHourlySelection() {
-		return MObject.morphedSchedulingStartTime( currentScheduledInstance.schedulingHourlyStartTime() );
+		return MUtil.morphedSchedulingStartTime( currentScheduledInstance.schedulingHourlyStartTime() );
 	}
 
 	public void setTimeHourlySelection( String value ) {
-		currentScheduledInstance.setSchedulingHourlyStartTime( MObject.morphedSchedulingStartTime( value ) );
+		currentScheduledInstance.setSchedulingHourlyStartTime( MUtil.morphedSchedulingStartTime( value ) );
 	}
 
 	public String timeDailySelection() {
-		return MObject.morphedSchedulingStartTime( currentScheduledInstance.schedulingDailyStartTime() );
+		return MUtil.morphedSchedulingStartTime( currentScheduledInstance.schedulingDailyStartTime() );
 	}
 
 	public void setTimeDailySelection( String value ) {
-		currentScheduledInstance.setSchedulingDailyStartTime( MObject.morphedSchedulingStartTime( value ) );
+		currentScheduledInstance.setSchedulingDailyStartTime( MUtil.morphedSchedulingStartTime( value ) );
 	}
 
 	public String timeWeeklySelection() {
-		return MObject.morphedSchedulingStartTime( currentScheduledInstance.schedulingWeeklyStartTime() );
+		return MUtil.morphedSchedulingStartTime( currentScheduledInstance.schedulingWeeklyStartTime() );
 	}
 
 	public void setTimeWeeklySelection( String value ) {
-		currentScheduledInstance.setSchedulingWeeklyStartTime( MObject.morphedSchedulingStartTime( value ) );
+		currentScheduledInstance.setSchedulingWeeklyStartTime( MUtil.morphedSchedulingStartTime( value ) );
 	}
 
 	public WOComponent schedulingUpdateClicked() {
