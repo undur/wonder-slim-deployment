@@ -15,8 +15,6 @@ package com.webobjects.monitor.application;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation._NSUtilities;
-import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MSiteConfig;
 import com.webobjects.monitor.application.admin.AdminAction;
 import com.webobjects.monitor.util.WOTaskdHandler;
@@ -30,7 +28,6 @@ public class Application extends ERXApplication {
 	}
 
 	public Application() {
-		_NSUtilities.setClassForName( MApplication.class, "MApplication" );
 
 		// FIXME: I know.
 		if( "hugi".equals( System.getProperty( "user.name" ) ) ) {
