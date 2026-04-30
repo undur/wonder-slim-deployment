@@ -145,17 +145,6 @@ public class Application extends ERXApplication {
 
 		_lock = new _NSCollectionReaderWriterLock();
 
-		String dd = System.getProperties().getProperty( "_DeploymentDebugging" );
-		if( dd != null ) {
-			FLog.debug.setIsVerbose( true );
-			FLog.out.setIsVerbose( true );
-			FLog.err.setIsVerbose( true );
-			FLog.allowDebugLoggingForGroups( FLog.DebugGroupDeployment );
-			if( !FLog.debugLoggingAllowedForLevel( FLog.DebugLevelInformational ) ) {
-				FLog.debug.setAllowedDebugLevel( FLog.DebugLevelInformational );
-			}
-		}
-
 		com.webobjects.appserver._private.WOHttpIO._alwaysAppendContentLength = false;
 
 		// Setting the ports
@@ -376,8 +365,7 @@ public class Application extends ERXApplication {
 
 	// creates and starts the ListenerThread inner class
 	public void createRequestListenerThread() {
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "Detaching request listen thread" );
+		FLog.debug.appendln( "Detaching request listen thread" );
 		listenThread = new Application.ListenThread();
 		listenThread.start();
 	}
@@ -469,16 +457,13 @@ public class Application extends ERXApplication {
 		public void closeRequestSocket() {
 			try {
 				socket.leaveGroup( address );
-				if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) )
-					FLog.debug.appendln( "Leaving multicast group" );
+				FLog.debug.appendln( "Leaving multicast group" );
 			}
 			catch( IOException exception ) {
-				if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelCritical, FLog.DebugGroupDeployment ) )
-					FLog.debug.appendln( "Error leaving multicast group " + exception );
+				FLog.debug.appendln( "Error leaving multicast group " + exception );
 				return;
 			}
-			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) )
-				FLog.debug.appendln( "Closing request listen socket" );
+			FLog.debug.appendln( "Closing request listen socket" );
 			socket.close();
 		}
 
@@ -542,8 +527,7 @@ public class Application extends ERXApplication {
 							String key = incomingPacket.getAddress() + ":" + incomingPacket.getPort();
 
 							siteConfig().globalErrorDictionary.takeValueForKey( (myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol."), key );
-							if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelCritical, FLog.DebugGroupDeployment ) )
-								FLog.debug.appendln( myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol." );
+							FLog.debug.appendln( myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol." );
 						}
 					}
 					catch( IOException localException ) {
@@ -557,8 +541,7 @@ public class Application extends ERXApplication {
 			}
 			catch( Throwable t ) {
 				FLog.err.appendln( "Listen thread exiting with exception: " + t );
-				if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelCritical, FLog.DebugGroupDeployment ) )
-					FLog.debug.appendln( t );
+				FLog.debug.appendln( t );
 			}
 			System.exit( 1 );
 		}

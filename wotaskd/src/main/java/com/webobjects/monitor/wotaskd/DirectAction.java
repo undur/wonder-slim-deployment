@@ -100,8 +100,7 @@ public class DirectAction extends WODirectAction {
 		// Aren't allowed to call this through the Web server.
 		if( aRequest.isUsingWebServer() ) {
 			FLog.debug.appendln( "Attempt to call DirectAction: monitorRequestAction through Web server" );
-			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelCritical, FLog.DebugGroupDeployment ) )
-				FLog.debug.appendln( aRequest.contentString() );
+			FLog.debug.appendln( aRequest.contentString() );
 			aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 			aResponse.appendContentString( _accessDenied );
 			return aResponse;
@@ -129,16 +128,13 @@ public class DirectAction extends WODirectAction {
 		}
 		catch( Exception e ) {
 			FLog.err.appendln( "Wotaskd monitorRequestAction: Error parsing request" );
-			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) )
-				FLog.debug.appendln( "Wotaskd monitorRequestAction: " + aRequest.contentString() );
+			FLog.debug.appendln( "Wotaskd monitorRequestAction: " + aRequest.contentString() );
 			aResponse.appendContentString( _invalidXML );
 			return aResponse;
 		}
 
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "\n@@@@@ monitorRequestAction received request from Monitor" );
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "@@@@@ monitorRequestAction requestDict: " + requestDict + "\n" );
+		FLog.debug.appendln( "\n@@@@@ monitorRequestAction received request from Monitor" );
+		FLog.debug.appendln( "@@@@@ monitorRequestAction requestDict: " + requestDict + "\n" );
 
 		// These 2 get used for everything else - the global response object and the global error object.
 		NSMutableDictionary monitorResponse = new NSMutableDictionary();
@@ -616,10 +612,8 @@ public class DirectAction extends WODirectAction {
 			monitorResponse.takeValueForKey( errorResponse, "errorResponse" );
 		}
 
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "@@@@@ monitorRequestAction returning response to Monitor" );
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "@@@@@ monitorRequestAction responseDict: " + monitorResponse + "\n" );
+		FLog.debug.appendln( "@@@@@ monitorRequestAction returning response to Monitor" );
+		FLog.debug.appendln( "@@@@@ monitorRequestAction responseDict: " + monitorResponse + "\n" );
 		aResponse.appendContentString( (new FoundationCoder()).encodeRootObjectForKey( monitorResponse, "monitorResponse" ) );
 		return aResponse;
 	}
@@ -645,8 +639,7 @@ public class DirectAction extends WODirectAction {
 					}
 					catch( MonitorException me ) {
 						MInstance badInstance = ((MInstance)instanceArray.objectAtIndex( j ));
-						if( (!badInstance.isRunning_W()) &&
-								(FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelCritical, FLog.DebugGroupDeployment )) ) {
+						if( !badInstance.isRunning_W() ) {
 							FLog.debug.appendln( "Exception getting Statistics for instance: " + ((MInstance)instanceArray.objectAtIndex( j )).displayName() );
 						}
 						//if we get an exception and the instance state is running, that could mean the app may have been too 
@@ -964,8 +957,7 @@ public class DirectAction extends WODirectAction {
 		aResponse.appendContentString( xml );
 		aResponse.setHeader( "text/xml", "content-type" );
 		aResponse.setHeader( aFormat.format( new NSTimestamp() ), "Last-Modified" );
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "woConfigAction returned: " + xml );
+		FLog.debug.appendln( "woConfigAction returned: " + xml );
 
 		return aResponse;
 	}

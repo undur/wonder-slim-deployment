@@ -996,14 +996,10 @@ public class MInstance extends MObject {
 		final long halfHourAsSeconds = 1800;
 
 		if( temp < halfHourAsSeconds ) {
-			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) ) {
-				FLog.debug.appendln( "nearNextScheduledShutdown TRUE" );
-			}
+			FLog.debug.appendln( "nearNextScheduledShutdown TRUE" );
 			return true;
 		}
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) ) {
-			FLog.debug.appendln( "nearNextScheduledShutdown FALSE" );
-		}
+		FLog.debug.appendln( "nearNextScheduledShutdown FALSE" );
 		return false;
 	}
 
@@ -1097,9 +1093,7 @@ public class MInstance extends MObject {
 			setNextScheduledShutdown( new NSTimestamp( currentYear, currentMonth, currentDayOfMonth, startTime, 0, 0, currentTimeZone ) );
 
 		}
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelInformational, FLog.DebugGroupDeployment ) ) {
-			FLog.debug.appendln( "calculateNextScheduledShutdown: " + _nextScheduledShutdown );
-		}
+		FLog.debug.appendln( "calculateNextScheduledShutdown: " + _nextScheduledShutdown );
 	}
 
 	public void setRefusingNewSessions( boolean isRefusingNewSessions ) {

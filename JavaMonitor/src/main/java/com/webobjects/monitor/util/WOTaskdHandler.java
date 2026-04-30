@@ -329,9 +329,7 @@ public class WOTaskdHandler {
 			final ResponseWrapper[] responses = collector.sendRequest( monitorRequest, wotaskdArray, false );
 			final NSDictionary[] responseDicts = generateResponseDictionaries( responses );
 
-			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
-				FLog.debug.appendln( "OUT: " + NSPropertyListSerialization.stringFromPropertyList( monitorRequest ) + "\n\nIN: " + NSPropertyListSerialization.stringFromPropertyList( new NSArray( responseDicts ) ) );
-			}
+			FLog.debug.appendln( "OUT: " + NSPropertyListSerialization.stringFromPropertyList( monitorRequest ) + "\n\nIN: " + NSPropertyListSerialization.stringFromPropertyList( new NSArray( responseDicts ) ) );
 
 			collector.getCommandErrors( responseDicts );
 		}
@@ -457,9 +455,7 @@ public class WOTaskdHandler {
 			}
 		}
 
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
-			FLog.debug.appendln( "##### getUpdateErrors: " + errorArray );
-		}
+		FLog.debug.appendln( "##### getUpdateErrors: " + errorArray );
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
 	}
@@ -508,9 +504,7 @@ public class WOTaskdHandler {
 			}
 		}
 
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
-			FLog.debug.appendln( "##### getCommandErrors: " + errorArray );
-		}
+		FLog.debug.appendln( "##### getCommandErrors: " + errorArray );
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
 		return errorArray;
@@ -632,9 +626,7 @@ public class WOTaskdHandler {
 				}
 			}
 
-			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
-				FLog.debug.appendln( "##### pageWithName(AppDetailPage) errors: " + errorArray );
-			}
+			FLog.debug.appendln( "##### pageWithName(AppDetailPage) errors: " + errorArray );
 
 			errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
 		}
@@ -676,9 +668,7 @@ public class WOTaskdHandler {
 			}
 		}
 
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
-			FLog.debug.appendln( "##### pageWithName(HostsPage) errors: " + errorArray );
-		}
+		FLog.debug.appendln( "##### pageWithName(HostsPage) errors: " + errorArray );
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
 	}
@@ -728,9 +718,7 @@ public class WOTaskdHandler {
 			}
 		}
 
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
-			FLog.debug.appendln( "##### pageWithName(ApplicationsPage) errors: " + errorArray );
-		}
+		FLog.debug.appendln( "##### pageWithName(ApplicationsPage) errors: " + errorArray );
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
 	}

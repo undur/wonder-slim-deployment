@@ -6,9 +6,6 @@
 
 #WOHost=localhost
 
-# Uncomment this to get some basic logging (like lifebeats from instances), probably to the file: /Library/WebObjects/Logs/wotaskd.log
-#_DeploymentDebugging=true
-
 WOAutoOpenInBrowser=false
 WODebuggingEnabled=false
 WODirectConnectEnabled=true

@@ -281,8 +281,7 @@ public class InstanceController implements IInstanceController {
 
 	/********** Timer Targets **********/
 	public void _checkAutoRecover() {
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "_checkAutoRecover START" );
+		FLog.debug.appendln( "_checkAutoRecover START" );
 		theApplication._lock.startReading();
 		try {
 			MHost theHost = theApplication.siteConfig().localHost();
@@ -305,14 +304,12 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.endReading();
 		}
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "_checkAutoRecover STOP" );
+		FLog.debug.appendln( "_checkAutoRecover STOP" );
 	}
 
 	// This only runs once, on startup - then it starts the regular timer
 	public void _checkAutoRecoverStartup() {
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "_checkAutoRecoverStartup START" );
+		FLog.debug.appendln( "_checkAutoRecoverStartup START" );
 		theApplication._lock.startReading();
 		try {
 			MSiteConfig aConfig = theApplication.siteConfig();
@@ -355,8 +352,7 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.endReading();
 		}
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "_checkAutoRecoverStartup STOP" );
+		FLog.debug.appendln( "_checkAutoRecoverStartup STOP" );
 	}
 
 	private void _autoRecoverApplication( MApplication anApplication ) {
@@ -399,8 +395,7 @@ public class InstanceController implements IInstanceController {
 	}
 
 	public void _checkSchedules() {
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "_checkSchedules START" );
+		FLog.debug.appendln( "_checkSchedules START" );
 		theApplication._lock.startReading();
 		try {
 
@@ -454,8 +449,7 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.endReading();
 		}
-		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) )
-			FLog.debug.appendln( "_checkSchedules STOP" );
+		FLog.debug.appendln( "_checkSchedules STOP" );
 	}
 
 	/********** Controlling Instances **********/
@@ -504,8 +498,7 @@ public class InstanceController implements IInstanceController {
 		}
 
 		try {
-			if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelCritical, FLog.DebugGroupDeployment ) )
-				FLog.debug.appendln( "Starting Instance: " + aLaunchPath );
+			FLog.debug.appendln( "Starting Instance: " + aLaunchPath );
 			Runtime.getRuntime().exec( aLaunchPath );
 		}
 		catch( IOException ioe ) {

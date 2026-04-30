@@ -32,7 +32,6 @@ public class Application extends ERXApplication {
 
 	public Application() {
 		_NSUtilities.setClassForName( MApplication.class, "MApplication" );
-		initLoggingForDeploymentDebugging();
 
 		// FIXME: I know.
 		if( "hugi".equals( System.getProperty( "user.name" ) ) ) {
@@ -53,18 +52,6 @@ public class Application extends ERXApplication {
 		}, "admin" );
 
 		setAllowsConcurrentRequestHandling( true );
-	}
-
-	private void initLoggingForDeploymentDebugging() {
-		String dd = System.getProperties().getProperty( "_DeploymentDebugging" );
-
-		if( dd != null ) {
-			FLog.debug.setIsVerbose( true );
-			FLog.out.setIsVerbose( true );
-			FLog.err.setIsVerbose( true );
-			FLog.allowDebugLoggingForGroups( FLog.DebugGroupDeployment );
-			FLog.debug.setAllowedDebugLevel( FLog.DebugLevelDetailed );
-		}
 	}
 
 	@Deprecated
