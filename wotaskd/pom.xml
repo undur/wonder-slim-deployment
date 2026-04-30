@@ -15,8 +15,8 @@
 		<webobjects.group>com.webobjects</webobjects.group>
 		<webobjects.version>5.4.3</webobjects.version>
 
-		<wonder.core.group>wonder.core</wonder.core.group>
-		<wonder.version>8.0.0.slim-SNAPSHOT</wonder.version>
+		<wonder.group>is.rebbi.slim</wonder.group>
+		<wonder.version>8.0.0-SNAPSHOT</wonder.version>
 	</properties>
 
 	<build>
@@ -33,12 +33,12 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>${wonder.core.group}</groupId>
+			<groupId>${wonder.group}</groupId>
 			<artifactId>ERExtensions</artifactId>
 			<version>${wonder.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>${wonder.core.group}</groupId>
+			<groupId>${wonder.group}</groupId>
 			<artifactId>ERLoggingReload4j</artifactId>
 			<version>${wonder.version}</version>
 		</dependency>
