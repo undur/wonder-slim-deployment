@@ -991,9 +991,9 @@ public class MSiteConfig extends MObject {
 
 						anInst.extractAdaptorValuesFromApplication();
 
-						final Integer id = (Integer)anInst.values.valueForKey( "id" );
-						final Integer port = (Integer)anInst.values.valueForKey( "port" );
-						final String host = (String)anInst.values.valueForKey( "hostName" );
+						final Integer id = anInst.id();
+						final Integer port = anInst.port();
+						final String host = anInst.hostName();
 						final Integer sendTimeout = (Integer)anInst.adaptorValues.get( "sendTimeout" );
 						final Integer recvTimeout = (Integer)anInst.adaptorValues.get( "recvTimeout" );
 						final Integer cnctTimeout = (Integer)anInst.adaptorValues.get( "cnctTimeout" );

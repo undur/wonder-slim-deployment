@@ -396,45 +396,47 @@ public class MInstance extends MObject {
 	}
 
 	public void _takePortFromApplication() {
-		NSDictionary appValues = _application.values;
-		MHost aHost = _host;
+		final MHost aHost = _host;
 
-		Integer appPort = (Integer)appValues.valueForKey( "startingPort" );
+		final Integer appPort = _application.startingPort();
+
 		if( (port() == null) || ((port() != null) && (port().intValue() < appPort.intValue())) ) {
 			setPort( aHost.nextAvailablePort( appPort ) );
 		}
 	}
 
 	public void _takePathFromApplication() {
-		NSDictionary appValues = _application.values;
-		MHost aHost = _host;
+		final MHost aHost = _host;
 
 		if( aHost.osType().equals( "UNIX" ) ) {
-			values.takeValueForKey( appValues.valueForKey( "unixPath" ), "path" );
+			values.takeValueForKey( _application.unixPath(), "path" );
 		}
 		else if( aHost.osType().equals( "WINDOWS" ) ) {
-			values.takeValueForKey( appValues.valueForKey( "winPath" ), "path" );
+			values.takeValueForKey( _application.winPath(), "path" );
 		}
 		else if( aHost.osType().equals( "MACOSX" ) ) {
-			values.takeValueForKey( appValues.valueForKey( "macPath" ), "path" );
+			values.takeValueForKey( _application.macPath(), "path" );
 		}
 	}
 
 	public void _takeOutputPathFromApplication() {
-		NSDictionary appValues = _application.values;
-		MHost aHost = _host;
+		final MHost aHost = _host;
 
 		if( aHost.osType().equals( "UNIX" ) ) {
-			values.takeValueForKey( generateOutputPath( (String)appValues.valueForKey( "unixOutputPath" ) ), "outputPath" );
+			values.takeValueForKey( generateOutputPath( _application.unixOutputPath() ), "outputPath" );
 		}
 		else if( aHost.osType().equals( "WINDOWS" ) ) {
-			values.takeValueForKey( generateOutputPath( (String)appValues.valueForKey( "winOutputPath" ) ), "outputPath" );
+			values.takeValueForKey( generateOutputPath( _application.winOutputPath() ), "outputPath" );
 		}
 		else if( aHost.osType().equals( "MACOSX" ) ) {
-			values.takeValueForKey( generateOutputPath( (String)appValues.valueForKey( "macOutputPath" ) ), "outputPath" );
+			values.takeValueForKey( generateOutputPath( _application.macOutputPath() ), "outputPath" );
 		}
 	}
 
+	/**
+	 * FIXME: Eliminate invocations of this method, replacing them with direct method invocations for each changed parameter // Hugi 2026-05-01
+	 */
+	@Deprecated
 	public void _takeValueFromApplication( String valueName ) {
 		final Object appValue = _application.values.valueForKey( valueName );
 		values.takeValueForKey( appValue, valueName );
@@ -476,19 +478,19 @@ public class MInstance extends MObject {
 
 		// get MApplication application settings for setting that are still not set
 		if( adaptorValues.get( "sendTimeout" ) == null ) {
-			adaptorValues.put( "sendTimeout", _application.values.valueForKey( "sendTimeout" ) );
+			adaptorValues.put( "sendTimeout", _application.sendTimeout() );
 		}
 		if( adaptorValues.get( "recvTimeout" ) == null ) {
-			adaptorValues.put( "recvTimeout", _application.values.valueForKey( "recvTimeout" ) );
+			adaptorValues.put( "recvTimeout", _application.recvTimeout() );
 		}
 		if( adaptorValues.get( "cnctTimeout" ) == null ) {
-			adaptorValues.put( "cnctTimeout", _application.values.valueForKey( "cnctTimeout" ) );
+			adaptorValues.put( "cnctTimeout", _application.cnctTimeout() );
 		}
 		if( adaptorValues.get( "sendBufSize" ) == null ) {
-			adaptorValues.put( "sendBufSize", _application.values.valueForKey( "sendBufSize" ) );
+			adaptorValues.put( "sendBufSize", _application.sendBufSize() );
 		}
 		if( adaptorValues.get( "recvBufSize" ) == null ) {
-			adaptorValues.put( "recvBufSize", _application.values.valueForKey( "recvBufSize" ) );
+			adaptorValues.put( "recvBufSize", _application.recvBufSize() );
 		}
 
 		// get MSiteConfig application settings for settings that are still not set

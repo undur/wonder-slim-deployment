@@ -26,6 +26,10 @@ import com.webobjects.monitor._private.MUtil;
 public class MApplication extends MObject {
 
 	// Old common code
+
+	/**
+	 * FIXME: Make private once we've eliminated MInstance._takeValueFromApplication()
+	 */
 	protected NSMutableDictionary<String, Object> values;
 	protected Map<String, Object> adaptorValues = Collections.synchronizedMap( new HashMap<>() );
 
