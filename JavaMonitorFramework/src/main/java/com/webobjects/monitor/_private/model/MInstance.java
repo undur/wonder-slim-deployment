@@ -14,14 +14,18 @@ package com.webobjects.monitor._private.model;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -31,9 +35,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSTimeZone;
-import com.webobjects.foundation.NSTimestamp;
-import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.monitor._private.MUtil;
 
 import x.FLog;
@@ -75,28 +76,27 @@ public class MInstance extends MObject {
 	//	Integer sendBufSize;
 	//	Integer recvBufSize;
 
-	private static final NSTimestampFormatter dateFormatter = new NSTimestampFormatter( "%m/%d/%Y %H:%M:%S %Z" );
-	private static final NSTimestampFormatter shutdownFormatter = new NSTimestampFormatter( "%a @ %H:00" );
+	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern( "MM/dd/yyyy HH:mm:ss zzz", Locale.US );
+	private static final DateTimeFormatter SHUTDOWN_FORMATTER = DateTimeFormatter.ofPattern( "EEE '@' HH:00", Locale.US ).withZone( ZoneId.of( "UTC" ) );
 	public static long TIME_FOR_STARTUP = 30;
 
 	protected MHost _host;
 	protected MApplication _application;
-	private NSTimestamp _lastRegistration = NSTimestamp.DistantPast;
+	private Instant _lastRegistration = Instant.EPOCH;
 	private NSMutableArray<String> _deaths = new NSMutableArray<>();
 	private boolean isRefusingNewSessions = false;
 	public int state = MUtil.DEAD;
 	private NSMutableDictionary _statistics = new NSMutableDictionary();
 	private Timer _taskTimer;
 	private TimerTask _forceQuitTask;
-	private NSTimestamp _nextScheduledShutdown = NSTimestamp.DistantPast;
+	private ZonedDateTime _nextScheduledShutdown = ZonedDateTime.of( LocalDate.of( 1970, 1, 1 ).atStartOfDay(), ZoneId.systemDefault() );
 	private String _nextScheduledShutdownString = "-";
-	private NSTimestamp _finishStartingByDate = new NSTimestamp();
+	private Instant _finishStartingByDate = Instant.now();
 	private String _statisticsError = null;
 	private int _connectFailureCount = 0;
 
 	// This constructor is for adding new instances through the UI
 	public MInstance( MHost aHost, MApplication anApplication, Integer anID, MSiteConfig aConfig ) {
-		shutdownFormatter.setDefaultFormatTimeZone( NSTimeZone.timeZoneWithName( "UTC", true ) );
 		values = new NSMutableDictionary();
 		_host = aHost;
 		_application = anApplication;
@@ -120,7 +120,6 @@ public class MInstance extends MObject {
 
 	// This constructor is for unarchiving Instances
 	public MInstance( NSDictionary aDict, MSiteConfig aConfig ) {
-		shutdownFormatter.setDefaultFormatTimeZone( NSTimeZone.timeZoneWithName( "UTC", true ) );
 		values = new NSMutableDictionary( aDict );
 
 		_host = aConfig.hostWithName( hostName() );
@@ -620,7 +619,7 @@ public class MInstance extends MObject {
 			timeForStartup = MInstance.TIME_FOR_STARTUP;
 		}
 
-		_finishStartingByDate = new NSTimestamp( new NSTimestamp().getTime() + (timeForStartup * 1000) );
+		_finishStartingByDate = Instant.now().plusSeconds( timeForStartup );
 	}
 
 	public void failedToConnect() {
@@ -629,7 +628,7 @@ public class MInstance extends MObject {
 		// FIXME: The number of failures required to consider the instance dead should be a constant (or at least documented) // Hugi 2024-11-04
 		if( _connectFailureCount > 2 ) {
 			state = MUtil.DEAD;
-			_lastRegistration = NSTimestamp.DistantPast;
+			_lastRegistration = Instant.EPOCH;
 		}
 	}
 
@@ -650,9 +649,12 @@ public class MInstance extends MObject {
 	}
 
 	public boolean isRunning_W() {
-		long currentTime = (new NSTimestamp()).getTime();
-		long cutOffTime = _lastRegistration.getTime() + lifebeatCheckInterval();
-		long finishStartingByTime = _finishStartingByDate.getTime();
+		// FIXME: lifebeatCheckInterval() is in seconds but is being added to a millisecond
+		// epoch — preserved verbatim from the original to avoid behaviour changes during
+		// the NSTimestamp → Instant migration. // Hugi 2026-05-01
+		long currentTime = Instant.now().toEpochMilli();
+		long cutOffTime = _lastRegistration.toEpochMilli() + lifebeatCheckInterval();
+		long finishStartingByTime = _finishStartingByDate.toEpochMilli();
 
 		if( state == MUtil.STARTING ) {
 			// I'm still trying to start
@@ -733,7 +735,7 @@ public class MInstance extends MObject {
 		return b;
 	}
 
-	public NSTimestamp lastRegistration() {
+	public Instant lastRegistration() {
 		return _lastRegistration;
 	}
 
@@ -743,33 +745,34 @@ public class MInstance extends MObject {
 
 	public void updateRegistration() {
 		succeededInConnection();
-		// CHECKME: could be a parameter. Localizes the NSTimestamp effect.
-		_lastRegistration = new NSTimestamp();
+		_lastRegistration = Instant.now();
 	}
 
 	public void registerStop() {
 		succeededInConnection();
-		_lastRegistration = NSTimestamp.DistantPast;
+		_lastRegistration = Instant.EPOCH;
 		state = MUtil.DEAD;
 	}
 
 	public void registerCrash() {
 		succeededInConnection();
-		_lastRegistration = NSTimestamp.DistantPast;
+		_lastRegistration = Instant.EPOCH;
 		state = MUtil.CRASHING;
 	}
 
 	public void sendDeathNotificationEmail() {
 
-		final NSTimestamp currentTime = new NSTimestamp();
+		final Instant currentTime = Instant.now();
 		final String currentDate = currentTime.toString();
 
-		final long cutOffTime = _lastRegistration.getTime() + lifebeatCheckInterval();
+		// FIXME: see note on isRunning_W — preserves the seconds-vs-milliseconds inconsistency
+		// from the original. // Hugi 2026-05-01
+		final long cutOffTime = _lastRegistration.toEpochMilli() + lifebeatCheckInterval();
 
 		String assumedToBeDead = "";
 
-		if( currentTime.getTime() > cutOffTime ) {
-			long secondsDifference = (currentTime.getTime() - _lastRegistration.getTime()) / 1000;
+		if( currentTime.toEpochMilli() > cutOffTime ) {
+			long secondsDifference = (currentTime.toEpochMilli() - _lastRegistration.toEpochMilli()) / 1000;
 			assumedToBeDead = "The app did not respond for " + secondsDifference + " seconds " + "which is greater than the allowed threshold of " + lifebeatCheckInterval() + " seconds " + "(Lifebeat Interval * WOAssumeApplicationIsDeadMultiplier) so it is assumed to be dead.\n";
 		}
 
@@ -827,7 +830,7 @@ public class MInstance extends MObject {
 	}
 
 	public void addDeath() {
-		_deaths.addObject( MInstance.dateFormatter.format( new NSTimestamp() ) );
+		_deaths.addObject( DATE_FORMATTER.format( ZonedDateTime.now() ) );
 	}
 
 	public void removeAllDeaths() {
@@ -972,13 +975,13 @@ public class MInstance extends MObject {
 		return true;
 	}
 
-	public NSTimestamp nextScheduledShutdown() {
+	public ZonedDateTime nextScheduledShutdown() {
 		return _nextScheduledShutdown;
 	}
 
-	public void setNextScheduledShutdown( NSTimestamp newtime ) {
+	public void setNextScheduledShutdown( ZonedDateTime newtime ) {
 		_nextScheduledShutdown = newtime;
-		_nextScheduledShutdownString = shutdownFormatter.format( _nextScheduledShutdown );
+		_nextScheduledShutdownString = SHUTDOWN_FORMATTER.format( _nextScheduledShutdown );
 	}
 
 	public String nextScheduledShutdownString() {
@@ -1017,29 +1020,22 @@ public class MInstance extends MObject {
 			return;
 		}
 
-		NSTimestamp currentTime = new NSTimestamp( System.currentTimeMillis(), java.util.TimeZone.getDefault() );
-		TimeZone currentTimeZone = currentTime.timeZone();
-		int currentYear = currentTime.yearOfCommonEra();
-		int currentMonth = currentTime.monthOfYear();
-		int currentDayOfMonth = currentTime.dayOfMonth(); // [1,31]
-		int currentHourOfDay = currentTime.hourOfDay(); // [0,23]
+		final ZonedDateTime now = ZonedDateTime.now( ZoneId.systemDefault() );
+		final int currentHourOfDay = now.getHour(); // [0,23]
 
-		// Java normally returns 1-7, ObjC returned 0-6, JavaFoundation will
-		// return 0-6
-		int currentDayOfWeek = currentTime.dayOfWeek(); // [0,6] ==
-		// [Sunday,Saturday]
+		// schedulingStartDay is persisted as 0=Sunday..6=Saturday. java.time's
+		// DayOfWeek.getValue() is 1=Monday..7=Sunday, so % 7 lands us back in the
+		// stored convention (Mon=1..Sat=6, Sun=0).
+		final int currentDayOfWeek = now.getDayOfWeek().getValue() % 7;
 
-		String type = schedulingType();
-
-		// KH - can we check what happens if we run overtime - NSTimestamp
-		// should take care of it, but...
+		final String type = schedulingType();
 
 		if( type.equals( "HOURLY" ) ) {
-			Integer startTimeTemp = schedulingHourlyStartTime();
+			final Integer startTimeTemp = schedulingHourlyStartTime();
 			int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
 
-			Integer intervalTemp = schedulingInterval();
-			int interval = (intervalTemp != null) ? intervalTemp.intValue() : -1;
+			final Integer intervalTemp = schedulingInterval();
+			final int interval = (intervalTemp != null) ? intervalTemp.intValue() : -1;
 
 			if( (startTime == -1) || (interval == -1) ) {
 				return;
@@ -1050,49 +1046,51 @@ public class MInstance extends MObject {
 				startTime += interval;
 			}
 
-			setNextScheduledShutdown( new NSTimestamp( currentYear, currentMonth, currentDayOfMonth, startTime, 0, 0, currentTimeZone ) );
-
+			setNextScheduledShutdown( atHour( now, startTime, 0 ) );
 		}
 		else if( type.equals( "DAILY" ) ) {
-			Integer startTimeTemp = schedulingDailyStartTime();
-			int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
+			final Integer startTimeTemp = schedulingDailyStartTime();
+			final int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
 
 			if( startTime == -1 ) {
 				return;
 			}
 
-			// This is to make sure that we don't set it in the past!
-			if( startTime <= currentHourOfDay ) {
-				currentDayOfMonth++;
-			}
-
-			setNextScheduledShutdown( new NSTimestamp( currentYear, currentMonth, currentDayOfMonth, startTime, 0, 0, currentTimeZone ) );
-
+			final int dayOffset = (startTime <= currentHourOfDay) ? 1 : 0;
+			setNextScheduledShutdown( atHour( now, startTime, dayOffset ) );
 		}
 		else if( type.equals( "WEEKLY" ) ) {
-			Integer startTimeTemp = schedulingWeeklyStartTime();
-			int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
+			final Integer startTimeTemp = schedulingWeeklyStartTime();
+			final int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
 
-			Integer startDayTemp = schedulingStartDay();
-			int startDay = (startDayTemp != null) ? startDayTemp.intValue() : -1;
+			final Integer startDayTemp = schedulingStartDay();
+			final int startDay = (startDayTemp != null) ? startDayTemp.intValue() : -1;
 
 			if( (startTime == -1) || (startDay == -1) ) {
 				return;
 			}
 
-			// This is to make sure that we don't set it in the past!
-			int temp = (startDay - currentDayOfWeek);
-			currentDayOfMonth = currentDayOfMonth + ((temp < 0) ? 7 + temp : temp);
+			final int temp = (startDay - currentDayOfWeek);
+			int dayOffset = (temp < 0) ? 7 + temp : temp;
 
 			// Same day, but checking for past times
 			if( (temp == 0) && (startTime <= currentHourOfDay) ) {
-				currentDayOfMonth += 7;
+				dayOffset += 7;
 			}
 
-			setNextScheduledShutdown( new NSTimestamp( currentYear, currentMonth, currentDayOfMonth, startTime, 0, 0, currentTimeZone ) );
-
+			setNextScheduledShutdown( atHour( now, startTime, dayOffset ) );
 		}
 		FLog.debug.appendln( "calculateNextScheduledShutdown: " + _nextScheduledShutdown );
+	}
+
+	/**
+	 * Returns {@code now}, advanced by {@code dayOffset} days, with hour set to {@code hour}
+	 * and minutes/seconds/nanos zeroed. {@code hour} is permitted to exceed 23 — the overflow
+	 * rolls into the following days, matching the original NSTimestamp behaviour where
+	 * arithmetic on hour/day overflowed into the next calendar position.
+	 */
+	private static ZonedDateTime atHour( ZonedDateTime now, int hour, int dayOffset ) {
+		return now.withMinute( 0 ).withSecond( 0 ).withNano( 0 ).withHour( 0 ).plusDays( dayOffset ).plusHours( hour );
 	}
 
 	public void setRefusingNewSessions( boolean isRefusingNewSessions ) {
