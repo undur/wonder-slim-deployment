@@ -410,6 +410,11 @@ public class MInstance extends MObject {
 		_takeValueFromApplication( "cachingEnabled" );
 	}
 
+	public void _takeDebuggingEnabledFromApplication() {
+		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
+		_takeValueFromApplication( "debuggingEnabled" );
+	}
+
 	public void _takePortFromApplication() {
 		final MHost aHost = _host;
 
@@ -468,7 +473,7 @@ public class MInstance extends MObject {
 		_takeOutputPathFromApplication();
 
 		_takeCachingEnabledFromApplication();
-		_takeValueFromApplication( "debuggingEnabled" );
+		_takeDebuggingEnabledFromApplication();
 		_takeValueFromApplication( "autoOpenInBrowser" );
 		_takeValueFromApplication( "lifebeatInterval" );
 		_takeValueFromApplication( "additionalArgs" );

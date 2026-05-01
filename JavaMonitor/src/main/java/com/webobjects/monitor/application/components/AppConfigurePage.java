@@ -205,7 +205,7 @@ public class AppConfigurePage extends AppComponent {
 			myApplication().setDebuggingEnabled( appDefaults.debuggingEnabled() );
 
 			for( MInstance anInstance : myApplication().instanceArray() ) {
-				anInstance._takeValueFromApplication( "debuggingEnabled" );
+				anInstance._takeDebuggingEnabledFromApplication();
 			}
 
 			_defaultsPush();
