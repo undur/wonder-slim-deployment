@@ -29,7 +29,7 @@ public class Application extends ERXApplication {
 
 	public Application() {
 
-		// FIXME: I know.
+		// FIXME: I know. We need a better method to enter "test" mode // Hugi 2026-05-01
 		if( "hugi".equals( System.getProperty( "user.name" ) ) ) {
 			System.setProperty( "WODeploymentConfigurationDirectory", "/Users/hugi/Desktop/woconfig" );
 		}
@@ -50,6 +50,9 @@ public class Application extends ERXApplication {
 		setAllowsConcurrentRequestHandling( true );
 	}
 
+	/**
+	 * FIXME: Delete. Currently only used in templates 	// Hugi 2026-05-01
+	 */
 	@Deprecated
 	public MSiteConfig siteConfig() {
 		return WOTaskdHandler.siteConfig();
