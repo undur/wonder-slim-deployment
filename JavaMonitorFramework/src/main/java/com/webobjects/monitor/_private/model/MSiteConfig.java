@@ -55,7 +55,7 @@ import x.FoundationCoder;
 public class MSiteConfig extends MObject {
 
 	// Old common code
-	protected NSMutableDictionary<String, Object> values;
+	private NSMutableDictionary<String, Object> values;
 
 	public NSMutableDictionary<String, Object> values() {
 		return values;

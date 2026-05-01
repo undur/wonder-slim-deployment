@@ -493,19 +493,19 @@ public class MInstance extends MObject {
 
 		// get MSiteConfig application settings for settings that are still not set
 		if( adaptorValues.get( "sendTimeout" ) == null ) {
-			adaptorValues.put( "sendTimeout", _siteConfig.values.valueForKey( "sendTimeout" ) );
+			adaptorValues.put( "sendTimeout", _siteConfig.sendTimeout() );
 		}
 		if( adaptorValues.get( "recvTimeout" ) == null ) {
-			adaptorValues.put( "recvTimeout", _siteConfig.values.valueForKey( "recvTimeout" ) );
+			adaptorValues.put( "recvTimeout", _siteConfig.recvTimeout() );
 		}
 		if( adaptorValues.get( "cnctTimeout" ) == null ) {
-			adaptorValues.put( "cnctTimeout", _siteConfig.values.valueForKey( "cnctTimeout" ) );
+			adaptorValues.put( "cnctTimeout", _siteConfig.cnctTimeout() );
 		}
 		if( adaptorValues.get( "sendBufSize" ) == null ) {
-			adaptorValues.put( "sendBufSize", _siteConfig.values.valueForKey( "sendBufSize" ) );
+			adaptorValues.put( "sendBufSize", _siteConfig.sendBufSize() );
 		}
 		if( adaptorValues.get( "recvBufSize" ) == null ) {
-			adaptorValues.put( "recvBufSize", _siteConfig.values.valueForKey( "recvBufSize" ) );
+			adaptorValues.put( "recvBufSize", _siteConfig.recvBufSize() );
 		}
 	}
 

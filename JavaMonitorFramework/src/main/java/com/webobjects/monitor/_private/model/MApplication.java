@@ -564,22 +564,22 @@ public class MApplication extends MObject {
 
 		// get MSiteConfig application settings for settings that are still not set
 		if( adaptorValues.get( "retries" ) == null ) {
-			adaptorValues.put( "retries", _siteConfig.values.valueForKey( "retries" ) );
+			adaptorValues.put( "retries", _siteConfig.retries() );
 		}
 		if( adaptorValues.get( "scheduler" ) == null ) {
-			adaptorValues.put( "scheduler", _siteConfig.values.valueForKey( "scheduler" ) );
+			adaptorValues.put( "scheduler", _siteConfig.scheduler() );
 		}
 		if( adaptorValues.get( "dormant" ) == null ) {
-			adaptorValues.put( "dormant", _siteConfig.values.valueForKey( "dormant" ) );
+			adaptorValues.put( "dormant", _siteConfig.dormant() );
 		}
 		if( adaptorValues.get( "redir" ) == null ) {
-			adaptorValues.put( "redir", _siteConfig.values.valueForKey( "redir" ) );
+			adaptorValues.put( "redir", _siteConfig.redir() );
 		}
 		if( adaptorValues.get( "poolsize" ) == null ) {
-			adaptorValues.put( "poolsize", _siteConfig.values.valueForKey( "poolsize" ) );
+			adaptorValues.put( "poolsize", _siteConfig.poolsize() );
 		}
 		if( adaptorValues.get( "urlVersion" ) == null ) {
-			adaptorValues.put( "urlVersion", _siteConfig.values.valueForKey( "urlVersion" ) );
+			adaptorValues.put( "urlVersion", _siteConfig.urlVersion() );
 		}
 	}
 
