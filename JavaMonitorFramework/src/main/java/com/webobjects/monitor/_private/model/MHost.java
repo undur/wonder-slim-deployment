@@ -33,7 +33,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSProperties;
 import com.webobjects.monitor._private.MUtil;
 
 import x.FoundationCoder;
@@ -56,16 +55,9 @@ public class MHost extends MObject {
 	private static final Logger logger = LoggerFactory.getLogger( MHost.class );
 
 	/**
-	 * FIXME: Move to wherever we decide to eventually keep properties // Hugi 2024-11-04
+	 * FIXME: Should be configurable. Used to be the property "JavaMonitor.receiveTimeout" // Hugi 2024-11-04
 	 */
-	@Deprecated
-	private static final int RECEIVE_TIMEOUT = readReceiveTimeout();
-
-	@Deprecated
-	private static int readReceiveTimeout() {
-		final String prop = NSProperties.getProperty( "JavaMonitor.receiveTimeout", "10000" );
-		return Integer.parseInt( prop );
-	}
+	private static final int WOTASKD_RECEIVE_TIMEOUT = 10000;
 
 	/**
 	 * FIXME: It doesn't look like this variable is ever actually read in a meaningful way. Delete? // Hugi 2024-11-02
@@ -260,7 +252,7 @@ public class MHost extends MObject {
 			final Builder requestBuilder = HttpRequest
 					.newBuilder()
 					.uri( URI.create( "http://%s:%s%s".formatted( name(), WOApplication.application().lifebeatDestinationPort(), MUtil.WOTASKD_DIRECT_ACTION_URL ) ) )
-					.timeout( Duration.ofMillis( RECEIVE_TIMEOUT ) )
+					.timeout( Duration.ofMillis( WOTASKD_RECEIVE_TIMEOUT ) )
 					.POST( BodyPublishers.ofString( contentString ) );
 
 			// FIXME: We're going to have to check the semantics of resetting the password (used to be handled when constructing the password header map in MSiteConfig.passwordDictionary()) // Hugi 2024-11-06
