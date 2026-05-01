@@ -15,7 +15,9 @@ SUCH DAMAGE.
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;
@@ -29,7 +31,6 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
-import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.model.MApplication;
@@ -596,10 +597,13 @@ public class DirectAction extends WODirectAction {
 		}
 
 		// getting the errors
-		NSArray globalArray = theApplication.siteConfig().globalErrorDictionary.allValues();
-		if( (globalArray != null) && (globalArray.count() > 0) ) {
-			errorResponse.addObjectsFromArray( globalArray );
-			theApplication.siteConfig().globalErrorDictionary = new _NSThreadsafeMutableDictionary( new NSMutableDictionary() );
+		final List<String> globalErrors;
+		synchronized( theApplication.siteConfig().globalErrorDictionary ) {
+			globalErrors = new ArrayList<>( theApplication.siteConfig().globalErrorDictionary.values() );
+			theApplication.siteConfig().globalErrorDictionary.clear();
+		}
+		if( !globalErrors.isEmpty() ) {
+			errorResponse.addObjectsFromArray( new NSArray( globalErrors.toArray() ) );
 		}
 		if( errorResponse.count() != 0 ) {
 			monitorResponse.takeValueForKey( errorResponse, "errorResponse" );

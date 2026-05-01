@@ -12,20 +12,22 @@ SUCH DAMAGE.
  */
 package com.webobjects.monitor._private.model;
 
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 
 public class MApplication extends MObject {
 
 	// Old common code
 	protected NSMutableDictionary<String, Object> values;
-	protected _NSThreadsafeMutableDictionary<String, Object> adaptorValues = new _NSThreadsafeMutableDictionary<>( new NSMutableDictionary<>() );
+	protected Map<String, Object> adaptorValues = Collections.synchronizedMap( new HashMap<>() );
 
 	public NSMutableDictionary<String, Object> values() {
 		return values;
@@ -553,31 +555,31 @@ public class MApplication extends MObject {
 
 	public void extractAdaptorValuesFromSiteConfig() {
 		// get my application settings
-		adaptorValues.takeValueForKey( values.valueForKey( "retries" ), "retries" );
-		adaptorValues.takeValueForKey( values.valueForKey( "scheduler" ), "scheduler" );
-		adaptorValues.takeValueForKey( values.valueForKey( "dormant" ), "dormant" );
-		adaptorValues.takeValueForKey( values.valueForKey( "redir" ), "redir" );
-		adaptorValues.takeValueForKey( values.valueForKey( "poolsize" ), "poolsize" );
-		adaptorValues.takeValueForKey( values.valueForKey( "urlVersion" ), "urlVersion" );
+		adaptorValues.put( "retries", values.valueForKey( "retries" ) );
+		adaptorValues.put( "scheduler", values.valueForKey( "scheduler" ) );
+		adaptorValues.put( "dormant", values.valueForKey( "dormant" ) );
+		adaptorValues.put( "redir", values.valueForKey( "redir" ) );
+		adaptorValues.put( "poolsize", values.valueForKey( "poolsize" ) );
+		adaptorValues.put( "urlVersion", values.valueForKey( "urlVersion" ) );
 
 		// get MSiteConfig application settings for settings that are still not set
-		if( adaptorValues.valueForKey( "retries" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "retries" ), "retries" );
+		if( adaptorValues.get( "retries" ) == null ) {
+			adaptorValues.put( "retries", _siteConfig.values.valueForKey( "retries" ) );
 		}
-		if( adaptorValues.valueForKey( "scheduler" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "scheduler" ), "scheduler" );
+		if( adaptorValues.get( "scheduler" ) == null ) {
+			adaptorValues.put( "scheduler", _siteConfig.values.valueForKey( "scheduler" ) );
 		}
-		if( adaptorValues.valueForKey( "dormant" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "dormant" ), "dormant" );
+		if( adaptorValues.get( "dormant" ) == null ) {
+			adaptorValues.put( "dormant", _siteConfig.values.valueForKey( "dormant" ) );
 		}
-		if( adaptorValues.valueForKey( "redir" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "redir" ), "redir" );
+		if( adaptorValues.get( "redir" ) == null ) {
+			adaptorValues.put( "redir", _siteConfig.values.valueForKey( "redir" ) );
 		}
-		if( adaptorValues.valueForKey( "poolsize" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "poolsize" ), "poolsize" );
+		if( adaptorValues.get( "poolsize" ) == null ) {
+			adaptorValues.put( "poolsize", _siteConfig.values.valueForKey( "poolsize" ) );
 		}
-		if( adaptorValues.valueForKey( "urlVersion" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "urlVersion" ), "urlVersion" );
+		if( adaptorValues.get( "urlVersion" ) == null ) {
+			adaptorValues.put( "urlVersion", _siteConfig.values.valueForKey( "urlVersion" ) );
 		}
 	}
 

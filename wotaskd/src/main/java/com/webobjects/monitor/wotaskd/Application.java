@@ -526,7 +526,7 @@ public class Application extends ERXApplication {
 							// This is if we get an unrecognized packet.
 							String key = incomingPacket.getAddress() + ":" + incomingPacket.getPort();
 
-							siteConfig().globalErrorDictionary.takeValueForKey( (myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol."), key );
+							siteConfig().globalErrorDictionary.put( key, (myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol.") );
 							FLog.debug.appendln( myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol." );
 						}
 					}

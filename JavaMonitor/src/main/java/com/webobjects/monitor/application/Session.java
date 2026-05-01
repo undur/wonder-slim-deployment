@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory;
  */
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.model.MSiteConfig;
 import com.webobjects.monitor.application.components.JMLoginPage;
 import com.webobjects.monitor.util.WOTaskdHandler;
@@ -96,11 +94,14 @@ public class Session extends ERXSession implements ErrorCollector {
 		final MSiteConfig siteConfig = WOTaskdHandler.siteConfig();
 
 		if( siteConfig != null ) {
-			final List<String> globalErrors = siteConfig.globalErrorDictionary.allValues();
+			final List<String> globalErrors;
+			synchronized( siteConfig.globalErrorDictionary ) {
+				globalErrors = new ArrayList<>( siteConfig.globalErrorDictionary.values() );
+				siteConfig.globalErrorDictionary.clear();
+			}
 
 			if( !globalErrors.isEmpty() ) {
 				addObjectsFromArrayIfAbsentToErrorMessageArray( globalErrors );
-				siteConfig.globalErrorDictionary = new _NSThreadsafeMutableDictionary( new NSMutableDictionary<Object, Object>() );
 			}
 		}
 

@@ -86,7 +86,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		final List<String> values = NSArray.componentsSeparatedByString( aRequest.queryString(), "&" );
 
 		if( (values == null) || (values.size() != 4) ) {
-			theApplication.siteConfig().globalErrorDictionary.takeValueForKey( (myName + ": Received bad lifebeat: " + aRequest.queryString()), aRequest.queryString() );
+			theApplication.siteConfig().globalErrorDictionary.put( aRequest.queryString(), (myName + ": Received bad lifebeat: " + aRequest.queryString()) );
 			log.error( "{}: Received bad lifebeat: {}", myName, aRequest.queryString() );
 		}
 		else {
@@ -126,7 +126,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 				aResponse = null;
 			}
 			else {
-				theApplication.siteConfig().globalErrorDictionary.takeValueForKey( (myName + ": Received bad lifebeat: " + aRequest.queryString()), aRequest.queryString() );
+				theApplication.siteConfig().globalErrorDictionary.put( aRequest.queryString(), (myName + ": Received bad lifebeat: " + aRequest.queryString()) );
 				log.error( "{}: Received bad lifebeat: {}", myName, aRequest.queryString() );
 			}
 		}

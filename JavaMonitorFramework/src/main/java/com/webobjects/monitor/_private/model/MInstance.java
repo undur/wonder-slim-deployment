@@ -17,7 +17,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,7 +34,6 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimeZone;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
-import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 
 import x.FLog;
@@ -40,7 +42,7 @@ public class MInstance extends MObject {
 
 	// Old common code
 	protected NSMutableDictionary<String, Object> values;
-	protected _NSThreadsafeMutableDictionary<String, Object> adaptorValues = new _NSThreadsafeMutableDictionary<>( new NSMutableDictionary<>() );
+	protected Map<String, Object> adaptorValues = Collections.synchronizedMap( new HashMap<>() );
 
 	public NSMutableDictionary<String, Object> values() {
 		return values;
@@ -467,44 +469,44 @@ public class MInstance extends MObject {
 
 	public void extractAdaptorValuesFromApplication() {
 		// get my instance settings
-		adaptorValues.takeValueForKey( values.valueForKey( "sendTimeout" ), "sendTimeout" );
-		adaptorValues.takeValueForKey( values.valueForKey( "recvTimeout" ), "recvTimeout" );
-		adaptorValues.takeValueForKey( values.valueForKey( "cnctTimeout" ), "cnctTimeout" );
-		adaptorValues.takeValueForKey( values.valueForKey( "sendBufSize" ), "sendBufSize" );
-		adaptorValues.takeValueForKey( values.valueForKey( "recvBufSize" ), "recvBufSize" );
+		adaptorValues.put( "sendTimeout", values.valueForKey( "sendTimeout" ) );
+		adaptorValues.put( "recvTimeout", values.valueForKey( "recvTimeout" ) );
+		adaptorValues.put( "cnctTimeout", values.valueForKey( "cnctTimeout" ) );
+		adaptorValues.put( "sendBufSize", values.valueForKey( "sendBufSize" ) );
+		adaptorValues.put( "recvBufSize", values.valueForKey( "recvBufSize" ) );
 
 		// get MApplication application settings for setting that are still not set
-		if( adaptorValues.valueForKey( "sendTimeout" ) == null ) {
-			adaptorValues.takeValueForKey( _application.values.valueForKey( "sendTimeout" ), "sendTimeout" );
+		if( adaptorValues.get( "sendTimeout" ) == null ) {
+			adaptorValues.put( "sendTimeout", _application.values.valueForKey( "sendTimeout" ) );
 		}
-		if( adaptorValues.valueForKey( "recvTimeout" ) == null ) {
-			adaptorValues.takeValueForKey( _application.values.valueForKey( "recvTimeout" ), "recvTimeout" );
+		if( adaptorValues.get( "recvTimeout" ) == null ) {
+			adaptorValues.put( "recvTimeout", _application.values.valueForKey( "recvTimeout" ) );
 		}
-		if( adaptorValues.valueForKey( "cnctTimeout" ) == null ) {
-			adaptorValues.takeValueForKey( _application.values.valueForKey( "cnctTimeout" ), "cnctTimeout" );
+		if( adaptorValues.get( "cnctTimeout" ) == null ) {
+			adaptorValues.put( "cnctTimeout", _application.values.valueForKey( "cnctTimeout" ) );
 		}
-		if( adaptorValues.valueForKey( "sendBufSize" ) == null ) {
-			adaptorValues.takeValueForKey( _application.values.valueForKey( "sendBufSize" ), "sendBufSize" );
+		if( adaptorValues.get( "sendBufSize" ) == null ) {
+			adaptorValues.put( "sendBufSize", _application.values.valueForKey( "sendBufSize" ) );
 		}
-		if( adaptorValues.valueForKey( "recvBufSize" ) == null ) {
-			adaptorValues.takeValueForKey( _application.values.valueForKey( "recvBufSize" ), "recvBufSize" );
+		if( adaptorValues.get( "recvBufSize" ) == null ) {
+			adaptorValues.put( "recvBufSize", _application.values.valueForKey( "recvBufSize" ) );
 		}
 
 		// get MSiteConfig application settings for settings that are still not set
-		if( adaptorValues.valueForKey( "sendTimeout" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "sendTimeout" ), "sendTimeout" );
+		if( adaptorValues.get( "sendTimeout" ) == null ) {
+			adaptorValues.put( "sendTimeout", _siteConfig.values.valueForKey( "sendTimeout" ) );
 		}
-		if( adaptorValues.valueForKey( "recvTimeout" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "recvTimeout" ), "recvTimeout" );
+		if( adaptorValues.get( "recvTimeout" ) == null ) {
+			adaptorValues.put( "recvTimeout", _siteConfig.values.valueForKey( "recvTimeout" ) );
 		}
-		if( adaptorValues.valueForKey( "cnctTimeout" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "cnctTimeout" ), "cnctTimeout" );
+		if( adaptorValues.get( "cnctTimeout" ) == null ) {
+			adaptorValues.put( "cnctTimeout", _siteConfig.values.valueForKey( "cnctTimeout" ) );
 		}
-		if( adaptorValues.valueForKey( "sendBufSize" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "sendBufSize" ), "sendBufSize" );
+		if( adaptorValues.get( "sendBufSize" ) == null ) {
+			adaptorValues.put( "sendBufSize", _siteConfig.values.valueForKey( "sendBufSize" ) );
 		}
-		if( adaptorValues.valueForKey( "recvBufSize" ) == null ) {
-			adaptorValues.takeValueForKey( _siteConfig.values.valueForKey( "recvBufSize" ), "recvBufSize" );
+		if( adaptorValues.get( "recvBufSize" ) == null ) {
+			adaptorValues.put( "recvBufSize", _siteConfig.values.valueForKey( "recvBufSize" ) );
 		}
 	}
 

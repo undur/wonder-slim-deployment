@@ -25,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,6 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
-import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
@@ -256,7 +256,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	/********** Errors  **********/
-	public _NSThreadsafeMutableDictionary<String, String> globalErrorDictionary = new _NSThreadsafeMutableDictionary<>( new NSMutableDictionary<>() );
+	public Map<String, String> globalErrorDictionary = Collections.synchronizedMap( new HashMap<>() );
 
 	public Set<MHost> hostErrorArray = Collections.synchronizedSet( new HashSet<>() );
 
@@ -492,7 +492,7 @@ public class MSiteConfig extends MObject {
 			messageDigest = MessageDigest.getInstance( "MD5" );
 		}
 		catch( final NoSuchAlgorithmException exc ) {
-			globalErrorDictionary.takeValueForKey( ("Security package does not contain appropriate algorithm"), ("Security package does not contain appropriate algorithm") );
+			globalErrorDictionary.put( "Security package does not contain appropriate algorithm", "Security package does not contain appropriate algorithm" );
 			logger.error( "Security package does not contain appropriate algorithm" );
 			return encrypted_value;
 		}
@@ -885,7 +885,7 @@ public class MSiteConfig extends MObject {
 			if( siteConfigFile.exists() && !siteConfigFile.canWrite() ) {
 				logger.error( "Don't have permission to write to file {} as this user, please change the permissions.", siteConfigFile.getAbsolutePath() );
 				final String pre = WOApplication.application().name() + " - " + localHostName;
-				globalErrorDictionary.takeValueForKey( pre + " Don't have permission to write to file " + siteConfigFile.getAbsolutePath() + " as this user, please change the permissions.", "archiveSiteConfig" );
+				globalErrorDictionary.put( "archiveSiteConfig", pre + " Don't have permission to write to file " + siteConfigFile.getAbsolutePath() + " as this user, please change the permissions." );
 				return;
 			}
 
@@ -897,13 +897,13 @@ public class MSiteConfig extends MObject {
 				Files.writeString( siteConfigFile.toPath(), serialisedSiteConfig, StandardCharsets.UTF_8 );
 			}
 
-			globalErrorDictionary.takeValueForKey( null, "archiveSiteConfig" );
+			globalErrorDictionary.remove( "archiveSiteConfig" );
 		}
 		catch( final IOException e ) {
 			final String message = "Cannot write to file " + siteConfigFile.getAbsolutePath() + ". IOException: " + e.getLocalizedMessage();
 			logger.error( message );
 			final String pre = WOApplication.application().name() + " - " + localHostName;
-			globalErrorDictionary.takeValueForKey( pre + message, "archiveSiteConfig" );
+			globalErrorDictionary.put( "archiveSiteConfig", pre + message );
 		}
 	}
 
@@ -925,17 +925,17 @@ public class MSiteConfig extends MObject {
 			if( ac.exists() && !ac.canWrite() ) {
 				logger.error( "Don't have permission to write to file {} as this user, please change the permissions.", fileForAdaptorConfig() );
 				final String pre = WOApplication.application().name() + " - " + localHostName;
-				globalErrorDictionary.takeValueForKey( pre + " Don't have permission to write to file " + fileForAdaptorConfig() + "as this user, please change the permissions.", "archiveSiteConfig" );
+				globalErrorDictionary.put( "archiveSiteConfig", pre + " Don't have permission to write to file " + fileForAdaptorConfig() + "as this user, please change the permissions." );
 				return;
 			}
 			Files.writeString( fileForAdaptorConfig().toPath(), generateAdaptorConfigXML( false, false ), StandardCharsets.UTF_8 );
-			globalErrorDictionary.takeValueForKey( null, "archiveAdaptorConfig" );
+			globalErrorDictionary.remove( "archiveAdaptorConfig" );
 		}
 		catch( final IOException e ) {
 			final String message = "Cannot write to file " + pathForAdaptorConfig() + ". IOException: " + e.getLocalizedMessage();
 			logger.error( message );
 			final String pre = WOApplication.application().name() + " - " + localHostName;
-			globalErrorDictionary.takeValueForKey( pre + " " + message, "archiveAdaptorConfig" );
+			globalErrorDictionary.put( "archiveAdaptorConfig", pre + " " + message );
 		}
 	}
 
@@ -948,12 +948,12 @@ public class MSiteConfig extends MObject {
 
 				anApp.extractAdaptorValuesFromSiteConfig();
 
-				final Integer retries = (Integer)anApp.adaptorValues.valueForKey( "retries" );
-				final String scheduler = (String)anApp.adaptorValues.valueForKey( "scheduler" );
-				final Integer dormant = (Integer)anApp.adaptorValues.valueForKey( "dormant" );
-				final String redir = (String)anApp.adaptorValues.valueForKey( "redir" );
-				final Integer poolsize = (Integer)anApp.adaptorValues.valueForKey( "poolsize" );
-				final Integer urlVersion = (Integer)anApp.adaptorValues.valueForKey( "urlVersion" );
+				final Integer retries = (Integer)anApp.adaptorValues.get( "retries" );
+				final String scheduler = (String)anApp.adaptorValues.get( "scheduler" );
+				final Integer dormant = (Integer)anApp.adaptorValues.get( "dormant" );
+				final String redir = (String)anApp.adaptorValues.get( "redir" );
+				final Integer poolsize = (Integer)anApp.adaptorValues.get( "poolsize" );
+				final Integer urlVersion = (Integer)anApp.adaptorValues.get( "urlVersion" );
 
 				sb.append( "  <application name=\"" );
 				sb.append( anApp.name() );
@@ -993,11 +993,11 @@ public class MSiteConfig extends MObject {
 						final Integer id = (Integer)anInst.values.valueForKey( "id" );
 						final Integer port = (Integer)anInst.values.valueForKey( "port" );
 						final String host = (String)anInst.values.valueForKey( "hostName" );
-						final Integer sendTimeout = (Integer)anInst.adaptorValues.valueForKey( "sendTimeout" );
-						final Integer recvTimeout = (Integer)anInst.adaptorValues.valueForKey( "recvTimeout" );
-						final Integer cnctTimeout = (Integer)anInst.adaptorValues.valueForKey( "cnctTimeout" );
-						final Integer sendBufSize = (Integer)anInst.adaptorValues.valueForKey( "sendBufSize" );
-						final Integer recvBufSize = (Integer)anInst.adaptorValues.valueForKey( "recvBufSize" );
+						final Integer sendTimeout = (Integer)anInst.adaptorValues.get( "sendTimeout" );
+						final Integer recvTimeout = (Integer)anInst.adaptorValues.get( "recvTimeout" );
+						final Integer cnctTimeout = (Integer)anInst.adaptorValues.get( "cnctTimeout" );
+						final Integer sendBufSize = (Integer)anInst.adaptorValues.get( "sendBufSize" );
+						final Integer recvBufSize = (Integer)anInst.adaptorValues.get( "recvBufSize" );
 
 						sb.append( "    <instance" );
 
