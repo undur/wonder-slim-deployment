@@ -44,9 +44,6 @@ import com.webobjects.foundation.NSMutableDictionary;
  *       This matches the reference encoder exactly.</li>
  *   <li>{@code null} → emitted as {@code <key type="?">null</key>}.</li>
  * </ul>
- * <p>{@code NSData}, {@code NSTimestamp}, and {@code EOEnterpriseObject} branches that exist
- * in the reference encoder are <em>not</em> implemented — the deployment protocol does not
- * carry those types.
  *
  * <h2>Decode return types — temporary regression</h2>
  * <p>The decoder presently returns {@code NSMutableDictionary} for dictionaries and
@@ -73,7 +70,7 @@ import com.webobjects.foundation.NSMutableDictionary;
  * <h2>{@code decodeRootObject(String)} is not what you'd expect</h2>
  * <p>For drop-in compatibility with {@code WOXMLDecoder}, {@link #decodeRootObject(String)}
  * treats its argument as a <em>SAX systemId</em> (URL or filesystem path resolved against
- * the working directory), <em>not</em> as the XML payload. Pass {@code byte[]} or {@code NSData}
+ * the working directory), <em>not</em> as the XML payload. Pass {@code byte[]}
  * if you have an in-memory document. This is documented further on the method.
  *
  * <h2>Thread safety</h2>
