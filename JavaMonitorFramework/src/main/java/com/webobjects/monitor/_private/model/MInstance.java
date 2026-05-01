@@ -395,6 +395,10 @@ public class MInstance extends MObject {
 		setApplicationName( _application.name() );
 	}
 
+	public void _takeAutoRecoverFromApplication() {
+		_takeValueFromApplication( "autoRecover" );
+	}
+
 	public void _takePortFromApplication() {
 		final MHost aHost = _host;
 
@@ -446,7 +450,7 @@ public class MInstance extends MObject {
 		_takeNameFromApplication();
 		_takePortFromApplication();
 
-		_takeValueFromApplication( "autoRecover" );
+		_takeAutoRecoverFromApplication();
 		_takeValueFromApplication( "minimumActiveSessionsCount" );
 
 		_takePathFromApplication();

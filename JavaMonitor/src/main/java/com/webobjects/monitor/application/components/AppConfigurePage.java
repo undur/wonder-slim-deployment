@@ -160,7 +160,7 @@ public class AppConfigurePage extends AppComponent {
 			myApplication().setAutoRecover( appDefaults.autoRecover() );
 
 			for( MInstance anInstance : myApplication().instanceArray() ) {
-				anInstance._takeValueFromApplication( "autoRecover" );
+				anInstance._takeAutoRecoverFromApplication();
 			}
 
 			_defaultsPush();
