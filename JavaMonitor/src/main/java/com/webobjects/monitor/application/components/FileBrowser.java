@@ -14,7 +14,6 @@ package com.webobjects.monitor.application.components;
  */
 
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
@@ -44,6 +43,7 @@ import com.webobjects.monitor.util.WOTaskdHandler;
 
 import x.FoundationCoder;
 import x.ResponseWrapper;
+import x.XUtil;
 
 public class FileBrowser extends MonitorComponent {
 
@@ -215,11 +215,6 @@ public class FileBrowser extends MonitorComponent {
 			RemoteResult result = null;
 
 			try {
-				// CHECKME: We can reuse the client. Future performance thoughts
-				final HttpClient client = HttpClient
-						.newBuilder()
-						.build();
-
 				final Builder requestBuilder = HttpRequest
 						.newBuilder()
 						.uri( URI.create( "http://%s:%s%s".formatted( host.name(), WOApplication.application().lifebeatDestinationPort(), RemoteBrowseClient.BROWSE_URL ) ) )
@@ -248,7 +243,7 @@ public class FileBrowser extends MonitorComponent {
 
 				logger.info( "--> Sending request: =======" );
 				logger.info( "{}", request );
-				final HttpResponse<byte[]> response = client.send( request, BodyHandlers.ofByteArray() );
+				final HttpResponse<byte[]> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofByteArray() );
 				logger.info( "--> Response received ======= " + response.headers() );
 
 				// FIXME: Look into this error handling // Hugi 2024-11-10
@@ -268,6 +263,11 @@ public class FileBrowser extends MonitorComponent {
 			catch( MonitorException me ) {
 				host.isAvailable = true;
 				throw me;
+			}
+			catch( InterruptedException ie ) {
+				Thread.currentThread().interrupt();
+				host.isAvailable = false;
+				throw new MonitorException( "Interrupted while requesting directory listing for " + path + " from " + host.name(), ie );
 			}
 			catch( Exception localException ) {
 				host.isAvailable = false;

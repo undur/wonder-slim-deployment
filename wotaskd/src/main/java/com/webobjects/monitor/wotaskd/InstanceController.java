@@ -18,7 +18,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpRequest.Builder;
@@ -57,6 +56,7 @@ import er.extensions.foundation.ERXProperties;
 import x.FLog;
 import x.FoundationCoder;
 import x.ResponseWrapper;
+import x.XUtil;
 
 public class InstanceController implements IInstanceController {
 
@@ -586,10 +586,6 @@ public class InstanceController implements IInstanceController {
 		ResponseWrapper responseWrapper = null;
 
 		try {
-			final HttpClient client = HttpClient
-					.newBuilder()
-					.build();
-
 			final Builder requestBuilder = HttpRequest
 					.newBuilder()
 					.uri( URI.create( "http://%s:%s%s".formatted( anInstance.host().name(), anInstance.port(), urlString ) ) )
@@ -602,7 +598,7 @@ public class InstanceController implements IInstanceController {
 			logger.info( "{}", request );
 			logger.info( requestContentXML );
 
-			final HttpResponse<byte[]> response = client.send( request, BodyHandlers.ofByteArray() );
+			final HttpResponse<byte[]> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofByteArray() );
 			logger.info( "--> Response received =======" );
 			responseWrapper = new ResponseWrapper();
 			responseWrapper._content = response.body();

@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpRequest.Builder;
@@ -37,6 +36,7 @@ import com.webobjects.monitor._private.MUtil;
 
 import x.FoundationCoder;
 import x.ResponseWrapper;
+import x.XUtil;
 
 public class MHost extends MObject {
 
@@ -247,11 +247,6 @@ public class MHost extends MObject {
 
 		ResponseWrapper responseWrapper = new ResponseWrapper();
 
-		// CHECKME: We can reuse the client. Future performance thoughts
-		final HttpClient client = HttpClient
-				.newBuilder()
-				.build();
-
 		final Builder requestBuilder = HttpRequest
 				.newBuilder()
 				.uri( URI.create( "http://%s:%s%s".formatted( name(), WOApplication.application().lifebeatDestinationPort(), MUtil.WOTASKD_DIRECT_ACTION_URL ) ) )
@@ -270,7 +265,7 @@ public class MHost extends MObject {
 		logger.info( contentString );
 
 		try {
-			final HttpResponse<byte[]> response = client.send( request, BodyHandlers.ofByteArray() );
+			final HttpResponse<byte[]> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofByteArray() );
 			logger.info( "--> Response received =======" );
 			responseWrapper._content = response.body();
 		}

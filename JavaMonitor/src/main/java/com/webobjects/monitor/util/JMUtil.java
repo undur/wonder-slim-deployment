@@ -7,13 +7,14 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 import com.webobjects.appserver.WOApplication;
+
+import x.XUtil;
 
 /**
  * FIXME: Yet another class to serve as a temporary repository while we pull functionality from the UI // Hugi 2024-10-31
@@ -42,12 +43,15 @@ public class JMUtil {
 		final HttpRequest request = requestBuilder.build();
 	
 		try {
-			return HttpClient
-					.newHttpClient()
+			return XUtil.HTTP_CLIENT
 					.send( request, BodyHandlers.ofString() )
 					.body();
 		}
-		catch( IOException | InterruptedException e ) {
+		catch( InterruptedException e ) {
+			Thread.currentThread().interrupt();
+			return "Failed to get response from wotaskd %s:%s".formatted( hostName, port );
+		}
+		catch( IOException e ) {
 			e.printStackTrace();
 			return "Failed to get response from wotaskd %s:%s".formatted( hostName, port );
 		}

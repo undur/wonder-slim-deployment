@@ -2,13 +2,14 @@ package com.webobjects.monitor.util;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.List;
 
 import com.webobjects.monitor._private.model.MInstance;
+
+import x.XUtil;
 
 /**
  * Home for some experimental functionality (that will probably get a different home later
@@ -43,10 +44,6 @@ public class ExperimentalUtilities {
 	 */
 	private static String fetchStringFromMonitorService( final String hostName, final int port, final String password, final String url ) {
 
-		final HttpClient client = HttpClient
-				.newBuilder()
-				.build();
-
 		final HttpRequest request = HttpRequest
 				.newBuilder()
 				.uri( URI.create( "http://%s:%s%s".formatted( hostName, port, url ) ) )
@@ -58,9 +55,13 @@ public class ExperimentalUtilities {
 		System.out.println( request.headers() );
 
 		try {
-			return client.send( request, BodyHandlers.ofString() ).body();
+			return XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofString() ).body();
 		}
-		catch( IOException | InterruptedException e ) {
+		catch( InterruptedException e ) {
+			Thread.currentThread().interrupt();
+			return "Failed to get response from wotaskd %s:%s".formatted( hostName, port );
+		}
+		catch( IOException e ) {
 			e.printStackTrace();
 			return "Failed to get response from wotaskd %s:%s".formatted( hostName, port );
 		}
