@@ -267,7 +267,7 @@ public class AppConfigurePage extends AppComponent {
 			myApplication().setAdditionalArgs( appDefaults.additionalArgs() );
 
 			for( MInstance anInstance : myApplication().instanceArray() ) {
-				anInstance._takeValueFromApplication( "additionalArgs" );
+				anInstance._takeAdditionalArgsFromApplication();
 			}
 
 			_defaultsPush();
