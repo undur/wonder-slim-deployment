@@ -12,6 +12,9 @@ IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL OR CONSE
 SUCH DAMAGE.
  */
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Enumeration;
 
 import com.webobjects.appserver.WOActionResults;
@@ -26,9 +29,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
-import com.webobjects.foundation.NSTimeZone;
 import com.webobjects.foundation.NSTimestamp;
-import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
@@ -57,7 +58,7 @@ public class DirectAction extends WODirectAction {
 	private static String _invalidXML;
 	private static String _emptyXML;
 	private static NSDictionary _argumentNumberCommandError;
-	private static NSTimestampFormatter aFormat = null;
+	private static final DateTimeFormatter HTTP_DATE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME.withZone( ZoneOffset.UTC );
 
 	static {
 		// get the hostname for the error messages
@@ -76,10 +77,6 @@ public class DirectAction extends WODirectAction {
 		_invalidXML = (new FoundationCoder()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" ), "errorResponse" ), "monitorResponse" );
 		_emptyXML = (new FoundationCoder()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + " - INTERNAL ERROR: Request from Monitor was Empty" ), "errorResponse" ), "monitorResponse" );
 		_argumentNumberCommandError = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" }, errorKeys );
-
-		// get the formatter setup
-		aFormat = new NSTimestampFormatter( "%a, %d %b %Y %H:%M:%S GMT" );
-		aFormat.setDefaultFormatTimeZone( NSTimeZone.timeZoneWithName( "GMT", true ) );
 	}
 
 	public DirectAction( WORequest aRequest ) {
@@ -953,7 +950,7 @@ public class DirectAction extends WODirectAction {
 		WOResponse aResponse = WOApplication.application().createResponseInContext( null );
 		aResponse.appendContentString( xml );
 		aResponse.setHeader( "text/xml", "content-type" );
-		aResponse.setHeader( aFormat.format( new NSTimestamp() ), "Last-Modified" );
+		aResponse.setHeader( HTTP_DATE_FORMATTER.format( Instant.now() ), "Last-Modified" );
 		FLog.debug.appendln( "woConfigAction returned: " + xml );
 
 		return aResponse;
