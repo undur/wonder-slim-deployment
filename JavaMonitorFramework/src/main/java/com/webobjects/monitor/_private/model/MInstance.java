@@ -420,6 +420,11 @@ public class MInstance extends MObject {
 		_takeValueFromApplication( "autoOpenInBrowser" );
 	}
 
+	public void _takeLifebeatIntervalFromApplication() {
+		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
+		_takeValueFromApplication( "lifebeatInterval" );
+	}
+
 	public void _takePortFromApplication() {
 		final MHost aHost = _host;
 
@@ -480,7 +485,7 @@ public class MInstance extends MObject {
 		_takeCachingEnabledFromApplication();
 		_takeDebuggingEnabledFromApplication();
 		_takeAutoOpenInBrowserFromApplication();
-		_takeValueFromApplication( "lifebeatInterval" );
+		_takeLifebeatIntervalFromApplication();
 		_takeValueFromApplication( "additionalArgs" );
 	}
 

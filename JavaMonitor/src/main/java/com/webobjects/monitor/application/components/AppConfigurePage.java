@@ -252,7 +252,7 @@ public class AppConfigurePage extends AppComponent {
 			myApplication().setLifebeatInterval( appDefaults.lifebeatInterval() );
 
 			for( MInstance anInstance : myApplication().instanceArray() ) {
-				anInstance._takeValueFromApplication( "lifebeatInterval" );
+				anInstance._takeLifebeatIntervalFromApplication();
 			}
 
 			_defaultsPush();
