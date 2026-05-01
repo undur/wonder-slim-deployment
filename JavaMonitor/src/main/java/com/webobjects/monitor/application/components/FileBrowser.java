@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor.application.MonitorComponent;
@@ -101,7 +102,7 @@ public class FileBrowser extends MonitorComponent {
 	}
 
 	public boolean isCurrentFileDirectory() {
-		return aCurrentFile.fileType().equals( "NSFileTypeDirectory" );
+		return aCurrentFile.fileType().equals( MUtil.FILE_TYPE_DIRECTORY );
 	}
 
 	public Object backClicked() {

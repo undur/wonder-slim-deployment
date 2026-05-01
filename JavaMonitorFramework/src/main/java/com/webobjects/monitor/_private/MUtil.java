@@ -26,6 +26,9 @@ public class MUtil {
 	public static final String ADMIN_ACTION_STRING_PREFIX = "/cgi-bin/WebObjects/";
 	public static final String ADMIN_ACTION_STRING_POSTFIX = ".woa/womp/instanceRequest";
 
+	public static final String FILE_TYPE_DIRECTORY = "NSFileTypeDirectory";
+	public static final String FILE_TYPE_REGULAR = "NSFileTypeRegular";
+
 	public static Integer validatedInteger( final Integer value ) {
 
 		if( value == null ) {

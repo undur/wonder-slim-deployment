@@ -25,6 +25,7 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
+import com.webobjects.monitor._private.MUtil;
 
 import x.FoundationCoder;
 
@@ -56,7 +57,7 @@ public class RemoteBrowse extends WODirectAction {
 		final NSMutableArray rootArray = new NSMutableArray( anArrayCount );
 
 		for( int i = 0; i < anArrayCount; i++ ) {
-			NSDictionary aFileDict = new NSDictionary( new Object[] { rootStrings[i], "NSFileTypeDirectory", Long.valueOf( 0 ) }, FILE_KEYS );
+			NSDictionary aFileDict = new NSDictionary( new Object[] { rootStrings[i], MUtil.FILE_TYPE_DIRECTORY, Long.valueOf( 0 ) }, FILE_KEYS );
 			rootArray.addObject( aFileDict );
 		}
 
@@ -86,17 +87,17 @@ public class RemoteBrowse extends WODirectAction {
 					File subfile = new File( fullPath );
 
 					if( subfile.isDirectory() ) {
-						aFileType = "NSFileTypeDirectory";
+						aFileType = MUtil.FILE_TYPE_DIRECTORY;
 						aFileSize = Long.valueOf( 0 );
 					}
 					else {
-						aFileType = "NSFileTypeRegular";
+						aFileType = MUtil.FILE_TYPE_REGULAR;
 						aFileSize = Long.valueOf( subfile.length() );
 					}
 
 					final Map<String,Object> aFileDict = Map.of( "file", aFile, "fileType", aFileType, "fileSize", aFileSize );
 
-					if( aFileType.equals( "NSFileTypeDirectory" ) ) {
+					if( aFileType.equals( MUtil.FILE_TYPE_DIRECTORY ) ) {
 						aDirectoryArray.add( aFileDict );
 					}
 					else {
