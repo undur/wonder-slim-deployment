@@ -23,6 +23,8 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,8 +45,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSTimestamp;
-import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
@@ -865,11 +865,12 @@ public class MSiteConfig extends MObject {
 		return aConfig;
 	}
 
+	private static final DateTimeFormatter BACKUP_TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern( "yyyyMMddHHmmssSSS" );
+
 	private static void backupSiteConfig() {
 		final File sc = fileForSiteConfig();
 		if( sc.exists() ) {
-			final NSTimestampFormatter formatter = new NSTimestampFormatter( "%Y%m%d%H%M%S%F" ); // FIXME: Replace with java.time // Hugi 2024-11-10
-			final File renamedFile = new File( pathForSiteConfig() + "." + formatter.format( new NSTimestamp() ) );
+			final File renamedFile = new File( pathForSiteConfig() + "." + LocalDateTime.now().format( BACKUP_TIMESTAMP_FORMAT ) );
 			if( !sc.renameTo( renamedFile ) ) {
 				logger.error( "Cannot backup file {}. Possible Permissions Problem.", pathForSiteConfig() );
 			}
