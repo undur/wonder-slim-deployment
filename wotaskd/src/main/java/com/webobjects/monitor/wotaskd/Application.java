@@ -49,8 +49,6 @@ import x.FLog;
 
 public class Application extends ERXApplication {
 	
-	private static final Logger logger = LoggerFactory.getLogger( Application.class );
-	
 	private static final String _HTTP1 = "HTTP/1.0";
 
 	private InstanceController _localMonitor;
@@ -75,64 +73,6 @@ public class Application extends ERXApplication {
 
 	static public void main( String argv[] ) {
 		ERXApplication.main( argv, Application.class );
-	}
-
-	@Override
-	public String defaultRequestHandlerClassName() {
-		return "com.webobjects.appserver._private.WODirectActionRequestHandler";
-	}
-
-	@Override
-	public String name() {
-		return "wotaskd";
-	}
-
-	@Override
-	public Number port() {
-		if( _port == null ) {
-			if( super.port().intValue() > 0 ) {
-				_port = super.port();
-			}
-			else {
-				_port = Integer.valueOf( 1085 );
-			}
-			_intPort = _port.intValue();
-		}
-		return _port;
-	}
-
-	private int intPort() {
-		return _intPort;
-	}
-
-	public String multicastAddress() {
-		return _multicastAddress;
-	}
-
-	@Override
-	public boolean allowsConcurrentRequestHandling() {
-		return true;
-	}
-
-	public MSiteConfig siteConfig() {
-		return _siteConfig;
-	}
-
-	public void setSiteConfig( MSiteConfig aConfig ) {
-		// Don't need to call dataHasChanged, since a new MSiteConfig is already dirty
-		_siteConfig = aConfig;
-	}
-
-	public InstanceController localMonitor() {
-		return _localMonitor;
-	}
-
-	public boolean shouldWriteAdaptorConfig() {
-		return _shouldWriteAdaptorConfig;
-	}
-
-	public boolean shouldRespondToMulticast() {
-		return _shouldRespondToMulticast;
 	}
 
 	public Application() {
@@ -209,6 +149,64 @@ public class Application extends ERXApplication {
 
 		// Set up multicast listen thread
 		createRequestListenerThread();
+	}
+
+	@Override
+	public String defaultRequestHandlerClassName() {
+		return "com.webobjects.appserver._private.WODirectActionRequestHandler";
+	}
+
+	@Override
+	public String name() {
+		return "wotaskd";
+	}
+
+	@Override
+	public Number port() {
+		if( _port == null ) {
+			if( super.port().intValue() > 0 ) {
+				_port = super.port();
+			}
+			else {
+				_port = Integer.valueOf( 1085 );
+			}
+			_intPort = _port.intValue();
+		}
+		return _port;
+	}
+
+	private int intPort() {
+		return _intPort;
+	}
+
+	public String multicastAddress() {
+		return _multicastAddress;
+	}
+
+	@Override
+	public boolean allowsConcurrentRequestHandling() {
+		return true;
+	}
+
+	public MSiteConfig siteConfig() {
+		return _siteConfig;
+	}
+
+	public void setSiteConfig( MSiteConfig aConfig ) {
+		// Don't need to call dataHasChanged, since a new MSiteConfig is already dirty
+		_siteConfig = aConfig;
+	}
+
+	public InstanceController localMonitor() {
+		return _localMonitor;
+	}
+
+	public boolean shouldWriteAdaptorConfig() {
+		return _shouldWriteAdaptorConfig;
+	}
+
+	public boolean shouldRespondToMulticast() {
+		return _shouldRespondToMulticast;
 	}
 
 	/**
