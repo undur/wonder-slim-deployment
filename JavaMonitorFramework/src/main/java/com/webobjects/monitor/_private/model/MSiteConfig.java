@@ -1093,21 +1093,21 @@ public class MSiteConfig extends MObject {
 
 		for( int i = 0; i < hostArrayCount; i++ ) {
 			final MHost anMobject = _hostArray.get( i );
-			hostArray.addObject( anMobject.values );
+			hostArray.addObject( anMobject.dictionaryForArchive() );
 		}
 
 		final NSMutableArray<MApplication> applicationArray = new NSMutableArray<>( applicationArrayCount );
 
 		for( int i = 0; i < applicationArrayCount; i++ ) {
 			final MApplication anMobject = _applicationArray.get( i );
-			applicationArray.addObject( anMobject.values );
+			applicationArray.addObject( anMobject.dictionaryForArchive() );
 		}
 
 		final NSMutableArray<MInstance> instanceArray = new NSMutableArray<>( instanceArrayCount );
 
 		for( int i = 0; i < instanceArrayCount; i++ ) {
 			final MInstance anMobject = _instanceArray.get( i );
-			instanceArray.addObject( anMobject.values );
+			instanceArray.addObject( anMobject.dictionaryForArchive() );
 		}
 
 		siteConfig.takeValueForKey( site, "site" );

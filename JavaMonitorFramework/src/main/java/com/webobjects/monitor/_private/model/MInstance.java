@@ -42,10 +42,14 @@ import x.FLog;
 public class MInstance extends MObject {
 
 	// Old common code
-	protected NSMutableDictionary<String, Object> values;
+	private NSMutableDictionary<String, Object> values;
 	protected Map<String, Object> adaptorValues = Collections.synchronizedMap( new HashMap<>() );
 
 	public NSMutableDictionary<String, Object> values() {
+		return values;
+	}
+
+	public NSMutableDictionary<String, Object> dictionaryForArchive() {
 		return values;
 	}
 

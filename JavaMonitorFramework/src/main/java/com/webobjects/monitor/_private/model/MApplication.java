@@ -30,7 +30,7 @@ public class MApplication extends MObject {
 	/**
 	 * FIXME: Make private once we've eliminated MInstance._takeValueFromApplication()
 	 */
-	protected NSMutableDictionary<String, Object> values;
+	private NSMutableDictionary<String, Object> values;
 	protected Map<String, Object> adaptorValues = Collections.synchronizedMap( new HashMap<>() );
 
 	public NSMutableDictionary<String, Object> values() {
@@ -40,6 +40,10 @@ public class MApplication extends MObject {
 	public void updateValues( NSDictionary<String, Object> aDict ) {
 		values = new NSMutableDictionary<>( aDict );
 		_siteConfig.dataHasChanged();
+	}
+
+	public NSMutableDictionary<String, Object> dictionaryForArchive() {
+		return values;
 	}
 
 	//	String name;

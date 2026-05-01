@@ -41,7 +41,7 @@ import x.ResponseWrapper;
 public class MHost extends MObject {
 
 	// Old common code
-	protected NSMutableDictionary<String, Object> values;
+	private NSMutableDictionary<String, Object> values;
 
 	public NSMutableDictionary<String, Object> values() {
 		return values;
@@ -50,6 +50,10 @@ public class MHost extends MObject {
 	public void updateValues( NSDictionary<String, Object> aDict ) {
 		values = new NSMutableDictionary<>( aDict );
 		_siteConfig.dataHasChanged();
+	}
+
+	public NSMutableDictionary<String, Object> dictionaryForArchive() {
+		return values;
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger( MHost.class );
