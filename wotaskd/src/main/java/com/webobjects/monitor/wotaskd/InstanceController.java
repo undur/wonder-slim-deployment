@@ -25,6 +25,7 @@ import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -407,8 +408,8 @@ public class InstanceController implements IInstanceController {
 				if( instArrayCount == 0 )
 					return;
 
-				final NSTimestamp rightNow = new NSTimestamp( System.currentTimeMillis(), java.util.TimeZone.getDefault() );
-				Thread[] workers = new Thread[instArrayCount];
+				final Instant now = Instant.now();
+				final Thread[] workers = new Thread[instArrayCount];
 				final InstanceController localMonitor = this;
 
 				for( int i = 0; i < instArrayCount; i++ ) {
@@ -417,7 +418,7 @@ public class InstanceController implements IInstanceController {
 						public void run() {
 							try {
 								MInstance anInst = (MInstance)instArray.get( j );
-								if( (anInst.isScheduled()) && (anInst.nearNextScheduledShutdown( rightNow )) ) {
+								if( (anInst.isScheduled()) && (anInst.nearNextScheduledShutdown( now )) ) {
 									if( anInst.isGracefullyScheduled() ) {
 										localMonitor.stopInstance( anInst );
 									}

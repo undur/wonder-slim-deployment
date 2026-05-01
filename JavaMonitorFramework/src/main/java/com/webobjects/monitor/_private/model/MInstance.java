@@ -12,6 +12,8 @@ SUCH DAMAGE.
  */
 package com.webobjects.monitor._private.model;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -984,13 +986,12 @@ public class MInstance extends MObject {
 		_nextScheduledShutdownString = newtime;
 	}
 
-	public boolean nearNextScheduledShutdown( NSTimestamp rightNow ) {
-		long temp;
-		temp = Math.abs( _nextScheduledShutdown.timeIntervalSinceTimestamp( rightNow ) );
+	public boolean nearNextScheduledShutdown( Instant now ) {
+		final long secondsAway = Math.abs( ChronoUnit.SECONDS.between( now, _nextScheduledShutdown.toInstant() ) );
 
 		final long halfHourAsSeconds = 1800;
 
-		if( temp < halfHourAsSeconds ) {
+		if( secondsAway < halfHourAsSeconds ) {
 			FLog.debug.appendln( "nearNextScheduledShutdown TRUE" );
 			return true;
 		}
