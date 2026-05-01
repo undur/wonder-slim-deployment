@@ -396,38 +396,31 @@ public class MInstance extends MObject {
 	}
 
 	public void _takeAutoRecoverFromApplication() {
-		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
-		_takeValueFromApplication( "autoRecover" );
+		setAutoRecover( _application.autoRecover() );
 	}
 
 	public void _takeMinimumActiveSessionsCountFromApplication() {
-		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
-		_takeValueFromApplication( "minimumActiveSessionsCount" );
+		setMinimumActiveSessionsCount( _application.minimumActiveSessionsCount() );
 	}
 
 	public void _takeCachingEnabledFromApplication() {
-		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
-		_takeValueFromApplication( "cachingEnabled" );
+		setCachingEnabled( _application.cachingEnabled() );
 	}
 
 	public void _takeDebuggingEnabledFromApplication() {
-		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
-		_takeValueFromApplication( "debuggingEnabled" );
+		setDebuggingEnabled( _application.debuggingEnabled() );
 	}
 
 	public void _takeAutoOpenInBrowserFromApplication() {
-		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
-		_takeValueFromApplication( "autoOpenInBrowser" );
+		setAutoOpenInBrowser( _application.autoOpenInBrowser() );
 	}
 
 	public void _takeLifebeatIntervalFromApplication() {
-		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
-		_takeValueFromApplication( "lifebeatInterval" );
+		setLifebeatInterval( _application.lifebeatInterval() );
 	}
 
 	public void _takeAdditionalArgsFromApplication() {
-		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
-		_takeValueFromApplication( "additionalArgs" );
+		setAdditionalArgs( _application.additionalArgs() );
 	}
 
 	public void _takePortFromApplication() {
@@ -466,15 +459,6 @@ public class MInstance extends MObject {
 		else if( aHost.osType().equals( "MACOSX" ) ) {
 			values.takeValueForKey( generateOutputPath( _application.macOutputPath() ), "outputPath" );
 		}
-	}
-
-	/**
-	 * FIXME: Eliminate invocations of this method, replacing them with direct method invocations for each changed parameter // Hugi 2026-05-01
-	 */
-	@Deprecated
-	public void _takeValueFromApplication( String valueName ) {
-		final Object appValue = _application.values.valueForKey( valueName );
-		values.takeValueForKey( appValue, valueName );
 	}
 
 	public void takeValuesFromApplication() {
