@@ -247,45 +247,43 @@ public class MHost extends MObject {
 
 		ResponseWrapper responseWrapper = new ResponseWrapper();
 
-		try {
-			// CHECKME: We can reuse the client. Future performance thoughts
-			final HttpClient client = HttpClient
-					.newBuilder()
-					.build();
+		// CHECKME: We can reuse the client. Future performance thoughts
+		final HttpClient client = HttpClient
+				.newBuilder()
+				.build();
 
-			final Builder requestBuilder = HttpRequest
-					.newBuilder()
-					.uri( URI.create( "http://%s:%s%s".formatted( name(), WOApplication.application().lifebeatDestinationPort(), MUtil.WOTASKD_DIRECT_ACTION_URL ) ) )
-					.timeout( Duration.ofMillis( WOTASKD_RECEIVE_TIMEOUT ) )
-					.POST( BodyPublishers.ofString( contentString ) );
+		final Builder requestBuilder = HttpRequest
+				.newBuilder()
+				.uri( URI.create( "http://%s:%s%s".formatted( name(), WOApplication.application().lifebeatDestinationPort(), MUtil.WOTASKD_DIRECT_ACTION_URL ) ) )
+				.timeout( Duration.ofMillis( WOTASKD_RECEIVE_TIMEOUT ) )
+				.POST( BodyPublishers.ofString( contentString ) );
 
-			// FIXME: We're going to have to check the semantics of resetting the password (used to be handled when constructing the password header map in MSiteConfig.passwordDictionary()) // Hugi 2024-11-06
-			if( password != null ) {
-				requestBuilder.setHeader( "password", password );
-			}
-
-			final HttpRequest request = requestBuilder.build();
-
-			logger.info( "--> Sending request: =======" );
-			logger.info( "{}", request );
-			logger.info( contentString );
-
-			try {
-				final HttpResponse<byte[]> response = client.send( request, BodyHandlers.ofByteArray() );
-				logger.info( "--> Response received =======" );
-				responseWrapper._content = response.body();
-			}
-			catch( IOException e ) {
-				e.printStackTrace();
-				isAvailable = false;
-			}
-
-			logger.info( "--> End request phase =======" );
+		// FIXME: We're going to have to check the semantics of resetting the password (used to be handled when constructing the password header map in MSiteConfig.passwordDictionary()) // Hugi 2024-11-06
+		if( password != null ) {
+			requestBuilder.setHeader( "password", password );
 		}
-		catch( Throwable e ) {
+
+		final HttpRequest request = requestBuilder.build();
+
+		logger.info( "--> Sending request: =======" );
+		logger.info( "{}", request );
+		logger.info( contentString );
+
+		try {
+			final HttpResponse<byte[]> response = client.send( request, BodyHandlers.ofByteArray() );
+			logger.info( "--> Response received =======" );
+			responseWrapper._content = response.body();
+		}
+		catch( IOException e ) {
 			e.printStackTrace();
 			isAvailable = false;
 		}
+		catch( InterruptedException e ) {
+			Thread.currentThread().interrupt();
+			isAvailable = false;
+		}
+
+		logger.info( "--> End request phase =======" );
 
 		// For error handling
 		if( responseWrapper.contentString() == null ) {
