@@ -1,0 +1,162 @@
+(
+	{
+		"configuredInstances" = "1";
+		"maxSessions" = "6";
+		"maxAvgIdleTime" = "35.882";
+		"avgTransactions" = "1593.0000";
+		"sumSessions" = "6";
+		"avgAvgTransactionTime" = "0.0110000";
+		"refusingInstances" = "0";
+		"avgSessions" = "6.0000";
+		"maxTransactions" = "1593";
+		"applicationName" = "Hugi";
+		"avgAvgIdleTime" = "35.8820000";
+		"maxAvgTransactionTime" = "0.011";
+		"runningInstances" = "1";
+		"sumTransactions" = "1593";
+	},
+	{
+		"configuredInstances" = "1";
+		"maxSessions" = "6";
+		"maxAvgIdleTime" = "7.168";
+		"avgTransactions" = "67.0000";
+		"sumSessions" = "6";
+		"avgAvgTransactionTime" = "0.0430000";
+		"refusingInstances" = "0";
+		"avgSessions" = "6.0000";
+		"maxTransactions" = "67";
+		"applicationName" = "husvordurinn-ng";
+		"avgAvgIdleTime" = "7.1680000";
+		"maxAvgTransactionTime" = "0.043";
+		"runningInstances" = "1";
+		"sumTransactions" = "67";
+	},
+	{
+		"configuredInstances" = "1";
+		"maxSessions" = "6";
+		"maxAvgIdleTime" = "7.168";
+		"avgTransactions" = "67.0000";
+		"sumSessions" = "6";
+		"avgAvgTransactionTime" = "0.0430000";
+		"refusingInstances" = "0";
+		"avgSessions" = "6.0000";
+		"maxTransactions" = "67";
+		"applicationName" = "ng-website";
+		"avgAvgIdleTime" = "7.1680000";
+		"maxAvgTransactionTime" = "0.043";
+		"runningInstances" = "1";
+		"sumTransactions" = "67";
+	},
+	{
+		"configuredInstances" = "1";
+		"maxSessions" = "6";
+		"maxAvgIdleTime" = "7.168";
+		"avgTransactions" = "67.0000";
+		"sumSessions" = "6";
+		"avgAvgTransactionTime" = "0.0430000";
+		"refusingInstances" = "0";
+		"avgSessions" = "6.0000";
+		"maxTransactions" = "67";
+		"applicationName" = "whoacommunity";
+		"avgAvgIdleTime" = "7.1680000";
+		"maxAvgTransactionTime" = "0.043";
+		"runningInstances" = "1";
+		"sumTransactions" = "67";
+	},
+	{
+		"configuredInstances" = "1";
+		"maxSessions" = "6";
+		"maxAvgIdleTime" = "7.168";
+		"avgTransactions" = "67.0000";
+		"sumSessions" = "6";
+		"avgAvgTransactionTime" = "0.0430000";
+		"refusingInstances" = "0";
+		"avgSessions" = "6.0000";
+		"maxTransactions" = "67";
+		"applicationName" = "Rebbi";
+		"avgAvgIdleTime" = "7.1680000";
+		"maxAvgTransactionTime" = "0.043";
+		"runningInstances" = "1";
+		"sumTransactions" = "67";
+	},
+	{
+		"configuredInstances" = "1";
+		"maxSessions" = "6";
+		"maxAvgIdleTime" = "7.168";
+		"avgTransactions" = "67.0000";
+		"sumSessions" = "6";
+		"avgAvgTransactionTime" = "0.0430000";
+		"refusingInstances" = "0";
+		"avgSessions" = "6.0000";
+		"maxTransactions" = "67";
+		"applicationName" = "oskgunnlaugs";
+		"avgAvgIdleTime" = "7.1680000";
+		"maxAvgTransactionTime" = "0.043";
+		"runningInstances" = "1";
+		"sumTransactions" = "67";
+	},
+	{
+		"configuredInstances" = "1";
+		"maxSessions" = "4";
+		"maxAvgIdleTime" = "83.384";
+		"avgTransactions" = "671.0000";
+		"sumSessions" = "4";
+		"avgAvgTransactionTime" = "0.0090000";
+		"refusingInstances" = "0";
+		"avgSessions" = "4.0000";
+		"maxTransactions" = "671";
+		"applicationName" = "KidWits";
+		"avgAvgIdleTime" = "83.3840000";
+		"maxAvgTransactionTime" = "0.009";
+		"runningInstances" = "1";
+		"sumTransactions" = "671";
+	},
+	{
+		"configuredInstances" = "1";
+		"maxSessions" = "2";
+		"maxAvgIdleTime" = "1596.836";
+		"avgTransactions" = "35.0000";
+		"sumSessions" = "2";
+		"avgAvgTransactionTime" = "0.0220000";
+		"refusingInstances" = "0";
+		"avgSessions" = "2.0000";
+		"maxTransactions" = "35";
+		"applicationName" = "Campaigns";
+		"avgAvgIdleTime" = "1596.8360000";
+		"maxAvgTransactionTime" = "0.022";
+		"runningInstances" = "1";
+		"sumTransactions" = "35";
+	},
+	{
+		"configuredInstances" = "1";
+		"maxSessions" = "6";
+		"maxAvgIdleTime" = "7.168";
+		"avgTransactions" = "67.0000";
+		"sumSessions" = "6";
+		"avgAvgTransactionTime" = "0.0430000";
+		"refusingInstances" = "0";
+		"avgSessions" = "6.0000";
+		"maxTransactions" = "67";
+		"applicationName" = "Lidamot";
+		"avgAvgIdleTime" = "7.1680000";
+		"maxAvgTransactionTime" = "0.043";
+		"runningInstances" = "1";
+		"sumTransactions" = "67";
+	},
+	{
+		"configuredInstances" = "1";
+		"maxSessions" = "0";
+		"maxAvgIdleTime" = "436.941";
+		"avgTransactions" = "109.0000";
+		"sumSessions" = "0";
+		"avgAvgTransactionTime" = "0.00000";
+		"refusingInstances" = "0";
+		"avgSessions" = "0.0000";
+		"maxTransactions" = "109";
+		"applicationName" = "Gagnasafn";
+		"avgAvgIdleTime" = "436.9410000";
+		"maxAvgTransactionTime" = "0.0";
+		"runningInstances" = "1";
+		"sumTransactions" = "109";
+	}
+)

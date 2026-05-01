@@ -13,7 +13,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MHost;
@@ -25,6 +24,7 @@ import com.webobjects.monitor.application.components.HostsPage;
 
 import x.FLog;
 import x.FoundationCoder;
+import x.FoundationPropertyListSerialization;
 import x.ResponseWrapper;
 
 public class WOTaskdHandler {
@@ -328,7 +328,7 @@ public class WOTaskdHandler {
 			final ResponseWrapper[] responses = collector.sendRequest( monitorRequest, wotaskdArray, false );
 			final NSDictionary[] responseDicts = generateResponseDictionaries( responses );
 
-			FLog.debug.appendln( "OUT: " + NSPropertyListSerialization.stringFromPropertyList( monitorRequest ) + "\n\nIN: " + NSPropertyListSerialization.stringFromPropertyList( new NSArray( responseDicts ) ) );
+			FLog.debug.appendln( "OUT: " + FoundationPropertyListSerialization.stringFromPropertyList( monitorRequest ) + "\n\nIN: " + FoundationPropertyListSerialization.stringFromPropertyList( new NSArray( responseDicts ) ) );
 
 			collector.getCommandErrors( responseDicts );
 		}

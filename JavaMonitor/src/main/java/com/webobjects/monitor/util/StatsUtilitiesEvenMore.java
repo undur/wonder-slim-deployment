@@ -6,9 +6,10 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MInstance;
+
+import x.FoundationPropertyListSerialization;
 
 /**
  * FIXME: Temporary holder class for some statistics functionality we're moving out of the front end // Hugi 2024-10-26 
@@ -17,7 +18,7 @@ import com.webobjects.monitor._private.model.MInstance;
 public class StatsUtilitiesEvenMore {
 
 	public static String statisticsString() {
-		return NSPropertyListSerialization.stringFromPropertyList( StatsUtilitiesEvenMore.statistics() );
+		return FoundationPropertyListSerialization.stringFromPropertyList( StatsUtilitiesEvenMore.statistics() );
 	}
 
 	private static NSArray statistics() {

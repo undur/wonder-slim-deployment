@@ -30,7 +30,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.model.MApplication;
@@ -40,6 +39,7 @@ import com.webobjects.monitor._private.model.MSiteConfig;
 
 import x.FLog;
 import x.FoundationCoder;
+import x.FoundationPropertyListSerialization;
 import x.ResponseWrapper;
 
 public class DirectAction extends WODirectAction {
@@ -682,7 +682,7 @@ public class DirectAction extends WODirectAction {
 				}
 				catch( Exception e ) {
 					try {
-						Object o = NSPropertyListSerialization.propertyListFromString( new String( aResponse.content() ) );
+						Object o = FoundationPropertyListSerialization.propertyListFromString( new String( aResponse.content() ) );
 						errorResponse.addObject( anInstance.displayName() + " is probably an older application that doesn't conform to the current Monitor Protocol. Please update and restart the instance." );
 						FLog.err.appendln( "Got old-style response from instance: " + anInstance.displayName() );
 					}
@@ -703,7 +703,7 @@ public class DirectAction extends WODirectAction {
 					continue;
 
 				try {
-					NSDictionary statistics = (NSDictionary)NSPropertyListSerialization.propertyListFromString( queryInstanceResponse );
+					NSDictionary statistics = (NSDictionary)FoundationPropertyListSerialization.propertyListFromString( queryInstanceResponse );
 
 					NSMutableDictionary newStats = new NSMutableDictionary( 5 );
 
