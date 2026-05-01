@@ -190,7 +190,7 @@ public class AppConfigurePage extends AppComponent {
 			myApplication().setCachingEnabled( appDefaults.cachingEnabled() );
 
 			for( MInstance anInstance : myApplication().instanceArray() ) {
-				anInstance._takeValueFromApplication( "cachingEnabled" );
+				anInstance._takeCachingEnabledFromApplication();
 			}
 
 			_defaultsPush();
