@@ -26,18 +26,20 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
@@ -59,9 +61,11 @@ import x.ResponseWrapper;
 
 public class InstanceController implements IInstanceController {
 
-	private WOTimer aScheduleTimer;
-	private WOTimer anAutoRecoverTimer;
-	private WOTimer anAutoRecoverStartupTimer;
+	private final ScheduledExecutorService _scheduler = Executors.newSingleThreadScheduledExecutor( r -> {
+		final Thread t = new Thread( r, "InstanceController-scheduler" );
+		t.setDaemon( true );
+		return t;
+	} );
 	private final String _hostName;
 	private boolean _isOnWindows = false;
 	private boolean _shouldUseSpawn = true;
@@ -142,21 +146,9 @@ public class InstanceController implements IInstanceController {
 		}
 
 		// Used to do phased startup the first time startup
-		anAutoRecoverStartupTimer = WOTimer.scheduledTimer( aConfig.autoRecoverInterval(), this, "_checkAutoRecoverStartup", null, null, false );
+		_scheduler.schedule( this::_checkAutoRecoverStartup, aConfig.autoRecoverInterval(), TimeUnit.MILLISECONDS );
 
 		_hostName = theApplication.host();
-	}
-
-	private NSTimestamp calculateNearestHour() {
-		NSTimestamp currentTime = new NSTimestamp();
-
-		TimeZone currentTimeZone = currentTime.timeZone();
-		int currentYear = currentTime.yearOfCommonEra();
-		int currentMonth = currentTime.monthOfYear();
-		int currentDayOfMonth = currentTime.dayOfMonth(); // [1,31]
-		int currentHourOfDay = currentTime.hourOfDay(); // [0,23]
-
-		return new NSTimestamp( currentYear, currentMonth, currentDayOfMonth, currentHourOfDay + 1, 0, 0, currentTimeZone );
 	}
 
 	public void registerUnknownInstance( String name, String host, String port ) {
@@ -339,15 +331,13 @@ public class InstanceController implements IInstanceController {
 			catch( InterruptedException ie ) {
 			}
 
-			// That timer will kick off a repeating, hourly, timer for _checkSchedules every hour on the hour
-			NSTimestamp fireDate = calculateNearestHour();
+			// Repeating, hourly, timer for _checkSchedules — fires every hour on the hour
+			final Instant now = Instant.now();
+			final long delayUntilNextHour = Duration.between( now, now.truncatedTo( ChronoUnit.HOURS ).plus( 1, ChronoUnit.HOURS ) ).toMillis();
+			_scheduler.scheduleAtFixedRate( this::_checkSchedules, delayUntilNextHour, TimeUnit.HOURS.toMillis( 1 ), TimeUnit.MILLISECONDS );
 
-			//NSTimestamp fireDate, long ti, Object aTarget, String aSelectorName, Object userInfo, Class userInfoClass, boolean repeat
-			aScheduleTimer = new WOTimer( fireDate, (60 * 60 * 1000), this, "_checkSchedules", null, null, true );
-			aScheduleTimer.schedule();
-
-			// This is the regular timer that should do autorecovery
-			anAutoRecoverTimer = WOTimer.scheduledTimer( aConfig.autoRecoverInterval(), this, "_checkAutoRecover", null, null, true );
+			// Regular auto-recovery timer
+			_scheduler.scheduleAtFixedRate( this::_checkAutoRecover, aConfig.autoRecoverInterval(), aConfig.autoRecoverInterval(), TimeUnit.MILLISECONDS );
 
 		}
 		finally {
