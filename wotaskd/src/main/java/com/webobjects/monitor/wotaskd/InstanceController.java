@@ -24,6 +24,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -43,7 +44,6 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
@@ -140,13 +140,9 @@ public class InstanceController implements IInstanceController {
 		}
 		_shouldUseSpawn = StringExtensions.boolValue( System.getProperty( "WOShouldUseSpawn" ) );
 		if( _shouldUseSpawn ) {
-			String appDir = System.getProperties().getProperty( "user.dir" );
-			appDir = NSPathUtilities.stringByAppendingPathComponent( appDir, "Contents" );
-			appDir = NSPathUtilities.stringByAppendingPathComponent( appDir, "Resources" );
-			if( _isOnWindows )
-				appDir = NSPathUtilities.stringByAppendingPathComponent( appDir, "SpawnOfWotaskd.exe" );
-			else
-				appDir = NSPathUtilities.stringByAppendingPathComponent( appDir, "SpawnOfWotaskd.sh" );
+			final String userDir = System.getProperties().getProperty( "user.dir" );
+			final String spawnScript = _isOnWindows ? "SpawnOfWotaskd.exe" : "SpawnOfWotaskd.sh";
+			final String appDir = Path.of( userDir, "Contents", "Resources", spawnScript ).toString();
 
 			spawningGrounds = appDir + " ";
 

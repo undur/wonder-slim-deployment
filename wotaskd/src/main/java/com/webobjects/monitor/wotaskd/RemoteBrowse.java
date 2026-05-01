@@ -13,6 +13,7 @@ SUCH DAMAGE.
  */
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +25,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSPathUtilities;
 
 import x.FoundationCoder;
 
@@ -48,7 +48,7 @@ public class RemoteBrowse extends WODirectAction {
 		rootStrings = new String[roots.length];
 
 		for( int i = 0; i < roots.length; i++ ) {
-			rootStrings[i] = NSPathUtilities._standardizedPath( roots[i].getAbsolutePath() );
+			rootStrings[i] = Path.of( roots[i].getAbsolutePath() ).normalize().toString();
 		}
 
 		int anArrayCount = rootStrings.length;
@@ -82,8 +82,7 @@ public class RemoteBrowse extends WODirectAction {
 					String aFileType;
 					Long aFileSize;
 
-					String fullPath = NSPathUtilities.stringByAppendingPathComponent( aStartingPath, aFile );
-					fullPath = NSPathUtilities._standardizedPath( fullPath );
+					final String fullPath = Path.of( aStartingPath, aFile ).normalize().toString();
 					File subfile = new File( fullPath );
 
 					if( subfile.isDirectory() ) {

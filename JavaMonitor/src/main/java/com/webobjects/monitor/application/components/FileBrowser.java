@@ -19,6 +19,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor.application.MonitorComponent;
@@ -105,10 +105,10 @@ public class FileBrowser extends MonitorComponent {
 	}
 
 	public Object backClicked() {
-		String originalPath = startingPath;
-		startingPath = NSPathUtilities.stringByDeletingLastPathComponent( startingPath );
-		startingPath = NSPathUtilities._standardizedPath( startingPath );
-		if( startingPath.equals( "" ) || (originalPath.equals( startingPath )) ) {
+		final String originalPath = startingPath;
+		final Path parent = Path.of( startingPath ).getParent();
+		startingPath = (parent == null) ? null : parent.normalize().toString();
+		if( startingPath != null && originalPath.equals( startingPath ) ) {
 			startingPath = null;
 		}
 		if( retrieveFileList() != null ) {
@@ -118,10 +118,9 @@ public class FileBrowser extends MonitorComponent {
 	}
 
 	public Object directoryClicked() {
-		String originalPath = startingPath;
-		String aFile = aCurrentFile.file();
-		startingPath = NSPathUtilities.stringByAppendingPathComponent( startingPath, aFile );
-		startingPath = NSPathUtilities._standardizedPath( startingPath );
+		final String originalPath = startingPath;
+		final String aFile = aCurrentFile.file();
+		startingPath = Path.of( startingPath, aFile ).normalize().toString();
 		retrieveFileList();
 		if( retrieveFileList() != null ) {
 			startingPath = originalPath;
@@ -130,8 +129,8 @@ public class FileBrowser extends MonitorComponent {
 	}
 
 	public Object jumpToClicked() {
-		String originalPath = startingPath;
-		startingPath = NSPathUtilities._standardizedPath( startingPath );
+		final String originalPath = startingPath;
+		startingPath = Path.of( startingPath ).normalize().toString();
 		retrieveFileList();
 		if( retrieveFileList() != null ) {
 			startingPath = originalPath;
@@ -140,14 +139,13 @@ public class FileBrowser extends MonitorComponent {
 	}
 
 	public Object selectClicked() {
-		String aFile = aCurrentFile.file();
-		startingPath = NSPathUtilities.stringByAppendingPathComponent( startingPath, aFile );
-		startingPath = NSPathUtilities._standardizedPath( startingPath );
+		final String aFile = aCurrentFile.file();
+		startingPath = Path.of( startingPath, aFile ).normalize().toString();
 		return performParentAction( callbackSelectionAction );
 	}
 
 	public Object selectCurrentDirClicked() {
-		startingPath = NSPathUtilities._standardizedPath( startingPath );
+		startingPath = Path.of( startingPath ).normalize().toString();
 		return performParentAction( callbackSelectionAction );
 	}
 

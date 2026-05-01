@@ -12,6 +12,7 @@ SUCH DAMAGE.
  */
 package com.webobjects.monitor._private.model;
 
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSTimeZone;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
@@ -459,7 +459,7 @@ public class MInstance extends MObject {
 	public String generateOutputPath( String pathEndingWithSeperator ) {
 
 		if( pathEndingWithSeperator != null ) {
-			return NSPathUtilities._standardizedPath( NSPathUtilities.stringByAppendingPathComponent( pathEndingWithSeperator, displayName() ) );
+			return Path.of( pathEndingWithSeperator, displayName() ).normalize().toString();
 		}
 
 		return null;
