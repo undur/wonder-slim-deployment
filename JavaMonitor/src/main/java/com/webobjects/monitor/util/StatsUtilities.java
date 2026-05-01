@@ -12,13 +12,15 @@ SUCH DAMAGE.
  */
 package com.webobjects.monitor.util;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.foundation.NSTimestamp;
-import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MInstance;
 
@@ -147,10 +149,9 @@ public class StatsUtilities {
 		return Float.valueOf( aTotalAvg );
 	}
 
-	public static Float actualTransactionsPerSecond( final MApplication anApp ) {
+	private static final DateTimeFormatter STARTED_AT_FORMATTER = DateTimeFormatter.ofPattern( "yyyy:MM:dd:HH:mm:ss z" ).withZone( ZoneOffset.UTC );
 
-		// FIXME: We're going to replace this with java.time stuff eventually // Hugi 2024-10-25
-		NSTimestampFormatter dateFormatter = new NSTimestampFormatter( "%Y:%m:%d:%H:%M:%S %Z" );
+	public static Float actualTransactionsPerSecond( final MApplication anApp ) {
 
 		float result = (float)0.0;
 
@@ -171,18 +172,17 @@ public class StatsUtilities {
 				}
 
 				if( aTrans != null && (aTrans.intValue() > 0) ) {
-					NSTimestamp aDate;
 					float aRunningTime;
 
 					try {
-						// Important! This relies on the fact that the stats will deliver startdate based on GMT, since new NSTimestamp is also base on GMT!
-						aDate = (NSTimestamp)dateFormatter.parseObject( startedAt );
-						aRunningTime = (aDate.getTime() - System.currentTimeMillis()) / 1000;
+						// The stats deliver startedAt as a GMT timestamp string.
+						final long startedEpochMillis = ZonedDateTime.parse( startedAt, STARTED_AT_FORMATTER ).toInstant().toEpochMilli();
+						aRunningTime = (startedEpochMillis - System.currentTimeMillis()) / 1000.0f;
 					}
-					catch( java.text.ParseException ex ) {
+					catch( DateTimeParseException ex ) {
 						aRunningTime = (float)0.0;
 						logger.error( "Format error in StatsUtilities: " + startedAt );
-						logger.error( "{}", ex.getErrorOffset() );
+						logger.error( "{}", ex.getErrorIndex() );
 						logger.error( "Actual Transactions Per Second rate is inaccurate." );
 					}
 
