@@ -735,22 +735,23 @@ public class MInstance extends MObject {
 		return _lastRegistration;
 	}
 
-	public void startRegistration( NSTimestamp registrationDate ) {
-		updateRegistration( registrationDate );
+	public void startRegistration() {
+		updateRegistration();
 	}
 
-	public void updateRegistration( NSTimestamp registrationDate ) {
+	public void updateRegistration() {
 		succeededInConnection();
-		_lastRegistration = registrationDate;
+		// CHECKME: could be a parameter. Localizes the NSTimestamp effect.
+		_lastRegistration = new NSTimestamp();
 	}
 
-	public void registerStop( NSTimestamp registrationDate ) {
+	public void registerStop() {
 		succeededInConnection();
 		_lastRegistration = NSTimestamp.DistantPast;
 		state = MUtil.DEAD;
 	}
 
-	public void registerCrash( NSTimestamp registrationDate ) {
+	public void registerCrash() {
 		succeededInConnection();
 		_lastRegistration = NSTimestamp.DistantPast;
 		state = MUtil.CRASHING;

@@ -29,7 +29,6 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
-import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
@@ -661,7 +660,7 @@ public class DirectAction extends WODirectAction {
 			ResponseWrapper aResponse = responses[i];
 			MInstance anInstance = (MInstance)instArray.objectAtIndex( i );
 			if( aResponse != null ) {
-				anInstance.updateRegistration( new NSTimestamp() );
+				anInstance.updateRegistration();
 				if( aResponse.headerForKey( "x-webobjects-refusenewsessions" ) != null ) {
 					anInstance.setRefusingNewSessions( true );
 				}

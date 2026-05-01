@@ -25,7 +25,6 @@ import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.monitor._private.model.MInstance;
 
 public class LifebeatRequestHandler extends WORequestHandler {
@@ -150,7 +149,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
-				instance.startRegistration( new NSTimestamp() );
+				instance.startRegistration();
 				instance.setShouldDie( false );
 			}
 			else {
@@ -173,7 +172,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
-				instance.updateRegistration( new NSTimestamp() );
+				instance.updateRegistration();
 				// This call will reset shouldDie status!;
 				return !instance.shouldDieAndReset();
 			}
@@ -196,7 +195,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
-				instance.registerStop( new NSTimestamp() );
+				instance.registerStop();
 				instance.setShouldDie( false );
 				instance.cancelForceQuitTask();
 			}
@@ -218,7 +217,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
-				instance.registerCrash( new NSTimestamp() );
+				instance.registerCrash();
 				instance.setShouldDie( false );
 				instance.cancelForceQuitTask();
 			}
