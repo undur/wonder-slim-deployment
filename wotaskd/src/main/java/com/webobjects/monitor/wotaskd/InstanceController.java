@@ -44,7 +44,6 @@ import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
-import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
@@ -105,8 +104,21 @@ public class InstanceController implements IInstanceController {
 	 * so two missed pings count as dead. Keeps the registry from growing without bound.
 	 *
 	 * <h4>Shape</h4>
-	 * <p>{@code appName -> { port -> lastLifebeatTimestamp }}. Concurrent access is
-	 * gated by {@link #_unknownAppLock}.
+	 * <p>Two-level nested map:
+	 * <pre>
+	 * appName (String) -> { port (String) -> lastLifebeat (Instant) }
+	 * </pre>
+	 * <p>The outer key is the application name (e.g. {@code "Hugi"}), the inner key
+	 * is the port the instance is listening on (e.g. {@code "2001"}, kept as a String
+	 * since nothing parses it as an int), and the inner value is the timestamp of
+	 * the last lifebeat received from that instance. The two-level shape lines up
+	 * with the grouped-by-app structure {@link #generateAdaptorConfigXML()} emits.
+	 *
+	 * <p>FIXME: replace the inner map's value with an {@code UnknownApplication} record
+	 * once we get there; the current shape predates records and uses Strings/Instant
+	 * directly. // Hugi 2026-04-30
+	 *
+	 * <p>Concurrent access is gated by {@link #_unknownAppLock}.
 	 *
 	 * <h4>Is it pulling its weight?</h4>
 	 * <p>If your deployment is JavaMonitor-only and nobody starts apps from the shell,
@@ -155,7 +167,7 @@ public class InstanceController implements IInstanceController {
 		_unknownAppLock.writeLock().lock();
 
 		try {
-			NSTimestamp currentTime = new NSTimestamp();
+			Instant currentTime = Instant.now();
 			// Don't regenerate the localhost list for random applications
 			if( WOHostUtilities.isLocalInetAddress( InetAddress.getByName( host ), false ) ) {
 				NSMutableDictionary appDict = (NSMutableDictionary)_unknownApplications.valueForKey( name );
@@ -199,7 +211,7 @@ public class InstanceController implements IInstanceController {
 		try {
 			NSMutableDictionary unknownApps = _unknownApplications;
 			// Should make this configurable?
-			NSTimestamp cutOffDate = new NSTimestamp( System.currentTimeMillis() - 45000 );
+			Instant cutOffDate = Instant.now().minusSeconds( 45 );
 
 			List<String> unknownAppKeys = unknownApps.allKeys();
 
@@ -210,8 +222,8 @@ public class InstanceController implements IInstanceController {
 					List<String> appDictKeys = appDict.allKeys();
 
 					for( String appDictKey : appDictKeys ) {
-						NSTimestamp lastLifebeat = (NSTimestamp)appDict.valueForKey( appDictKey );
-						if( (lastLifebeat != null) && (lastLifebeat.before( cutOffDate )) ) {
+						Instant lastLifebeat = (Instant)appDict.valueForKey( appDictKey );
+						if( (lastLifebeat != null) && (lastLifebeat.isBefore( cutOffDate )) ) {
 							appDict.removeObjectForKey( appDictKey );
 						}
 					}
