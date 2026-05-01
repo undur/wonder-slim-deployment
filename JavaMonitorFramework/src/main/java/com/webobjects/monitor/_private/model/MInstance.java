@@ -396,7 +396,13 @@ public class MInstance extends MObject {
 	}
 
 	public void _takeAutoRecoverFromApplication() {
+		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
 		_takeValueFromApplication( "autoRecover" );
+	}
+
+	public void _takeMinimumActiveSessionsCountFromApplication() {
+		// FIXME: Exchange for direct method invocations // Hugi 2026-05-01
+		_takeValueFromApplication( "minimumActiveSessionsCount" );
 	}
 
 	public void _takePortFromApplication() {
@@ -451,7 +457,7 @@ public class MInstance extends MObject {
 		_takePortFromApplication();
 
 		_takeAutoRecoverFromApplication();
-		_takeValueFromApplication( "minimumActiveSessionsCount" );
+		_takeMinimumActiveSessionsCountFromApplication();
 
 		_takePathFromApplication();
 		_takeOutputPathFromApplication();

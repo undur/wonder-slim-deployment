@@ -175,7 +175,7 @@ public class AppConfigurePage extends AppComponent {
 			myApplication().setMinimumActiveSessionsCount( appDefaults.minimumActiveSessionsCount() );
 
 			for( MInstance anInstance : myApplication().instanceArray() ) {
-				anInstance._takeValueFromApplication( "minimumActiveSessionsCount" );
+				anInstance._takeMinimumActiveSessionsCountFromApplication();
 			}
 
 			_defaultsPush();
