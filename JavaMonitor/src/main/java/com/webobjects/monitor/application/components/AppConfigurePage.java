@@ -237,7 +237,7 @@ public class AppConfigurePage extends AppComponent {
 			myApplication().setAutoOpenInBrowser( appDefaults.autoOpenInBrowser() );
 
 			for( MInstance anInstance : myApplication().instanceArray() ) {
-				anInstance._takeValueFromApplication( "autoOpenInBrowser" );
+				anInstance._takeAutoOpenInBrowserFromApplication();
 			}
 
 			_defaultsPush();
