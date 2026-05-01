@@ -509,45 +509,6 @@ public class WOTaskdHandler {
 		return errorArray;
 	}
 
-//	FIXME: Doesn't look like this is used at all // Hugi 2024-11-06
-//	private NSMutableArray getQueryErrors( NSDictionary[] responseDicts ) {
-//
-//		final NSMutableArray errorArray = new NSMutableArray();
-//
-//		for( int i = 0; i < responseDicts.length; i++ ) {
-//			if( responseDicts[i] != null ) {
-//				final NSDictionary responseDict = responseDicts[i];
-//				getGlobalErrorFromResponse( responseDict, errorArray );
-//
-//				final NSArray commandWotaskdResponse = (NSArray)responseDict.valueForKey( "commandWotaskdResponse" );
-//
-//				if( (commandWotaskdResponse != null) && (commandWotaskdResponse.size() > 0) ) {
-//					int count = commandWotaskdResponse.size();
-//
-//					for( int j = 1; j < count; j++ ) {
-//						final NSDictionary aDict = (NSDictionary)commandWotaskdResponse.get( j );
-//						final String errorMessage = (String)aDict.valueForKey( "errorMessage" );
-//
-//						if( errorMessage != null ) {
-//							errorArray.addObject( errorMessage );
-//							if( j == 0 ) {
-//								break; // the command produced an error,
-//								// parsing didn't finish
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//
-//		if( FLog.debugLoggingAllowedForLevelAndGroups( FLog.DebugLevelDetailed, FLog.DebugGroupDeployment ) ) {
-//			FLog.debug.appendln( "##### getQueryErrors: " + errorArray );
-//		}
-//
-//		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
-//		return errorArray;
-//	}
-
 	private void getGlobalErrorFromResponse( NSDictionary responseDict, List<String> errorArray ) {
 		final NSArray errorResponse = (NSArray)responseDict.valueForKey( "errorResponse" );
 
