@@ -1,7 +1,7 @@
 <wo:JMTablerLook currentPage="$APP_PAGE" title="$myApplication.name" pageId="Applications">
 	<!-- FIXME:  Having the meta-refresh here is...odd. Needs to get moved into the look/<head> -->
 	<wo:if condition="$isRefreshEnabled">
-		<wo:WOMetaRefresh action="$refreshClicked" seconds="$application.siteConfig.viewRefreshRate" />
+		<wo:WOMetaRefresh action="$refreshClicked" seconds="$siteConfig.viewRefreshRate" />
 	</wo:if>
 
 	<!-- FIXME: These styles should be in a global CSS, just here while we work on fixing up the UI -->
@@ -68,7 +68,7 @@
 			</div>
 			<div class="col" align="right">
 				<wo:if condition="$isRefreshEnabled">
-					This page automatically updates every <wo:str value="$application.siteConfig.viewRefreshRate" /> seconds.
+					This page automatically updates every <wo:str value="$siteConfig.viewRefreshRate" /> seconds.
 				</wo:if>
 			</div>
 		</div>	
@@ -298,7 +298,7 @@
 	<wo:if condition="$hasHosts">
 		<div class="card p-3">
 			<wo:form class="mb-0">
-				Add: <wo:textfield value="$numberOfInstancesToAdd" numberformat="0" size="3" /> instance(s) on host: <wo:popUpButton list="$application.siteConfig.hostArray" item="$currentHost" displayString="$currentHost.name" selection="$selectedHost" /> <wo:submit action="$addInstanceClicked" value="Add" />
+				Add: <wo:textfield value="$numberOfInstancesToAdd" numberformat="0" size="3" /> instance(s) on host: <wo:popUpButton list="$siteConfig.hostArray" item="$currentHost" displayString="$currentHost.name" selection="$selectedHost" /> <wo:submit action="$addInstanceClicked" value="Add" />
 			</wo:form>
 		</div>
 	</wo:if>

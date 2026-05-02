@@ -4,7 +4,7 @@
 		<wo:form>
 			<p>Enter the complete URL to the WebObjects HTTP adaptor.<br /></p>
 			<p>Example: <code>http://store.apple.com/cgi-bin/WebObjects</code></p>
-			<p>URL to Adaptor: <wo:textfield value="$application.siteConfig.woAdaptor" size="60" /> <wo:submit action="$HTTPServerUpdateClicked" value="Update HTTP Adaptor URL" /></p>
+			<p>URL to Adaptor: <wo:textfield value="$siteConfig.woAdaptor" size="60" /> <wo:submit action="$HTTPServerUpdateClicked" value="Update HTTP Adaptor URL" /></p>
 		</wo:form>
 	</div>
 
@@ -42,39 +42,39 @@
 					</tr>
 					<tr>
 						<th>Retries:</th>
-						<td><wo:textfield  value="$application.siteConfig.retries" numberformat="0" size="4" /></td>
+						<td><wo:textfield  value="$siteConfig.retries" numberformat="0" size="4" /></td>
 					</tr>
 					<tr>
 						<th>Redirection URL:</th>
-						<td><wo:textfield value="$application.siteConfig.redir" size="60" /></td>
+						<td><wo:textfield value="$siteConfig.redir" size="60" /></td>
 					</tr>
 					<tr>
 						<th>Dormant:</th>
-						<td><wo:textfield value="$application.siteConfig.dormant" numberformat="0" size="4" /></td>
+						<td><wo:textfield value="$siteConfig.dormant" numberformat="0" size="4" /></td>
 					</tr>
 					<tr>
 						<th>Send Timeout:</th>
-						<td><wo:textfield value="$application.siteConfig.sendTimeout" numberformat="0"	size="4" /></td>
+						<td><wo:textfield value="$siteConfig.sendTimeout" numberformat="0"	size="4" /></td>
 					</tr>
 					<tr>
 						<th>Receive Timeout:</th>
-						<td><wo:textfield value="$application.siteConfig.recvTimeout" numberformat="0" size="4" /></td>
+						<td><wo:textfield value="$siteConfig.recvTimeout" numberformat="0" size="4" /></td>
 					</tr>
 					<tr>
 						<th>Connect Timeout:</th>
-						<td><wo:textfield value="$application.siteConfig.cnctTimeout" numberformat="0" size="4" /></td>
+						<td><wo:textfield value="$siteConfig.cnctTimeout" numberformat="0" size="4" /></td>
 					</tr>
 					<tr>
 						<th>Send Buffer Size:</th>
-						<td><wo:textfield value="$application.siteConfig.sendBufSize" numberformat="0" size="4" /></td>
+						<td><wo:textfield value="$siteConfig.sendBufSize" numberformat="0" size="4" /></td>
 					</tr>
 					<tr>
 						<th>Receive Buffer Size:</th>
-						<td><wo:textfield value="$application.siteConfig.recvBufSize" numberformat="0" size="4" /></td>
+						<td><wo:textfield value="$siteConfig.recvBufSize" numberformat="0" size="4" /></td>
 					</tr>
 					<tr>
 						<th>Connection Pool Size:</th>
-						<td><wo:textfield value="$application.siteConfig.poolsize" numberformat="0" size="4" /></td>
+						<td><wo:textfield value="$siteConfig.poolsize" numberformat="0" size="4" /></td>
 					</tr>
 					<tr>
 						<th>URL Version:</th>
@@ -94,11 +94,11 @@
 				<table class="FormFieldTable">
 					<tr>
 						<th>SMTP host:</th>
-						<td><wo:textfield value="$application.siteConfig.SMTPhost" /></td>
+						<td><wo:textfield value="$siteConfig.SMTPhost" /></td>
 					</tr>
 					<tr>
 						<th>Return address:</th>
-						<td><wo:textfield value="$application.siteConfig.emailReturnAddr" /></td>
+						<td><wo:textfield value="$siteConfig.emailReturnAddr" /></td>
 					</tr>
 				</table>
 				<p><wo:submit action="$emailUpdateClicked" value="Update Email Notification Settings" /></p>

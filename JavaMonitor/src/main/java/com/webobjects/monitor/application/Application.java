@@ -15,7 +15,6 @@ package com.webobjects.monitor.application;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.monitor._private.model.MSiteConfig;
 import com.webobjects.monitor.application.admin.AdminAction;
 import com.webobjects.monitor.util.WOTaskdHandler;
 
@@ -48,13 +47,5 @@ public class Application extends ERXApplication {
 		}, "admin" );
 
 		setAllowsConcurrentRequestHandling( true );
-	}
-
-	/**
-	 * FIXME: Delete. Currently only used in templates 	// Hugi 2026-05-01
-	 */
-	@Deprecated
-	public MSiteConfig siteConfig() {
-		return WOTaskdHandler.siteConfig();
 	}
 }

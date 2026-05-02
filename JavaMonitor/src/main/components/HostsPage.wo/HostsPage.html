@@ -14,7 +14,7 @@
 				<th>&nbsp;</th>
 				<th>&nbsp;</th>
 			</tr>
-			<wo:repetition list="$application.siteConfig.hostArray" item="$currentHost">
+			<wo:repetition list="$siteConfig.hostArray" item="$currentHost">
 				<tr>
 					<td><wo:link action="$configureHostClicked"><wo:str value="$currentHost.name" /> / <wo:str value="$currentHost.addressAsString" /></wo:link></td>
 					<td>

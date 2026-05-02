@@ -2,8 +2,8 @@
 	<div class="card p-3 mb-3">
 		<h2>Monitor Password</h2>
 		<p>
-			<wo:if condition="$application.siteConfig.isPasswordRequired">The password is currently set.</wo:if>
-			<wo:if condition="$application.siteConfig.isPasswordRequired" negate="$true">The password is currently <b>NOT</b> set. </wo:if>
+			<wo:if condition="$siteConfig.isPasswordRequired">The password is currently set.</wo:if>
+			<wo:if condition="$siteConfig.isPasswordRequired" negate="$true">The password is currently <b>NOT</b> set. </wo:if>
 		</p>
 		<wo:form multipleSubmit="$true">
 			<table>
@@ -24,8 +24,8 @@
 		<h2>Detail View Refesh Settings</h2>
 		<p>The Detail View page can be configured to automatically refresh itself in your browser's window.</p>
 		<wo:form>
-			<p><wo:checkbox checked="$application.siteConfig.viewRefreshEnabled" /> Auto-Refresh the Detail View</p>
-			<p><wo:textfield value="$application.siteConfig.viewRefreshRate" numberformat="0" size="3" /> second delay before refreshing.</p>
+			<p><wo:checkbox checked="$siteConfig.viewRefreshEnabled" /> Auto-Refresh the Detail View</p>
+			<p><wo:textfield value="$siteConfig.viewRefreshRate" numberformat="0" size="3" /> second delay before refreshing.</p>
 			<p><wo:submit action="$detailViewUpdateClicked" value="Update Settings" /></p>
 		</wo:form>
 	</div>
