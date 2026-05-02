@@ -1,19 +1,11 @@
-# Properties file for JavaMonitor
-# Overrides the JavaWebObjects.framework Properties
+# WOHost=localhost
+# WOAutoOpenInBrowser=true
+# WODebuggingEnabled=false
+# WOCachingEnabled=true
 
-#WOHost=localhost
-
-WOAutoOpenInBrowser=true
-
-WODebuggingEnabled=false
 WODirectConnectEnabled=true
-WOCachingEnabled=true
-
-#30 minutes.
 WOSessionTimeOut=1800
-
 WOMonitorEnabled=true
-
 WOLifebeatDestinationPort=1085
 WOLifebeatEnabled=true
 WOAllowsConcurrentRequestHandling=true
@@ -28,9 +20,3 @@ log4j.appender.A1=org.apache.log4j.ConsoleAppender
 # A1 uses PatternLayout.
 log4j.appender.A1.layout=er.extensions.logging.ERXPatternLayout
 log4j.appender.A1.layout.ConversionPattern=%d %-5p %V{u/f} [%t] %C{2} (%F:%L) - %m%n
-
-ERXRest.MHost.type.alias = osType
-
-# OGNL
-ognl.helperFunctions=true
-ognl.inlineBindings=true
