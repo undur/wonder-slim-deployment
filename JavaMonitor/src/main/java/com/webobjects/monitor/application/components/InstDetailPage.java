@@ -33,6 +33,10 @@ public class InstDetailPage extends InstComponent {
 		return null;
 	}
 
+	public WOComponent configureInstanceClicked() {
+		return InstConfigurePage.create( context(), myInstance() );
+	}
+
 	public WOComponent returnClicked() {
 		return AppDetailPage.create( context(), myInstance().application() );
 	}
