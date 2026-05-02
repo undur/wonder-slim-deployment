@@ -78,13 +78,6 @@ public class JMTablerLook extends MonitorComponent {
 	}
 
 	/**
-	 * FIXME: I have no idea why we'd ever like to keep this tab secret // Hugi 2024-10-24 
-	 */
-	private boolean showModProxy() {
-		return ERXProperties.booleanForKeyWithDefault( "er.javamonitor.showModProxyTab", false );
-	}
-
-	/**
 	 * @return The action result of clicking the current menuitem
 	 * 
 	 * FIXME: Preferable we'd just use the supplied value in the link's action attribute. Unfortunately, KVC throws a fit when it sees the lambda. We'd like to try to fix that (but that must happen at the KVC level) // Hugi 2024-10-24
@@ -103,10 +96,7 @@ public class JMTablerLook extends MonitorComponent {
 		items.add( new MenuItem( 2, "Site", Icon.Home, () -> ConfigurePage.create( context() ) ) );
 		items.add( new MenuItem( 3, "Preferences", Icon.Adjustments, () -> PrefsPage.create( context() ) ) );
 		items.add( new MenuItem( 4, "Help", Icon.Help, () -> pageWithName( HelpPage.class ) ) );
-
-		if( showModProxy() ) {
-			items.add( new MenuItem( 6, "mod_proxy", Icon.Polygon, () -> pageWithName( ModProxyPage.class )) );
-		}
+		items.add( new MenuItem( 6, "mod_proxy", Icon.Polygon, () -> pageWithName( ModProxyPage.class )) );
 
 		if( showLogout() ) {
 			items.add( new MenuItem( 7, "Logout", Icon.Home, () -> {
