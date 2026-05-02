@@ -132,6 +132,14 @@ public class InstanceController implements IInstanceController {
 	private static final int RECEIVE_TIMEOUT = ERXProperties.intForKeyWithDefault( "WOTaskd.receiveTimeout", 5000 );
 	private static final boolean FORCE_QUIT_TASK_ENABLED = ERXProperties.booleanForKeyWithDefault( "WOTaskd.forceQuitTaskEnabled", false );
 
+	/**
+	 * When true, instances are launched in a way that detaches them from wotaskd's process
+	 * group, so killing wotaskd does not take the instances with it. Off by default; flip via
+	 * the {@code WOTaskd.detachLaunch} system property. The legacy {@code Runtime.exec} path
+	 * is preserved unchanged for the off case. Unix-only — has no effect on Windows.
+	 */
+	private static final boolean DETACH_LAUNCH = ERXProperties.booleanForKeyWithDefault( "WOTaskd.detachLaunch", false );
+
 	public InstanceController() {
 		MSiteConfig aConfig = theApplication.siteConfig();
 
@@ -498,13 +506,66 @@ public class InstanceController implements IInstanceController {
 
 		try {
 			FLog.debug.appendln( "Starting Instance: " + aLaunchPath );
-			Runtime.getRuntime().exec( aLaunchPath );
+			if( DETACH_LAUNCH && !_isOnWindows ) {
+				logger.info( "starting instance {}:{} in detached mode", anInstance.applicationName(), anInstance.port() );
+				startInstanceDetached( aFullPath, anInstance.commandLineArgumentsAsArray() );
+			}
+			else {
+				logger.info( "starting instance {}:{} in normal mode (attached to the wotaskd process)", anInstance.applicationName(), anInstance.port() );
+				Runtime.getRuntime().exec( aLaunchPath );
+			}
 		}
 		catch( IOException ioe ) {
 			FLog.err.appendln( "Failed to start " + anInstance.displayName() + ": " + ioe );
 			return _hostName + ": Failed to start " + anInstance.displayName() + ": " + ioe;
 		}
 		return null;
+	}
+
+	/**
+	 * Launches the instance in a way that detaches it from wotaskd's process group, so
+	 * killing wotaskd does not take the instance with it. POSIX-only.
+	 *
+	 * <p>Runs {@code /bin/sh -c "exec <cmd> </dev/null >/dev/null 2>&1 &"}: the trailing
+	 * {@code &} backgrounds the child within the shell, then the shell exits, and the
+	 * orphaned child is reparented to PID 1 (init). The WOApp itself redirects its own
+	 * stdout/stderr to the configured {@code -WOOutputPath} during startup, so anything
+	 * written between fork and that redirection is discarded by the {@code /dev/null}
+	 * setup here — same observable behaviour as the legacy {@code Runtime.exec} path.
+	 *
+	 * <p>The {@code Process} returned by the shell is waited on briefly; once {@code sh}
+	 * exits (which is immediate), wotaskd has no further handle on the actual instance.
+	 *
+	 * @param launchPath path to the WOApp executable
+	 * @param args command-line arguments (already-typed; no shell quoting headaches needed
+	 *             for individual element values, but the assembled command line is shell-quoted
+	 *             before being handed to {@code sh -c}).
+	 */
+	private static void startInstanceDetached( final String launchPath, final List<String> args ) throws IOException {
+		final StringBuilder shellCmd = new StringBuilder( "exec " ).append( shellQuote( launchPath ) );
+		for( final String arg : args ) {
+			shellCmd.append( ' ' ).append( shellQuote( arg ) );
+		}
+		shellCmd.append( " </dev/null >/dev/null 2>&1 &" );
+
+		final ProcessBuilder pb = new ProcessBuilder( "/bin/sh", "-c", shellCmd.toString() );
+		final Process p = pb.start();
+		try {
+			p.waitFor();
+		}
+		catch( InterruptedException e ) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	/**
+	 * POSIX-quote a single argument so {@code /bin/sh -c} reads it as one token. Wraps the
+	 * value in single quotes and escapes any embedded single quotes by closing-and-reopening
+	 * the quoted string ({@code 'foo'\''bar'}). Safe for arbitrary content including spaces,
+	 * newlines, and shell metacharacters.
+	 */
+	private static String shellQuote( final String s ) {
+		return "'" + s.replace( "'", "'\\''" ) + "'";
 	}
 
 	@Override
