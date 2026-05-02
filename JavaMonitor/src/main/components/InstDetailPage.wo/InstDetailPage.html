@@ -1,18 +1,27 @@
 <wo:JMTablerLook currentPage="$APP_PAGE">
+	<wo:if condition="$errorMessage.length">
+		<div class="alert alert-danger">
+			<p><wo:str value="$errorMessage" /></p>
+		</div>
+	</wo:if>
 	<div class="card p-3 pb-1 mb-3">
-		<div class="row">
-			<div class="col">
-				<h1>Instance <wo:str value="$myInstance.displayName" /> on <wo:str value="$myInstance.hostName" /></h1>
+		<div class="card-header">
+			<h1>Instance <wo:str value="$myInstance.displayName" /> on <wo:str value="$myInstance.hostName" /></h1>
+		</div>
+		<div class="card-body">
+			<div class="row">
+				<div class="col" align="right">
+					<wo:link action="$returnClicked" class="btn btn-primary">All instances</wo:link>
+				</div>
 			</div>
-			<div class="col" align="right">
-				<wo:link action="$returnClicked" class="btn btn-primary">All instances</wo:link>
+			<div class="row">
+				<div class="col">
+				<wo:link action="$jstack" class="btn btn-primary">jstack</wo:link> <wo:link action="$viewLog" class="btn btn-primary">Log file</wo:link>
+				</div>
 			</div>
 		</div>
 	</div>
 
-	<wo:link action="$jstack" class="btn btn-primary">jstack</wo:link>
-	<wo:link action="$viewLog" class="btn btn-primary">Log file</wo:link>
-	
 	<wo:if condition="$jstackString.length">
 		<pre><wo:str value="$jstackString" /></pre>
 	</wo:if>

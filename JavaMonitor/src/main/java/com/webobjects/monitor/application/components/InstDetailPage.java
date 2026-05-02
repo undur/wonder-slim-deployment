@@ -8,12 +8,14 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.monitor._private.model.MInstance;
 import com.webobjects.monitor.application.MonitorComponent.InstComponent;
 import com.webobjects.monitor.util.ExperimentalUtilities;
+import com.webobjects.monitor.util.ExperimentalUtilities.WOMonitorServicePasswordNotSetException;
 import com.webobjects.monitor.util.JMLogViewerPage;
 
 import er.extensions.appserver.ERXApplication;
 
 public class InstDetailPage extends InstComponent {
 
+	public String errorMessage;
 	public String jstackString;
 
 	public InstDetailPage( WOContext context ) {
@@ -21,7 +23,13 @@ public class InstDetailPage extends InstComponent {
 	}
 
 	public WOActionResults jstack() {
-		jstackString = ExperimentalUtilities.jstack( myInstance() );
+		try {
+			jstackString = ExperimentalUtilities.jstack( myInstance() );
+		}
+		catch( WOMonitorServicePasswordNotSetException e ) {
+			errorMessage = "WOMonitorServicePassword is not set. It must be set if you want monitor to perform 'jstack' on an application";
+		}
+
 		return null;
 	}
 

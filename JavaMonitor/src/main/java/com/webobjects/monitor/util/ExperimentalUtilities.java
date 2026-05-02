@@ -17,12 +17,12 @@ import x.XUtil;
 
 public class ExperimentalUtilities {
 
-	public static String jstack( final MInstance instance ) {
+	public static String jstack( final MInstance instance ) throws WOMonitorServicePasswordNotSetException {
 		final List<String> arguments = instance.commandLineArgumentsAsArray();
 		final int indexOfAppPasswordDefinition = arguments.indexOf( "-WOMonitorServicePassword" );
 
 		if( indexOfAppPasswordDefinition == -1 ) {
-			throw new IllegalArgumentException( "WOMonitorServicePassword is not set" );
+			throw new WOMonitorServicePasswordNotSetException();
 		}
 
 		final String password = arguments.get( indexOfAppPasswordDefinition + 1 );
@@ -35,6 +35,8 @@ public class ExperimentalUtilities {
 		return fetchStringFromMonitorService( hostName, port, password, url );
 	}
 	
+	public static class WOMonitorServicePasswordNotSetException extends Exception {}
+
 	/**
 	 * @param hostName Name of host running wotaskd
 	 * @param port wotaskd's port
