@@ -30,14 +30,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.appserver.WOMailDelivery;
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 
 import x.FLog;
+import x.FNotifications;
 
 public class MInstance extends MObject {
 
@@ -790,8 +789,7 @@ public class MInstance extends MObject {
 		final Instant currentTime = Instant.now();
 		final String currentDate = currentTime.toString();
 
-		// FIXME: see note on isRunning_W — preserves the seconds-vs-milliseconds inconsistency
-		// from the original. // Hugi 2026-05-01
+		// FIXME: see note on isRunning_W — preserves the seconds-vs-milliseconds inconsistency from the original // Hugi 2026-05-01
 		final long cutOffTime = _lastRegistration.toEpochMilli() + lifebeatCheckInterval();
 
 		String assumedToBeDead = "";
@@ -805,39 +803,19 @@ public class MInstance extends MObject {
 
 		FLog.err.appendln( message );
 
-		boolean shouldEmail = false;
-		final Boolean aBool = _application.notificationEmailEnabled();
+		final boolean notificationsEnabled = _application.notificationEmailEnabled() != null && _application.notificationEmailEnabled();
+		final String emailAddressString = _application.notificationEmailAddr();
 
-		if( aBool != null ) {
-			shouldEmail = aBool.booleanValue();
-		}
+		if( notificationsEnabled && emailAddressString != null && !emailAddressString.isBlank() ) {
+			final String fromName = "wotaskd-" + _application.name();
+			final String fromEmailAddress = _siteConfig.emailReturnAddr();
+			final List<String> toEmailAddresses = Arrays
+					.stream( emailAddressString.split( "," ) )
+					.map( String::trim )
+					.toList();
 
-		/**
-		 * FIXME: Replace WOMailDelivery with a working mailer // Hugi 2024-11-04
-		 */
-		if( shouldEmail ) {
-			try {
-				final WOMailDelivery mailer = WOMailDelivery.sharedInstance();
-				String fromAddress = siteConfig().emailReturnAddr();
-				NSArray<String> toAddress = null;
-				String subject = "App stopped running: " + displayName();
-				String bodyText = message;
-
-				if( fromAddress != null ) {
-					fromAddress = "root@" + _host.name();
-				}
-
-				if( _application.notificationEmailAddr() != null ) {
-					toAddress = NSArray.componentsSeparatedByString( _application.notificationEmailAddr(), "," );
-				}
-
-				if( mailer != null && toAddress != null && toAddress.count() > 0 ) {
-					mailer.composePlainTextEmail( fromAddress, toAddress, null, subject, bodyText, true );
-				}
-			}
-			catch( Throwable e ) {
-				FLog.err.appendln( "Error attempting to send email: " + e );
-			}
+			final String subject = "App stopped running: " + displayName();
+			FNotifications.sendNotification( fromName, fromEmailAddress, toEmailAddresses, subject, message );
 		}
 	}
 
