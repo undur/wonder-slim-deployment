@@ -19,6 +19,7 @@ import com.webobjects.monitor.application.admin.AdminAction;
 import com.webobjects.monitor.util.WOTaskdHandler;
 
 import er.extensions.appserver.ERXApplication;
+import er.extensions.routes.RouteTable;
 
 public class Application extends ERXApplication {
 
@@ -35,7 +36,7 @@ public class Application extends ERXApplication {
 
 		WOTaskdHandler.createSiteConfig();
 
-		setDefaultRequestHandler( requestHandlerForKey( directActionRequestHandlerKey() ) );
+		setAllowsConcurrentRequestHandling( true );
 
 		registerRequestHandler( new WODirectActionRequestHandler() {
 			@Override
@@ -46,6 +47,10 @@ public class Application extends ERXApplication {
 
 		}, "admin" );
 
-		setAllowsConcurrentRequestHandling( true );
+		
+		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
+		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
+		final WODirectActionRequestHandler rootRequestHandler = new WODirectActionRequestHandler( DirectAction.class.getName(), "default", false );
+		RouteTable.defaultRouteTable().map( "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
 	}
 }
