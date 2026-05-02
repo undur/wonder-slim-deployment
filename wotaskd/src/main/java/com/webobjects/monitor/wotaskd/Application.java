@@ -40,7 +40,7 @@ public class Application extends ERXApplication {
 
 	private InstanceController _localMonitor;
 	private MSiteConfig _siteConfig;
-	private ListenThread listenThread;
+	private MulticastListener listenThread;
 	private LifebeatRequestHandler _lifebeatRequestHandler;
 	private Number _port;
 	private int _intPort;
@@ -202,7 +202,7 @@ public class Application extends ERXApplication {
 	// creates and starts the ListenerThread inner class
 	public void createRequestListenerThread() {
 		FLog.debug.appendln( "Detaching request listen thread" );
-		listenThread = new Application.ListenThread();
+		listenThread = new Application.MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() );
 		listenThread.start();
 	}
 
@@ -243,44 +243,59 @@ public class Application extends ERXApplication {
 	}
 
 	// Inner class used to listen to Multicast Queries and UDP queries
-	class ListenThread extends Thread {
-		MulticastSocket socket;
-		InetAddress address;
+	public static class MulticastListener extends Thread {
+
+		private final int _port;
+		private final boolean _shouldRespondToMulticast;
+		private final String _multicastAddress;
+		private final MSiteConfig _siteConfig;
+
+		private MulticastSocket _socket;
+		private InetAddress _address;
+
+		public MulticastListener( final boolean shouldRespondToMulticast, final int port, final String multicastAddress, final MSiteConfig siteConfig ) {
+			_shouldRespondToMulticast = shouldRespondToMulticast;
+			_multicastAddress = multicastAddress;
+			_port = port;
+			
+			// FIXME: The siteconfig is only for reporting errors. It's a bad mechanism and hopefully this parameter will get nuked soon // Hugi 2026-05-02
+			_siteConfig = siteConfig;
+		}
 
 		private void createRequestSocket() {
 			// Create a new MulticastSocket, even if we're not listening for Multicast
 			// MulticastSocket acts just like a DatagramSocket
 			try {
-				socket = new MulticastSocket( intPort() );
+				_socket = new MulticastSocket( _port );
 				if( !WOApplication.application()._unsetHost ) {
-					socket.setInterface( WOApplication.application().hostAddress() );
+					_socket.setInterface( WOApplication.application().hostAddress() );
 				}
 			}
 			catch( IOException exception ) {
 				FLog.err.appendln( "Unable to create multicast listener socket: " + exception );
-				FLog.err.appendln( "Port " + intPort() + " may be in use by another application." );
+				FLog.err.appendln( "Port " + _port + " may be in use by another application." );
 				FLog.err.appendln( "Exiting..." );
 				System.exit( 1 );
 			}
 
 			if( _shouldRespondToMulticast ) {
 				try {
-					address = InetAddress.getByName( multicastAddress() );
+					_address = InetAddress.getByName( _multicastAddress );
 				}
 				catch( UnknownHostException exception ) {
-					FLog.err.appendln( "Error resolving address: " + multicastAddress() + " - " + exception );
+					FLog.err.appendln( "Error resolving address: " + _multicastAddress + " - " + exception );
 					FLog.err.appendln( "Exiting..." );
 					System.exit( 1 );
 				}
 
-				if( !address.isMulticastAddress() ) {
-					FLog.err.appendln( address + " is not a valid multicast address" );
+				if( !_address.isMulticastAddress() ) {
+					FLog.err.appendln( _address + " is not a valid multicast address" );
 					FLog.err.appendln( "Exiting..." );
 					System.exit( 1 );
 				}
 
 				try {
-					socket.joinGroup( address );
+					_socket.joinGroup( _address );
 				}
 				catch( IOException exception ) {
 					FLog.err.appendln( "Error joining multicast group: " + exception );
@@ -292,7 +307,7 @@ public class Application extends ERXApplication {
 
 		public void closeRequestSocket() {
 			try {
-				socket.leaveGroup( address );
+				_socket.leaveGroup( _address );
 				FLog.debug.appendln( "Leaving multicast group" );
 			}
 			catch( IOException exception ) {
@@ -300,14 +315,14 @@ public class Application extends ERXApplication {
 				return;
 			}
 			FLog.debug.appendln( "Closing request listen socket" );
-			socket.close();
+			_socket.close();
 		}
 
 		public void sendReplyWithLengthTo( byte[] aReplyBytes, int aReplyBytesLength, DatagramPacket incomingPacket ) {
 			DatagramPacket outgoingPacket = new DatagramPacket( aReplyBytes, aReplyBytesLength, incomingPacket.getAddress(), incomingPacket.getPort() );
 
 			try {
-				socket.send( outgoingPacket );
+				_socket.send( outgoingPacket );
 			}
 			catch( IOException localException ) {
 				FLog.err.appendln( "Error sending reply: " + localException + " (ignored)" );
@@ -326,7 +341,7 @@ public class Application extends ERXApplication {
 		// This is the main thread - we just look for a UDP packet that matches a known signature.
 		public void listenForRequests() {
 			try {
-				String myName = WOApplication.application().host().toLowerCase() + ":" + intPort();
+				String myName = WOApplication.application().host().toLowerCase() + ":" + _port;
 
 				byte[] multicastRequest;
 				byte[] multicastReply;
@@ -346,10 +361,10 @@ public class Application extends ERXApplication {
 				byte[] mbuffer = new byte[1000];
 				DatagramPacket incomingPacket = new DatagramPacket( mbuffer, mbuffer.length );
 
-				while( socket != null ) {
+				while( _socket != null ) {
 					try {
 						incomingPacket.setLength( mbuffer.length );
-						socket.receive( incomingPacket );
+						_socket.receive( incomingPacket );
 						if( byteArrayStartsWith( incomingPacket.getData(), multicastRequest, multicastRequestLength ) ) {
 							// this responds with the DirectAction URL for getting our adaptor Config XML
 							sendReplyWithLengthTo( multicastReply, multicast_reply_len, incomingPacket );
@@ -362,7 +377,7 @@ public class Application extends ERXApplication {
 							// This is if we get an unrecognized packet.
 							String key = incomingPacket.getAddress() + ":" + incomingPacket.getPort();
 
-							siteConfig().globalErrorDictionary.put( key, (myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol.") );
+							_siteConfig.globalErrorDictionary.put( key, (myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol.") );
 							FLog.debug.appendln( myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol." );
 						}
 					}
