@@ -32,19 +32,22 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;
+import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
 import er.extensions.appserver.ERXApplication;
+import er.extensions.routes.RouteHandler;
+import er.extensions.routes.RouteInvocation;
+import er.extensions.routes.RouteTable;
 import x.FLog;
 
 public class Application extends ERXApplication {
@@ -149,11 +152,19 @@ public class Application extends ERXApplication {
 
 		// Set up multicast listen thread
 		createRequestListenerThread();
+
+		registerRootRequestHandler();
 	}
 
-	@Override
-	public String defaultRequestHandlerClassName() {
-		return "com.webobjects.appserver._private.WODirectActionRequestHandler";
+	/**
+	 * wotaskd initially handled requests to the root URL "/" using the default request handler, which returned DirectAction.defaultAction() (the WO config page)
+	 * Since wonder-slim handles uses the routing request handler as the default request handler, we register the root URL manually
+	 * 
+	 * CHECKME: Eventually this doesn't really need to go through a Direct Action // Hugi 2026-05-02
+	 */
+	private void registerRootRequestHandler() {
+		final WODirectActionRequestHandler rootRequestHandler = new WODirectActionRequestHandler( DirectAction.class.getName(), "default", false );
+		RouteTable.defaultRouteTable().map( "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
 	}
 
 	@Override
