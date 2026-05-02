@@ -13,24 +13,12 @@ IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL OR CONSE
 SUCH DAMAGE.
  */
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXConnectorServerFactory;
-import javax.management.remote.JMXServiceURL;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WORequest;
@@ -60,15 +48,6 @@ public class Application extends ERXApplication {
 	private boolean _shouldWriteAdaptorConfig;
 	private boolean _shouldRespondToMulticast;
 	public ReentrantReadWriteLock _lock;
-
-	//========================================================================================
-	//     JMX Instance Variables 
-	// ------------------------------------------------------
-	private MBeanServer _mbeanServer; // MBean server
-	private String _mbsDomain; // JMX domain to be used for the mbean server
-	private String _jmxPort = null; // Port number for jmx listener
-	private String _jmxAccessFile = null; // Access filename for JMX client authentication (with comlete path)
-	private String _jmxPasswordFile = null; // Password filename for JMX client authentication (with comlete path)
 
 	static public void main( String argv[] ) {
 		ERXApplication.main( argv, Application.class );
@@ -137,15 +116,6 @@ public class Application extends ERXApplication {
 			}
 		}
 
-		//JMX Support
-		_jmxPort = System.getProperty( "WOJMXPort" );
-		_jmxAccessFile = System.getProperty( "WOJMXAccessFile" );
-		_jmxPasswordFile = System.getProperty( "WOJMXPasswordFile" );
-		if( _jmxPort != null ) {
-			registerMBean( SiteConfig.getInstance(), "WotaskdJMXMBean", "SiteConfigMBean" );
-			setupRemoteMonitoring();
-		}
-
 		// Set up multicast listen thread
 		createRequestListenerThread();
 
@@ -206,137 +176,6 @@ public class Application extends ERXApplication {
 
 	public boolean shouldRespondToMulticast() {
 		return _shouldRespondToMulticast;
-	}
-
-	/**
-	 * ============================================================================================
-	 *						Methods Added for Enabling JMX in Wotaskd
-	 * ============================================================================================
-	 * This methods registers the MBean object in the MBeanServer
-	 * @param objMBean		- The MBean object to register
-	 * @param strDomainName - Domain name required for creating the ObjectName of the MBean
-	 * @param strMBeanName  - Name of the MBean
-	 */
-	@Override
-	public void registerMBean( Object objMBean, String strDomainName, String strMBeanName ) throws IllegalArgumentException {
-		if( objMBean == null )
-			throw new IllegalArgumentException( "Error: Could not register null to PlatformMbeanServer." );
-		if( strMBeanName == null )
-			throw new IllegalArgumentException( "Error: MBean name could not be null." );
-
-		ObjectName objName = null;
-		strDomainName = (strDomainName == null) ? getJMXDomain() : strDomainName;
-
-		//Create the Object Name for the MBean
-		try {
-			objName = new ObjectName( strDomainName + ": name=" + strMBeanName );
-		}
-		catch( MalformedObjectNameException e ) {
-			e.printStackTrace();
-		}
-		catch( NullPointerException e ) {
-			e.printStackTrace();
-		}
-
-		// Register the MBean
-		try {
-			getMBeanServer().registerMBean( objMBean, objName );
-		}
-		catch( IllegalAccessException e ) {
-			FLog.err.appendln( "ERROR: security access problem registering bean: " + objMBean + " with ObjectName: " + objName + " " + e.toString() );
-		}
-		catch( InstanceAlreadyExistsException e ) {
-			FLog.err.appendln( "ERROR: MBean already exists bean: " + objMBean + " with ObjectName: " + objName + " " + e.toString() );
-		}
-		catch( MBeanRegistrationException e ) {
-			FLog.err.appendln( "ERROR: error registering bean: " + objMBean + " with ObjectName: " + objName + " " + e.toString() );
-		}
-		catch( NotCompliantMBeanException e ) {
-			FLog.err.appendln( "ERROR: error registering bean: " + objMBean + " with ObjectName: " + objName + " " + e.toString() );
-		}
-	}
-
-	/**
-	 * ============================================================================================
-	 *						Methods Added for Enabling JMX in Wotaskd
-	 * ============================================================================================
-	 * This methods creates the JMX Domain Name by appending the hostname, application
-	 * name and the port. This is called from method registerMBean() whenever domain
-	 * name is passed as null.
-	 * @return _mbsDomain  - String containing the Domain name to be used while registering the MBean
-	 */
-	@Override
-	public String getJMXDomain() {
-		if( _mbsDomain == null ) {
-			_mbsDomain = host() + "." + name() + "." + port();
-		}
-		return _mbsDomain;
-	}
-
-	/**
-	 * ============================================================================================
-	 *						Methods Added for Enabling JMX in Wotaskd
-	 * ============================================================================================
-	 * This methods sets up this application for remote monitoring. This method creates a new 
-	 * connector server and associates it with the MBean Server. The server is started by calling
-	 * the start() method. The connector server listens for the client connection requests and
-	 * creates a connection for each one.
-	 */
-	public void setupRemoteMonitoring() {
-		if( _jmxPort != null ) {
-			// Create an RMI connector and start it
-			try {
-				// Get the port difference to use when creating our new jmx listener
-				int intWotaskdJmxPort = Integer.parseInt( _jmxPort );
-
-				// Set up the Password and Access file
-				HashMap<String, String> envPwd = new HashMap<>();
-				envPwd.put( "jmx.remote.x.password.file", _jmxPasswordFile );
-				envPwd.put( "jmx.remote.x.access.file", _jmxAccessFile );
-
-				// setup our listener
-				java.rmi.registry.LocateRegistry.createRegistry( intWotaskdJmxPort );
-				JMXServiceURL jsUrl = new JMXServiceURL( "service:jmx:rmi:///jndi/rmi://" + host() + ":" + intWotaskdJmxPort + "/jmxrmi" );
-				FLog.debug.appendln( "Setting up monitoring on url : " + jsUrl );
-
-				// Create an RMI Connector Server
-				JMXConnectorServer jmxCS = JMXConnectorServerFactory.newJMXConnectorServer( jsUrl, envPwd, getMBeanServer() );
-
-				jmxCS.start();
-			}
-			catch( Exception anException ) {
-				FLog.err.appendln( "Error starting remote monitoring: " + anException );
-			}
-		}
-	}
-
-	/**
-	 * ============================================================================================
-	 *						Methods Added for Enabling JMX in Wotaskd
-	 * ============================================================================================
-	 * This methods returns the platform MBean Server from the Factory
-	 * @return _mbeanServer  - The platform MBeanServer 
-	 */
-	@Override
-	public MBeanServer getMBeanServer() throws IllegalAccessException {
-		if( _mbeanServer == null ) {
-			_mbeanServer = ManagementFactory.getPlatformMBeanServer();
-			if( _mbeanServer == null )
-				throw new IllegalAccessException( "Error: PlatformMBeanServer could not be accessed via ManagementFactory." );
-		}
-		return _mbeanServer;
-	}
-
-	/**
-	 * Added by X-Provision Team
-	 * This method reads the SiteConfig.xml file whenever it is invoked by the SiteConfigMBean
-	 */
-	public void readSiteConfigXML() {
-		FLog.debug.appendln( "Inside readSiteConfigXML method of Application.java: Calling unarchiveSiteConfig" );
-		_siteConfig = MSiteConfig.unarchiveSiteConfig( true );
-
-		FLog.debug.appendln( "Inside readSiteConfigXML method of Application.java: Calling archiveSiteConfig" );
-		_siteConfig.archiveSiteConfig();
 	}
 
 	// sleep will check if there have been changes to the siteConfig.

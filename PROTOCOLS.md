@@ -674,7 +674,6 @@ Generated when `WOSavesAdaptorConfiguration` is enabled. This is a *different* X
 | `WOTaskd.receiveTimeout` | 5000 ms | wotaskd → instance HTTP receive timeout |
 | `WOTaskd.killTimeout` | 120000 ms | Force-quit delay after graceful stop (`InstanceController.FORCE_QUIT_DELAY`); minimum 60000 ms |
 | `WOTaskd.refuseNumRetries` | 3 | Number of REFUSE retries before force-quit |
-| `WOJMXPort` / `WOJMXAccessFile` / `WOJMXPasswordFile` | unset | JMX management endpoint configuration |
 
 `JavaMonitor.receiveTimeout` is **no longer functional** — the value is hardcoded to 10000 ms in `MHost.WOTASKD_RECEIVE_TIMEOUT` with a FIXME explaining the property used to drive it.
 
