@@ -63,12 +63,6 @@ public class MHost extends MObject {
 	 */
 	private static final int WOTASKD_RECEIVE_TIMEOUT = 10000;
 
-	/**
-	 * FIXME: It doesn't look like this variable is ever actually read in a meaningful way. Delete? // Hugi 2024-11-02
-	 */
-	@Deprecated
-	private NSMutableArray<MApplication> _applicationArray = new NSMutableArray<>();
-
 	private NSMutableArray<MInstance> _instanceArray;
 
 	private InetAddress _address = null;
@@ -134,31 +128,10 @@ public class MHost extends MObject {
 
 	public void _addInstancePrimitive( MInstance anInstance ) {
 		_instanceArray.addObject( anInstance );
-
-		if( !_applicationArray.contains( anInstance._application ) ) {
-			_applicationArray.add( anInstance._application );
-		}
 	}
 
 	public void _removeInstancePrimitive( MInstance anInstance ) {
-
 		_instanceArray.removeObject( anInstance );
-
-		// get the instances's host - check all the other instances that this
-		// application has to see if any other ones have that host
-		// if not, remove it.
-		boolean uniqueApplication = true;
-
-		for( MInstance anInst : _instanceArray ) {
-			if( anInstance._application == anInst._application ) {
-				uniqueApplication = false;
-				break;
-			}
-		}
-
-		if( uniqueApplication ) {
-			_applicationArray.removeObject( anInstance._application );
-		}
 	}
 
 	public InetAddress address() {
