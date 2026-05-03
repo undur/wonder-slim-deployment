@@ -155,27 +155,19 @@ public class MHost extends MObject {
 			}
 		}
 
-		return Integer.valueOf( runningInstances );
+		return runningInstances;
 	}
 
 	public boolean isPortInUse( Integer port ) {
 		return instanceWithPort( port ) != null;
 	}
 
-	// KH - this is probably slow :)
 	public Integer nextAvailablePort( Integer startingPort ) {
-		Integer retVal = null;
-
-		while( retVal == null ) {
-			if( isPortInUse( startingPort ) ) {
-				startingPort = Integer.valueOf( startingPort.intValue() + 1 );
-			}
-			else {
-				retVal = startingPort;
-			}
+		int port = startingPort;
+		while( isPortInUse( port ) ) {
+			port++;
 		}
-
-		return retVal;
+		return port;
 	}
 
 	public MInstance instanceWithPort( Integer port ) {
