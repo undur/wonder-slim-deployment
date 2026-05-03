@@ -212,8 +212,6 @@ public class FileBrowser extends MonitorComponent {
 
 		public static RemoteResult getFileList( final String path, final MHost host, final boolean showFiles ) throws MonitorException {
 
-			RemoteResult result = null;
-
 			try {
 				final Builder requestBuilder = HttpRequest
 						.newBuilder()
@@ -252,11 +250,12 @@ public class FileBrowser extends MonitorComponent {
 				}
 
 				final ResponseWrapper responseWrapper = new ResponseWrapper( response.body(), response.headers() );
-
-				result = extractFileListFromResponse( responseWrapper, path );
+				final RemoteResult result = extractFileListFromResponse( responseWrapper, path );
 				
 				// By submitting a successful request, we've certainly certified that the host is available. Should probably stay...
 				host.isAvailable = true;
+
+				return result;
 			}
 			catch( MonitorException me ) {
 				host.isAvailable = true;
@@ -273,8 +272,6 @@ public class FileBrowser extends MonitorComponent {
 				localException.printStackTrace();
 				throw new MonitorException( "Exception requesting directory listing for " + path + " from " + host.name() + ": " + localException.toString(), localException );
 			}
-
-			return result;
 		}
 	}
 }
