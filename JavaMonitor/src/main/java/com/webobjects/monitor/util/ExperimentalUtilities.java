@@ -54,8 +54,6 @@ public class ExperimentalUtilities {
 				.GET()
 				.build();
 
-		System.out.println( request.headers() );
-
 		try {
 			return XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofString() ).body();
 		}
