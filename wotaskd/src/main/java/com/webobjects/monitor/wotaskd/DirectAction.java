@@ -93,8 +93,8 @@ public class DirectAction extends WODirectAction {
 
 		// Aren't allowed to call this through the Web server.
 		if( aRequest.isUsingWebServer() ) {
-			FLog.debug.appendln( "Attempt to call DirectAction: monitorRequestAction through Web server" );
-			FLog.debug.appendln( aRequest.contentString() );
+			FLog.debug( "Attempt to call DirectAction: monitorRequestAction through Web server" );
+			FLog.debug( aRequest.contentString() );
 			aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 			aResponse.appendContentString( _accessDenied );
 			return aResponse;
@@ -105,7 +105,7 @@ public class DirectAction extends WODirectAction {
 		try {
 			String passwordHeader = aRequest.headerForKey( "password" );
 			if( !aConfig.comparePasswordWithPassword( passwordHeader ) ) {
-				FLog.debug.appendln( "Attempt to call DirectAction: monitorRequestAction with incorrect password." );
+				FLog.debug( "Attempt to call DirectAction: monitorRequestAction with incorrect password." );
 				aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 				aResponse.appendContentString( _invalidPassword );
 				// the read lock is released in the finally block
@@ -121,14 +121,14 @@ public class DirectAction extends WODirectAction {
 			requestDict = (NSDictionary)new FoundationCoder().decodeRootObject( aRequest.content().bytes() );
 		}
 		catch( Exception e ) {
-			FLog.err.appendln( "Wotaskd monitorRequestAction: Error parsing request" );
-			FLog.debug.appendln( "Wotaskd monitorRequestAction: " + aRequest.contentString() );
+			FLog.error( "Wotaskd monitorRequestAction: Error parsing request" );
+			FLog.debug( "Wotaskd monitorRequestAction: " + aRequest.contentString() );
 			aResponse.appendContentString( _invalidXML );
 			return aResponse;
 		}
 
-		FLog.debug.appendln( "\n@@@@@ monitorRequestAction received request from Monitor" );
-		FLog.debug.appendln( "@@@@@ monitorRequestAction requestDict: " + requestDict + "\n" );
+		FLog.debug( "\n@@@@@ monitorRequestAction received request from Monitor" );
+		FLog.debug( "@@@@@ monitorRequestAction requestDict: " + requestDict + "\n" );
 
 		// These 2 get used for everything else - the global response object and the global error object.
 		NSMutableDictionary monitorResponse = new NSMutableDictionary();
@@ -609,8 +609,8 @@ public class DirectAction extends WODirectAction {
 			monitorResponse.takeValueForKey( errorResponse, "errorResponse" );
 		}
 
-		FLog.debug.appendln( "@@@@@ monitorRequestAction returning response to Monitor" );
-		FLog.debug.appendln( "@@@@@ monitorRequestAction responseDict: " + monitorResponse + "\n" );
+		FLog.debug( "@@@@@ monitorRequestAction returning response to Monitor" );
+		FLog.debug( "@@@@@ monitorRequestAction responseDict: " + monitorResponse + "\n" );
 		aResponse.appendContentString( (new FoundationCoder()).encodeRootObjectForKey( monitorResponse, "monitorResponse" ) );
 		return aResponse;
 	}
@@ -637,7 +637,7 @@ public class DirectAction extends WODirectAction {
 					catch( MonitorException me ) {
 						MInstance badInstance = ((MInstance)instanceArray.objectAtIndex( j ));
 						if( !badInstance.isRunning_W() ) {
-							FLog.debug.appendln( "Exception getting Statistics for instance: " + ((MInstance)instanceArray.objectAtIndex( j )).displayName() );
+							FLog.debug( "Exception getting Statistics for instance: " + ((MInstance)instanceArray.objectAtIndex( j )).displayName() );
 						}
 						//if we get an exception and the instance state is running, that could mean the app may have been too 
 						//busy to respond of may have locked up in either case, we need to notify 
@@ -677,17 +677,17 @@ public class DirectAction extends WODirectAction {
 					instanceResponse = (NSDictionary)new FoundationCoder().decodeRootObject( aResponse.content() );
 				}
 				catch( NullPointerException npe ) {
-					FLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: No content returned from " + anInstance.displayName() );
+					FLog.error( "Wotaskd getStatisticsForInstanceArray: No content returned from " + anInstance.displayName() );
 					continue;
 				}
 				catch( Exception e ) {
 					try {
 						Object o = FoundationPropertyListSerialization.propertyListFromString( new String( aResponse.content() ) );
 						errorResponse.addObject( anInstance.displayName() + " is probably an older application that doesn't conform to the current Monitor Protocol. Please update and restart the instance." );
-						FLog.err.appendln( "Got old-style response from instance: " + anInstance.displayName() );
+						FLog.error( "Got old-style response from instance: " + anInstance.displayName() );
 					}
 					catch( Throwable t ) {
-						FLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: Error parsing: " + new String( aResponse.content() ) + " from " + anInstance.displayName() );
+						FLog.error( "Wotaskd getStatisticsForInstanceArray: Error parsing: " + new String( aResponse.content() ) + " from " + anInstance.displayName() );
 					}
 					continue;
 				}
@@ -721,7 +721,7 @@ public class DirectAction extends WODirectAction {
 				}
 				catch( Exception e ) {
 					// Do nothing - assume we died trying to parse the plist
-					FLog.err.appendln( "Wotaskd getStatisticsForInstanceArray: Error parsing PList: " + queryInstanceResponse + " from " + anInstance.displayName() );
+					FLog.error( "Wotaskd getStatisticsForInstanceArray: Error parsing PList: " + queryInstanceResponse + " from " + anInstance.displayName() );
 				}
 			}
 			else if( anInstance.isRunning_M() ) {
@@ -881,7 +881,7 @@ public class DirectAction extends WODirectAction {
 			// Check for correct password
 			String passwordHeader = aRequest.headerForKey( "password" );
 			if( !aConfig.comparePasswordWithPassword( passwordHeader ) ) {
-				FLog.debug.appendln( "Attempt to call Direct Action: defaultAction with incorrect password." );
+				FLog.debug( "Attempt to call Direct Action: defaultAction with incorrect password." );
 				aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 				aResponse.appendContentString( "Attempt to call Direct Action: defaultAction on wotaskd with incorrect password." );
 				// the read lock is released in the finally block
@@ -954,7 +954,7 @@ public class DirectAction extends WODirectAction {
 		aResponse.appendContentString( xml );
 		aResponse.setHeader( "text/xml", "content-type" );
 		aResponse.setHeader( HTTP_DATE_FORMATTER.format( Instant.now() ), "Last-Modified" );
-		FLog.debug.appendln( "woConfigAction returned: " + xml );
+		FLog.debug( "woConfigAction returned: " + xml );
 
 		return aResponse;
 	}

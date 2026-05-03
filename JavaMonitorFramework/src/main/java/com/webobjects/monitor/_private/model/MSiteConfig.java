@@ -837,7 +837,7 @@ public class MSiteConfig extends MObject {
 
 					aConfig = new MSiteConfig( siteDict );
 
-					FLog.debug.appendln( "the SiteConfig is \n" + aConfig.generateSiteConfigXML() );
+					FLog.debug( "the SiteConfig is \n" + aConfig.generateSiteConfigXML() );
 				}
 				catch( final Throwable ex ) {
 					if( isWotaskd ) {

@@ -77,7 +77,7 @@ public abstract class MInstanceTask extends TimerTask {
 
 			}
 			catch( MonitorException e ) {
-				FLog.err.appendln( "Exception while scheduling forceQuit: " + e.getMessage() );
+				FLog.error( "Exception while scheduling forceQuit: " + e.getMessage() );
 			}
 			finally {
 				++retries;

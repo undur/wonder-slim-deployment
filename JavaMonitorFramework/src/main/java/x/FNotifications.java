@@ -9,7 +9,7 @@ public class FNotifications {
 			Emailer.sendInThread( fromName, fromEmailAddress, toAddresses, subject, plainTextMessage, null );
 		}
 		catch( Throwable e ) {
-			FLog.err.appendln( "Error attempting to send email: " + e );
+			FLog.error( "Error attempting to send email: " + e );
 		}
 	}
 }

@@ -801,7 +801,7 @@ public class MInstance extends MObject {
 
 		final String message = "Application '" + displayName() + "' on " + _host.name() + ":" + port() + " stopped running at " + (currentDate) + ".\n" + "The app's current state was: " + MUtil.INSTANCE_STATES[state] + ".\n" + assumedToBeDead + "The last successful communication occurred at: " + _lastRegistration.toString() + ". " + "This may be the result of a crash or an intentional shutdown from outside of wotaskd";
 
-		FLog.err.appendln( message );
+		FLog.error( message );
 
 		final boolean notificationsEnabled = _application.notificationEmailEnabled() != null && _application.notificationEmailEnabled();
 		final String emailAddressString = _application.notificationEmailAddr();
@@ -1001,10 +1001,10 @@ public class MInstance extends MObject {
 		final long halfHourAsSeconds = 1800;
 
 		if( secondsAway < halfHourAsSeconds ) {
-			FLog.debug.appendln( "nearNextScheduledShutdown TRUE" );
+			FLog.debug( "nearNextScheduledShutdown TRUE" );
 			return true;
 		}
-		FLog.debug.appendln( "nearNextScheduledShutdown FALSE" );
+		FLog.debug( "nearNextScheduledShutdown FALSE" );
 		return false;
 	}
 
@@ -1083,7 +1083,7 @@ public class MInstance extends MObject {
 
 			setNextScheduledShutdown( atHour( now, startTime, dayOffset ) );
 		}
-		FLog.debug.appendln( "calculateNextScheduledShutdown: " + _nextScheduledShutdown );
+		FLog.debug( "calculateNextScheduledShutdown: " + _nextScheduledShutdown );
 	}
 
 	/**

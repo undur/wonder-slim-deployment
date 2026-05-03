@@ -290,7 +290,7 @@ public class InstanceController implements IInstanceController {
 
 	/********** Timer Targets **********/
 	public void _checkAutoRecover() {
-		FLog.debug.appendln( "_checkAutoRecover START" );
+		FLog.debug( "_checkAutoRecover START" );
 		theApplication._lock.readLock().lock();
 		try {
 			MHost theHost = theApplication.siteConfig().localHost();
@@ -313,12 +313,12 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.readLock().unlock();
 		}
-		FLog.debug.appendln( "_checkAutoRecover STOP" );
+		FLog.debug( "_checkAutoRecover STOP" );
 	}
 
 	// This only runs once, on startup - then it starts the regular timer
 	public void _checkAutoRecoverStartup() {
-		FLog.debug.appendln( "_checkAutoRecoverStartup START" );
+		FLog.debug( "_checkAutoRecoverStartup START" );
 		theApplication._lock.readLock().lock();
 		try {
 			MSiteConfig aConfig = theApplication.siteConfig();
@@ -359,7 +359,7 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.readLock().unlock();
 		}
-		FLog.debug.appendln( "_checkAutoRecoverStartup STOP" );
+		FLog.debug( "_checkAutoRecoverStartup STOP" );
 	}
 
 	private void _autoRecoverApplication( MApplication anApplication ) {
@@ -402,7 +402,7 @@ public class InstanceController implements IInstanceController {
 	}
 
 	public void _checkSchedules() {
-		FLog.debug.appendln( "_checkSchedules START" );
+		FLog.debug( "_checkSchedules START" );
 		theApplication._lock.readLock().lock();
 		try {
 
@@ -435,7 +435,7 @@ public class InstanceController implements IInstanceController {
 								}
 							}
 							catch( MonitorException me ) {
-								FLog.err.appendln( "Exception while scheduling: " + me.getMessage() );
+								FLog.error( "Exception while scheduling: " + me.getMessage() );
 							}
 						}
 					};
@@ -456,7 +456,7 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.readLock().unlock();
 		}
-		FLog.debug.appendln( "_checkSchedules STOP" );
+		FLog.debug( "_checkSchedules STOP" );
 	}
 
 	/********** Controlling Instances **********/
@@ -505,7 +505,7 @@ public class InstanceController implements IInstanceController {
 		}
 
 		try {
-			FLog.debug.appendln( "Starting Instance: " + aLaunchPath );
+			FLog.debug( "Starting Instance: " + aLaunchPath );
 			if( DETACH_LAUNCH && !_isOnWindows ) {
 				logger.info( "starting instance {}:{} in detached mode", anInstance.applicationName(), anInstance.port() );
 				startInstanceDetached( aFullPath, anInstance.commandLineArgumentsAsArray() );
@@ -516,7 +516,7 @@ public class InstanceController implements IInstanceController {
 			}
 		}
 		catch( IOException ioe ) {
-			FLog.err.appendln( "Failed to start " + anInstance.displayName() + ": " + ioe );
+			FLog.error( "Failed to start " + anInstance.displayName() + ": " + ioe );
 			return _hostName + ": Failed to start " + anInstance.displayName() + ": " + ioe;
 		}
 		return null;
@@ -581,7 +581,7 @@ public class InstanceController implements IInstanceController {
 				anInstance.scheduleForceQuit( new MInstanceTask.ForceQuit( anInstance ), FORCE_QUIT_DELAY );
 			}
 			else {
-				FLog.err.appendln( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
+				FLog.error( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
 			}
 		}
 
@@ -604,7 +604,7 @@ public class InstanceController implements IInstanceController {
 				anInstance.scheduleRefuseTask( new MInstanceTask.Refuse( anInstance, ERXProperties.intForKeyWithDefault( "WOTaskd.refuseNumRetries", 3 ) ), FORCE_QUIT_DELAY, FORCE_QUIT_DELAY );
 			}
 			else {
-				FLog.err.appendln( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
+				FLog.error( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
 			}
 		}
 

@@ -89,11 +89,11 @@ public class Application extends ERXApplication {
 		if( shouldMC != null ) {
 			if( !StringExtensions.boolValue( shouldMC ) ) {
 				_shouldRespondToMulticast = false;
-				FLog.debug.appendln( "Multicast Response Disabled" );
+				FLog.debug( "Multicast Response Disabled" );
 			}
 			else {
 				_shouldRespondToMulticast = true;
-				FLog.debug.appendln( "Multicast Response Enabled" );
+				FLog.debug( "Multicast Response Enabled" );
 			}
 		}
 
@@ -182,7 +182,7 @@ public class Application extends ERXApplication {
 
 	// creates and starts the ListenerThread inner class
 	public void createRequestListenerThread() {
-		FLog.debug.appendln( "Detaching request listen thread" );
+		FLog.debug( "Detaching request listen thread" );
 		listenThread = new MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() );
 		listenThread.start();
 	}
