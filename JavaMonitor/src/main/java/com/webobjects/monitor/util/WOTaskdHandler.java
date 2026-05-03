@@ -22,7 +22,6 @@ import com.webobjects.monitor.application.components.AppDetailPage;
 import com.webobjects.monitor.application.components.ApplicationsPage;
 import com.webobjects.monitor.application.components.HostsPage;
 
-import x.FLog;
 import x.FoundationCoder;
 import x.FoundationPropertyListSerialization;
 import x.ResponseWrapper;
@@ -328,7 +327,7 @@ public class WOTaskdHandler {
 			final ResponseWrapper[] responses = collector.sendRequest( monitorRequest, wotaskdArray, false );
 			final NSDictionary[] responseDicts = generateResponseDictionaries( responses );
 
-			FLog.debug( "OUT: " + FoundationPropertyListSerialization.stringFromPropertyList( monitorRequest ) + "\n\nIN: " + FoundationPropertyListSerialization.stringFromPropertyList( new NSArray( responseDicts ) ) );
+			logger.debug( "OUT: " + FoundationPropertyListSerialization.stringFromPropertyList( monitorRequest ) + "\n\nIN: " + FoundationPropertyListSerialization.stringFromPropertyList( new NSArray( responseDicts ) ) );
 
 			collector.getCommandErrors( responseDicts );
 		}
@@ -454,7 +453,7 @@ public class WOTaskdHandler {
 			}
 		}
 
-		FLog.debug( "##### getUpdateErrors: " + errorArray );
+		logger.debug( "##### getUpdateErrors: " + errorArray );
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
 	}
@@ -503,7 +502,7 @@ public class WOTaskdHandler {
 			}
 		}
 
-		FLog.debug( "##### getCommandErrors: " + errorArray );
+		logger.debug( "##### getCommandErrors: " + errorArray );
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
 		return errorArray;
@@ -536,7 +535,7 @@ public class WOTaskdHandler {
 						responseDictionary = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 					}
 					catch( Exception e ) {
-						FLog.error( "MonitorComponent pageWithName(AppDetailPage) Error decoding response: " + responses[i].contentString() );
+						logger.error( "MonitorComponent pageWithName(AppDetailPage) Error decoding response: " + responses[i].contentString() );
 						responseDictionary = responseParsingFailed;
 					}
 				}
@@ -586,7 +585,7 @@ public class WOTaskdHandler {
 				}
 			}
 
-			FLog.debug( "##### pageWithName(AppDetailPage) errors: " + errorArray );
+			logger.debug( "##### pageWithName(AppDetailPage) errors: " + errorArray );
 
 			errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
 		}
@@ -609,7 +608,7 @@ public class WOTaskdHandler {
 					responseDict = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 				}
 				catch( Exception e ) {
-					FLog.error( "MonitorComponent pageWithName(HostsPage) Error decoding response: " + responses[i].contentString() );
+					logger.error( "MonitorComponent pageWithName(HostsPage) Error decoding response: " + responses[i].contentString() );
 					responseDict = responseParsingFailed;
 				}
 			}
@@ -628,7 +627,7 @@ public class WOTaskdHandler {
 			}
 		}
 
-		FLog.debug( "##### pageWithName(HostsPage) errors: " + errorArray );
+		logger.debug( "##### pageWithName(HostsPage) errors: " + errorArray );
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
 	}
@@ -652,7 +651,7 @@ public class WOTaskdHandler {
 					queryResponseDictionary = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
 				}
 				catch( Exception e ) {
-					FLog.error( "MonitorComponent pageWithName(ApplicationsPage) Error decoding response: " + responses[i].contentString() );
+					logger.error( "MonitorComponent pageWithName(ApplicationsPage) Error decoding response: " + responses[i].contentString() );
 					queryResponseDictionary = responseParsingFailed;
 				}
 			}
@@ -678,7 +677,7 @@ public class WOTaskdHandler {
 			}
 		}
 
-		FLog.debug( "##### pageWithName(ApplicationsPage) errors: " + errorArray );
+		logger.debug( "##### pageWithName(ApplicationsPage) errors: " + errorArray );
 
 		errorCollector().addObjectsFromArrayIfAbsentToErrorMessageArray( errorArray );
 	}

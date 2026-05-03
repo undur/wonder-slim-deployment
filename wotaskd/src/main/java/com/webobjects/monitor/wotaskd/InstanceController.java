@@ -53,7 +53,6 @@ import com.webobjects.monitor._private.model.MInstance;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
 import er.extensions.foundation.ERXProperties;
-import x.FLog;
 import x.FoundationCoder;
 import x.ResponseWrapper;
 import x.XUtil;
@@ -290,7 +289,7 @@ public class InstanceController implements IInstanceController {
 
 	/********** Timer Targets **********/
 	public void _checkAutoRecover() {
-		FLog.debug( "_checkAutoRecover START" );
+		logger.debug( "_checkAutoRecover START" );
 		theApplication._lock.readLock().lock();
 		try {
 			MHost theHost = theApplication.siteConfig().localHost();
@@ -313,12 +312,12 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.readLock().unlock();
 		}
-		FLog.debug( "_checkAutoRecover STOP" );
+		logger.debug( "_checkAutoRecover STOP" );
 	}
 
 	// This only runs once, on startup - then it starts the regular timer
 	public void _checkAutoRecoverStartup() {
-		FLog.debug( "_checkAutoRecoverStartup START" );
+		logger.debug( "_checkAutoRecoverStartup START" );
 		theApplication._lock.readLock().lock();
 		try {
 			MSiteConfig aConfig = theApplication.siteConfig();
@@ -359,7 +358,7 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.readLock().unlock();
 		}
-		FLog.debug( "_checkAutoRecoverStartup STOP" );
+		logger.debug( "_checkAutoRecoverStartup STOP" );
 	}
 
 	private void _autoRecoverApplication( MApplication anApplication ) {
@@ -402,7 +401,7 @@ public class InstanceController implements IInstanceController {
 	}
 
 	public void _checkSchedules() {
-		FLog.debug( "_checkSchedules START" );
+		logger.debug( "_checkSchedules START" );
 		theApplication._lock.readLock().lock();
 		try {
 
@@ -435,7 +434,7 @@ public class InstanceController implements IInstanceController {
 								}
 							}
 							catch( MonitorException me ) {
-								FLog.error( "Exception while scheduling: " + me.getMessage() );
+								logger.error( "Exception while scheduling: " + me.getMessage() );
 							}
 						}
 					};
@@ -456,7 +455,7 @@ public class InstanceController implements IInstanceController {
 		finally {
 			theApplication._lock.readLock().unlock();
 		}
-		FLog.debug( "_checkSchedules STOP" );
+		logger.debug( "_checkSchedules STOP" );
 	}
 
 	/********** Controlling Instances **********/
@@ -505,7 +504,7 @@ public class InstanceController implements IInstanceController {
 		}
 
 		try {
-			FLog.debug( "Starting Instance: " + aLaunchPath );
+			logger.debug( "Starting Instance: " + aLaunchPath );
 			if( DETACH_LAUNCH && !_isOnWindows ) {
 				logger.info( "starting instance {}:{} in detached mode", anInstance.applicationName(), anInstance.port() );
 				startInstanceDetached( aFullPath, anInstance.commandLineArgumentsAsArray() );
@@ -516,7 +515,7 @@ public class InstanceController implements IInstanceController {
 			}
 		}
 		catch( IOException ioe ) {
-			FLog.error( "Failed to start " + anInstance.displayName() + ": " + ioe );
+			logger.error( "Failed to start " + anInstance.displayName() + ": " + ioe );
 			return _hostName + ": Failed to start " + anInstance.displayName() + ": " + ioe;
 		}
 		return null;
@@ -581,7 +580,7 @@ public class InstanceController implements IInstanceController {
 				anInstance.scheduleForceQuit( new MInstanceTask.ForceQuit( anInstance ), FORCE_QUIT_DELAY );
 			}
 			else {
-				FLog.error( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
+				logger.error( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
 			}
 		}
 
@@ -604,7 +603,7 @@ public class InstanceController implements IInstanceController {
 				anInstance.scheduleRefuseTask( new MInstanceTask.Refuse( anInstance, ERXProperties.intForKeyWithDefault( "WOTaskd.refuseNumRetries", 3 ) ), FORCE_QUIT_DELAY, FORCE_QUIT_DELAY );
 			}
 			else {
-				FLog.error( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
+				logger.error( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );
 			}
 		}
 

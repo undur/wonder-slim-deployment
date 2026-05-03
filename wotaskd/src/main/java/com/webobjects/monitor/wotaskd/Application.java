@@ -2,6 +2,9 @@ package com.webobjects.monitor.wotaskd;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
@@ -13,10 +16,11 @@ import com.webobjects.monitor._private.model.MSiteConfig;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.routes.RouteTable;
-import x.FLog;
 
 public class Application extends ERXApplication {
-	
+
+	private static final Logger logger = LoggerFactory.getLogger( Application.class );
+
 	private static final String _HTTP1 = "HTTP/1.0";
 
 	private InstanceController _localMonitor;
@@ -89,11 +93,11 @@ public class Application extends ERXApplication {
 		if( shouldMC != null ) {
 			if( !StringExtensions.boolValue( shouldMC ) ) {
 				_shouldRespondToMulticast = false;
-				FLog.debug( "Multicast Response Disabled" );
+				logger.debug( "Multicast Response Disabled" );
 			}
 			else {
 				_shouldRespondToMulticast = true;
-				FLog.debug( "Multicast Response Enabled" );
+				logger.debug( "Multicast Response Enabled" );
 			}
 		}
 
@@ -182,7 +186,7 @@ public class Application extends ERXApplication {
 
 	// creates and starts the ListenerThread inner class
 	public void createRequestListenerThread() {
-		FLog.debug( "Detaching request listen thread" );
+		logger.debug( "Detaching request listen thread" );
 		listenThread = new MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() );
 		listenThread.start();
 	}

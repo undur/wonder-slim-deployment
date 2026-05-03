@@ -49,7 +49,6 @@ import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
 
-import x.FLog;
 import x.FoundationCoder;
 
 public class MSiteConfig extends MObject {
@@ -837,7 +836,7 @@ public class MSiteConfig extends MObject {
 
 					aConfig = new MSiteConfig( siteDict );
 
-					FLog.debug( "the SiteConfig is \n" + aConfig.generateSiteConfigXML() );
+					logger.debug( "the SiteConfig is \n" + aConfig.generateSiteConfigXML() );
 				}
 				catch( final Throwable ex ) {
 					if( isWotaskd ) {

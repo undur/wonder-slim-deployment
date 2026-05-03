@@ -2,13 +2,16 @@ package com.webobjects.monitor.wotaskd;
 
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.monitor._private.MonitorException;
 import com.webobjects.monitor._private.model.MInstance;
 
-import x.FLog;
-
 public abstract class MInstanceTask extends TimerTask {
+
+	private static final Logger logger = LoggerFactory.getLogger( MInstanceTask.class );
 
 	MInstance _instance;
 
@@ -77,7 +80,7 @@ public abstract class MInstanceTask extends TimerTask {
 
 			}
 			catch( MonitorException e ) {
-				FLog.error( "Exception while scheduling forceQuit: " + e.getMessage() );
+				logger.error( "Exception while scheduling forceQuit: " + e.getMessage() );
 			}
 			finally {
 				++retries;

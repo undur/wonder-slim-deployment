@@ -7,16 +7,19 @@ import java.net.MulticastSocket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.monitor._private.model.MSiteConfig;
-
-import x.FLog;
 
 /**
  * Listens to Multicast Queries and UDP queries
  */
 
 public class MulticastListener extends Thread {
+
+	private static final Logger logger = LoggerFactory.getLogger( MulticastListener.class );
 
 	private final int _port;
 	private final boolean _shouldRespondToMulticast;
@@ -45,9 +48,9 @@ public class MulticastListener extends Thread {
 			}
 		}
 		catch( IOException exception ) {
-			FLog.error( "Unable to create multicast listener socket: " + exception );
-			FLog.error( "Port " + _port + " may be in use by another application." );
-			FLog.error( "Exiting..." );
+			logger.error( "Unable to create multicast listener socket: " + exception );
+			logger.error( "Port " + _port + " may be in use by another application." );
+			logger.error( "Exiting..." );
 			System.exit( 1 );
 		}
 
@@ -56,14 +59,14 @@ public class MulticastListener extends Thread {
 				_address = InetAddress.getByName( _multicastAddress );
 			}
 			catch( UnknownHostException exception ) {
-				FLog.error( "Error resolving address: " + _multicastAddress + " - " + exception );
-				FLog.error( "Exiting..." );
+				logger.error( "Error resolving address: " + _multicastAddress + " - " + exception );
+				logger.error( "Exiting..." );
 				System.exit( 1 );
 			}
 
 			if( !_address.isMulticastAddress() ) {
-				FLog.error( _address + " is not a valid multicast address" );
-				FLog.error( "Exiting..." );
+				logger.error( _address + " is not a valid multicast address" );
+				logger.error( "Exiting..." );
 				System.exit( 1 );
 			}
 
@@ -71,8 +74,8 @@ public class MulticastListener extends Thread {
 				_socket.joinGroup( _address );
 			}
 			catch( IOException exception ) {
-				FLog.error( "Error joining multicast group: " + exception );
-				FLog.error( "Exiting..." );
+				logger.error( "Error joining multicast group: " + exception );
+				logger.error( "Exiting..." );
 				System.exit( 1 );
 			}
 		}
@@ -81,13 +84,13 @@ public class MulticastListener extends Thread {
 	public void closeRequestSocket() {
 		try {
 			_socket.leaveGroup( _address );
-			FLog.debug( "Leaving multicast group" );
+			logger.debug( "Leaving multicast group" );
 		}
 		catch( IOException exception ) {
-			FLog.debug( "Error leaving multicast group " + exception );
+			logger.debug( "Error leaving multicast group " + exception );
 			return;
 		}
-		FLog.debug( "Closing request listen socket" );
+		logger.debug( "Closing request listen socket" );
 		_socket.close();
 	}
 
@@ -98,7 +101,7 @@ public class MulticastListener extends Thread {
 			_socket.send( outgoingPacket );
 		}
 		catch( IOException localException ) {
-			FLog.error( "Error sending reply: " + localException + " (ignored)" );
+			logger.error( "Error sending reply: " + localException + " (ignored)" );
 		}
 	}
 
@@ -151,21 +154,21 @@ public class MulticastListener extends Thread {
 						String key = incomingPacket.getAddress() + ":" + incomingPacket.getPort();
 
 						_siteConfig.globalErrorDictionary.put( key, (myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol.") );
-						FLog.debug( myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol." );
+						logger.debug( myName + ": Unrecognized UDP packet: " + new String( incomingPacket.getData() ) + " from " + key + ". This may be an Application that conforms to an older protocol." );
 					}
 				}
 				catch( IOException localException ) {
-					FLog.error( "Error receiving packet: " + localException + " (ignored)" );
+					logger.error( "Error receiving packet: " + localException + " (ignored)" );
 				}
 
 			}
 
 			// Hari-kiri - but should never happen, of course.
-			FLog.error( "wotaskd listen thread exiting because of bad socket" );
+			logger.error( "wotaskd listen thread exiting because of bad socket" );
 		}
 		catch( Throwable t ) {
-			FLog.error( "Listen thread exiting with exception: " + t );
-			FLog.debug( String.valueOf( t ) );
+			logger.error( "Listen thread exiting with exception: " + t );
+			logger.debug( String.valueOf( t ) );
 		}
 		System.exit( 1 );
 	}
@@ -173,7 +176,7 @@ public class MulticastListener extends Thread {
 	@Override
 	public void run() {
 		createRequestSocket();
-		FLog.debug( "Created UDP socket; listening for requests..." );
+		logger.debug( "Created UDP socket; listening for requests..." );
 		listenForRequests();
 	}
 }

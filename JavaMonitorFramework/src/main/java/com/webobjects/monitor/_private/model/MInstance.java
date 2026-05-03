@@ -29,16 +29,20 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 
-import x.FLog;
 import x.FNotifications;
 
 public class MInstance extends MObject {
+
+	private static final Logger logger = LoggerFactory.getLogger( MInstance.class );
 
 	// Old common code
 	private NSMutableDictionary<String, Object> values;
@@ -801,7 +805,7 @@ public class MInstance extends MObject {
 
 		final String message = "Application '" + displayName() + "' on " + _host.name() + ":" + port() + " stopped running at " + (currentDate) + ".\n" + "The app's current state was: " + MUtil.INSTANCE_STATES[state] + ".\n" + assumedToBeDead + "The last successful communication occurred at: " + _lastRegistration.toString() + ". " + "This may be the result of a crash or an intentional shutdown from outside of wotaskd";
 
-		FLog.error( message );
+		logger.error( message );
 
 		final boolean notificationsEnabled = _application.notificationEmailEnabled() != null && _application.notificationEmailEnabled();
 		final String emailAddressString = _application.notificationEmailAddr();
@@ -1001,10 +1005,10 @@ public class MInstance extends MObject {
 		final long halfHourAsSeconds = 1800;
 
 		if( secondsAway < halfHourAsSeconds ) {
-			FLog.debug( "nearNextScheduledShutdown TRUE" );
+			logger.debug( "nearNextScheduledShutdown TRUE" );
 			return true;
 		}
-		FLog.debug( "nearNextScheduledShutdown FALSE" );
+		logger.debug( "nearNextScheduledShutdown FALSE" );
 		return false;
 	}
 
@@ -1083,7 +1087,7 @@ public class MInstance extends MObject {
 
 			setNextScheduledShutdown( atHour( now, startTime, dayOffset ) );
 		}
-		FLog.debug( "calculateNextScheduledShutdown: " + _nextScheduledShutdown );
+		logger.debug( "calculateNextScheduledShutdown: " + _nextScheduledShutdown );
 	}
 
 	/**
