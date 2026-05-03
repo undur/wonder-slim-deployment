@@ -28,13 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 
-import x.FoundationCoder;
 import x.ResponseWrapper;
 import x.XUtil;
 
@@ -268,7 +266,7 @@ public class MHost extends MObject {
 	 * FIXME: Part of weird error handling mechanism // Hugi 2024-11-03
 	 */
 	private static String errorResponseString( final MHost host ) {
-		return new FoundationCoder().encodeRootObjectForKey( new NSDictionary<>( new NSArray<>( "Failed to contact " + host.name() + "-" + WOApplication.application().lifebeatDestinationPort() ), "errorResponse" ), "instanceResponse" );
+		return XUtil.errorResponseXML( "instanceResponse", "Failed to contact " + host.name() + "-" + WOApplication.application().lifebeatDestinationPort() );
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import com.webobjects.monitor.application.components.HostsPage;
 import x.FoundationCoder;
 import x.FoundationPropertyListSerialization;
 import x.ResponseWrapper;
+import x.XUtil;
 
 public class WOTaskdHandler {
 
@@ -373,9 +374,9 @@ public class WOTaskdHandler {
 	}
 
 	/* ******** Response Handling ********* */
-	private static NSDictionary responseParsingFailed = new NSDictionary( new NSDictionary( new NSArray( "INTERNAL ERROR: Failed to parse response XML" ), "errorResponse" ), "monitorResponse" );
+	private static NSDictionary responseParsingFailed = XUtil.errorResponseDict( "monitorResponse", "INTERNAL ERROR: Failed to parse response XML" );
 
-	private static NSDictionary emptyResponse = new NSDictionary( new NSDictionary( new NSArray( "INTERNAL ERROR: Response returned was null or empty" ), "errorResponse" ), "monitorResponse" );
+	private static NSDictionary emptyResponse = XUtil.errorResponseDict( "monitorResponse", "INTERNAL ERROR: Response returned was null or empty" );
 
 	private static NSDictionary[] generateResponseDictionaries( ResponseWrapper[] responses ) {
 

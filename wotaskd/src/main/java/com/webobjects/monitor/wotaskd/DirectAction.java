@@ -43,6 +43,7 @@ import com.webobjects.monitor._private.model.MSiteConfig;
 import x.FoundationCoder;
 import x.FoundationPropertyListSerialization;
 import x.ResponseWrapper;
+import x.XUtil;
 
 public class DirectAction extends WODirectAction {
 
@@ -76,10 +77,10 @@ public class DirectAction extends WODirectAction {
 		errorKeys = new Object[] { "success", "errorMessage" };
 
 		// Pre-cache error messages
-		_accessDenied = (new FoundationCoder()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + ": wotaskd may not be accessed through a Web server - Access Denied" ), "errorResponse" ), "monitorResponse" );
-		_invalidPassword = (new FoundationCoder()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + ": Invalid Password - Access Denied" ), "errorResponse" ), "monitorResponse" );
-		_invalidXML = (new FoundationCoder()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" ), "errorResponse" ), "monitorResponse" );
-		_emptyXML = (new FoundationCoder()).encodeRootObjectForKey( new NSDictionary( new NSArray( _hostName + " - INTERNAL ERROR: Request from Monitor was Empty" ), "errorResponse" ), "monitorResponse" );
+		_accessDenied = XUtil.errorResponseXML( "monitorResponse", _hostName + ": wotaskd may not be accessed through a Web server - Access Denied" );
+		_invalidPassword = XUtil.errorResponseXML( "monitorResponse", _hostName + ": Invalid Password - Access Denied" );
+		_invalidXML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" );
+		_emptyXML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Empty" );
 		_argumentNumberCommandError = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" }, errorKeys );
 	}
 

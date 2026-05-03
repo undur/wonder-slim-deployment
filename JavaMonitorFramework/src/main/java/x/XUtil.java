@@ -2,6 +2,9 @@ package x;
 
 import java.net.http.HttpClient;
 
+import com.webobjects.foundation.NSArray;
+import com.webobjects.foundation.NSDictionary;
+
 /**
  * Catch-all utility holder for cross-cutting framework-side helpers that don't yet have
  * a more specific home. Items here are expected to migrate out as natural homes appear.
@@ -24,4 +27,40 @@ public class XUtil {
 	 * java.net.http.HttpRequest.Builder} at the call site, not on the client.
 	 */
 	public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder().build();
+
+	/**
+	 * Builds the canonical wotaskd-protocol error envelope as an in-memory dictionary,
+	 * shaped:
+	 * <pre>
+	 * { rootKey: { errorResponse: [ message ] } }
+	 * </pre>
+	 *
+	 * <p>{@code rootKey} is typically {@code "monitorResponse"} (JavaMonitor↔wotaskd) or
+	 * {@code "instanceResponse"} (wotaskd↔WOApp). Used at sites where the response could
+	 * not be parsed and downstream code expects an already-parsed dict it can treat as if
+	 * parsing had succeeded.
+	 */
+	public static NSDictionary<String, Object> errorResponseDict( final String rootKey, final String message ) {
+		final NSArray<Object> messages = new NSArray<>( message );
+		final NSDictionary<String, Object> inner = new NSDictionary<>( messages, "errorResponse" );
+		return new NSDictionary<>( inner, rootKey );
+	}
+
+	/**
+	 * Builds the canonical wotaskd-protocol error envelope and returns it as wire-encoded XML.
+	 *
+	 * <p>Resulting XML has shape (rendered with {@code rootKey="monitorResponse"}):
+	 * <pre>
+	 * &lt;monitorResponse type="NSDictionary"&gt;
+	 *   &lt;errorResponse type="NSArray"&gt;
+	 *     &lt;element type="NSString"&gt;...message...&lt;/element&gt;
+	 *   &lt;/errorResponse&gt;
+	 * &lt;/monitorResponse&gt;
+	 * </pre>
+	 */
+	public static String errorResponseXML( final String rootKey, final String message ) {
+		final NSArray<Object> messages = new NSArray<>( message );
+		final NSDictionary<String, Object> inner = new NSDictionary<>( messages, "errorResponse" );
+		return new FoundationCoder().encodeRootObjectForKey( inner, rootKey );
+	}
 }
