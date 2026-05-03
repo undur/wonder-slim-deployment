@@ -251,9 +251,7 @@ public class FileBrowser extends MonitorComponent {
 					throw new MonitorException( "Error requesting directory listing for " + path + " from " + host.name() );
 				}
 
-				final ResponseWrapper responseWrapper = new ResponseWrapper();
-				responseWrapper._content = response.body();
-				responseWrapper._headers = response.headers();
+				final ResponseWrapper responseWrapper = new ResponseWrapper( response.body(), response.headers() );
 
 				result = extractFileListFromResponse( responseWrapper, path );
 				

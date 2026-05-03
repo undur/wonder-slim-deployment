@@ -267,7 +267,7 @@ public class MHost extends MObject {
 		try {
 			final HttpResponse<byte[]> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofByteArray() );
 			logger.info( "--> Response received =======" );
-			responseWrapper._content = response.body();
+			responseWrapper.setContent( response.body() );
 		}
 		catch( IOException e ) {
 			e.printStackTrace();
@@ -285,7 +285,7 @@ public class MHost extends MObject {
 			if( willChange ) {
 				_siteConfig.hostErrorArray.add( this );
 			}
-			responseWrapper._content = errorResponseString( this ).getBytes();
+			responseWrapper.setContent( errorResponseString( this ).getBytes() );
 		}
 		else {
 			// if we successfully synced, clear the error dictionary

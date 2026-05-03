@@ -643,9 +643,6 @@ public class InstanceController implements IInstanceController {
 		final String requestContentXML = new FoundationCoder().encodeRootObjectForKey( xmlDict, "instanceRequest" );
 		final String urlString = MUtil.ADMIN_ACTION_STRING_PREFIX + anInstance.applicationName() + MUtil.ADMIN_ACTION_STRING_POSTFIX;
 
-		// FIXME: We should not have to create this here...
-		ResponseWrapper responseWrapper = null;
-
 		try {
 			final Builder requestBuilder = HttpRequest
 					.newBuilder()
@@ -661,12 +658,11 @@ public class InstanceController implements IInstanceController {
 
 			final HttpResponse<byte[]> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofByteArray() );
 			logger.info( "--> Response received =======" );
-			responseWrapper = new ResponseWrapper();
-			responseWrapper._content = response.body();
-			responseWrapper._headers = response.headers();
+			final ResponseWrapper responseWrapper = new ResponseWrapper( response.body(), response.headers() );
 			logger.info( "--> End request phase =======" );
 			
 			anInstance.succeededInConnection();
+			return responseWrapper;
 		}
 		catch( java.net.http.HttpTimeoutException te ) {
 			anInstance.failedToConnect();
@@ -676,8 +672,6 @@ public class InstanceController implements IInstanceController {
 			anInstance.failedToConnect();
 			throw new MonitorException( hostName + ": Error while communicating with " + anInstance.displayName() + ": " + e );
 		}
-
-		return responseWrapper;
 	}
 
 	/**

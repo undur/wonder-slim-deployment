@@ -9,8 +9,25 @@ import java.util.Optional;
 
 public class ResponseWrapper {
 
-	public byte[] _content;
-	public HttpHeaders _headers;
+	private byte[] _content;
+	private HttpHeaders _headers;
+
+	// FIXME: Delete. This class should be immutable // Hugi 2026-05-03
+	@Deprecated
+	public ResponseWrapper() {
+		this( null, null );
+	}
+
+	// FIXME: Delete. This class should be immutable // Hugi 2026-05-03
+	@Deprecated
+	public void setContent( byte[] newValue ) {
+		_content = newValue;
+	}
+
+	public ResponseWrapper( final byte[] content, final HttpHeaders headers ) {
+		_content = content;
+		_headers = headers;
+	}
 
 	public byte[] content() {
 		return _content;
