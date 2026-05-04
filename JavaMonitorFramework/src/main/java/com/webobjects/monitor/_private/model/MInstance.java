@@ -554,6 +554,10 @@ public class MInstance extends MObject {
 		_statistics = InstanceStatistics.fromDictionary( newStatistics );
 	}
 
+	/**
+	 * FIXME: Display level logic // Hugi 2026-05-04
+	 */
+	@Deprecated
 	public String transactions() {
 		if( _statistics != null ) {
 			Object _value = _statistics.transactions;
@@ -565,6 +569,10 @@ public class MInstance extends MObject {
 		return "-";
 	}
 
+	/**
+	 * FIXME: Display level logic // Hugi 2026-05-04
+	 */
+	@Deprecated
 	public String activeSessions() {
 		if( _statistics != null ) {
 			Object _value = _statistics.activeSessions;
@@ -576,6 +584,10 @@ public class MInstance extends MObject {
 		return "-";
 	}
 
+	/**
+	 * FIXME: Display level logic // Hugi 2026-05-04
+	 */
+	@Deprecated
 	public String avgTransactionTime() {
 		if( _statistics != null ) {
 			Object _value = _statistics.avgTransactionTime;
@@ -587,6 +599,10 @@ public class MInstance extends MObject {
 		return "-";
 	}
 
+	/**
+	 * FIXME: Display level logic // Hugi 2026-05-04
+	 */
+	@Deprecated
 	public String averageIdlePeriod() {
 		if( _statistics != null ) {
 			Object _value = _statistics.averageIdlePeriod;
