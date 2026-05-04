@@ -43,42 +43,63 @@ public class StatsUtilitiesEvenMore {
 		result.put( "applicationName", app.name() );
 
 		final List<MInstance> allInstances = app.instanceArray();
-		result.put( "configuredInstances", Integer.valueOf( allInstances.size() ) );
+		final int instanceCount = allInstances.size();
+		result.put( "configuredInstances", Integer.valueOf( instanceCount ) );
 
 		int runningInstances = 0;
 		int refusingInstances = 0;
 
-		for( MInstance instance : allInstances ) {
+		int sumSessions = 0;
+		int maxSessions = 0;
+		int sumTransactions = 0;
+		int maxTransactions = 0;
+		float sumAvgTransactionTime = 0f;
+		float maxAvgTransactionTime = 0f;
+		float sumAvgIdleTime = 0f;
+		float maxAvgIdleTime = 0f;
+
+		for( final MInstance instance : allInstances ) {
 			if( instance.isRunning_M() ) {
 				runningInstances++;
 			}
-
 			if( instance.isRefusingNewSessions() ) {
 				refusingInstances++;
 			}
+
+			final int sessions = instance.activeSessionsValue();
+			sumSessions += sessions;
+			if( sessions > maxSessions ) maxSessions = sessions;
+
+			final int transactions = instance.transactionsValue();
+			sumTransactions += transactions;
+			if( transactions > maxTransactions ) maxTransactions = transactions;
+
+			final float avgTxTime = instance.avgTransactionTimeValue();
+			sumAvgTransactionTime += avgTxTime;
+			if( avgTxTime > maxAvgTransactionTime ) maxAvgTransactionTime = avgTxTime;
+
+			final float avgIdleTime = instance.avgIdleTimeValue();
+			sumAvgIdleTime += avgIdleTime;
+			if( avgIdleTime > maxAvgIdleTime ) maxAvgIdleTime = avgIdleTime;
 		}
 
 		result.put( "runningInstances", Integer.valueOf( runningInstances ) );
 		result.put( "refusingInstances", Integer.valueOf( refusingInstances ) );
 
-		result.put( "sumSessions", nonNull( app.instanceArray().valueForKeyPath( "@sum.activeSessionsValue" ) ) );
-		result.put( "maxSessions", nonNull( app.instanceArray().valueForKeyPath( "@max.activeSessionsValue" ) ) );
-		result.put( "avgSessions", nonNull( app.instanceArray().valueForKeyPath( "@avg.activeSessionsValue" ) ) );
+		result.put( "sumSessions", sumSessions );
+		result.put( "maxSessions", maxSessions );
+		result.put( "avgSessions", instanceCount > 0 ? (float)sumSessions / instanceCount : 0f );
 
-		result.put( "sumTransactions", nonNull( app.instanceArray().valueForKeyPath( "@sum.transactionsValue" ) ) );
-		result.put( "maxTransactions", nonNull( app.instanceArray().valueForKeyPath( "@max.transactionsValue" ) ) );
-		result.put( "avgTransactions", nonNull( app.instanceArray().valueForKeyPath( "@avg.transactionsValue" ) ) );
+		result.put( "sumTransactions", sumTransactions );
+		result.put( "maxTransactions", maxTransactions );
+		result.put( "avgTransactions", instanceCount > 0 ? (float)sumTransactions / instanceCount : 0f );
 
-		result.put( "maxAvgTransactionTime", nonNull( app.instanceArray().valueForKeyPath( "@max.avgTransactionTimeValue" ) ) );
-		result.put( "avgAvgTransactionTime", nonNull( app.instanceArray().valueForKeyPath( "@avg.avgTransactionTimeValue" ) ) );
+		result.put( "maxAvgTransactionTime", maxAvgTransactionTime );
+		result.put( "avgAvgTransactionTime", instanceCount > 0 ? sumAvgTransactionTime / instanceCount : 0f );
 
-		result.put( "maxAvgIdleTime", nonNull( app.instanceArray().valueForKeyPath( "@max.avgIdleTimeValue" ) ) );
-		result.put( "avgAvgIdleTime", nonNull( app.instanceArray().valueForKeyPath( "@avg.avgIdleTimeValue" ) ) );
+		result.put( "maxAvgIdleTime", maxAvgIdleTime );
+		result.put( "avgAvgIdleTime", instanceCount > 0 ? sumAvgIdleTime / instanceCount : 0f );
 
 		return result;
-	}
-
-	private static Object nonNull( Object value ) {
-		return value != null ? value : "";
 	}
 }
