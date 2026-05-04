@@ -47,7 +47,7 @@ public class MHost extends MObject {
 
 	public void updateValues( NSDictionary<String, Object> aDict ) {
 		values = new NSMutableDictionary<>( aDict );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public NSMutableDictionary<String, Object> dictionaryForArchive() {
@@ -108,7 +108,7 @@ public class MHost extends MObject {
 
 	public void setName( String value ) {
 		values.takeValueForKey( value, "name" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public String osType() {
@@ -117,7 +117,7 @@ public class MHost extends MObject {
 
 	public void setOsType( String value ) {
 		values.takeValueForKey( MUtil.validatedHostType( value ), "type" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public NSMutableArray<MInstance> instanceArray() {

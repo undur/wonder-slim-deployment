@@ -19,4 +19,8 @@ public class MObject {
 	public MSiteConfig siteConfig() {
 		return _siteConfig;
 	}
+
+	protected void dataChanged() {
+		_siteConfig.dataHasChanged();
+	}
 }

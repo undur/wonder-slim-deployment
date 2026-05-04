@@ -62,7 +62,7 @@ public class MSiteConfig extends MObject {
 
 	public void updateValues( NSDictionary<String, Object> aDict ) {
 		values = new NSMutableDictionary<>( aDict );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger( MSiteConfig.class );
@@ -98,7 +98,7 @@ public class MSiteConfig extends MObject {
 	// Special treatment - the password is stored encrypted!
 	public void setPassword( String value ) {
 		_setPassword( value );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public String woAdaptor() {
@@ -107,7 +107,7 @@ public class MSiteConfig extends MObject {
 
 	public void setWoAdaptor( String value ) {
 		values.takeValueForKey( value, "woAdaptor" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public String SMTPhost() {
@@ -116,7 +116,7 @@ public class MSiteConfig extends MObject {
 
 	public void setSMTPhost( String value ) {
 		values.takeValueForKey( value, "SMTPhost" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public String emailReturnAddr() {
@@ -125,7 +125,7 @@ public class MSiteConfig extends MObject {
 
 	public void setEmailReturnAddr( String value ) {
 		values.takeValueForKey( value, "emailReturnAddr" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Boolean viewRefreshEnabled() {
@@ -134,7 +134,7 @@ public class MSiteConfig extends MObject {
 
 	public void setViewRefreshEnabled( Boolean value ) {
 		values.takeValueForKey( value, "viewRefreshEnabled" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer viewRefreshRate() {
@@ -143,7 +143,7 @@ public class MSiteConfig extends MObject {
 
 	public void setViewRefreshRate( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "viewRefreshRate" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer sequence() {
@@ -152,7 +152,7 @@ public class MSiteConfig extends MObject {
 
 	public void setSequence( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "sequence" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer retries() {
@@ -161,7 +161,7 @@ public class MSiteConfig extends MObject {
 
 	public void setRetries( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "retries" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public String scheduler() {
@@ -170,7 +170,7 @@ public class MSiteConfig extends MObject {
 
 	public void setScheduler( String value ) {
 		values.takeValueForKey( value, "scheduler" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer dormant() {
@@ -179,7 +179,7 @@ public class MSiteConfig extends MObject {
 
 	public void setDormant( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "dormant" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public String redir() {
@@ -188,7 +188,7 @@ public class MSiteConfig extends MObject {
 
 	public void setRedir( String value ) {
 		values.takeValueForKey( value, "redir" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer sendTimeout() {
@@ -197,7 +197,7 @@ public class MSiteConfig extends MObject {
 
 	public void setSendTimeout( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "sendTimeout" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer recvTimeout() {
@@ -206,7 +206,7 @@ public class MSiteConfig extends MObject {
 
 	public void setRecvTimeout( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "recvTimeout" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer cnctTimeout() {
@@ -215,7 +215,7 @@ public class MSiteConfig extends MObject {
 
 	public void setCnctTimeout( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "cnctTimeout" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer sendBufSize() {
@@ -224,7 +224,7 @@ public class MSiteConfig extends MObject {
 
 	public void setSendBufSize( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "sendBufSize" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer recvBufSize() {
@@ -233,7 +233,7 @@ public class MSiteConfig extends MObject {
 
 	public void setRecvBufSize( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "recvBufSize" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer poolsize() {
@@ -242,7 +242,7 @@ public class MSiteConfig extends MObject {
 
 	public void setPoolsize( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "poolsize" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer urlVersion() {
@@ -251,7 +251,7 @@ public class MSiteConfig extends MObject {
 
 	public void setUrlVersion( Integer value ) {
 		values.takeValueForKey( MUtil.validatedUrlVersion( value ), "urlVersion" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	/********** Errors  **********/

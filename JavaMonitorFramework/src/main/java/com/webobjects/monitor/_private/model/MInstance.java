@@ -142,7 +142,7 @@ public class MInstance extends MObject {
 
 	public void setHostName( String value ) {
 		values.takeValueForKey( value, "hostName" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer id() {
@@ -151,7 +151,7 @@ public class MInstance extends MObject {
 
 	public void setId( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "id" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer port() {
@@ -163,7 +163,7 @@ public class MInstance extends MObject {
 		if( !valVal.equals( port() ) ) {
 			setOldport( port() );
 			values.takeValueForKey( valVal, "port" );
-			_siteConfig.dataHasChanged();
+			dataChanged();
 		}
 	}
 
@@ -173,7 +173,7 @@ public class MInstance extends MObject {
 
 	public void setApplicationName( String value ) {
 		values.takeValueForKey( value, "applicationName" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Boolean autoRecover() {
@@ -182,7 +182,7 @@ public class MInstance extends MObject {
 
 	public void setAutoRecover( Boolean value ) {
 		values.takeValueForKey( value, "autoRecover" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer minimumActiveSessionsCount() {
@@ -191,7 +191,7 @@ public class MInstance extends MObject {
 
 	public void setMinimumActiveSessionsCount( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "minimumActiveSessionsCount" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public String path() {
@@ -200,7 +200,7 @@ public class MInstance extends MObject {
 
 	public void setPath( String value ) {
 		values.takeValueForKey( value, "path" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Boolean cachingEnabled() {
@@ -209,7 +209,7 @@ public class MInstance extends MObject {
 
 	public void setCachingEnabled( Boolean value ) {
 		values.takeValueForKey( value, "cachingEnabled" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Boolean debuggingEnabled() {
@@ -218,7 +218,7 @@ public class MInstance extends MObject {
 
 	public void setDebuggingEnabled( Boolean value ) {
 		values.takeValueForKey( value, "debuggingEnabled" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public String outputPath() {
@@ -227,7 +227,7 @@ public class MInstance extends MObject {
 
 	public void setOutputPath( String value ) {
 		values.takeValueForKey( MUtil.validatedOutputPath( value ), "outputPath" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Boolean autoOpenInBrowser() {
@@ -236,7 +236,7 @@ public class MInstance extends MObject {
 
 	public void setAutoOpenInBrowser( Boolean value ) {
 		values.takeValueForKey( value, "autoOpenInBrowser" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer lifebeatInterval() {
@@ -245,7 +245,7 @@ public class MInstance extends MObject {
 
 	public void setLifebeatInterval( Integer value ) {
 		values.takeValueForKey( MUtil.validatedLifebeatInterval( value ), "lifebeatInterval" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public String additionalArgs() {
@@ -254,7 +254,7 @@ public class MInstance extends MObject {
 
 	public void setAdditionalArgs( String value ) {
 		values.takeValueForKey( value, "additionalArgs" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Boolean schedulingEnabled() {
@@ -263,7 +263,7 @@ public class MInstance extends MObject {
 
 	public void setSchedulingEnabled( Boolean value ) {
 		values.takeValueForKey( value, "schedulingEnabled" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public String schedulingType() {
@@ -272,7 +272,7 @@ public class MInstance extends MObject {
 
 	public void setSchedulingType( String value ) {
 		values.takeValueForKey( MUtil.validatedSchedulingType( value ), "schedulingType" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer schedulingHourlyStartTime() {
@@ -281,7 +281,7 @@ public class MInstance extends MObject {
 
 	public void setSchedulingHourlyStartTime( Integer value ) {
 		values.takeValueForKey( MUtil.validatedSchedulingStartTime( value ), "schedulingHourlyStartTime" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer schedulingDailyStartTime() {
@@ -290,7 +290,7 @@ public class MInstance extends MObject {
 
 	public void setSchedulingDailyStartTime( Integer value ) {
 		values.takeValueForKey( MUtil.validatedSchedulingStartTime( value ), "schedulingDailyStartTime" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer schedulingWeeklyStartTime() {
@@ -299,7 +299,7 @@ public class MInstance extends MObject {
 
 	public void setSchedulingWeeklyStartTime( Integer value ) {
 		values.takeValueForKey( MUtil.validatedSchedulingStartTime( value ), "schedulingWeeklyStartTime" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer schedulingStartDay() {
@@ -308,7 +308,7 @@ public class MInstance extends MObject {
 
 	public void setSchedulingStartDay( Integer value ) {
 		values.takeValueForKey( MUtil.validatedSchedulingStartDay( value ), "schedulingStartDay" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer schedulingInterval() {
@@ -317,7 +317,7 @@ public class MInstance extends MObject {
 
 	public void setSchedulingInterval( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "schedulingInterval" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Boolean gracefulScheduling() {
@@ -326,7 +326,7 @@ public class MInstance extends MObject {
 
 	public void setGracefulScheduling( Boolean value ) {
 		values.takeValueForKey( value, "gracefulScheduling" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer sendTimeout() {
@@ -335,7 +335,7 @@ public class MInstance extends MObject {
 
 	public void setSendTimeout( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "sendTimeout" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer recvTimeout() {
@@ -344,7 +344,7 @@ public class MInstance extends MObject {
 
 	public void setRecvTimeout( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "recvTimeout" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer cnctTimeout() {
@@ -353,7 +353,7 @@ public class MInstance extends MObject {
 
 	public void setCnctTimeout( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "cnctTimeout" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer sendBufSize() {
@@ -362,7 +362,7 @@ public class MInstance extends MObject {
 
 	public void setSendBufSize( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "sendBufSize" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public Integer recvBufSize() {
@@ -371,7 +371,7 @@ public class MInstance extends MObject {
 
 	public void setRecvBufSize( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "recvBufSize" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	/**
@@ -388,7 +388,7 @@ public class MInstance extends MObject {
 	@Deprecated
 	public void setOldport( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "oldport" );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 	}
 
 	public MHost host() {
@@ -893,7 +893,7 @@ public class MInstance extends MObject {
 	 */
 	public void updateValues( NSDictionary aDict ) {
 		values = new NSMutableDictionary<>( aDict );
-		_siteConfig.dataHasChanged();
+		dataChanged();
 
 		if( isScheduled() ) {
 			calculateNextScheduledShutdown();
