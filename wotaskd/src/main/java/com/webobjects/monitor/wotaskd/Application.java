@@ -170,7 +170,7 @@ public class Application extends ERXApplication {
 	public void sleep() {
 		_lock.readLock().lock();
 		try {
-			if( (_siteConfig != null) && (_siteConfig.hasChanges()) ) {
+			if( (_siteConfig != null) && _siteConfig.hasChanges() ) {
 				// archiving the siteConfig
 				_siteConfig.archiveSiteConfig();
 				if( _shouldWriteAdaptorConfig ) {
@@ -185,7 +185,7 @@ public class Application extends ERXApplication {
 	}
 
 	// creates and starts the ListenerThread inner class
-	public void createRequestListenerThread() {
+	private void createRequestListenerThread() {
 		logger.debug( "Detaching request listen thread" );
 		listenThread = new MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() );
 		listenThread.start();
