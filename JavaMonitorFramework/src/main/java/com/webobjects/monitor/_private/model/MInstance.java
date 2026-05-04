@@ -551,30 +551,7 @@ public class MInstance extends MObject {
 	}
 
 	public void setStatistics( Map<String, String> newStatistics ) {
-		_statistics.transactions = validatedStats( newStatistics.get( "transactions" ) );
-		_statistics.activeSessions = validatedStats( newStatistics.get( "activeSessions" ) );
-		_statistics.avgTransactionTime = validatedStats( newStatistics.get( "avgTransactionTime" ) );
-		_statistics.averageIdlePeriod = validatedStats( newStatistics.get( "averageIdlePeriod" ) );
-		_statistics.startedAt = validatedStats( newStatistics.get( "startedAt" ) );
-	}
-
-	/**
-	 * FIXME: This reeally looks like it's just here to validate potentially bad data from wotaskd // Hugi 2024-11-07
-	 */
-	private static String validatedStats( String value ) {
-		if( value == null ) {
-			return "0";
-		}
-
-		int i = value.indexOf( '.' );
-		int sLen = value.length() - 1;
-		if( i == -1 ) {
-			return value;
-		}
-		if( (i + 3) > sLen ) {
-			return value;
-		}
-		return value.substring( 0, (i + 4) );
+		_statistics = InstanceStatistics.fromDictionary( newStatistics );
 	}
 
 	public String transactions() {
