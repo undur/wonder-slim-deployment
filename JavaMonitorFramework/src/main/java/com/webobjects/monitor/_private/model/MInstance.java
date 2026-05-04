@@ -1086,54 +1086,6 @@ public class MInstance extends MObject {
 		return isRefusingNewSessions;
 	}
 
-	private int intStatisticsValue( String aValue, int defaultValue ) {
-		InstanceStatistics aStatsDict = statistics();
-
-		if( aStatsDict != null ) {
-			try {
-				if( aValue != null ) {
-					return Integer.parseInt( aValue );
-				}
-			}
-			catch( Throwable ex ) {
-				// do nothing
-			}
-		}
-		return defaultValue;
-	}
-
-	private float floatStatisticsValue( String aValue, float defaultValue ) {
-		InstanceStatistics aStatsDict = statistics();
-
-		if( aStatsDict != null ) {
-			try {
-				if( aValue != null ) {
-					return Float.parseFloat( aValue );
-				}
-			}
-			catch( Throwable ex ) {
-				// do nothing
-			}
-		}
-		return defaultValue;
-	}
-
-	public int transactionsValue() {
-		return intStatisticsValue( statistics().transactions, 0 );
-	}
-
-	public int activeSessionsValue() {
-		return intStatisticsValue( statistics().activeSessions, 0 );
-	}
-
-	public float avgIdleTimeValue() {
-		return floatStatisticsValue( statistics().averageIdlePeriod, 0 );
-	}
-
-	public float avgTransactionTimeValue() {
-		return floatStatisticsValue( statistics().avgTransactionTime, 0 );
-	}
-
 	/** ******** Force quit task ********* */
 
 	public Timer taskTimer() {

@@ -66,4 +66,51 @@ public class InstanceStatistics {
 		}
 		return value.substring( 0, (i + 4) );
 	}
+
+	/**
+	 * FIXME: Parse errors shouldn't happen and these should never be null // Hugi 2026-05-04
+	 */
+	private static int intStatisticsValue( String aValue, int defaultValue ) {
+		if( aValue == null ) {
+			return defaultValue;
+		}
+		try {
+			return Integer.parseInt( aValue );
+		}
+		catch( NumberFormatException e ) {
+			return defaultValue;
+		}
+	}
+
+	/**
+	 * FIXME: Parse errors shouldn't happen and these should never be null // Hugi 2026-05-04
+	 */
+	private static float floatStatisticsValue( String aValue, float defaultValue ) {
+		if( aValue == null ) {
+			return defaultValue;
+		}
+		try {
+			return Float.parseFloat( aValue );
+		}
+		catch( NumberFormatException e ) {
+			return defaultValue;
+		}
+	}
+
+	public int transactionsValue() {
+		return intStatisticsValue( transactions, 0 );
+	}
+
+	public int activeSessionsValue() {
+		return intStatisticsValue( activeSessions, 0 );
+	}
+
+	public float avgIdleTimeValue() {
+		return floatStatisticsValue( averageIdlePeriod, 0 );
+	}
+
+	public float avgTransactionTimeValue() {
+		return floatStatisticsValue( avgTransactionTime, 0 );
+	}
+
 }

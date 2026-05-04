@@ -66,19 +66,19 @@ public class StatsUtilitiesEvenMore {
 				refusingInstances++;
 			}
 
-			final int sessions = instance.activeSessionsValue();
+			final int sessions = instance.statistics().activeSessionsValue();
 			sumSessions += sessions;
 			if( sessions > maxSessions ) maxSessions = sessions;
 
-			final int transactions = instance.transactionsValue();
+			final int transactions = instance.statistics().transactionsValue();
 			sumTransactions += transactions;
 			if( transactions > maxTransactions ) maxTransactions = transactions;
 
-			final float avgTxTime = instance.avgTransactionTimeValue();
+			final float avgTxTime = instance.statistics().avgTransactionTimeValue();
 			sumAvgTransactionTime += avgTxTime;
 			if( avgTxTime > maxAvgTransactionTime ) maxAvgTransactionTime = avgTxTime;
 
-			final float avgIdleTime = instance.avgIdleTimeValue();
+			final float avgIdleTime = instance.statistics().avgIdleTimeValue();
 			sumAvgIdleTime += avgIdleTime;
 			if( avgIdleTime > maxAvgIdleTime ) maxAvgIdleTime = avgIdleTime;
 		}
