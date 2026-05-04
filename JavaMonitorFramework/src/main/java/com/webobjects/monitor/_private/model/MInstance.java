@@ -559,14 +559,7 @@ public class MInstance extends MObject {
 	 */
 	@Deprecated
 	public String transactions() {
-		if( _statistics != null ) {
-			Object _value = _statistics.transactions;
-
-			if( _value != null ) {
-				return (_value.toString());
-			}
-		}
-		return "-";
+		return _statistics.transactions != null ? _statistics.transactions : "-";
 	}
 
 	/**
@@ -574,14 +567,7 @@ public class MInstance extends MObject {
 	 */
 	@Deprecated
 	public String activeSessions() {
-		if( _statistics != null ) {
-			Object _value = _statistics.activeSessions;
-
-			if( _value != null ) {
-				return (_value.toString());
-			}
-		}
-		return "-";
+		return _statistics.activeSessions != null ? _statistics.activeSessions : "-";
 	}
 
 	/**
@@ -589,14 +575,7 @@ public class MInstance extends MObject {
 	 */
 	@Deprecated
 	public String avgTransactionTime() {
-		if( _statistics != null ) {
-			Object _value = _statistics.avgTransactionTime;
-
-			if( _value != null ) {
-				return (_value.toString());
-			}
-		}
-		return "-";
+		return _statistics.avgTransactionTime != null ? _statistics.avgTransactionTime : "-";
 	}
 
 	/**
@@ -604,14 +583,7 @@ public class MInstance extends MObject {
 	 */
 	@Deprecated
 	public String averageIdlePeriod() {
-		if( _statistics != null ) {
-			Object _value = _statistics.averageIdlePeriod;
-
-			if( _value != null ) {
-				return (_value.toString());
-			}
-		}
-		return "-";
+		return _statistics.averageIdlePeriod != null ? _statistics.averageIdlePeriod : "-";
 	}
 
 	public void setStatisticsError( String errorString ) {
