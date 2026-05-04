@@ -61,7 +61,7 @@ public class StatsUtilities {
 
 		for( final MInstance instance : anApp.instanceArray() ) {
 			if( !runningOnly || instance.isRunning_M() ) {
-				final Map map = instance.statistics();
+				final Map map = instance.statistics().toDictionary();
 
 				if( map != null ) {
 					try {
@@ -86,7 +86,7 @@ public class StatsUtilities {
 		float aTotalAvg = (float)0.0;
 
 		for( MInstance instance : anApp.instanceArray() ) {
-			final Map map = instance.statistics();
+			final Map map = instance.statistics().toDictionary();
 
 			if( map != null ) {
 				try {
@@ -121,7 +121,7 @@ public class StatsUtilities {
 		float aTotalAvg = (float)0.0;
 
 		for( final MInstance instance : anApp.instanceArray() ) {
-			final Map map = instance.statistics();
+			final Map map = instance.statistics().toDictionary();
 
 			if( map != null ) {
 				try {
@@ -157,7 +157,7 @@ public class StatsUtilities {
 
 		for( final MInstance instance : anApp.instanceArray() ) {
 
-			final Map map = instance.statistics();
+			final Map map = instance.statistics().toDictionary();
 
 			if( map != null ) {
 				String startedAt = (String)map.get( "startedAt" );

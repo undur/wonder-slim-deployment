@@ -39,6 +39,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.monitor._private.MUtil;
 
 import x.FNotifications;
+import x.InstanceStatistics;
 
 public class MInstance extends MObject {
 
@@ -93,7 +94,7 @@ public class MInstance extends MObject {
 	private NSMutableArray<String> _deaths = new NSMutableArray<>();
 	private boolean isRefusingNewSessions = false;
 	public int state = MUtil.DEAD;
-	private NSMutableDictionary _statistics = new NSMutableDictionary();
+	private InstanceStatistics _statistics = new InstanceStatistics();
 	private Timer _taskTimer;
 	private TimerTask _forceQuitTask;
 	private ZonedDateTime _nextScheduledShutdown = ZonedDateTime.of( LocalDate.of( 1970, 1, 1 ).atStartOfDay(), ZoneId.systemDefault() );
@@ -545,16 +546,16 @@ public class MInstance extends MObject {
 		return hostName() + ":" + port();
 	}
 
-	public NSDictionary statistics() {
+	public InstanceStatistics statistics() {
 		return _statistics;
 	}
 
-	public void setStatistics( NSDictionary newStatistics ) {
-		_statistics.takeValueForKey( validatedStats( (String)newStatistics.valueForKey( "transactions" ) ), "transactions" );
-		_statistics.takeValueForKey( validatedStats( (String)newStatistics.valueForKey( "activeSessions" ) ), "activeSessions" );
-		_statistics.takeValueForKey( validatedStats( (String)newStatistics.valueForKey( "avgTransactionTime" ) ), "avgTransactionTime" );
-		_statistics.takeValueForKey( validatedStats( (String)newStatistics.valueForKey( "averageIdlePeriod" ) ), "averageIdlePeriod" );
-		_statistics.takeValueForKey( validatedStats( (String)newStatistics.valueForKey( "startedAt" ) ), "startedAt" );
+	public void setStatistics( Map<String, String> newStatistics ) {
+		_statistics.transactions = validatedStats( newStatistics.get( "transactions" ) );
+		_statistics.activeSessions = validatedStats( newStatistics.get( "activeSessions" ) );
+		_statistics.avgTransactionTime = validatedStats( newStatistics.get( "avgTransactionTime" ) );
+		_statistics.averageIdlePeriod = validatedStats( newStatistics.get( "averageIdlePeriod" ) );
+		_statistics.startedAt = validatedStats( newStatistics.get( "startedAt" ) );
 	}
 
 	/**
@@ -578,7 +579,7 @@ public class MInstance extends MObject {
 
 	public String transactions() {
 		if( _statistics != null ) {
-			Object _value = _statistics.valueForKey( "transactions" );
+			Object _value = _statistics.transactions;
 
 			if( _value != null ) {
 				return (_value.toString());
@@ -589,7 +590,7 @@ public class MInstance extends MObject {
 
 	public String activeSessions() {
 		if( _statistics != null ) {
-			Object _value = _statistics.valueForKey( "activeSessions" );
+			Object _value = _statistics.activeSessions;
 
 			if( _value != null ) {
 				return (_value.toString());
@@ -600,7 +601,7 @@ public class MInstance extends MObject {
 
 	public String avgTransactionTime() {
 		if( _statistics != null ) {
-			Object _value = _statistics.valueForKey( "avgTransactionTime" );
+			Object _value = _statistics.avgTransactionTime;
 
 			if( _value != null ) {
 				return (_value.toString());
@@ -611,7 +612,7 @@ public class MInstance extends MObject {
 
 	public String averageIdlePeriod() {
 		if( _statistics != null ) {
-			Object _value = _statistics.valueForKey( "averageIdlePeriod" );
+			Object _value = _statistics.averageIdlePeriod;
 
 			if( _value != null ) {
 				return (_value.toString());
@@ -1108,12 +1109,11 @@ public class MInstance extends MObject {
 		return isRefusingNewSessions;
 	}
 
-	private int intStatisticsValueForKey( String key, int defaultValue ) {
-		NSDictionary aStatsDict = statistics();
+	private int intStatisticsValue( String aValue, int defaultValue ) {
+		InstanceStatistics aStatsDict = statistics();
 
 		if( aStatsDict != null ) {
 			try {
-				String aValue = (String)aStatsDict.valueForKey( key );
 				if( aValue != null ) {
 					return Integer.parseInt( aValue );
 				}
@@ -1125,12 +1125,11 @@ public class MInstance extends MObject {
 		return defaultValue;
 	}
 
-	private float floatStatisticsValueForKey( String key, float defaultValue ) {
-		NSDictionary aStatsDict = statistics();
+	private float floatStatisticsValue( String aValue, float defaultValue ) {
+		InstanceStatistics aStatsDict = statistics();
 
 		if( aStatsDict != null ) {
 			try {
-				String aValue = (String)aStatsDict.valueForKey( key );
 				if( aValue != null ) {
 					return Float.parseFloat( aValue );
 				}
@@ -1143,19 +1142,19 @@ public class MInstance extends MObject {
 	}
 
 	public int transactionsValue() {
-		return intStatisticsValueForKey( "transactions", 0 );
+		return intStatisticsValue( statistics().transactions, 0 );
 	}
 
 	public int activeSessionsValue() {
-		return intStatisticsValueForKey( "activeSessions", 0 );
+		return intStatisticsValue( statistics().activeSessions, 0 );
 	}
 
 	public float avgIdleTimeValue() {
-		return floatStatisticsValueForKey( "averageIdlePeriod", 0 );
+		return floatStatisticsValue( statistics().averageIdlePeriod, 0 );
 	}
 
 	public float avgTransactionTimeValue() {
-		return floatStatisticsValueForKey( "avgTransactionTime", 0 );
+		return floatStatisticsValue( statistics().avgTransactionTime, 0 );
 	}
 
 	/** ******** Force quit task ********* */

@@ -580,7 +580,7 @@ public class DirectAction extends WODirectAction {
 						host = anInstance.hostName();
 						port = anInstance.port();
 						runningState = MUtil.INSTANCE_STATES[anInstance.state];
-						statistics = anInstance.statistics();
+						statistics = anInstance.statistics().toDictionary();
 						refusingNewSessions = (anInstance.isRefusingNewSessions()) ? Boolean.TRUE : Boolean.FALSE;
 						deaths = anInstance.deaths();
 						nextShutdown = anInstance.nextScheduledShutdownString();
