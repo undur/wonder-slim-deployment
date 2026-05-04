@@ -667,18 +667,11 @@ public class MInstance extends MObject {
 	}
 
 	public boolean isAutoRecovering() {
-		Boolean aBool = autoRecover();
-		if( aBool != null ) {
-			return aBool.booleanValue();
-		}
-		return false;
+		return Boolean.TRUE.equals( autoRecover() );
 	}
 
 	public boolean isLocal_W() {
-		if( host() == _siteConfig.localHost() ) {
-			return true;
-		}
-		return false;
+		return host() == _siteConfig.localHost();
 	}
 
 	private boolean _shouldDie = false;
