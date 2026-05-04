@@ -23,11 +23,6 @@ public class JMTablerLook extends MonitorComponent {
 	 * FIXME: wat?
 	 */
 	public int currentPage = APP_PAGE;
-	
-	/**
-	 * FIXME: wat?
-	 */
-	public String pageId;
 
 	/**
 	 * Item currently being iterated over in the top menu
