@@ -12,8 +12,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.monitor.application.MonitorComponent;
 import com.webobjects.monitor.util.Icon;
 
-import er.extensions.foundation.ERXProperties;
-
 public class JMTablerLook extends MonitorComponent {
 
 	/**
