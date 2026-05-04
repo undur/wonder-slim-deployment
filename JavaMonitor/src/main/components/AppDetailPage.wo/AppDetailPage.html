@@ -173,16 +173,16 @@
 					</td>
 					<wo:if condition="$showDetailStatistics">
 						<td class="TransactionsCount">
-							<wo:str value="$currentInstance.transactions" />
+							<wo:str value="$currentInstance.transactionsString" />
 						</td>
 						<td class="ActiveSessionCount">
-							<wo:str value="$currentInstance.activeSessions" />
+							<wo:str value="$currentInstance.activeSessionsString" />
 						</td>
 						<td class="AverageTransactionsCount">
-							<wo:str value="$currentInstance.avgTransactionTime" />
+							<wo:str value="$currentInstance.avgTransactionTimeString" />
 						</td>
 						<td class="AverageIdlePeriod">
-							<wo:str value="$currentInstance.averageIdlePeriod" />
+							<wo:str value="$currentInstance.averageIdlePeriodString" />
 						</td>
 					</wo:if>
 					<wo:if condition="$showDetailStatistics" negate="$true">

@@ -558,7 +558,7 @@ public class MInstance extends MObject {
 	 * FIXME: Display level logic // Hugi 2026-05-04
 	 */
 	@Deprecated
-	public String transactions() {
+	public String transactionsString() {
 		return _statistics.transactions != null ? _statistics.transactions : "-";
 	}
 
@@ -566,7 +566,7 @@ public class MInstance extends MObject {
 	 * FIXME: Display level logic // Hugi 2026-05-04
 	 */
 	@Deprecated
-	public String activeSessions() {
+	public String activeSessionsString() {
 		return _statistics.activeSessions != null ? _statistics.activeSessions : "-";
 	}
 
@@ -574,7 +574,7 @@ public class MInstance extends MObject {
 	 * FIXME: Display level logic // Hugi 2026-05-04
 	 */
 	@Deprecated
-	public String avgTransactionTime() {
+	public String avgTransactionTimeString() {
 		return _statistics.avgTransactionTime != null ? _statistics.avgTransactionTime : "-";
 	}
 
@@ -582,7 +582,7 @@ public class MInstance extends MObject {
 	 * FIXME: Display level logic // Hugi 2026-05-04
 	 */
 	@Deprecated
-	public String averageIdlePeriod() {
+	public String averageIdlePeriodString() {
 		return _statistics.averageIdlePeriod != null ? _statistics.averageIdlePeriod : "-";
 	}
 

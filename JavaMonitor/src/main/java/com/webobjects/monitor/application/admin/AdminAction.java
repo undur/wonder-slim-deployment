@@ -377,10 +377,10 @@ public class AdminAction extends WODirectAction {
 			result += "\"schedulingType\": \"" + minstance.schedulingType() + "\", ";
 			result += "\"schedulingStartDay\": " + minstance.schedulingStartDay() + ", ";
 			result += "\"schedulingInterval\": " + minstance.schedulingInterval() + ", ";
-			result += "\"transactions\": \"" + minstance.transactions() + "\", ";
-			result += "\"activeSessions\": \"" + minstance.activeSessions() + "\", ";
-			result += "\"averageIdlePeriod\": \"" + minstance.averageIdlePeriod() + "\", ";
-			result += "\"avgTransactionTime\": \"" + minstance.avgTransactionTime() + "\",";
+			result += "\"transactions\": \"" + minstance.transactionsString() + "\", ";
+			result += "\"activeSessions\": \"" + minstance.activeSessionsString() + "\", ";
+			result += "\"averageIdlePeriod\": \"" + minstance.averageIdlePeriodString() + "\", ";
+			result += "\"avgTransactionTime\": \"" + minstance.avgTransactionTimeString() + "\",";
 			result += "\"autoRecover\": \"" + minstance.isAutoRecovering() + "\"";
 
 			String infoMode = (String)context().request().formValueForKey( "info" );
