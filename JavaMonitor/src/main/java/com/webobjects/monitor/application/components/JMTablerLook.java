@@ -84,12 +84,12 @@ public class JMTablerLook extends MonitorComponent {
 	 */
 	public List<MenuItem> menuItems() {
 		final ArrayList<MenuItem> items = new ArrayList<>();
-		items.add( new MenuItem( 0, "Applications", Icon.Cube, () -> ApplicationsPage.create( context() ) ) );
-		items.add( new MenuItem( 1, "Hosts", Icon.Server, () -> HostsPage.create( context() ) ) );
-		items.add( new MenuItem( 2, "Site", Icon.Home, () -> ConfigurePage.create( context() ) ) );
-		items.add( new MenuItem( 3, "Preferences", Icon.Adjustments, () -> PrefsPage.create( context() ) ) );
-		items.add( new MenuItem( 4, "Help", Icon.Help, () -> pageWithName( HelpPage.class ) ) );
-		items.add( new MenuItem( 6, "mod_proxy", Icon.Polygon, () -> pageWithName( ModProxyPage.class )) );
+		items.add( new MenuItem( APP_PAGE, "Applications", Icon.Cube, () -> ApplicationsPage.create( context() ) ) );
+		items.add( new MenuItem( HOST_PAGE, "Hosts", Icon.Server, () -> HostsPage.create( context() ) ) );
+		items.add( new MenuItem( SITE_PAGE, "Site", Icon.Home, () -> ConfigurePage.create( context() ) ) );
+		items.add( new MenuItem( PREF_PAGE, "Preferences", Icon.Adjustments, () -> PrefsPage.create( context() ) ) );
+		items.add( new MenuItem( HELP_PAGE, "Help", Icon.Help, () -> pageWithName( HelpPage.class ) ) );
+		items.add( new MenuItem( MOD_PROXY_PAGE, "mod_proxy", Icon.Polygon, () -> pageWithName( ModProxyPage.class )) );
 
 		if( showLogout() ) {
 			items.add( new MenuItem( 7, "Logout", Icon.Home, () -> {
