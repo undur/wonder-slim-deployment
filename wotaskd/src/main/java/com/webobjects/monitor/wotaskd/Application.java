@@ -9,8 +9,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
-import com.webobjects.foundation.NSData;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
@@ -20,8 +18,6 @@ import er.extensions.routes.RouteTable;
 public class Application extends ERXApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger( Application.class );
-
-	private static final String _HTTP1 = "HTTP/1.0";
 
 	private InstanceController _localMonitor;
 	private MSiteConfig _siteConfig;
@@ -189,15 +185,6 @@ public class Application extends ERXApplication {
 		logger.debug( "Detaching request listen thread" );
 		listenThread = new MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() );
 		listenThread.start();
-	}
-
-	// Overridden createRequest because WO ObjC apps send 'GET /... HTTP/1.0 ' (note extra space) which doesn't parse very well.
-	public WORequest createRequest( String aMethod, String aURL, String anHTTPVersion, NSDictionary someHeaders, NSData aContent, NSDictionary someInfo ) {
-		if( (anHTTPVersion == null) && (aURL != null) && (aURL.endsWith( " HTTP/1.0" )) ) {
-			anHTTPVersion = _HTTP1;
-			aURL = aURL.substring( 0, (aURL.length() - _HTTP1.length() - 1) );
-		}
-		return super.createRequest( aMethod, aURL, anHTTPVersion, someHeaders, aContent, someInfo );
 	}
 
 	// overridden dispatch of requests, for faster lifebeat checking
