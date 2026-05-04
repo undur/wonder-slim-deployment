@@ -113,4 +113,36 @@ public class InstanceStatistics {
 		return floatStatisticsValue( avgTransactionTime, 0 );
 	}
 
+	/**
+	 * FIXME: Display level logic // Hugi 2026-05-04
+	 */
+	@Deprecated
+	public String transactionsString() {
+		return transactions != null ? transactions : "-";
+	}
+
+	/**
+	 * FIXME: Display level logic // Hugi 2026-05-04
+	 */
+	@Deprecated
+	public String activeSessionsString() {
+		return activeSessions != null ? activeSessions : "-";
+	}
+
+	/**
+	 * FIXME: Display level logic // Hugi 2026-05-04
+	 */
+	@Deprecated
+	public String avgTransactionTimeString() {
+		return avgTransactionTime != null ? avgTransactionTime : "-";
+	}
+
+	/**
+	 * FIXME: Display level logic // Hugi 2026-05-04
+	 */
+	@Deprecated
+	public String averageIdlePeriodString() {
+		return averageIdlePeriod != null ? averageIdlePeriod : "-";
+	}
+
 }
