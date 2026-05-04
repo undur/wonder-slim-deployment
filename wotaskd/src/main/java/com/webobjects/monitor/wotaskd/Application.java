@@ -191,26 +191,13 @@ public class Application extends ERXApplication {
 	// if it's a lifebeat, we return a null response, and that should close the socket immediately
 	@Override
 	public WOResponse dispatchRequest( WORequest request ) {
-
-//		logger.info( " ======= >> REQUEST ========" );
-//		logger.info( "{}", request );
-
 		final WORequestHandler handler = handlerForRequest( request );
 
 		if( (handler != null) && (handler == _lifebeatRequestHandler) ) {
 			_TheLastApplicationAccessTime = System.currentTimeMillis();
-			final WOResponse response = handler.handleRequest( request );
-
-//			logger.info( " ======= >> RESPONSE (lifebeat) ========" );
-//			logger.info( "{}", response );
-			return response;
+			return handler.handleRequest( request );
 		}
 
-		final WOResponse response = super.dispatchRequest( request );
-//		logger.info( " ======= >> RESPONSE ========" );
-//		logger.info( "{}", response );
-//		logger.info( "{}", response.contentString() );
-		
-		return response;
+		return super.dispatchRequest( request );
 	}
 }
