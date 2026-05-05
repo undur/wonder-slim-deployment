@@ -65,8 +65,6 @@ public class ModProxyPage extends MonitorComponent {
 		result.append( "#\n" );
 
 		for( MApplication anApp : siteConfig().applicationArray() ) {
-			anApp.extractAdaptorValuesFromSiteConfig();
-
 			String tmpAdaptor = adaptorURL();
 			tmpAdaptor = removeEnd( tmpAdaptor, "/" );
 
@@ -80,8 +78,6 @@ public class ModProxyPage extends MonitorComponent {
 			final List<String> reversePathes = new ArrayList<>();
 
 			for( MInstance anInst : anApp.instanceArray() ) {
-				anInst.extractAdaptorValuesFromApplication();
-
 				String host = anInst.hostName();
 				String port = anInst.port().toString();
 
@@ -120,7 +116,6 @@ public class ModProxyPage extends MonitorComponent {
 		result.append( "# Balancer configuration\n" );
 		result.append( "#\n" );
 		for( MApplication anApp : siteConfig().applicationArray() ) {
-			anApp.extractAdaptorValuesFromSiteConfig();
 			String name = anApp.name();
 			result.append( "ProxySet balancer://" + name + ".woa" );
 			if( timeout != null && timeout.intValue() > 0 ) {
@@ -176,8 +171,6 @@ public class ModProxyPage extends MonitorComponent {
 		final List<String> properitesRules = new ArrayList<>();
 
 		for( MApplication anApp : siteConfig().applicationArray() ) {
-			anApp.extractAdaptorValuesFromSiteConfig();
-
 			String tmpAdaptor = adaptorURL();
 			tmpAdaptor = removeEnd( tmpAdaptor, "/" );
 

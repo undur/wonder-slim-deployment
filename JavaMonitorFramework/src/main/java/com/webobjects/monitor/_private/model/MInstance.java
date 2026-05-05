@@ -21,8 +21,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,7 +45,6 @@ public class MInstance extends MObject {
 
 	// Old common code
 	private NSMutableDictionary<String, Object> values;
-	protected Map<String, Object> adaptorValues = Collections.synchronizedMap( new HashMap<>() );
 
 	public NSMutableDictionary<String, Object> values() {
 		return values;
@@ -493,49 +490,6 @@ public class MInstance extends MObject {
 		}
 
 		return null;
-	}
-
-	public void extractAdaptorValuesFromApplication() {
-		// get my instance settings
-		adaptorValues.put( "sendTimeout", values.valueForKey( "sendTimeout" ) );
-		adaptorValues.put( "recvTimeout", values.valueForKey( "recvTimeout" ) );
-		adaptorValues.put( "cnctTimeout", values.valueForKey( "cnctTimeout" ) );
-		adaptorValues.put( "sendBufSize", values.valueForKey( "sendBufSize" ) );
-		adaptorValues.put( "recvBufSize", values.valueForKey( "recvBufSize" ) );
-
-		// get MApplication application settings for setting that are still not set
-		if( adaptorValues.get( "sendTimeout" ) == null ) {
-			adaptorValues.put( "sendTimeout", _application.sendTimeout() );
-		}
-		if( adaptorValues.get( "recvTimeout" ) == null ) {
-			adaptorValues.put( "recvTimeout", _application.recvTimeout() );
-		}
-		if( adaptorValues.get( "cnctTimeout" ) == null ) {
-			adaptorValues.put( "cnctTimeout", _application.cnctTimeout() );
-		}
-		if( adaptorValues.get( "sendBufSize" ) == null ) {
-			adaptorValues.put( "sendBufSize", _application.sendBufSize() );
-		}
-		if( adaptorValues.get( "recvBufSize" ) == null ) {
-			adaptorValues.put( "recvBufSize", _application.recvBufSize() );
-		}
-
-		// get MSiteConfig application settings for settings that are still not set
-		if( adaptorValues.get( "sendTimeout" ) == null ) {
-			adaptorValues.put( "sendTimeout", _siteConfig.sendTimeout() );
-		}
-		if( adaptorValues.get( "recvTimeout" ) == null ) {
-			adaptorValues.put( "recvTimeout", _siteConfig.recvTimeout() );
-		}
-		if( adaptorValues.get( "cnctTimeout" ) == null ) {
-			adaptorValues.put( "cnctTimeout", _siteConfig.cnctTimeout() );
-		}
-		if( adaptorValues.get( "sendBufSize" ) == null ) {
-			adaptorValues.put( "sendBufSize", _siteConfig.sendBufSize() );
-		}
-		if( adaptorValues.get( "recvBufSize" ) == null ) {
-			adaptorValues.put( "recvBufSize", _siteConfig.recvBufSize() );
-		}
 	}
 
 	public String displayName() {

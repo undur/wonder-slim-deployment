@@ -12,10 +12,7 @@ SUCH DAMAGE.
  */
 package com.webobjects.monitor._private.model;
 
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
@@ -27,7 +24,6 @@ public class MApplication extends MObject {
 
 	// Old common code
 	private NSMutableDictionary<String, Object> values;
-	protected Map<String, Object> adaptorValues = Collections.synchronizedMap( new HashMap<>() );
 
 	public NSMutableDictionary<String, Object> values() {
 		return values;
@@ -554,36 +550,6 @@ public class MApplication extends MObject {
 
 		for( final MInstance instance : _instanceArray ) {
 			instance.takeValuesFromApplication();
-		}
-	}
-
-	public void extractAdaptorValuesFromSiteConfig() {
-		// get my application settings
-		adaptorValues.put( "retries", values.valueForKey( "retries" ) );
-		adaptorValues.put( "scheduler", values.valueForKey( "scheduler" ) );
-		adaptorValues.put( "dormant", values.valueForKey( "dormant" ) );
-		adaptorValues.put( "redir", values.valueForKey( "redir" ) );
-		adaptorValues.put( "poolsize", values.valueForKey( "poolsize" ) );
-		adaptorValues.put( "urlVersion", values.valueForKey( "urlVersion" ) );
-
-		// get MSiteConfig application settings for settings that are still not set
-		if( adaptorValues.get( "retries" ) == null ) {
-			adaptorValues.put( "retries", _siteConfig.retries() );
-		}
-		if( adaptorValues.get( "scheduler" ) == null ) {
-			adaptorValues.put( "scheduler", _siteConfig.scheduler() );
-		}
-		if( adaptorValues.get( "dormant" ) == null ) {
-			adaptorValues.put( "dormant", _siteConfig.dormant() );
-		}
-		if( adaptorValues.get( "redir" ) == null ) {
-			adaptorValues.put( "redir", _siteConfig.redir() );
-		}
-		if( adaptorValues.get( "poolsize" ) == null ) {
-			adaptorValues.put( "poolsize", _siteConfig.poolsize() );
-		}
-		if( adaptorValues.get( "urlVersion" ) == null ) {
-			adaptorValues.put( "urlVersion", _siteConfig.urlVersion() );
 		}
 	}
 
