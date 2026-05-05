@@ -306,7 +306,7 @@ public class MSiteConfig extends MObject {
 	private InetAddress localHostAddress;
 	private String localHostName;
 
-	public void _addHost( MHost newHost ) {
+	private void _addHost( MHost newHost ) {
 		// If WOHost was passed, it'll resolve against that, otherwise, it'll resolve any local address
 		if( WOHostUtilities.isLocalInetAddress( newHost.address(), true ) ) {
 			_localHost = newHost;
@@ -324,7 +324,7 @@ public class MSiteConfig extends MObject {
 		_addHost( newHost );
 	}
 
-	public void _removeHost( MHost aHost ) {
+	private void _removeHost( MHost aHost ) {
 		_hostArray.removeObject( aHost );
 		if( aHost == _localHost ) {
 			_localHost = null;
@@ -355,7 +355,7 @@ public class MSiteConfig extends MObject {
 		_removeHost( aHost );
 	}
 
-	public void _addApplication( MApplication newApplication ) {
+	private void _addApplication( MApplication newApplication ) {
 		_applicationArray.addObject( newApplication );
 		dataHasChanged();
 	}
@@ -369,7 +369,7 @@ public class MSiteConfig extends MObject {
 		_addApplication( newApplication );
 	}
 
-	public void _removeApplication( MApplication anApplication ) {
+	private void _removeApplication( MApplication anApplication ) {
 		_applicationArray.removeObject( anApplication );
 		dataHasChanged();
 	}
@@ -398,7 +398,7 @@ public class MSiteConfig extends MObject {
 		_removeApplication( anApplication );
 	}
 
-	public void _addInstance( MInstance newInstance ) {
+	private void _addInstance( MInstance newInstance ) {
 		_instanceArray.addObject( newInstance );
 		newInstance._host._addInstancePrimitive( newInstance );
 		newInstance._application._addInstancePrimitive( newInstance );
@@ -429,7 +429,7 @@ public class MSiteConfig extends MObject {
 		_addInstance( newInstance );
 	}
 
-	public void _removeInstance( MInstance anInstance ) {
+	private void _removeInstance( MInstance anInstance ) {
 		//cancel all tasks
 		anInstance.cancelForceQuitTask();
 		anInstance._host._removeInstancePrimitive( anInstance );
@@ -481,7 +481,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	// setPassword(value) is in the 'values' accessors
-	public void _setPassword( String value ) {
+	private void _setPassword( String value ) {
 		if( value != null ) {
 			values.takeValueForKey( LegacyPasswordHash.encryptStringWithKey( value, null ), "password" );
 		}
