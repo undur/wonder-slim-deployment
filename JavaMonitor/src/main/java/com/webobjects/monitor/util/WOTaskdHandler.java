@@ -385,9 +385,9 @@ public class WOTaskdHandler {
 		for( int i = 0; i < responses.length; i++ ) {
 			final ResponseWrapper currentResponse = responses[i];
 
-			if( currentResponse != null && currentResponse.content() != null ) {
+			if( currentResponse != null && currentResponse.contentString() != null ) {
 				try {
-					responseDicts[i] = (NSDictionary)new FoundationCoder().decodeRootObject( currentResponse.content() );
+					responseDicts[i] = (NSDictionary)new FoundationCoder().decodeRootObjectFromString( currentResponse.contentString() );
 				}
 				catch( Exception e ) {
 					responseDicts[i] = responseParsingFailed;
@@ -528,12 +528,12 @@ public class WOTaskdHandler {
 			NSDictionary queryResponseDictionary = null;
 
 			for( int i = 0; i < responses.length; i++ ) {
-				if( (responses[i] == null) || (responses[i].content() == null) ) {
+				if( (responses[i] == null) || (responses[i].contentString() == null) ) {
 					responseDictionary = emptyResponse;
 				}
 				else {
 					try {
-						responseDictionary = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
+						responseDictionary = (NSDictionary)new FoundationCoder().decodeRootObjectFromString( responses[i].contentString() );
 					}
 					catch( Exception e ) {
 						logger.error( "MonitorComponent pageWithName(AppDetailPage) Error decoding response: " + responses[i].contentString() );
@@ -601,12 +601,12 @@ public class WOTaskdHandler {
 		for( int i = 0; i < responses.length; i++ ) {
 			final MHost aHost = siteConfig().hostArray().get( i );
 
-			if( (responses[i] == null) || (responses[i].content() == null) ) {
+			if( (responses[i] == null) || (responses[i].contentString() == null) ) {
 				responseDict = emptyResponse;
 			}
 			else {
 				try {
-					responseDict = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
+					responseDict = (NSDictionary)new FoundationCoder().decodeRootObjectFromString( responses[i].contentString() );
 				}
 				catch( Exception e ) {
 					logger.error( "MonitorComponent pageWithName(HostsPage) Error decoding response: " + responses[i].contentString() );
@@ -644,12 +644,12 @@ public class WOTaskdHandler {
 		NSDictionary responseDictionary = null;
 
 		for( int i = 0; i < responses.length; i++ ) {
-			if( (responses[i] == null) || (responses[i].content() == null) ) {
+			if( (responses[i] == null) || (responses[i].contentString() == null) ) {
 				queryResponseDictionary = emptyResponse;
 			}
 			else {
 				try {
-					queryResponseDictionary = (NSDictionary)new FoundationCoder().decodeRootObject( responses[i].content() );
+					queryResponseDictionary = (NSDictionary)new FoundationCoder().decodeRootObjectFromString( responses[i].contentString() );
 				}
 				catch( Exception e ) {
 					logger.error( "MonitorComponent pageWithName(ApplicationsPage) Error decoding response: " + responses[i].contentString() );

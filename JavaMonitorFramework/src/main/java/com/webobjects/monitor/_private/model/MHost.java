@@ -228,9 +228,9 @@ public class MHost extends MObject {
 		logger.info( contentString );
 
 		try {
-			final HttpResponse<byte[]> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofByteArray() );
+			final HttpResponse<String> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofString() );
 			logger.info( "--> Response received =======" );
-			responseWrapper.setContent( response.body() );
+			responseWrapper.setContentString( response.body() );
 		}
 		catch( IOException e ) {
 			e.printStackTrace();
@@ -244,14 +244,14 @@ public class MHost extends MObject {
 		logger.info( "--> End request phase =======" );
 
 		// For error handling
-		if( responseWrapper.content() == null ) {
+		if( responseWrapper.contentString() == null ) {
 
 			if( willChange ) {
 				_siteConfig.hostErrorArray.add( this );
 			}
 
-			final byte[] errorResponse = XUtil.errorResponseXML( "instanceResponse", "Failed to contact " + this.name() + "-" + WOApplication.application().lifebeatDestinationPort() ).getBytes();
-			responseWrapper.setContent( errorResponse );
+			final String errorResponseString = XUtil.errorResponseXML( "instanceResponse", "Failed to contact " + this.name() + "-" + WOApplication.application().lifebeatDestinationPort() );
+			responseWrapper.setContentString( errorResponseString );
 		}
 		else {
 			// if we successfully synced, clear the error dictionary

@@ -680,7 +680,7 @@ public class DirectAction extends WODirectAction {
 
 				NSDictionary instanceResponse = null;
 				try {
-					instanceResponse = (NSDictionary)new FoundationCoder().decodeRootObject( aResponse.content() );
+					instanceResponse = (NSDictionary)new FoundationCoder().decodeRootObjectFromString( aResponse.contentString() );
 				}
 				catch( NullPointerException npe ) {
 					logger.error( "Wotaskd getStatisticsForInstanceArray: No content returned from " + anInstance.displayName() );
@@ -688,12 +688,12 @@ public class DirectAction extends WODirectAction {
 				}
 				catch( Exception e ) {
 					try {
-						Object o = FoundationPropertyListSerialization.propertyListFromString( new String( aResponse.content() ) );
+						Object o = FoundationPropertyListSerialization.propertyListFromString( aResponse.contentString() );
 						errorResponse.addObject( anInstance.displayName() + " is probably an older application that doesn't conform to the current Monitor Protocol. Please update and restart the instance." );
 						logger.error( "Got old-style response from instance: " + anInstance.displayName() );
 					}
 					catch( Throwable t ) {
-						logger.error( "Wotaskd getStatisticsForInstanceArray: Error parsing: " + new String( aResponse.content() ) + " from " + anInstance.displayName() );
+						logger.error( "Wotaskd getStatisticsForInstanceArray: Error parsing: " + aResponse.contentString() + " from " + anInstance.displayName() );
 					}
 					continue;
 				}

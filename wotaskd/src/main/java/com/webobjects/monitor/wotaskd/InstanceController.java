@@ -655,7 +655,7 @@ public class InstanceController implements IInstanceController {
 			logger.info( "{}", request );
 			logger.info( requestContentXML );
 
-			final HttpResponse<byte[]> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofByteArray() );
+			final HttpResponse<String> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofString() );
 			logger.info( "--> Response received =======" );
 			final ResponseWrapper responseWrapper = new ResponseWrapper( response.body(), response.headers() );
 			logger.info( "--> End request phase =======" );

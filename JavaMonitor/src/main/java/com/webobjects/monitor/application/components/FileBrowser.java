@@ -164,26 +164,21 @@ public class FileBrowser extends MonitorComponent {
 		private static String BROWSE_URL = "/cgi-bin/WebObjects/wotaskd.woa/wa/RemoteBrowse/getPath";
 
 		// FIXME: Dear lord. I feel the pain of whomever wrote this // Hugi 2024-11-10
-		private static byte[] EVIL_HACK = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>".getBytes();
+		private static String EVIL_HACK = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
 
 		private static RemoteResult extractFileListFromResponse( final ResponseWrapper response, final String sourcePath ) throws MonitorException {
 
-			final byte[] responseContentBytes = response.content();
+			final String responseContentString = response.contentString();
 
 			List<Map<String, ?>> deserializedResponseContent = Collections.emptyList();
 
-			if( responseContentBytes != null ) {
-				final String responseContentString = new String( responseContentBytes );
-
+			if( responseContentString != null ) {
 				if( responseContentString.startsWith( "ERROR" ) ) {
 					throw new MonitorException( "Path " + sourcePath + " does not exist" );
 				}
 
 				try {
-					final byte[] evilHackCombined = new byte[responseContentBytes.length + EVIL_HACK.length];
-					System.arraycopy( EVIL_HACK, 0, evilHackCombined, 0, EVIL_HACK.length );
-					System.arraycopy( responseContentBytes, 0, evilHackCombined, EVIL_HACK.length, responseContentBytes.length );
-					deserializedResponseContent = (List<Map<String,?>>)new FoundationCoder().decodeRootObject( evilHackCombined );
+					deserializedResponseContent = (List<Map<String,?>>)new FoundationCoder().decodeRootObjectFromString( EVIL_HACK + responseContentString );
 				}
 				catch( Exception e ) {
 					logger.error( "RemoteBrowseClient _getFileListOutOfResponse Error decoding response: " + responseContentString );
@@ -241,7 +236,7 @@ public class FileBrowser extends MonitorComponent {
 
 				logger.info( "--> Sending request: =======" );
 				logger.info( "{}", request );
-				final HttpResponse<byte[]> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofByteArray() );
+				final HttpResponse<String> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofString() );
 				logger.info( "--> Response received ======= " + response.headers() );
 
 				// FIXME: Look into this error handling // Hugi 2024-11-10

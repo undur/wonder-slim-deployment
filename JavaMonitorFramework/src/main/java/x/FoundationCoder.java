@@ -2,6 +2,7 @@ package x;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -157,6 +158,10 @@ public class FoundationCoder {
 		catch( SAXException | IOException | ParserConfigurationException e ) {
 			throw new RuntimeException( "Failed to decode XML", e );
 		}
+	}
+
+	public Object decodeRootObjectFromString( String string ) {
+		return decodeRootObject( string.getBytes( StandardCharsets.UTF_8 ) );
 	}
 
 	private void encodeObjectForKey( StringBuilder buffer, int tabCount, Object value, String key ) {

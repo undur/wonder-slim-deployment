@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class ResponseWrapper {
 
-	private byte[] _content;
+	private String _contentString;
 	private HttpHeaders _headers;
 
 	// FIXME: Delete. This class should be immutable // Hugi 2026-05-03
@@ -18,28 +18,19 @@ public class ResponseWrapper {
 		this( null, null );
 	}
 
-	// FIXME: Delete. This class should be immutable // Hugi 2026-05-03
-	@Deprecated
-	public void setContent( byte[] newValue ) {
-		_content = newValue;
-	}
-
-	public ResponseWrapper( final byte[] content, final HttpHeaders headers ) {
-		_content = content;
+	public ResponseWrapper( final String contentString, final HttpHeaders headers ) {
+		_contentString = contentString;
 		_headers = headers;
 	}
 
-	public byte[] content() {
-		return _content;
+	public String contentString() {
+		return _contentString;
 	}
 
-	public String contentString() {
-
-		if( _content != null ) {
-			return new String( _content );
-		}
-
-		return null;
+	// FIXME: Delete. This class should be immutable // Hugi 2026-05-03
+	@Deprecated
+	public void setContentString( String contentString ) {
+		_contentString = contentString;
 	}
 
 	public String headerForKey( String key ) {
