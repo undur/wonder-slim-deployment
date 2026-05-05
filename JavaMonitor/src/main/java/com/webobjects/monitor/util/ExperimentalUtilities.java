@@ -3,7 +3,6 @@ package com.webobjects.monitor.util;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class ExperimentalUtilities {
 				.build();
 
 		try {
-			return XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofString() ).body();
+			return XUtil.sendRequest( request ).body();
 		}
 		catch( InterruptedException e ) {
 			Thread.currentThread().interrupt();

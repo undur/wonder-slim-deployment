@@ -20,7 +20,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.Map;
 
@@ -228,7 +227,7 @@ public class MHost extends MObject {
 		logger.info( contentString );
 
 		try {
-			final HttpResponse<String> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofString() );
+			final HttpResponse<String> response = XUtil.sendRequest( request );
 			logger.info( "--> Response received =======" );
 			responseWrapper.setContentString( response.body() );
 		}

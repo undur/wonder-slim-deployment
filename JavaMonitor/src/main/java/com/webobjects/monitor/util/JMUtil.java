@@ -8,7 +8,6 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
@@ -43,9 +42,7 @@ public class JMUtil {
 		final HttpRequest request = requestBuilder.build();
 	
 		try {
-			return XUtil.HTTP_CLIENT
-					.send( request, BodyHandlers.ofString() )
-					.body();
+			return XUtil.sendRequest( request ).body();
 		}
 		catch( InterruptedException e ) {
 			Thread.currentThread().interrupt();

@@ -22,7 +22,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -655,7 +654,7 @@ public class InstanceController implements IInstanceController {
 			logger.info( "{}", request );
 			logger.info( requestContentXML );
 
-			final HttpResponse<String> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofString() );
+			final HttpResponse<String> response = XUtil.sendRequest( request );
 			logger.info( "--> Response received =======" );
 			final ResponseWrapper responseWrapper = new ResponseWrapper( response.body(), response.headers() );
 			logger.info( "--> End request phase =======" );

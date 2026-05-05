@@ -17,7 +17,6 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -236,7 +235,7 @@ public class FileBrowser extends MonitorComponent {
 
 				logger.info( "--> Sending request: =======" );
 				logger.info( "{}", request );
-				final HttpResponse<String> response = XUtil.HTTP_CLIENT.send( request, BodyHandlers.ofString() );
+				final HttpResponse<String> response = XUtil.sendRequest( request );
 				logger.info( "--> Response received ======= " + response.headers() );
 
 				// FIXME: Look into this error handling // Hugi 2024-11-10

@@ -1,6 +1,10 @@
 package x;
 
+import java.io.IOException;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
@@ -26,7 +30,17 @@ public class XUtil {
 	 * <p>Per-request configuration (timeouts, headers, body) belongs on the {@link
 	 * java.net.http.HttpRequest.Builder} at the call site, not on the client.
 	 */
-	public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder().build();
+	private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder().build();
+
+	/**
+	 * Sends {@code request} through the shared {@link HttpClient} and returns the response with
+	 * its body decoded as UTF-8 text. All outbound HTTP traffic for the deployment tooling
+	 * routes through here; this is the chokepoint for future request logging, recording, and
+	 * tracing.
+	 */
+	public static HttpResponse<String> sendRequest( final HttpRequest request ) throws IOException, InterruptedException {
+		return HTTP_CLIENT.send( request, BodyHandlers.ofString() );
+	}
 
 	/**
 	 * Builds the canonical wotaskd-protocol error envelope as an in-memory dictionary,
