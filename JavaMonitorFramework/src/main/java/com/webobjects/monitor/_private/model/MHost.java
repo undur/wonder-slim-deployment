@@ -51,11 +51,6 @@ public class MHost extends MObject {
 
 	private static final Logger logger = LoggerFactory.getLogger( MHost.class );
 
-	/**
-	 * FIXME: Should be configurable. Used to be the property "JavaMonitor.receiveTimeout" // Hugi 2024-11-04
-	 */
-	private static final int WOTASKD_RECEIVE_TIMEOUT = 10000;
-
 	private NSMutableArray<MInstance> _instanceArray;
 
 	private InetAddress _address = null;
@@ -202,6 +197,9 @@ public class MHost extends MObject {
 	 * FIXME: We need to go over this, especially WRT error handling, reporting and management // Hugi 2024-11-06
 	 */
 	public ResponseWrapper sendRequestToWotaskd( final String contentString, final String password, final boolean willChange, final boolean isSync ) {
+
+		// FIXME: Should be configurable. Used to be the property "JavaMonitor.receiveTimeout" // Hugi 2024-11-04
+		final int WOTASKD_RECEIVE_TIMEOUT = 10_000;
 
 		ResponseWrapper responseWrapper = new ResponseWrapper();
 
