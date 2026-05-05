@@ -499,10 +499,9 @@ public class MSiteConfig extends MObject {
 			messageDigest = MessageDigest.getInstance( "MD5" );
 		}
 		catch( final NoSuchAlgorithmException exc ) {
-			globalErrorDictionary.put( "Security package does not contain appropriate algorithm", "Security package does not contain appropriate algorithm" );
-			logger.error( "Security package does not contain appropriate algorithm" );
-			return encrypted_value;
+			throw new AssertionError( "MD5 is mandatory in the JDK; this cannot happen", exc );
 		}
+
 		if( to_be_encrypted != null ) {
 			byte digest[];
 			byte fudge_constant[];
@@ -946,7 +945,6 @@ public class MSiteConfig extends MObject {
 			globalErrorDictionary.put( "archiveAdaptorConfig", pre + " " + message );
 		}
 	}
-
 
 	public String generateSiteConfigXML() {
 		return new FoundationCoder().encodeRootObjectForKey( dictionaryForArchive(), "SiteConfig" );
