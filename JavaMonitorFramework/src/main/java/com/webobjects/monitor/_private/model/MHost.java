@@ -245,10 +245,13 @@ public class MHost extends MObject {
 
 		// For error handling
 		if( responseWrapper.contentString() == null ) {
+
 			if( willChange ) {
 				_siteConfig.hostErrorArray.add( this );
 			}
-			responseWrapper.setContent( errorResponseString( this ).getBytes() );
+
+			final byte[] errorResponse = XUtil.errorResponseXML( "instanceResponse", "Failed to contact " + this.name() + "-" + WOApplication.application().lifebeatDestinationPort() ).getBytes();
+			responseWrapper.setContent( errorResponse );
 		}
 		else {
 			// if we successfully synced, clear the error dictionary
@@ -258,15 +261,6 @@ public class MHost extends MObject {
 		}
 
 		return responseWrapper;
-	}
-
-	/**
-	 * @return Fake response content for an "error response"
-	 *
-	 * FIXME: Part of weird error handling mechanism // Hugi 2024-11-03
-	 */
-	private static String errorResponseString( final MHost host ) {
-		return XUtil.errorResponseXML( "instanceResponse", "Failed to contact " + host.name() + "-" + WOApplication.application().lifebeatDestinationPort() );
 	}
 
 	@Override
