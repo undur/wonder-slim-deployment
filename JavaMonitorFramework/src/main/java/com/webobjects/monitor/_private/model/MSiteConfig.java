@@ -49,8 +49,8 @@ import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
 
+import x.AdaptorConfigSerialization;
 import x.FoundationCoder;
-import x.XUtil;
 
 public class MSiteConfig extends MObject {
 
@@ -929,7 +929,7 @@ public class MSiteConfig extends MObject {
 				globalErrorDictionary.put( "archiveSiteConfig", pre + " Don't have permission to write to file " + fileForAdaptorConfig() + "as this user, please change the permissions." );
 				return;
 			}
-			Files.writeString( fileForAdaptorConfig().toPath(), generateAdaptorConfigXML( false, false ), StandardCharsets.UTF_8 );
+			Files.writeString( fileForAdaptorConfig().toPath(), AdaptorConfigSerialization.generateAdaptorConfigXML( this, false, false ), StandardCharsets.UTF_8 );
 			globalErrorDictionary.remove( "archiveAdaptorConfig" );
 		}
 		catch( final IOException e ) {
@@ -940,118 +940,6 @@ public class MSiteConfig extends MObject {
 		}
 	}
 
-	public String generateAdaptorConfigXML( boolean onlyIncludeRunningInstances, boolean shouldIncludeUnregisteredInstances ) {
-		final StringBuilder sb = new StringBuilder( "<?xml version=\"1.0\" encoding=\"ASCII\"?>\n<adaptor>\n" );
-
-		for( final MApplication anApp : applicationArray() ) {
-
-			if( !(onlyIncludeRunningInstances && !anApp.isRunning_W()) ) {
-
-				final Integer retries = XUtil.firstNonNull( anApp.retries(), retries() );
-				final String scheduler = XUtil.firstNonNull( anApp.scheduler(), scheduler() );
-				final Integer dormant = XUtil.firstNonNull( anApp.dormant(), dormant() );
-				final String redir = XUtil.firstNonNull( anApp.redir(), redir() );
-				final Integer poolsize = XUtil.firstNonNull( anApp.poolsize(), poolsize() );
-				final Integer urlVersion = XUtil.firstNonNull( anApp.urlVersion(), urlVersion() );
-
-				sb.append( "  <application name=\"" );
-				sb.append( anApp.name() );
-
-				if( retries != null ) {
-					sb.append( "\" retries=\"" );
-					sb.append( retries.toString() );
-				}
-				if( scheduler != null ) {
-					sb.append( "\" scheduler=\"" );
-					sb.append( scheduler );
-				}
-				if( dormant != null ) {
-					sb.append( "\" dormant=\"" );
-					sb.append( dormant );
-				}
-				if( redir != null ) {
-					sb.append( "\" redir=\"" );
-					sb.append( redir );
-				}
-				if( poolsize != null ) {
-					sb.append( "\" poolsize=\"" );
-					sb.append( poolsize.toString() );
-				}
-				if( urlVersion != null ) {
-					sb.append( "\" urlVersion=\"" );
-					sb.append( urlVersion.toString() );
-				}
-				sb.append( "\">\n" );
-
-				for( final MInstance anInst : anApp.instanceArray() ) {
-
-					if( !(onlyIncludeRunningInstances && !anInst.isRunning_W()) ) {
-
-						final Integer id = anInst.id();
-						final Integer port = anInst.port();
-						final String host = anInst.hostName();
-						final Integer sendTimeout = XUtil.firstNonNull( anInst.sendTimeout(), anApp.sendTimeout(), sendTimeout() );
-						final Integer recvTimeout = XUtil.firstNonNull( anInst.recvTimeout(), anApp.recvTimeout(), recvTimeout() );
-						final Integer cnctTimeout = XUtil.firstNonNull( anInst.cnctTimeout(), anApp.cnctTimeout(), cnctTimeout() );
-						final Integer sendBufSize = XUtil.firstNonNull( anInst.sendBufSize(), anApp.sendBufSize(), sendBufSize() );
-						final Integer recvBufSize = XUtil.firstNonNull( anInst.recvBufSize(), anApp.recvBufSize(), recvBufSize() );
-
-						sb.append( "    <instance" );
-
-						if( id != null ) {
-							sb.append( " id=\"" );
-							sb.append( id.toString() );
-						}
-						if( port != null ) {
-							sb.append( "\" port=\"" );
-							sb.append( port.toString() );
-						}
-						if( host != null ) {
-							sb.append( "\" host=\"" );
-							sb.append( host );
-						}
-						if( sendTimeout != null ) {
-							sb.append( "\" sendTimeout=\"" );
-							sb.append( sendTimeout.toString() );
-						}
-						if( recvTimeout != null ) {
-							sb.append( "\" recvTimeout=\"" );
-							sb.append( recvTimeout.toString() );
-						}
-						if( cnctTimeout != null ) {
-							sb.append( "\" cnctTimeout=\"" );
-							sb.append( cnctTimeout.toString() );
-						}
-						if( sendBufSize != null ) {
-							sb.append( "\" sendBufSize=\"" );
-							sb.append( sendBufSize.toString() );
-						}
-						if( recvBufSize != null ) {
-							sb.append( "\" recvBufSize=\"" );
-							sb.append( recvBufSize.toString() );
-						}
-						sb.append( "\"/>\n" );
-					} // end if (!(onlyIncludeRunningInstances && !anInst.isRunning()));
-				}
-
-				sb.append( "  </application>\n" );
-			} // end if (!(onlyIncludeRunningInstances && anApp.isRunning()))
-		} // end Application Enumeration
-
-		if( shouldIncludeUnregisteredInstances ) {
-			// For unknown/unregistered instances
-			final IInstanceController plMonitor = (IInstanceController)WOApplication.application().valueForKey( "localMonitor" );
-			if( plMonitor != null ) {
-				final StringBuffer unknownSB = plMonitor.generateAdaptorConfigXML();
-				if( unknownSB.length() > 0 ) {
-					sb.append( unknownSB );
-				}
-			}
-		}
-
-		sb.append( "</adaptor>\n" );
-		return sb.toString();
-	}
 
 	public String generateSiteConfigXML() {
 		return new FoundationCoder().encodeRootObjectForKey( dictionaryForArchive(), "SiteConfig" );

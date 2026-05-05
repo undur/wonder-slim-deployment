@@ -40,6 +40,7 @@ import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor._private.model.MInstance;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
+import x.AdaptorConfigSerialization;
 import x.FoundationCoder;
 import x.FoundationPropertyListSerialization;
 import x.ResponseWrapper;
@@ -898,11 +899,11 @@ public class DirectAction extends WODirectAction {
 			aResponse.appendContentString( "<br><br><hr><br>Site Config as written to disk<br><hr><br><pre>" );
 			aResponse.appendContentString( WOMessage.stringByEscapingHTMLString( aConfig.generateSiteConfigXML() ) );
 			aResponse.appendContentString( "</pre><br><br><hr><br>Adaptor Config as sent to Local WOAdaptors - All Running Applications and Instances<br><hr><br><pre>" );
-			aResponse.appendContentString( WOMessage.stringByEscapingHTMLString( aConfig.generateAdaptorConfigXML( true, true ) ) );
+			aResponse.appendContentString( WOMessage.stringByEscapingHTMLString( AdaptorConfigSerialization.generateAdaptorConfigXML( aConfig, true, true ) ) );
 			aResponse.appendContentString( "</pre><br><br><br><br>Adaptor Config as sent to remote WOAdaptors - All Registered and Running Applications and Instances<br><hr><br><pre>" );
-			aResponse.appendContentString( WOMessage.stringByEscapingHTMLString( aConfig.generateAdaptorConfigXML( true, false ) ) );
+			aResponse.appendContentString( WOMessage.stringByEscapingHTMLString( AdaptorConfigSerialization.generateAdaptorConfigXML( aConfig, true, false ) ) );
 			aResponse.appendContentString( "</pre><br><br><hr><br>Adaptor Config as written to disk - All Registered Applications and Instances<br><hr><br><pre>" );
-			aResponse.appendContentString( WOMessage.stringByEscapingHTMLString( aConfig.generateAdaptorConfigXML( false, false ) ) );
+			aResponse.appendContentString( WOMessage.stringByEscapingHTMLString( AdaptorConfigSerialization.generateAdaptorConfigXML( aConfig, false, false ) ) );
 			aResponse.appendContentString( "</pre><br><br><hr><br>Properties of this wotaskd<br><hr><br><pre>" );
 
 			aResponse.appendContentString( "The Configuration Directory is: " + MSiteConfig.configDirectoryPath() );
@@ -950,7 +951,7 @@ public class DirectAction extends WODirectAction {
 		theApplication._lock.readLock().lock();
 		String xml;
 		try {
-			xml = ((Application)WOApplication.application()).siteConfig().generateAdaptorConfigXML( true, shouldIncludeUnregisteredInstances );
+			xml = AdaptorConfigSerialization.generateAdaptorConfigXML( ((Application)WOApplication.application()).siteConfig(), true, shouldIncludeUnregisteredInstances );
 		}
 		finally {
 			theApplication._lock.readLock().unlock();
