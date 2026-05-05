@@ -63,17 +63,4 @@ public class XUtil {
 		final NSDictionary<String, Object> inner = new NSDictionary<>( messages, "errorResponse" );
 		return new FoundationCoder().encodeRootObjectForKey( inner, rootKey );
 	}
-
-	/**
-	 * @return The first non-null value among the given candidates, or {@code null} if all are null.
-	 */
-	@SafeVarargs
-	public static <E> E firstNonNull( E... candidates ) {
-		for( E candidate : candidates ) {
-			if( candidate != null ) {
-				return candidate;
-			}
-		}
-		return null;
-	}
 }

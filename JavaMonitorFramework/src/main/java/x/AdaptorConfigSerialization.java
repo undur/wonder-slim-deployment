@@ -26,12 +26,12 @@ public class AdaptorConfigSerialization {
 
 			if( !(onlyIncludeRunningInstances && !anApp.isRunning_W()) ) {
 
-				final Integer retries = XUtil.firstNonNull( anApp.retries(), siteConfig.retries() );
-				final String scheduler = XUtil.firstNonNull( anApp.scheduler(), siteConfig.scheduler() );
-				final Integer dormant = XUtil.firstNonNull( anApp.dormant(), siteConfig.dormant() );
-				final String redir = XUtil.firstNonNull( anApp.redir(), siteConfig.redir() );
-				final Integer poolsize = XUtil.firstNonNull( anApp.poolsize(), siteConfig.poolsize() );
-				final Integer urlVersion = XUtil.firstNonNull( anApp.urlVersion(), siteConfig.urlVersion() );
+				final Integer retries = firstNonNull( anApp.retries(), siteConfig.retries() );
+				final String scheduler = firstNonNull( anApp.scheduler(), siteConfig.scheduler() );
+				final Integer dormant = firstNonNull( anApp.dormant(), siteConfig.dormant() );
+				final String redir = firstNonNull( anApp.redir(), siteConfig.redir() );
+				final Integer poolsize = firstNonNull( anApp.poolsize(), siteConfig.poolsize() );
+				final Integer urlVersion = firstNonNull( anApp.urlVersion(), siteConfig.urlVersion() );
 
 				sb.append( "  <application name=\"" );
 				sb.append( anApp.name() );
@@ -69,11 +69,11 @@ public class AdaptorConfigSerialization {
 						final Integer id = anInst.id();
 						final Integer port = anInst.port();
 						final String host = anInst.hostName();
-						final Integer sendTimeout = XUtil.firstNonNull( anInst.sendTimeout(), anApp.sendTimeout(), siteConfig.sendTimeout() );
-						final Integer recvTimeout = XUtil.firstNonNull( anInst.recvTimeout(), anApp.recvTimeout(), siteConfig.recvTimeout() );
-						final Integer cnctTimeout = XUtil.firstNonNull( anInst.cnctTimeout(), anApp.cnctTimeout(), siteConfig.cnctTimeout() );
-						final Integer sendBufSize = XUtil.firstNonNull( anInst.sendBufSize(), anApp.sendBufSize(), siteConfig.sendBufSize() );
-						final Integer recvBufSize = XUtil.firstNonNull( anInst.recvBufSize(), anApp.recvBufSize(), siteConfig.recvBufSize() );
+						final Integer sendTimeout = firstNonNull( anInst.sendTimeout(), anApp.sendTimeout(), siteConfig.sendTimeout() );
+						final Integer recvTimeout = firstNonNull( anInst.recvTimeout(), anApp.recvTimeout(), siteConfig.recvTimeout() );
+						final Integer cnctTimeout = firstNonNull( anInst.cnctTimeout(), anApp.cnctTimeout(), siteConfig.cnctTimeout() );
+						final Integer sendBufSize = firstNonNull( anInst.sendBufSize(), anApp.sendBufSize(), siteConfig.sendBufSize() );
+						final Integer recvBufSize = firstNonNull( anInst.recvBufSize(), anApp.recvBufSize(), siteConfig.recvBufSize() );
 
 						sb.append( "    <instance" );
 
@@ -129,5 +129,18 @@ public class AdaptorConfigSerialization {
 
 		sb.append( "</adaptor>\n" );
 		return sb.toString();
+	}
+
+	/**
+	 * @return The first non-null value among the given candidates, or {@code null} if all are null.
+	 */
+	@SafeVarargs
+	private static <E> E firstNonNull( E... candidates ) {
+		for( E candidate : candidates ) {
+			if( candidate != null ) {
+				return candidate;
+			}
+		}
+		return null;
 	}
 }
