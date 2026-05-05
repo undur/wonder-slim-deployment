@@ -5,9 +5,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.appserver.WORequest;
-import com.webobjects.appserver.WORequestHandler;
-import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MSiteConfig;
@@ -22,7 +19,6 @@ public class Application extends ERXApplication {
 	private InstanceController _localMonitor;
 	private MSiteConfig _siteConfig;
 	private MulticastListener listenThread;
-	private LifebeatRequestHandler _lifebeatRequestHandler;
 	private Number _port;
 	private int _intPort;
 	private String _multicastAddress;
@@ -55,9 +51,7 @@ public class Application extends ERXApplication {
 			_multicastAddress = "239.128.14.2";
 		}
 
-		// registering the lifebeat request handler
-		_lifebeatRequestHandler = new LifebeatRequestHandler();
-		registerRequestHandler( _lifebeatRequestHandler, "wlb" );
+		registerRequestHandler( new LifebeatRequestHandler(), "wlb" );
 
 		// unregistering the WOComponent / WOResource request handlers
 		removeRequestHandlerForKey( "wo" );
@@ -185,19 +179,5 @@ public class Application extends ERXApplication {
 		logger.debug( "Detaching request listen thread" );
 		listenThread = new MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() );
 		listenThread.start();
-	}
-
-	// overridden dispatch of requests, for faster lifebeat checking
-	// if it's a lifebeat, we return a null response, and that should close the socket immediately
-	@Override
-	public WOResponse dispatchRequest( WORequest request ) {
-		final WORequestHandler handler = handlerForRequest( request );
-
-		if( (handler != null) && (handler == _lifebeatRequestHandler) ) {
-			_TheLastApplicationAccessTime = System.currentTimeMillis();
-			return handler.handleRequest( request );
-		}
-
-		return super.dispatchRequest( request );
 	}
 }
