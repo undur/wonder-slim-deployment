@@ -554,16 +554,10 @@ public class MApplication extends MObject {
 	}
 
 	public Integer nextID() {
-		int instanceArrayCount = _instanceArray.count();
-		int lastSequence = 0;
-		for( int i = 0; i < instanceArrayCount; i++ ) {
-			MInstance anInst = _instanceArray.objectAtIndex( i );
-			int thisSequence = anInst.id().intValue();
-			if( thisSequence > lastSequence ) {
-				lastSequence = thisSequence;
-			}
-		}
-		return Integer.valueOf( lastSequence + 1 );
+		return _instanceArray.stream()
+				.mapToInt( MInstance::id )
+				.max()
+				.orElse( 0 ) + 1;
 	}
 
 	public boolean isIDInUse( Integer ID ) {
