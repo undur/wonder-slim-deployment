@@ -39,6 +39,11 @@ public class Application extends ERXApplication {
 
 		_lock = new ReentrantReadWriteLock();
 
+		// Required: keeps zero-length lifebeat responses small enough for the WOApp's
+		// fixed-width parser in WOApplication._LifebeatThread.sendMessage() to read without
+		// desyncing. See issue #21.
+		com.webobjects.appserver._private.WOHttpIO._alwaysAppendContentLength = false;
+
 		// Setting the ports
 		_setLifebeatDestinationPort( intPort() );
 
