@@ -542,7 +542,7 @@ public class MApplication extends MObject {
 					"macOutputPath",
 					"macPath" } );
 
-	public void takeValuesFromDefaults() {
+	private void takeValuesFromDefaults() {
 		values.addEntriesFromDictionary( _defaults );
 	}
 
