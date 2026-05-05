@@ -1,6 +1,6 @@
 package x;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ThreadLocalRandom;
@@ -19,7 +19,7 @@ public class LegacyPasswordHash {
 	public static String encryptStringWithKey( String to_be_encrypted, String aKey ) {
 		String encrypted_value = "";
 		final char xdigit[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-		MessageDigest messageDigest;
+		final MessageDigest messageDigest;
 
 		try {
 			messageDigest = MessageDigest.getInstance( "MD5" );
@@ -30,39 +30,28 @@ public class LegacyPasswordHash {
 
 		if( to_be_encrypted != null ) {
 			byte digest[];
-			byte fudge_constant[];
-			try {
-				fudge_constant = ("X#@!").getBytes( "UTF8" );
-			}
-			catch( final UnsupportedEncodingException uee ) {
-				fudge_constant = ("X#@!").getBytes();
-			}
+			byte fudge_constant[] = "X#@!".getBytes( StandardCharsets.UTF_8 );
+
 			byte fudgetoo_part[] = {
 					(byte)xdigit[(int)(myrand() % 16)],
 					(byte)xdigit[(int)(myrand() % 16)],
 					(byte)xdigit[(int)(myrand() % 16)],
 					(byte)xdigit[(int)(myrand() % 16)]
 			};
+
 			int i = 0;
 
 			if( aKey != null ) {
-				try {
-					fudgetoo_part = aKey.getBytes( "UTF8" );
-				}
-				catch( final UnsupportedEncodingException uee ) {
-					fudgetoo_part = aKey.getBytes();
-				}
+				fudgetoo_part = aKey.getBytes( StandardCharsets.UTF_8 );
 			}
+
 			messageDigest.update( fudge_constant );
-			try {
-				messageDigest.update( to_be_encrypted.getBytes( "UTF8" ) );
-			}
-			catch( final UnsupportedEncodingException uee ) {
-				messageDigest.update( to_be_encrypted.getBytes() );
-			}
+			messageDigest.update( to_be_encrypted.getBytes( StandardCharsets.UTF_8 ) );
+
 			messageDigest.update( fudgetoo_part );
 			digest = messageDigest.digest();
 			encrypted_value = new String( fudgetoo_part );
+
 			for( i = 0; i < digest.length; i++ ) {
 				int mashed;
 				final char temp[] = new char[2];
@@ -77,6 +66,7 @@ public class LegacyPasswordHash {
 				encrypted_value = encrypted_value + (new String( temp ));
 			}
 		}
+
 		return encrypted_value;
 	}
 }
