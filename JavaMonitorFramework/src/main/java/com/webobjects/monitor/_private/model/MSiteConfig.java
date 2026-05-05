@@ -490,7 +490,7 @@ public class MSiteConfig extends MObject {
 		return Math.abs( nextLong );
 	}
 
-	private String encryptStringWithKey( String to_be_encrypted, String aKey ) {
+	private static String encryptStringWithKey( String to_be_encrypted, String aKey ) {
 		String encrypted_value = "";
 		final char xdigit[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 		MessageDigest messageDigest;
