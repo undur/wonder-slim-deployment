@@ -249,6 +249,7 @@ public class MHost extends MObject {
 				_siteConfig.hostErrorArray.add( this );
 			}
 
+			// FIXME: This is a really, really weird method of error handling // Hugi 2024-11-03
 			final String errorResponseString = XUtil.errorResponseXML( "instanceResponse", "Failed to contact " + this.name() + "-" + WOApplication.application().lifebeatDestinationPort() );
 			responseWrapper.setContentString( errorResponseString );
 		}
