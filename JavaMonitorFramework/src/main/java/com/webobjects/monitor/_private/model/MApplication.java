@@ -498,23 +498,23 @@ public class MApplication extends MObject {
 	}
 
 	private static NSDictionary<Object, Object> _defaults = new NSDictionary<>( new Object[] {
-			Integer.valueOf( 2001 ),
-			Integer.valueOf( 30 ),
+			2001,
+			30,
 			Boolean.TRUE,
 			Boolean.TRUE,
-			Integer.valueOf( 0 ),
+			0,
 			Boolean.TRUE,
 			"WODefaultAdaptor",
-			Integer.valueOf( 8 ),
-			Integer.valueOf( 128 ),
-			Integer.valueOf( 16 ),
-			Integer.valueOf( 256 ),
+			8,
+			128,
+			16,
+			256,
 			"()",
-			Integer.valueOf( 3600 ),
+			3600,
 			"",
 			Boolean.FALSE,
 			Boolean.FALSE,
-			Integer.valueOf( 30 ),
+			30,
 			"",
 			Boolean.FALSE,
 			"",
@@ -579,7 +579,7 @@ public class MApplication extends MObject {
 			}
 		}
 
-		return Integer.valueOf( runningInstances );
+		return runningInstances;
 	}
 
 	public boolean isRunning_W() {
@@ -596,15 +596,13 @@ public class MApplication extends MObject {
 	}
 
 	public void setRunningInstancesCount( int cnt ) {
-		runningInstancesCount = Integer.valueOf( cnt );
+		runningInstancesCount = cnt;
 	}
 
 	// Used for the AppDetailPage
 	public Integer runningInstancesCount_M() {
-		int runningInstances = runningInstances_M().count();
-		Integer riInt = Integer.valueOf( runningInstances );
-		runningInstancesCount = riInt;
-		return riInt;
+		runningInstancesCount = runningInstances_M().count();
+		return runningInstancesCount;
 	}
 
 	public NSArray<MInstance> runningInstances_M() {

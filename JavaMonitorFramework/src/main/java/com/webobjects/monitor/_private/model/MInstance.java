@@ -115,11 +115,11 @@ public class MInstance extends MObject {
 
 		setSchedulingEnabled( Boolean.FALSE );
 		setSchedulingType( "DAILY" );
-		setSchedulingHourlyStartTime( Integer.valueOf( 3 ) );
-		setSchedulingDailyStartTime( Integer.valueOf( 3 ) );
-		setSchedulingWeeklyStartTime( Integer.valueOf( 3 ) );
-		setSchedulingStartDay( Integer.valueOf( 1 ) ); // Sunday
-		setSchedulingInterval( Integer.valueOf( 12 ) );
+		setSchedulingHourlyStartTime( 3 );
+		setSchedulingDailyStartTime( 3 );
+		setSchedulingWeeklyStartTime( 3 );
+		setSchedulingStartDay( 1 ); // Sunday
+		setSchedulingInterval( 12 );
 		setGracefulScheduling( Boolean.TRUE );
 	}
 

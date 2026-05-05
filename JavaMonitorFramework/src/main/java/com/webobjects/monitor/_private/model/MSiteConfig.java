@@ -656,7 +656,7 @@ public class MSiteConfig extends MObject {
 		if( xmlDict == null ) {
 			values = new NSMutableDictionary();
 			setViewRefreshEnabled( Boolean.TRUE );
-			setViewRefreshRate( Integer.valueOf( 60 ) );
+			setViewRefreshRate( 60 );
 		}
 		else {
 			final NSDictionary siteDict = (NSDictionary)xmlDict.valueForKey( "site" );
@@ -664,7 +664,7 @@ public class MSiteConfig extends MObject {
 				// rdar://3935864 - Seed: "Null Pointer Exception" for WO Application Instances
 				// It seems this should not be necessary, but there is no other place for default values to get fed in. -rrk
 				//
-				values = new NSMutableDictionary( new NSArray( new Object[] { Boolean.TRUE, Integer.valueOf( 60 ) } ), new NSArray( new Object[] { "viewRefreshEnabled", "viewRefreshRate" } ) );
+				values = new NSMutableDictionary( new NSArray( new Object[] { Boolean.TRUE, 60 } ), new NSArray( new Object[] { "viewRefreshEnabled", "viewRefreshRate" } ) );
 			}
 			else {
 				values = new NSMutableDictionary( siteDict );
