@@ -39,8 +39,6 @@ public class Application extends ERXApplication {
 
 		_lock = new ReentrantReadWriteLock();
 
-		com.webobjects.appserver._private.WOHttpIO._alwaysAppendContentLength = false;
-
 		// Setting the ports
 		_setLifebeatDestinationPort( intPort() );
 
