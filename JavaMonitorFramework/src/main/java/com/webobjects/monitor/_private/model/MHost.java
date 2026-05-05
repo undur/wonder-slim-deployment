@@ -244,7 +244,7 @@ public class MHost extends MObject {
 		logger.info( "--> End request phase =======" );
 
 		// For error handling
-		if( responseWrapper.contentString() == null ) {
+		if( responseWrapper.content() == null ) {
 
 			if( willChange ) {
 				_siteConfig.hostErrorArray.add( this );
