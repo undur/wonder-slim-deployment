@@ -16,22 +16,21 @@ public class Application extends ERXApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger( Application.class );
 
-	private InstanceController _localMonitor;
+	private final InstanceController _localMonitor;
+	private final String _multicastAddress;
+	private final boolean _shouldWriteAdaptorConfig;
+	private final boolean _shouldRespondToMulticast;
+	public final ReentrantReadWriteLock _lock;
+	private final MulticastListener listenThread; // CHECKME: We probably don't need this variable, probably just an old precautionary "Don't GC me bro" // Hugi 2026-05-05
 	private MSiteConfig _siteConfig;
-	private MulticastListener listenThread;
 	private Number _port;
 	private int _intPort;
-	private String _multicastAddress;
-	private boolean _shouldWriteAdaptorConfig;
-	private boolean _shouldRespondToMulticast;
-	public ReentrantReadWriteLock _lock;
 
 	static public void main( String argv[] ) {
 		ERXApplication.main( argv, Application.class );
 	}
 
 	public Application() {
-		super();
 		
 		// FIXME: I know.
 		if( "hugi".equals( System.getProperty( "user.name" ) ) ) {
@@ -45,11 +44,8 @@ public class Application extends ERXApplication {
 		// Setting the ports
 		_setLifebeatDestinationPort( intPort() );
 
-		// Setting the multicast Port
-		_multicastAddress = System.getProperties().getProperty( "WOMulticastAddress" );
-		if( _multicastAddress == null ) {
-			_multicastAddress = "239.128.14.2";
-		}
+		// Setting the multicast address
+		_multicastAddress = System.getProperty( "WOMulticastAddress", "239.128.14.2" );
 
 		registerRequestHandler( new LifebeatRequestHandler(), "wlb" );
 
@@ -66,33 +62,26 @@ public class Application extends ERXApplication {
 		_localMonitor = new InstanceController();
 
 		// checking to see if we should save WOConfig.xml to disk for the adaptors.
-		String WOSavesAdaptorConfig = System.getProperties().getProperty( "WOSavesAdaptorConfiguration" );
-		if( WOSavesAdaptorConfig != null ) {
-			_shouldWriteAdaptorConfig = StringExtensions.boolValue( WOSavesAdaptorConfig );
-			if( _shouldWriteAdaptorConfig ) {
-				_siteConfig.archiveAdaptorConfig();
-			}
-		}
-		else {
-			_shouldWriteAdaptorConfig = false;
+		_shouldWriteAdaptorConfig = StringExtensions.boolValue( System.getProperty( "WOSavesAdaptorConfiguration" ) );
+
+		if( _shouldWriteAdaptorConfig ) {
+			_siteConfig.archiveAdaptorConfig();
 		}
 
 		// checking to see if we should respond to adaptor multicast queries
 		// we will always respond to non-multicast UDP packets
-		String shouldMC = System.getProperties().getProperty( "WORespondsToMulticastQuery" );
-		if( shouldMC != null ) {
-			if( !StringExtensions.boolValue( shouldMC ) ) {
-				_shouldRespondToMulticast = false;
-				logger.debug( "Multicast Response Disabled" );
-			}
-			else {
-				_shouldRespondToMulticast = true;
-				logger.debug( "Multicast Response Enabled" );
-			}
+		_shouldRespondToMulticast = StringExtensions.boolValue( System.getProperty( "WORespondsToMulticastQuery" ) );
+
+		if( _shouldRespondToMulticast ) {
+			logger.info( "Multicast Response Enabled" );
+		}
+		else {
+			logger.info( "Multicast Response Disabled" );
 		}
 
 		// Set up multicast listen thread
-		createRequestListenerThread();
+		listenThread = new MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() );
+		listenThread.start();
 
 		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
 		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
@@ -172,12 +161,5 @@ public class Application extends ERXApplication {
 		finally {
 			_lock.readLock().unlock();
 		}
-	}
-
-	// creates and starts the ListenerThread inner class
-	private void createRequestListenerThread() {
-		logger.debug( "Detaching request listen thread" );
-		listenThread = new MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() );
-		listenThread.start();
 	}
 }
