@@ -50,6 +50,7 @@ import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
 
 import x.FoundationCoder;
+import x.XUtil;
 
 public class MSiteConfig extends MObject {
 
@@ -946,12 +947,12 @@ public class MSiteConfig extends MObject {
 
 			if( !(onlyIncludeRunningInstances && !anApp.isRunning_W()) ) {
 
-				final Integer retries = anApp.retries() != null ? anApp.retries() : retries();
-				final String scheduler = anApp.scheduler() != null ? anApp.scheduler() : scheduler();
-				final Integer dormant = anApp.dormant() != null ? anApp.dormant() : dormant();
-				final String redir = anApp.redir() != null ? anApp.redir() : redir();
-				final Integer poolsize = anApp.poolsize() != null ? anApp.poolsize() : poolsize();
-				final Integer urlVersion = anApp.urlVersion() != null ? anApp.urlVersion() : urlVersion();
+				final Integer retries = XUtil.firstNonNull( anApp.retries(), retries() );
+				final String scheduler = XUtil.firstNonNull( anApp.scheduler(), scheduler() );
+				final Integer dormant = XUtil.firstNonNull( anApp.dormant(), dormant() );
+				final String redir = XUtil.firstNonNull( anApp.redir(), redir() );
+				final Integer poolsize = XUtil.firstNonNull( anApp.poolsize(), poolsize() );
+				final Integer urlVersion = XUtil.firstNonNull( anApp.urlVersion(), urlVersion() );
 
 				sb.append( "  <application name=\"" );
 				sb.append( anApp.name() );
@@ -989,11 +990,11 @@ public class MSiteConfig extends MObject {
 						final Integer id = anInst.id();
 						final Integer port = anInst.port();
 						final String host = anInst.hostName();
-						final Integer sendTimeout = anInst.sendTimeout() != null ? anInst.sendTimeout() : (anApp.sendTimeout() != null ? anApp.sendTimeout() : sendTimeout());
-						final Integer recvTimeout = anInst.recvTimeout() != null ? anInst.recvTimeout() : (anApp.recvTimeout() != null ? anApp.recvTimeout() : recvTimeout());
-						final Integer cnctTimeout = anInst.cnctTimeout() != null ? anInst.cnctTimeout() : (anApp.cnctTimeout() != null ? anApp.cnctTimeout() : cnctTimeout());
-						final Integer sendBufSize = anInst.sendBufSize() != null ? anInst.sendBufSize() : (anApp.sendBufSize() != null ? anApp.sendBufSize() : sendBufSize());
-						final Integer recvBufSize = anInst.recvBufSize() != null ? anInst.recvBufSize() : (anApp.recvBufSize() != null ? anApp.recvBufSize() : recvBufSize());
+						final Integer sendTimeout = XUtil.firstNonNull( anInst.sendTimeout(), anApp.sendTimeout(), sendTimeout() );
+						final Integer recvTimeout = XUtil.firstNonNull( anInst.recvTimeout(), anApp.recvTimeout(), recvTimeout() );
+						final Integer cnctTimeout = XUtil.firstNonNull( anInst.cnctTimeout(), anApp.cnctTimeout(), cnctTimeout() );
+						final Integer sendBufSize = XUtil.firstNonNull( anInst.sendBufSize(), anApp.sendBufSize(), sendBufSize() );
+						final Integer recvBufSize = XUtil.firstNonNull( anInst.recvBufSize(), anApp.recvBufSize(), recvBufSize() );
 
 						sb.append( "    <instance" );
 
