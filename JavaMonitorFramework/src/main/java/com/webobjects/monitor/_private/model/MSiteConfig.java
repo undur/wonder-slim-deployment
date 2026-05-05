@@ -57,8 +57,15 @@ public class MSiteConfig extends MObject {
 	// Old common code
 	private NSMutableDictionary<String, Object> values;
 
-	public NSMutableDictionary<String, Object> values() {
-		return values;
+	/**
+	 * @return A cloned dict of the site-level scalars (no nested host/application/instance arrays),
+	 *         suitable for the {@code "site"} payload in a wotaskd update request.
+	 *
+	 *         <p>Distinct from {@link #dictionaryForArchive()}, which returns the full archive
+	 *         shape (site scalars wrapped alongside hostArray/applicationArray/instanceArray).
+	 */
+	public NSDictionary<String, Object> dictionaryForWireUpdate() {
+		return values.mutableClone();
 	}
 
 	public void updateValues( NSDictionary<String, Object> aDict ) {
@@ -964,14 +971,14 @@ public class MSiteConfig extends MObject {
 		saveSiteConfig( new File( fileForSiteConfig().getParentFile(), "SiteConfigBackup.xml." + date + reason ), generateSiteConfigXML(), true );
 	}
 
-	public NSDictionary dictionaryForArchive() {
+	public NSDictionary<String, Object> dictionaryForArchive() {
 		final int hostArrayCount = _hostArray.size();
 		final int applicationArrayCount = _applicationArray.size();
 		final int instanceArrayCount = _instanceArray.size();
 
 		final NSMutableDictionary siteConfig = new NSMutableDictionary( 4 );
 
-		final NSMutableDictionary site = values;
+		final NSMutableDictionary site = values.mutableClone();
 
 		final NSMutableArray<MHost> hostArray = new NSMutableArray<>( hostArrayCount );
 

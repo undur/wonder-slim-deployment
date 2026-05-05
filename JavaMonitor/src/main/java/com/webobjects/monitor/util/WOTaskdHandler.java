@@ -163,17 +163,17 @@ public class WOTaskdHandler {
 		final NSMutableDictionary requestTypeDict = new NSMutableDictionary();
 
 		if( _Config != null ) {
-			final NSDictionary site = new NSDictionary( _Config.values() );
+			final NSDictionary site = _Config.dictionaryForWireUpdate();
 			requestTypeDict.takeValueForKey( site, "site" );
 		}
 
 		if( _Host != null ) {
-			final List<MHost> hostArray = new NSArray( _Host.values() );
+			final List<MHost> hostArray = new NSArray( _Host.dictionaryForArchive() );
 			requestTypeDict.takeValueForKey( hostArray, "hostArray" );
 		}
 
 		if( _Application != null ) {
-			final List<MApplication> applicationArray = new NSArray( _Application.values() );
+			final List<MApplication> applicationArray = new NSArray( _Application.dictionaryForArchive() );
 			requestTypeDict.takeValueForKey( applicationArray, "applicationArray" );
 		}
 
@@ -183,7 +183,7 @@ public class WOTaskdHandler {
 
 			for( int i = 0; i < instanceCount; i++ ) {
 				MInstance anInst = _InstanceArray.get( i );
-				instanceArray.addObject( anInst.values() );
+				instanceArray.addObject( anInst.dictionaryForArchive() );
 			}
 
 			requestTypeDict.takeValueForKey( instanceArray, "instanceArray" );

@@ -46,12 +46,8 @@ public class MInstance extends MObject {
 	// Old common code
 	private NSMutableDictionary<String, Object> values;
 
-	public NSMutableDictionary<String, Object> values() {
-		return values;
-	}
-
-	public NSMutableDictionary<String, Object> dictionaryForArchive() {
-		return values;
+	public NSDictionary<String, Object> dictionaryForArchive() {
+		return values.mutableClone();
 	}
 
 	//	String hostName;

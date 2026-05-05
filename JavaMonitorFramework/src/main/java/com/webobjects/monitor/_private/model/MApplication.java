@@ -25,17 +25,13 @@ public class MApplication extends MObject {
 	// Old common code
 	private NSMutableDictionary<String, Object> values;
 
-	public NSMutableDictionary<String, Object> values() {
-		return values;
-	}
-
 	public void updateValues( NSDictionary<String, Object> aDict ) {
 		values = new NSMutableDictionary<>( aDict );
 		dataChanged();
 	}
 
-	public NSMutableDictionary<String, Object> dictionaryForArchive() {
-		return values;
+	public NSDictionary<String, Object> dictionaryForArchive() {
+		return values.mutableClone();
 	}
 
 	//	String name;
@@ -96,7 +92,7 @@ public class MApplication extends MObject {
 	}
 
 	// For Cheating on the AppConfigurePage
-	public MApplication( NSMutableDictionary aDict, MSiteConfig aConfig, Object o ) {
+	public MApplication( NSDictionary<String, Object> aDict, MSiteConfig aConfig, Object o ) {
 		_siteConfig = aConfig;
 		values = aDict.mutableClone();
 	}

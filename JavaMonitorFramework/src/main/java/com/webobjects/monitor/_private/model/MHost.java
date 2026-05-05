@@ -40,17 +40,13 @@ public class MHost extends MObject {
 	// Old common code
 	private NSMutableDictionary<String, Object> values;
 
-	public NSMutableDictionary<String, Object> values() {
-		return values;
-	}
-
 	public void updateValues( NSDictionary<String, Object> aDict ) {
 		values = new NSMutableDictionary<>( aDict );
 		dataChanged();
 	}
 
-	public NSMutableDictionary<String, Object> dictionaryForArchive() {
-		return values;
+	public NSDictionary<String, Object> dictionaryForArchive() {
+		return values.mutableClone();
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger( MHost.class );
