@@ -567,18 +567,13 @@ public class MApplication extends MObject {
 	}
 
 	public boolean isIDInUse( Integer ID ) {
-		return instanceWithID( ID ) != null;
-	}
-
-	private MInstance instanceWithID( Integer ID ) {
-
 		for( final MInstance instance : _instanceArray ) {
 			if( instance.id().equals( ID ) ) {
-				return instance;
+				return true;
 			}
 		}
 
-		return null;
+		return false;
 	}
 
 	public Integer runningInstancesCount_W() {
