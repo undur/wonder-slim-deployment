@@ -10,11 +10,12 @@ import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.monitor._private.MUtil;
-import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor.application.MonitorComponent;
 import com.webobjects.monitor.application.components.ConfirmationPage.ConfirmationDelegate;
 import com.webobjects.monitor.util.JMUtil;
+
+import x.XUtil;
 
 public class HostsPage extends MonitorComponent {
 
@@ -30,7 +31,7 @@ public class HostsPage extends MonitorComponent {
 
 	public WOComponent addHostClicked() {
 
-		if( newHostName != null && (newHostName.length() > 0) && (StringExtensions.isValidXMLString( newHostName )) ) {
+		if( newHostName != null && (newHostName.length() > 0) && (XUtil.isValidXMLString( newHostName )) ) {
 			try {
 				InetAddress anAddress = InetAddress.getByName( newHostName );
 

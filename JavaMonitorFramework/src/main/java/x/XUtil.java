@@ -77,4 +77,42 @@ public class XUtil {
 		final NSDictionary<String, Object> inner = new NSDictionary<>( messages, "errorResponse" );
 		return new FoundationCoder().encodeRootObjectForKey( inner, rootKey );
 	}
+
+	/**
+	 * FIXME: Eliminate. Each call site of this method needs to be checked beforehand // Hugi 2024-11-02
+	 */
+	@Deprecated
+	public static boolean boolValue( final String s ) {
+
+		if( s == null ) {
+			return false;
+		}
+
+		return s.equalsIgnoreCase( "_YES" ) ||
+				s.equalsIgnoreCase( "Y" ) ||
+				s.equalsIgnoreCase( "YES" ) ||
+				s.equalsIgnoreCase( "true" ) ||
+				s.equalsIgnoreCase( "1" );
+	}
+
+	/**
+	 * FIXME: Eliminate. Each call site of this method needs to be checked beforehand // Hugi 2024-11-02
+	 */
+	@Deprecated
+	public static boolean isValidXMLString( final String s ) {
+
+		if( s == null || s.isEmpty() ) {
+			return false;
+		}
+
+		for( int i = 0; i < s.length(); i++ ) {
+			char aChar = s.charAt( i );
+
+			if( (!Character.isLetterOrDigit( aChar )) && (aChar != '-') && (aChar != '.') ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 }

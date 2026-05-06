@@ -17,11 +17,12 @@ import java.util.List;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.monitor._private.MUtil;
-import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MInstance;
 import com.webobjects.monitor._private.model.MSiteConfig;
 import com.webobjects.monitor.application.MonitorComponent.AppComponent;
+
+import x.XUtil;
 
 public class AppConfigurePage extends AppComponent {
 
@@ -441,7 +442,7 @@ public class AppConfigurePage extends AppComponent {
 			else if( i == (loadSchedulerList.size() - 1) ) {
 				newValue = customSchedulerName;
 
-				if( !StringExtensions.isValidXMLString( newValue ) ) {
+				if( !XUtil.isValidXMLString( newValue ) ) {
 					newValue = null;
 				}
 			}

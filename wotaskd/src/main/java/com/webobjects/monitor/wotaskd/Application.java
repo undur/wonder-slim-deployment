@@ -6,11 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
-import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MSiteConfig;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.routes.RouteTable;
+
+import x.XUtil;
 
 public class Application extends ERXApplication {
 
@@ -65,7 +66,7 @@ public class Application extends ERXApplication {
 		_localMonitor = new InstanceController();
 
 		// checking to see if we should save WOConfig.xml to disk for the adaptors.
-		_shouldWriteAdaptorConfig = StringExtensions.boolValue( System.getProperty( "WOSavesAdaptorConfiguration" ) );
+		_shouldWriteAdaptorConfig = XUtil.boolValue( System.getProperty( "WOSavesAdaptorConfiguration" ) );
 
 		if( _shouldWriteAdaptorConfig ) {
 			_siteConfig.archiveAdaptorConfig();
@@ -73,7 +74,7 @@ public class Application extends ERXApplication {
 
 		// checking to see if we should respond to adaptor multicast queries
 		// we will always respond to non-multicast UDP packets
-		_shouldRespondToMulticast = StringExtensions.boolValue( System.getProperty( "WORespondsToMulticastQuery" ) );
+		_shouldRespondToMulticast = XUtil.boolValue( System.getProperty( "WORespondsToMulticastQuery" ) );
 
 		if( _shouldRespondToMulticast ) {
 			logger.info( "Multicast Response Enabled" );

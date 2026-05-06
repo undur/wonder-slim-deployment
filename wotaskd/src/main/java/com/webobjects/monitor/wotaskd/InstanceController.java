@@ -45,7 +45,6 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.monitor._private.IInstanceController;
 import com.webobjects.monitor._private.MUtil;
 import com.webobjects.monitor._private.MonitorException;
-import com.webobjects.monitor._private.StringExtensions;
 import com.webobjects.monitor._private.model.MApplication;
 import com.webobjects.monitor._private.model.MHost;
 import com.webobjects.monitor._private.model.MInstance;
@@ -144,7 +143,7 @@ public class InstanceController implements IInstanceController {
 		if( System.getProperties().getProperty( "os.name" ).toLowerCase().startsWith( "win" ) ) {
 			_isOnWindows = true;
 		}
-		_shouldUseSpawn = StringExtensions.boolValue( System.getProperty( "WOShouldUseSpawn" ) );
+		_shouldUseSpawn = XUtil.boolValue( System.getProperty( "WOShouldUseSpawn" ) );
 		if( _shouldUseSpawn ) {
 			final String userDir = System.getProperties().getProperty( "user.dir" );
 			final String spawnScript = _isOnWindows ? "SpawnOfWotaskd.exe" : "SpawnOfWotaskd.sh";
