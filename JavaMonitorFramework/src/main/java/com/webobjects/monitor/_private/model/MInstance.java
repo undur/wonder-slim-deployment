@@ -435,30 +435,22 @@ public class MInstance extends MObject {
 	}
 
 	public void _takePathFromApplication() {
-		final MHost aHost = _host;
-
-		if( aHost.osType().equals( "UNIX" ) ) {
-			setPath( _application.unixPath() );
-		}
-		else if( aHost.osType().equals( "WINDOWS" ) ) {
-			setPath( _application.winPath() );
-		}
-		else if( aHost.osType().equals( "MACOSX" ) ) {
-			setPath( _application.macPath() );
+		switch( _host.osType() ) {
+			case "UNIX" -> setPath( _application.unixPath() );
+			case "WINDOWS" -> setPath( _application.winPath() );
+			case "MACOSX" -> setPath( _application.macPath() );
+			// FIXME: Should throw on unknown osType once configuration validation can guarantee the set of known types // Hugi 2026-05-06
+			default -> { /* no-op, preserving legacy behavior for unknown osType */ }
 		}
 	}
 
 	public void _takeOutputPathFromApplication() {
-		final MHost aHost = _host;
-
-		if( aHost.osType().equals( "UNIX" ) ) {
-			setOutputPath( generateOutputPath( _application.unixOutputPath() ) );
-		}
-		else if( aHost.osType().equals( "WINDOWS" ) ) {
-			setOutputPath( generateOutputPath( _application.winOutputPath() ) );
-		}
-		else if( aHost.osType().equals( "MACOSX" ) ) {
-			setOutputPath( generateOutputPath( _application.macOutputPath() ) );
+		switch( _host.osType() ) {
+			case "UNIX" -> setOutputPath( generateOutputPath( _application.unixOutputPath() ) );
+			case "WINDOWS" -> setOutputPath( generateOutputPath( _application.winOutputPath() ) );
+			case "MACOSX" -> setOutputPath( generateOutputPath( _application.macOutputPath() ) );
+			// FIXME: Should throw on unknown osType once configuration validation can guarantee the set of known types // Hugi 2026-05-06
+			default -> { /* no-op, preserving legacy behavior for unknown osType */ }
 		}
 	}
 
