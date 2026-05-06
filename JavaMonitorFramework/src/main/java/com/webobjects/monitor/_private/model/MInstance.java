@@ -636,10 +636,6 @@ public class MInstance extends MObject {
 		return b;
 	}
 
-	private Instant lastRegistration() {
-		return _lastRegistration;
-	}
-
 	public void startRegistration() {
 		updateRegistration();
 	}
