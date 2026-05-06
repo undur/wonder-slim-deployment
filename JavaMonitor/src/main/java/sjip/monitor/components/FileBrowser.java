@@ -153,8 +153,6 @@ public class FileBrowser extends MonitorComponent {
 
 		public record RemoteFile( String file, Integer fileSize, String fileType ) {}
 
-		private static final Logger logger = LoggerFactory.getLogger( RemoteBrowseClient.class );
-
 		/**
 		 * The URL invoked to get a remote file list.
 		 */
@@ -227,10 +225,7 @@ public class FileBrowser extends MonitorComponent {
 
 				final HttpRequest request = requestBuilder.build();
 
-				logger.info( "--> Sending request: =======" );
-				logger.info( "{}", request );
 				final HttpResponse<String> response = XUtil.sendRequest( request );
-				logger.info( "--> Response received ======= " + response.headers() );
 
 				// FIXME: Look into this error handling // Hugi 2024-11-10
 				if( response.statusCode() != 200 ) {

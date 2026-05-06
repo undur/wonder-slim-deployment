@@ -214,13 +214,8 @@ public class MHost extends MObject {
 
 		final HttpRequest request = requestBuilder.build();
 
-		logger.info( "--> Sending request: =======" );
-		logger.info( "{}", request );
-		logger.info( contentString );
-
 		try {
 			final HttpResponse<String> response = XUtil.sendRequest( request );
-			logger.info( "--> Response received =======" );
 			responseWrapper.setContentString( response.body() );
 		}
 		catch( IOException e ) {
@@ -231,8 +226,6 @@ public class MHost extends MObject {
 			Thread.currentThread().interrupt();
 			isAvailable = false;
 		}
-
-		logger.info( "--> End request phase =======" );
 
 		// For error handling
 		if( responseWrapper.contentString() == null ) {

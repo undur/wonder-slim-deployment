@@ -654,14 +654,8 @@ public class InstanceController implements IInstanceController {
 
 			final HttpRequest request = requestBuilder.build();
 
-			logger.info( "--> Sending request: =======" );
-			logger.info( "{}", request );
-			logger.info( requestContentXML );
-
 			final HttpResponse<String> response = XUtil.sendRequest( request );
-			logger.info( "--> Response received =======" );
 			final ResponseWrapper responseWrapper = new ResponseWrapper( response.body(), response.headers() );
-			logger.info( "--> End request phase =======" );
 			
 			anInstance.succeededInConnection();
 			return responseWrapper;
