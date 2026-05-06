@@ -62,11 +62,11 @@ public class InstanceController implements IInstanceController {
 		t.setDaemon( true );
 		return t;
 	} );
+
 	private final String _hostName;
 	private final boolean _isOnWindows;
 	private final boolean _shouldUseSpawn;
 	private final String spawningGrounds;
-	private final Application theApplication = (Application)WOApplication.application();
 
 	/**
 	 * Registry of running app instances that wotaskd <em>didn't</em> start — apps that
@@ -138,7 +138,7 @@ public class InstanceController implements IInstanceController {
 	private static final boolean DETACH_LAUNCH = ERXProperties.booleanForKeyWithDefault( "WOTaskd.detachLaunch", false );
 
 	public InstanceController() {
-		final MSiteConfig aConfig = theApplication.siteConfig();
+		final MSiteConfig aConfig = theApplication().siteConfig();
 
 		_isOnWindows = System.getProperties().getProperty( "os.name" ).toLowerCase().startsWith( "win" );
 
@@ -166,7 +166,7 @@ public class InstanceController implements IInstanceController {
 		// Used to do phased startup the first time startup
 		_scheduler.schedule( this::_checkAutoRecoverStartup, aConfig.autoRecoverInterval(), TimeUnit.MILLISECONDS );
 
-		_hostName = theApplication.host();
+		_hostName = theApplication().host();
 	}
 
 	public void registerUnknownInstance( String name, String host, String port ) {
@@ -293,9 +293,9 @@ public class InstanceController implements IInstanceController {
 	/********** Timer Targets **********/
 	public void _checkAutoRecover() {
 		logger.debug( "_checkAutoRecover START" );
-		theApplication._lock.readLock().lock();
+		theApplication()._lock.readLock().lock();
 		try {
-			MHost theHost = theApplication.siteConfig().localHost();
+			MHost theHost = theApplication().siteConfig().localHost();
 			if( theHost != null ) {
 				List<MInstance> instArray = theHost.instanceArray();
 				int instArrayCount = instArray.size();
@@ -313,7 +313,7 @@ public class InstanceController implements IInstanceController {
 			triageUnknownInstances();
 		}
 		finally {
-			theApplication._lock.readLock().unlock();
+			theApplication()._lock.readLock().unlock();
 		}
 		logger.debug( "_checkAutoRecover STOP" );
 	}
@@ -321,9 +321,9 @@ public class InstanceController implements IInstanceController {
 	// This only runs once, on startup - then it starts the regular timer
 	public void _checkAutoRecoverStartup() {
 		logger.debug( "_checkAutoRecoverStartup START" );
-		theApplication._lock.readLock().lock();
+		theApplication()._lock.readLock().lock();
 		try {
-			MSiteConfig aConfig = theApplication.siteConfig();
+			MSiteConfig aConfig = theApplication().siteConfig();
 			final List<MApplication> appArray = aConfig.applicationArray();
 			int appArrayCount = appArray.size();
 			final InstanceController localMonitor = this;
@@ -359,7 +359,7 @@ public class InstanceController implements IInstanceController {
 
 		}
 		finally {
-			theApplication._lock.readLock().unlock();
+			theApplication()._lock.readLock().unlock();
 		}
 		logger.debug( "_checkAutoRecoverStartup STOP" );
 	}
@@ -405,10 +405,10 @@ public class InstanceController implements IInstanceController {
 
 	public void _checkSchedules() {
 		logger.debug( "_checkSchedules START" );
-		theApplication._lock.readLock().lock();
+		theApplication()._lock.readLock().lock();
 		try {
 
-			MHost theHost = theApplication.siteConfig().localHost();
+			MHost theHost = theApplication().siteConfig().localHost();
 			if( theHost != null ) {
 				final List<MInstance> instArray = theHost.instanceArray();
 				int instArrayCount = instArray.size();
@@ -456,7 +456,7 @@ public class InstanceController implements IInstanceController {
 			}
 		}
 		finally {
-			theApplication._lock.readLock().unlock();
+			theApplication()._lock.readLock().unlock();
 		}
 		logger.debug( "_checkSchedules STOP" );
 	}
@@ -465,7 +465,7 @@ public class InstanceController implements IInstanceController {
 	// Returns null if success
 	@Override
 	public String startInstance( MInstance anInstance ) {
-		MSiteConfig aConfig = theApplication.siteConfig();
+		MSiteConfig aConfig = theApplication().siteConfig();
 		if( anInstance == null )
 			return "Attempt to start null instance on " + _hostName;
 		if( anInstance.host() != aConfig.localHost() )
@@ -629,7 +629,7 @@ public class InstanceController implements IInstanceController {
 	}
 
 	private void catchInstanceErrors( MInstance anInstance ) throws MonitorException {
-		MSiteConfig aConfig = theApplication.siteConfig();
+		MSiteConfig aConfig = theApplication().siteConfig();
 		if( anInstance == null )
 			throw new MonitorException( "Attempt to command null instance on " + _hostName );
 		if( anInstance.host() != aConfig.localHost() )
@@ -751,5 +751,9 @@ public class InstanceController implements IInstanceController {
 		catch( IOException e ) {
 			return false;
 		}
+	}
+	
+	private static Application theApplication() {
+		return (Application)WOApplication.application();
 	}
 }
