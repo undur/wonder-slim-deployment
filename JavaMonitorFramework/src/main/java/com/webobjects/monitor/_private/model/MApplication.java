@@ -73,8 +73,8 @@ public class MApplication extends MObject {
 	//	Integer poolsize;
 	//	Integer urlVersion;	// 3 | 4
 
-	private NSMutableArray<MInstance> _instanceArray = new NSMutableArray<>();
-	private NSMutableArray<MHost> _hostArray = new NSMutableArray<>();
+	private final NSMutableArray<MInstance> _instanceArray = new NSMutableArray<>();
+	private final NSMutableArray<MHost> _hostArray = new NSMutableArray<>();
 
 	// Used for the ApplicationsPage
 	private Integer runningInstancesCount = 0;

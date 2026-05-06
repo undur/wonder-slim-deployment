@@ -255,9 +255,9 @@ public class MSiteConfig extends MObject {
 	}
 
 	/********** Errors  **********/
-	public Map<String, String> globalErrorDictionary = Collections.synchronizedMap( new HashMap<>() );
+	public final Map<String, String> globalErrorDictionary = Collections.synchronizedMap( new HashMap<>() );
 
-	public Set<MHost> hostErrorArray = Collections.synchronizedSet( new HashSet<>() );
+	public final Set<MHost> hostErrorArray = Collections.synchronizedSet( new HashSet<>() );
 
 	/********** Object Graph  **********/
 	private final NSMutableArray<MHost> _hostArray = new NSMutableArray<>();
@@ -298,8 +298,8 @@ public class MSiteConfig extends MObject {
 	}
 
 	/********** Adding and Deleting **********/
-	private InetAddress localHostAddress;
-	private String localHostName;
+	private final InetAddress localHostAddress;
+	private final String localHostName;
 
 	private void _addHost( MHost newHost ) {
 		// If WOHost was passed, it'll resolve against that, otherwise, it'll resolve any local address

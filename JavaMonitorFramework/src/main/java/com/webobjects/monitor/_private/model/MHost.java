@@ -51,7 +51,7 @@ public class MHost extends MObject {
 
 	private static final Logger logger = LoggerFactory.getLogger( MHost.class );
 
-	private NSMutableArray<MInstance> _instanceArray;
+	private final NSMutableArray<MInstance> _instanceArray = new NSMutableArray<>();
 
 	private InetAddress _address = null;
 
@@ -69,7 +69,6 @@ public class MHost extends MObject {
 	public MHost( NSDictionary valuesDict, MSiteConfig siteConfig ) {
 		values = new NSMutableDictionary( valuesDict );
 		_siteConfig = siteConfig;
-		_instanceArray = new NSMutableArray<>();
 
 		int tries = 0;
 		while( tries++ < 5 ) {
