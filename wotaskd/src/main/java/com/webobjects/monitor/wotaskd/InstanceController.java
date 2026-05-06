@@ -63,9 +63,9 @@ public class InstanceController implements IInstanceController {
 		return t;
 	} );
 	private final String _hostName;
-	private boolean _isOnWindows = false;
-	private boolean _shouldUseSpawn = true;
-	private String spawningGrounds = null;
+	private final boolean _isOnWindows;
+	private final boolean _shouldUseSpawn;
+	private final String spawningGrounds;
 	private final Application theApplication = (Application)WOApplication.application();
 
 	/**
@@ -138,24 +138,29 @@ public class InstanceController implements IInstanceController {
 	private static final boolean DETACH_LAUNCH = ERXProperties.booleanForKeyWithDefault( "WOTaskd.detachLaunch", false );
 
 	public InstanceController() {
-		MSiteConfig aConfig = theApplication.siteConfig();
+		final MSiteConfig aConfig = theApplication.siteConfig();
 
-		if( System.getProperties().getProperty( "os.name" ).toLowerCase().startsWith( "win" ) ) {
-			_isOnWindows = true;
-		}
-		_shouldUseSpawn = XUtil.boolValue( System.getProperty( "WOShouldUseSpawn" ) );
-		if( _shouldUseSpawn ) {
+		_isOnWindows = System.getProperties().getProperty( "os.name" ).toLowerCase().startsWith( "win" );
+
+		final boolean spawnRequested = XUtil.boolValue( System.getProperty( "WOShouldUseSpawn" ) );
+		if( spawnRequested ) {
 			final String userDir = System.getProperties().getProperty( "user.dir" );
 			final String spawnScript = _isOnWindows ? "SpawnOfWotaskd.exe" : "SpawnOfWotaskd.sh";
 			final String appDir = Path.of( userDir, "Contents", "Resources", spawnScript ).toString();
+			final File theApp = new File( appDir );
 
-			spawningGrounds = appDir + " ";
-
-			File theApp = new File( appDir );
-
-			if( !(theApp.exists() && theApp.isFile()) ) {
-				_shouldUseSpawn = false;
+			if( theApp.exists() && theApp.isFile() ) {
+				_shouldUseSpawn = true;
+				spawningGrounds = appDir + " ";
 			}
+			else {
+				_shouldUseSpawn = false;
+				spawningGrounds = null;
+			}
+		}
+		else {
+			_shouldUseSpawn = false;
+			spawningGrounds = null;
 		}
 
 		// Used to do phased startup the first time startup
