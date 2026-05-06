@@ -630,10 +630,6 @@ public class MInstance extends MObject {
 		_shouldDie = b;
 	}
 
-	private boolean shouldDie() {
-		return _shouldDie;
-	}
-
 	public boolean shouldDieAndReset() {
 		boolean b = _shouldDie;
 		_shouldDie = false;
