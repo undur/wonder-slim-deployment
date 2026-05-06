@@ -462,8 +462,8 @@ public class MApplication extends MObject {
 
 		_instanceArray.addObject( anInstance );
 
-		if( !_hostArray.containsObject( anInstance._host ) ) {
-			_hostArray.addObject( anInstance._host );
+		if( !_hostArray.containsObject( anInstance.host() ) ) {
+			_hostArray.addObject( anInstance.host() );
 		}
 	}
 
@@ -474,14 +474,14 @@ public class MApplication extends MObject {
 
 		for( final Enumeration<MInstance> e = _instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
 			MInstance anInst = e.nextElement();
-			if( anInstance._host == anInst._host ) {
+			if( anInstance.host() == anInst.host() ) {
 				uniqueHost = false;
 				break;
 			}
 		}
 
 		if( uniqueHost ) {
-			_hostArray.removeObject( anInstance._host );
+			_hostArray.removeObject( anInstance.host() );
 		}
 	}
 

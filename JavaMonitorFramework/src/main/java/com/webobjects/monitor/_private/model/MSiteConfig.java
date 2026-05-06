@@ -395,8 +395,8 @@ public class MSiteConfig extends MObject {
 
 	private void _addInstance( MInstance newInstance ) {
 		_instanceArray.addObject( newInstance );
-		newInstance._host._addInstancePrimitive( newInstance );
-		newInstance._application._addInstancePrimitive( newInstance );
+		newInstance.host()._addInstancePrimitive( newInstance );
+		newInstance.application()._addInstancePrimitive( newInstance );
 		dataHasChanged();
 	}
 
@@ -427,8 +427,8 @@ public class MSiteConfig extends MObject {
 	private void _removeInstance( MInstance anInstance ) {
 		//cancel all tasks
 		anInstance.cancelForceQuitTask();
-		anInstance._host._removeInstancePrimitive( anInstance );
-		anInstance._application._removeInstancePrimitive( anInstance );
+		anInstance.host()._removeInstancePrimitive( anInstance );
+		anInstance.application()._removeInstancePrimitive( anInstance );
 		_instanceArray.removeObject( anInstance );
 		dataHasChanged();
 	}
@@ -457,7 +457,7 @@ public class MSiteConfig extends MObject {
 
 	public void removeInstance_W( MInstance anInstance ) {
 
-		if( (anInstance._host == _localHost) && anInstance.isRunning_W() ) {
+		if( (anInstance.host() == _localHost) && anInstance.isRunning_W() ) {
 			final IInstanceController plMonitor = (IInstanceController)WOApplication.application().valueForKey( "localMonitor" );
 
 			try {

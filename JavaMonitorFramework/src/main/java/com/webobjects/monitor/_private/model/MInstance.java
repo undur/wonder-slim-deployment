@@ -81,8 +81,8 @@ public class MInstance extends MObject {
 	private static final DateTimeFormatter SHUTDOWN_FORMATTER = DateTimeFormatter.ofPattern( "EEE '@' HH:00", Locale.US ).withZone( ZoneId.of( "UTC" ) );
 	public static long TIME_FOR_STARTUP = 30;
 
-	protected MHost _host;
-	protected MApplication _application;
+	private MHost _host;
+	private MApplication _application;
 	private Instant _lastRegistration = Instant.EPOCH;
 	private NSMutableArray<String> _deaths = new NSMutableArray<>();
 	private boolean isRefusingNewSessions = false;
