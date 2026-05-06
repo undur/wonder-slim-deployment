@@ -164,7 +164,7 @@ public class MInstance extends MObject {
 		return (String)values.valueForKey( "applicationName" );
 	}
 
-	public void setApplicationName( String value ) {
+	private void setApplicationName( String value ) {
 		values.takeValueForKey( value, "applicationName" );
 		dataChanged();
 	}
@@ -424,7 +424,7 @@ public class MInstance extends MObject {
 		setAdditionalArgs( _application.additionalArgs() );
 	}
 
-	public void _takePortFromApplication() {
+	private void _takePortFromApplication() {
 		final MHost aHost = _host;
 
 		final Integer appPort = _application.startingPort();
@@ -552,7 +552,7 @@ public class MInstance extends MObject {
 		return (state == MUtil.ALIVE);
 	}
 
-	public int lifebeatCheckInterval() {
+	private int lifebeatCheckInterval() {
 		Integer lb = lifebeatInterval();
 		if( lb == null ) {
 			return 30 * _siteConfig._appIsDeadMultiplier;
@@ -630,7 +630,7 @@ public class MInstance extends MObject {
 		_shouldDie = b;
 	}
 
-	public boolean shouldDie() {
+	private boolean shouldDie() {
 		return _shouldDie;
 	}
 
@@ -640,7 +640,7 @@ public class MInstance extends MObject {
 		return b;
 	}
 
-	public Instant lastRegistration() {
+	private Instant lastRegistration() {
 		return _lastRegistration;
 	}
 
@@ -665,7 +665,7 @@ public class MInstance extends MObject {
 		state = MUtil.CRASHING;
 	}
 
-	public void sendDeathNotificationEmail() {
+	private void sendDeathNotificationEmail() {
 
 		final Instant currentTime = Instant.now();
 		final String currentDate = currentTime.toString();
@@ -713,7 +713,7 @@ public class MInstance extends MObject {
 		return _deaths.count();
 	}
 
-	public void addDeath() {
+	private void addDeath() {
 		_deaths.addObject( DATE_FORMATTER.format( ZonedDateTime.now() ) );
 	}
 
@@ -859,11 +859,11 @@ public class MInstance extends MObject {
 		return true;
 	}
 
-	public ZonedDateTime nextScheduledShutdown() {
+	private ZonedDateTime nextScheduledShutdown() {
 		return _nextScheduledShutdown;
 	}
 
-	public void setNextScheduledShutdown( ZonedDateTime newtime ) {
+	private void setNextScheduledShutdown( ZonedDateTime newtime ) {
 		_nextScheduledShutdown = newtime;
 		_nextScheduledShutdownString = SHUTDOWN_FORMATTER.format( _nextScheduledShutdown );
 	}
@@ -987,7 +987,7 @@ public class MInstance extends MObject {
 
 	/** ******** Force quit task ********* */
 
-	public Timer taskTimer() {
+	private Timer taskTimer() {
 		if( _taskTimer == null ) {
 			_taskTimer = new Timer();
 		}
@@ -1009,7 +1009,7 @@ public class MInstance extends MObject {
 		_forceQuitTask = task;
 	}
 
-	public TimerTask forceQuitTask() {
+	private TimerTask forceQuitTask() {
 		return _forceQuitTask;
 	}
 

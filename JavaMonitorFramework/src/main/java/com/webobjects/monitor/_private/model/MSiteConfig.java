@@ -151,11 +151,11 @@ public class MSiteConfig extends MObject {
 		dataChanged();
 	}
 
-	public Integer sequence() {
+	private Integer sequence() {
 		return (Integer)values.valueForKey( "sequence" );
 	}
 
-	public void setSequence( Integer value ) {
+	private void setSequence( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "sequence" );
 		dataChanged();
 	}
@@ -421,7 +421,7 @@ public class MSiteConfig extends MObject {
 		return newInstanceArray;
 	}
 
-	public void addInstance_M( MInstance newInstance ) {
+	private void addInstance_M( MInstance newInstance ) {
 		_addInstance( newInstance );
 	}
 

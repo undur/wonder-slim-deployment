@@ -596,7 +596,7 @@ public class MApplication extends MObject {
 	}
 
 	// Used for the AppDetailPage
-	public Integer runningInstancesCount_M() {
+	private Integer runningInstancesCount_M() {
 		runningInstancesCount = runningInstances_M().count();
 		return runningInstancesCount;
 	}
