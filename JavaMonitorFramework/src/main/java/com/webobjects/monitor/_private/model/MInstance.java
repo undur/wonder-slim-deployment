@@ -1009,10 +1009,6 @@ public class MInstance extends MObject {
 		_forceQuitTask = task;
 	}
 
-	private TimerTask forceQuitTask() {
-		return _forceQuitTask;
-	}
-
 	/**
 	 * Only one force quit task can be scheduled
 	 *
