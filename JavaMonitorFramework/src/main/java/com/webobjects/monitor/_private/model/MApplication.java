@@ -472,8 +472,8 @@ public class MApplication extends MObject {
 		_instanceArray.removeObject( anInstance );
 		boolean uniqueHost = true;
 
-		for( Enumeration e = _instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
-			MInstance anInst = (MInstance)e.nextElement();
+		for( final Enumeration<MInstance> e = _instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
+			MInstance anInst = e.nextElement();
 			if( anInstance._host == anInst._host ) {
 				uniqueHost = false;
 				break;
