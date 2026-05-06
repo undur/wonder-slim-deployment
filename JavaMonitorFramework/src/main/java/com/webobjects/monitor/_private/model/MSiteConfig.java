@@ -80,7 +80,6 @@ public class MSiteConfig extends MObject {
 	String emailReturnAddr;
 	Boolean viewRefreshEnabled;
 	Integer viewRefreshRate;
-	Integer sequence;
 	// Adaptor
 	Integer retries;
 	String scheduler;	// "RANDOM" | "ROUNDROBIN" | "LOADAVERAGE" | <Custom Scheduler Name>
@@ -148,15 +147,6 @@ public class MSiteConfig extends MObject {
 
 	public void setViewRefreshRate( Integer value ) {
 		values.takeValueForKey( MUtil.validatedInteger( value ), "viewRefreshRate" );
-		dataChanged();
-	}
-
-	private Integer sequence() {
-		return (Integer)values.valueForKey( "sequence" );
-	}
-
-	private void setSequence( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "sequence" );
 		dataChanged();
 	}
 
