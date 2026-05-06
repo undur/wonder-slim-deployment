@@ -200,7 +200,7 @@ public class MHost extends MObject {
 		// FIXME: Should be configurable. Used to be the property "JavaMonitor.receiveTimeout" // Hugi 2024-11-04
 		final int WOTASKD_RECEIVE_TIMEOUT = 10_000;
 
-		ResponseWrapper responseWrapper = new ResponseWrapper();
+		String responseContentString = null;
 
 		final Builder requestBuilder = HttpRequest
 				.newBuilder()
@@ -216,7 +216,7 @@ public class MHost extends MObject {
 
 		try {
 			final HttpResponse<String> response = XUtil.sendRequest( request );
-			responseWrapper.setContentString( response.body() );
+			responseContentString = response.body();
 		}
 		catch( IOException e ) {
 			e.printStackTrace();
@@ -228,15 +228,14 @@ public class MHost extends MObject {
 		}
 
 		// For error handling
-		if( responseWrapper.contentString() == null ) {
+		if( responseContentString == null ) {
 
 			if( willChange ) {
 				_siteConfig.hostErrorArray.add( this );
 			}
 
 			// FIXME: This is a really, really weird method of error handling // Hugi 2024-11-03
-			final String errorResponseString = XUtil.errorResponseXML( "instanceResponse", "Failed to contact " + this.name() + "-" + WOApplication.application().lifebeatDestinationPort() );
-			responseWrapper.setContentString( errorResponseString );
+			responseContentString = XUtil.errorResponseXML( "instanceResponse", "Failed to contact " + this.name() + "-" + WOApplication.application().lifebeatDestinationPort() );
 		}
 		else {
 			// if we successfully synced, clear the error dictionary
@@ -245,7 +244,7 @@ public class MHost extends MObject {
 			}
 		}
 
-		return responseWrapper;
+		return new ResponseWrapper( responseContentString, null );
 	}
 
 	@Override
