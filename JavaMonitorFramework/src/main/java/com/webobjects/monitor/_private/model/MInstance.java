@@ -859,10 +859,6 @@ public class MInstance extends MObject {
 		return true;
 	}
 
-	private ZonedDateTime nextScheduledShutdown() {
-		return _nextScheduledShutdown;
-	}
-
 	private void setNextScheduledShutdown( ZonedDateTime newtime ) {
 		_nextScheduledShutdown = newtime;
 		_nextScheduledShutdownString = SHUTDOWN_FORMATTER.format( _nextScheduledShutdown );
