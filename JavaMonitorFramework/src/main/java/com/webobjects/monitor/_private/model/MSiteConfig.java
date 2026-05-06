@@ -546,34 +546,17 @@ public class MSiteConfig extends MObject {
 		return false;
 	}
 
-	@Deprecated
-	private Map<String, List<String>> _passwordHeaderMap;
-
-	// FIXME: This was for construction of HTTP headers. Leaving in place for now as a reminder to fix up the "oldpassword" stuff // Hugi 2024-11-06
-	@Deprecated
-	public Map<String, List<String>> passwordHeaderMap() {
-
-		if( _passwordHeaderMap == null ) {
-			_passwordHeaderMap = new NSMutableDictionary<>();
-			_passwordHeaderMap.put( "password", List.of( "" ) );
-		}
-
-		final String password = password();
-
+	/**
+	 * @return The password value to send in the {@code password:} HTTP header, or {@code null}
+	 *         if no password header should be sent. During the password-change UI flow, the
+	 *         pre-change password is returned so the user can be re-authenticated against the
+	 *         old hash before the new one takes effect.
+	 */
+	public String passwordForRequest() {
 		if( _oldPasswordSet ) {
-			if( _oldPassword != null ) {
-				_passwordHeaderMap.put( "password", List.of( _oldPassword ) );
-				return _passwordHeaderMap;
-			}
-			return NSDictionary.emptyDictionary();
+			return _oldPassword;
 		}
-
-		if( password != null ) {
-			_passwordHeaderMap.put( "password", List.of( password ) );
-			return _passwordHeaderMap;
-		}
-
-		return NSDictionary.emptyDictionary();
+		return password();
 	}
 
 	public MSiteConfig( NSDictionary xmlDict ) {

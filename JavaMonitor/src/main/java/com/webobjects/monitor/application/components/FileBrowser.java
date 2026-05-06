@@ -21,10 +21,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,22 +211,18 @@ public class FileBrowser extends MonitorComponent {
 						.timeout( Duration.ofMillis( 5000 ) )
 						.GET();
 
-				// FIXME: Entering an extremely lame method of constructing and setting the headers. Later... // Hugi 2024-11-06
-				final Map<String, List<String>> headers = new HashMap<>( WOTaskdHandler.siteConfig().passwordHeaderMap() );
+				final String password = WOTaskdHandler.siteConfig().passwordForRequest();
+				if( password != null ) {
+					requestBuilder.setHeader( "password", password );
+				}
 
 				// FIXME: I don't think the path can/should ever be null or empty. Validate in method invocation and handle in UI? // Hugi 2024-11-10
 				if( path != null && path.length() > 0 ) {
-					headers.put( "filepath", List.of( path ) );
+					requestBuilder.setHeader( "filepath", path );
 				}
 
 				if( showFiles ) {
-					headers.put( "showFiles", List.of( "YES" ) );
-				}
-
-				for( final Entry<String, List<String>> entry : headers.entrySet() ) {
-					for( final String headerValue : entry.getValue() ) {
-						requestBuilder.setHeader( entry.getKey(), headerValue );
-					}
+					requestBuilder.setHeader( "showFiles", "YES" );
 				}
 
 				final HttpRequest request = requestBuilder.build();

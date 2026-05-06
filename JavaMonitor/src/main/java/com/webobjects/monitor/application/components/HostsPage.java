@@ -126,7 +126,7 @@ public class HostsPage extends MonitorComponent {
 
 		final WOResponse response = new WOResponse();
 		response.setHeader( "text/html", "content-type" );
-		response.setContent( JMUtil.fetchWotaskdConfigurationString( hostName, port, siteConfig().password() ) );
+		response.setContent( JMUtil.fetchWotaskdConfigurationString( hostName, port, siteConfig().passwordForRequest() ) );
 		return response;
 	}
 

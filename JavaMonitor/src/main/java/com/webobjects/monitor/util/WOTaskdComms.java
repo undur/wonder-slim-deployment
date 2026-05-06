@@ -42,7 +42,7 @@ public class WOTaskdComms {
 				@Override
 				public void run() {
 					final MHost host = hosts.get( j );
-					responses[j] = host.sendRequestToWotaskd( contentString, siteConfig.password(), willChange, false );
+					responses[j] = host.sendRequestToWotaskd( contentString, siteConfig.passwordForRequest(), willChange, false );
 				}
 			};
 
@@ -74,7 +74,7 @@ public class WOTaskdComms {
 				@Override
 				public void run() {
 					MHost host = hosts.get( j );
-					host.sendRequestToWotaskd( syncRequestContent( siteConfig ), siteConfig.password(), true, true );
+					host.sendRequestToWotaskd( syncRequestContent( siteConfig ), siteConfig.passwordForRequest(), true, true );
 				}
 			};
 

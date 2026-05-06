@@ -209,7 +209,6 @@ public class MHost extends MObject {
 				.timeout( Duration.ofMillis( WOTASKD_RECEIVE_TIMEOUT ) )
 				.POST( BodyPublishers.ofString( contentString ) );
 
-		// FIXME: We're going to have to check the semantics of resetting the password (used to be handled when constructing the password header map in MSiteConfig.passwordDictionary()) // Hugi 2024-11-06
 		if( password != null ) {
 			requestBuilder.setHeader( "password", password );
 		}
