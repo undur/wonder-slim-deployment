@@ -47,7 +47,7 @@ public class PrefsPage extends MonitorComponent {
 
 	public WOActionResults passwordResetClicked() {
 		siteConfig()._setOldPassword();
-		siteConfig().resetPassword();
+		siteConfig().setPassword( null );
 
 		session().addErrorIfAbsent( "Password has been updated" );
 

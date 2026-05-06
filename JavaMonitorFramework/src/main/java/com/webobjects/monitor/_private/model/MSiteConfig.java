@@ -101,7 +101,12 @@ public class MSiteConfig extends MObject {
 
 	// Special treatment - the password is stored encrypted!
 	public void setPassword( String value ) {
-		_setPassword( value );
+		if( value != null ) {
+			values.takeValueForKey( LegacyPasswordHash.encryptStringWithKey( value, null ), "password" );
+		}
+		else {
+			values.takeValueForKey( null, "password" );
+		}
 		dataChanged();
 	}
 
@@ -468,20 +473,6 @@ public class MSiteConfig extends MObject {
 
 	public boolean isPasswordRequired() {
 		return password() != null;
-	}
-
-	// setPassword(value) is in the 'values' accessors
-	private void _setPassword( String value ) {
-		if( value != null ) {
-			values.takeValueForKey( LegacyPasswordHash.encryptStringWithKey( value, null ), "password" );
-		}
-		else {
-			resetPassword();
-		}
-	}
-
-	public void resetPassword() {
-		values.takeValueForKey( null, "password" );
 	}
 
 	private String _oldPassword = null;
