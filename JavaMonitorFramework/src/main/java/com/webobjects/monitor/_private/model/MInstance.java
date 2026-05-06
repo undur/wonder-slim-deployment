@@ -556,55 +556,57 @@ public class MInstance extends MObject {
 		// FIXME: lifebeatCheckInterval() is in seconds but is being added to a millisecond
 		// epoch — preserved verbatim from the original to avoid behaviour changes during
 		// the NSTimestamp → Instant migration. // Hugi 2026-05-01
-		long currentTime = Instant.now().toEpochMilli();
-		long cutOffTime = _lastRegistration.toEpochMilli() + lifebeatCheckInterval();
-		long finishStartingByTime = _finishStartingByDate.toEpochMilli();
+		final long currentTime = Instant.now().toEpochMilli();
+		final long cutOffTime = _lastRegistration.toEpochMilli() + lifebeatCheckInterval();
+		final long finishStartingByTime = _finishStartingByDate.toEpochMilli();
 
-		if( state == MUtil.STARTING ) {
-			// I'm still trying to start
-			if( currentTime < finishStartingByTime ) {
+		switch( state ) {
+			case MUtil.STARTING -> {
+				// Still within the startup window
+				if( currentTime < finishStartingByTime ) {
+					if( currentTime > cutOffTime ) {
+						return false;
+					}
+					state = MUtil.ALIVE;
+					return true;
+				}
+				// Startup window has expired — treat lifebeat lapse as death
 				if( currentTime > cutOffTime ) {
+					addDeath();
+					sendDeathNotificationEmail();
+					setShouldDie( false );
+					state = MUtil.DEAD;
 					return false;
 				}
 				state = MUtil.ALIVE;
 				return true;
-				// I'm finished trying to start
 			}
-			// I've received a lifebeat in time
-			if( currentTime > cutOffTime ) {
+			case MUtil.ALIVE -> {
+				if( currentTime > cutOffTime ) {
+					addDeath();
+					sendDeathNotificationEmail();
+					setShouldDie( false );
+					state = MUtil.DEAD;
+					return false;
+				}
+				return true;
+			}
+			case MUtil.CRASHING -> {
 				addDeath();
 				sendDeathNotificationEmail();
-				setShouldDie( false );
 				state = MUtil.DEAD;
 				return false;
 			}
-			state = MUtil.ALIVE;
-			return true;
-		}
-		else if( state == MUtil.ALIVE ) {
-			if( currentTime > cutOffTime ) {
-				addDeath();
-				sendDeathNotificationEmail();
-				setShouldDie( false );
-				state = MUtil.DEAD;
-				return false;
+			case MUtil.UNKNOWN, MUtil.DEAD, MUtil.STOPPING -> {
+				if( currentTime > cutOffTime ) {
+					state = MUtil.DEAD;
+					return false;
+				}
+				// KH - I've returned to life - what should I do?
+				state = MUtil.ALIVE;
+				return true;
 			}
-			return true;
-		}
-		else if( state == MUtil.CRASHING ) {
-			addDeath();
-			sendDeathNotificationEmail();
-			state = MUtil.DEAD;
-			return false;
-		}
-		else { // UNKNOWN, DEAD, STOPPING
-			if( currentTime > cutOffTime ) {
-				state = MUtil.DEAD;
-				return false;
-			}
-			// KH - I've returned to life - what should I do?
-			state = MUtil.ALIVE;
-			return true;
+			default -> throw new IllegalStateException( "Unknown instance state: " + state );
 		}
 	}
 
