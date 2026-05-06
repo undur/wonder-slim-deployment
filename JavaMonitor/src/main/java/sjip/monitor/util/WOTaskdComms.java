@@ -92,7 +92,7 @@ public class WOTaskdComms {
 
 	private static String syncRequestContent( final MSiteConfig siteConfig ) {
 		final NSMutableDictionary<String, NSDictionary> data = new NSMutableDictionary<>( siteConfig.dictionaryForArchive(), "SiteConfig" );
-		final NSMutableDictionary<String, NSMutableDictionary<String, NSDictionary>> updateWotaskd = new NSMutableDictionary<String, NSMutableDictionary<String, NSDictionary>>( data, "sync" );
+		final NSMutableDictionary<String, NSMutableDictionary<String, NSDictionary>> updateWotaskd = new NSMutableDictionary<>( data, "sync" );
 		final NSMutableDictionary<String, NSMutableDictionary<String, NSMutableDictionary<String, NSDictionary>>> monitorRequest = new NSMutableDictionary<>( updateWotaskd, "updateWotaskd" );
 		final String syncRequestString = new FoundationCoder().encodeRootObjectForKey( monitorRequest, "monitorRequest" );
 		return syncRequestString;
