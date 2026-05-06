@@ -664,7 +664,7 @@ public class AdminAction extends WODirectAction {
 	@Override
 	public WOActionResults performActionNamed( String s ) {
 		WOResponse woresponse = new WOResponse();
-		if( !siteConfig().isPasswordRequired() || siteConfig().compareStringWithPassword( context().request().stringFormValueForKey( "pw" ) ) ) {
+		if( !siteConfig().isPasswordRequired() || siteConfig().checkPasswordPlaintext( context().request().stringFormValueForKey( "pw" ) ) ) {
 			try {
 				WOActionResults woactionresults = performMonitorActionNamed( s );
 				if( woactionresults != null && (woactionresults instanceof WOResponse) ) {

@@ -18,7 +18,7 @@ public class JMLoginPage extends ERXComponent {
 
 	public WOActionResults login() {
 
-		boolean correctPassword = WOTaskdHandler.siteConfig().compareStringWithPassword( password );
+		boolean correctPassword = WOTaskdHandler.siteConfig().checkPasswordPlaintext( password );
 
 		if( correctPassword ) {
 			((Session)session()).setIsLoggedIn( true );

@@ -45,7 +45,7 @@ public class DirectAction extends ERXDirectAction {
 
 		final String password = request().stringFormValueForKey( "pw" );
 
-		if( password != null && WOTaskdHandler.siteConfig().compareStringWithPassword( password )) {
+		if( password != null && WOTaskdHandler.siteConfig().checkPasswordPlaintext( password )) {
 			return pageWithName( ApplicationsPage.class );
 		}
 
@@ -56,7 +56,7 @@ public class DirectAction extends ERXDirectAction {
 		final WOResponse response = new WOResponse();
 		final String pw = context().request().stringFormValueForKey( "pw" );
 
-		if( WOTaskdHandler.siteConfig().compareStringWithPassword( pw ) ) {
+		if( WOTaskdHandler.siteConfig().checkPasswordPlaintext( pw ) ) {
 			response.appendContentString( StatsUtilitiesEvenMore.statisticsString() );
 		}
 

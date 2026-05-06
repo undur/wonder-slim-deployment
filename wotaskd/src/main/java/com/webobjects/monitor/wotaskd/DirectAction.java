@@ -110,7 +110,7 @@ public class DirectAction extends WODirectAction {
 		theApplication._lock.readLock().lock();
 		try {
 			String passwordHeader = aRequest.headerForKey( "password" );
-			if( !aConfig.comparePasswordWithPassword( passwordHeader ) ) {
+			if( !aConfig.checkPasswordEncrypted( passwordHeader ) ) {
 				logger.debug( "Attempt to call DirectAction: monitorRequestAction with incorrect password." );
 				aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 				aResponse.appendContentString( _invalidPassword );
@@ -886,7 +886,7 @@ public class DirectAction extends WODirectAction {
 
 			// Check for correct password
 			String passwordHeader = aRequest.headerForKey( "password" );
-			if( !aConfig.comparePasswordWithPassword( passwordHeader ) ) {
+			if( !aConfig.checkPasswordEncrypted( passwordHeader ) ) {
 				logger.debug( "Attempt to call Direct Action: defaultAction with incorrect password." );
 				aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 				aResponse.appendContentString( "Attempt to call Direct Action: defaultAction on wotaskd with incorrect password." );

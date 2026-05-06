@@ -488,37 +488,37 @@ public class MSiteConfig extends MObject {
 		_oldPasswordSet = false;
 	}
 
-	public boolean compareStringWithPassword( String aString ) {
+	public boolean checkPasswordPlaintext( String plainTextPasswordParam ) {
 		final String stored = password();
 
 		// Strict null handling: both null = match, exactly one null = no match.
-		// (Distinct from comparePasswordWithPassword's "stored null = allow all" semantics.)
-		if( aString == null && stored == null ) {
+		// (Distinct from checkPasswordEncrypted's "stored null = allow all" semantics.)
+		if( plainTextPasswordParam == null && stored == null ) {
 			return true;
 		}
-		if( aString == null || stored == null ) {
+		if( plainTextPasswordParam == null || stored == null ) {
 			return false;
 		}
 
 		// Hash the plaintext using the salt prefix from the stored hash, then compare hashes.
 		final String salt = stored.substring( 0, 4 );
-		final String candidate = LegacyPasswordHash.encryptStringWithKey( aString, salt );
-		return comparePasswordWithPassword( candidate );
+		final String candidate = LegacyPasswordHash.encryptStringWithKey( plainTextPasswordParam, salt );
+		return checkPasswordEncrypted( candidate );
 	}
 
 	// The argument is always the tested. _encryptedPassword is the "correct" one.
-	public boolean comparePasswordWithPassword( String aString ) {
+	public boolean checkPasswordEncrypted( String encryptedPasswordParam ) {
 		final String _encryptedPassword = password();
 
 		if( (_encryptedPassword == null) || (_encryptedPassword.length() == 0) ) {
 			// if _encryptedPassword is null or blank, match
 			return true;
 		}
-		else if( (aString == null) || (aString.length() == 0) ) {
+		else if( (encryptedPasswordParam == null) || (encryptedPasswordParam.length() == 0) ) {
 			// if aString is null or blank, no match (since by this time, _encryptedPassword is non-null and not blank)
 			return false;
 		}
-		else if( aString.equals( _encryptedPassword ) ) {
+		else if( encryptedPasswordParam.equals( _encryptedPassword ) ) {
 			return true;
 		}
 		return false;
