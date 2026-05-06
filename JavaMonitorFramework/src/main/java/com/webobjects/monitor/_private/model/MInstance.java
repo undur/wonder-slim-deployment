@@ -438,13 +438,13 @@ public class MInstance extends MObject {
 		final MHost aHost = _host;
 
 		if( aHost.osType().equals( "UNIX" ) ) {
-			values.takeValueForKey( _application.unixPath(), "path" );
+			setPath( _application.unixPath() );
 		}
 		else if( aHost.osType().equals( "WINDOWS" ) ) {
-			values.takeValueForKey( _application.winPath(), "path" );
+			setPath( _application.winPath() );
 		}
 		else if( aHost.osType().equals( "MACOSX" ) ) {
-			values.takeValueForKey( _application.macPath(), "path" );
+			setPath( _application.macPath() );
 		}
 	}
 
@@ -452,13 +452,13 @@ public class MInstance extends MObject {
 		final MHost aHost = _host;
 
 		if( aHost.osType().equals( "UNIX" ) ) {
-			values.takeValueForKey( generateOutputPath( _application.unixOutputPath() ), "outputPath" );
+			setOutputPath( generateOutputPath( _application.unixOutputPath() ) );
 		}
 		else if( aHost.osType().equals( "WINDOWS" ) ) {
-			values.takeValueForKey( generateOutputPath( _application.winOutputPath() ), "outputPath" );
+			setOutputPath( generateOutputPath( _application.winOutputPath() ) );
 		}
 		else if( aHost.osType().equals( "MACOSX" ) ) {
-			values.takeValueForKey( generateOutputPath( _application.macOutputPath() ), "outputPath" );
+			setOutputPath( generateOutputPath( _application.macOutputPath() ) );
 		}
 	}
 
