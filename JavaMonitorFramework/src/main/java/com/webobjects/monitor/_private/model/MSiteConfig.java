@@ -489,24 +489,21 @@ public class MSiteConfig extends MObject {
 	}
 
 	public boolean compareStringWithPassword( String aString ) {
-		final String _encryptedPassword = password();
+		final String stored = password();
 
-		if( aString == null && _encryptedPassword == null ) {
-			// if both are null, match
+		// Strict null handling: both null = match, exactly one null = no match.
+		// (Distinct from comparePasswordWithPassword's "stored null = allow all" semantics.)
+		if( aString == null && stored == null ) {
 			return true;
 		}
-		else if( aString == null || _encryptedPassword == null ) {
-			// if one is null, and the other isn't, no match
+		if( aString == null || stored == null ) {
 			return false;
 		}
-		else { // do all the calculations
-				// extract random portion of the encrypted password
-			final String fudgetoo_part = _encryptedPassword.substring( 0, 4 );
-			// encrypt the new string using the random bit from the old string
-			final String encrypted_string = LegacyPasswordHash.encryptStringWithKey( aString, fudgetoo_part );
-			// compare keys and return
-			return encrypted_string.equals( _encryptedPassword );
-		}
+
+		// Hash the plaintext using the salt prefix from the stored hash, then compare hashes.
+		final String salt = stored.substring( 0, 4 );
+		final String candidate = LegacyPasswordHash.encryptStringWithKey( aString, salt );
+		return comparePasswordWithPassword( candidate );
 	}
 
 	// The argument is always the tested. _encryptedPassword is the "correct" one.
