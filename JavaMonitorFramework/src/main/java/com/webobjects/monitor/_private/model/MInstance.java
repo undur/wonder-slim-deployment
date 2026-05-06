@@ -894,57 +894,59 @@ public class MInstance extends MObject {
 		// stored convention (Mon=1..Sat=6, Sun=0).
 		final int currentDayOfWeek = now.getDayOfWeek().getValue() % 7;
 
-		final String type = schedulingType();
+		switch( schedulingType() ) {
+			case "HOURLY" -> {
+				final Integer startTimeTemp = schedulingHourlyStartTime();
+				int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
 
-		if( type.equals( "HOURLY" ) ) {
-			final Integer startTimeTemp = schedulingHourlyStartTime();
-			int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
+				final Integer intervalTemp = schedulingInterval();
+				final int interval = (intervalTemp != null) ? intervalTemp.intValue() : -1;
 
-			final Integer intervalTemp = schedulingInterval();
-			final int interval = (intervalTemp != null) ? intervalTemp.intValue() : -1;
+				if( (startTime == -1) || (interval == -1) ) {
+					return;
+				}
 
-			if( (startTime == -1) || (interval == -1) ) {
-				return;
+				// This is to make sure that we don't set it in the past!
+				while( startTime <= currentHourOfDay ) {
+					startTime += interval;
+				}
+
+				setNextScheduledShutdown( atHour( now, startTime, 0 ) );
 			}
+			case "DAILY" -> {
+				final Integer startTimeTemp = schedulingDailyStartTime();
+				final int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
 
-			// This is to make sure that we don't set it in the past!
-			while( startTime <= currentHourOfDay ) {
-				startTime += interval;
+				if( startTime == -1 ) {
+					return;
+				}
+
+				final int dayOffset = (startTime <= currentHourOfDay) ? 1 : 0;
+				setNextScheduledShutdown( atHour( now, startTime, dayOffset ) );
 			}
+			case "WEEKLY" -> {
+				final Integer startTimeTemp = schedulingWeeklyStartTime();
+				final int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
 
-			setNextScheduledShutdown( atHour( now, startTime, 0 ) );
-		}
-		else if( type.equals( "DAILY" ) ) {
-			final Integer startTimeTemp = schedulingDailyStartTime();
-			final int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
+				final Integer startDayTemp = schedulingStartDay();
+				final int startDay = (startDayTemp != null) ? startDayTemp.intValue() : -1;
 
-			if( startTime == -1 ) {
-				return;
+				if( (startTime == -1) || (startDay == -1) ) {
+					return;
+				}
+
+				final int temp = (startDay - currentDayOfWeek);
+				int dayOffset = (temp < 0) ? 7 + temp : temp;
+
+				// Same day, but checking for past times
+				if( (temp == 0) && (startTime <= currentHourOfDay) ) {
+					dayOffset += 7;
+				}
+
+				setNextScheduledShutdown( atHour( now, startTime, dayOffset ) );
 			}
-
-			final int dayOffset = (startTime <= currentHourOfDay) ? 1 : 0;
-			setNextScheduledShutdown( atHour( now, startTime, dayOffset ) );
-		}
-		else if( type.equals( "WEEKLY" ) ) {
-			final Integer startTimeTemp = schedulingWeeklyStartTime();
-			final int startTime = (startTimeTemp != null) ? startTimeTemp.intValue() : -1;
-
-			final Integer startDayTemp = schedulingStartDay();
-			final int startDay = (startDayTemp != null) ? startDayTemp.intValue() : -1;
-
-			if( (startTime == -1) || (startDay == -1) ) {
-				return;
-			}
-
-			final int temp = (startDay - currentDayOfWeek);
-			int dayOffset = (temp < 0) ? 7 + temp : temp;
-
-			// Same day, but checking for past times
-			if( (temp == 0) && (startTime <= currentHourOfDay) ) {
-				dayOffset += 7;
-			}
-
-			setNextScheduledShutdown( atHour( now, startTime, dayOffset ) );
+			// FIXME: Should throw on unknown schedulingType once configuration validation can guarantee the set of known types // Hugi 2026-05-06
+			default -> { /* no-op, preserving legacy behavior for unknown schedulingType */ }
 		}
 		logger.debug( "calculateNextScheduledShutdown: " + _nextScheduledShutdown );
 	}
