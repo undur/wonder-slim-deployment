@@ -21,7 +21,6 @@ public class Application extends ERXApplication {
 	private final boolean _shouldWriteAdaptorConfig;
 	private final boolean _shouldRespondToMulticast;
 	public final ReentrantReadWriteLock _lock;
-	private final MulticastListener listenThread; // CHECKME: We probably don't need this variable, probably just an old precautionary "Don't GC me bro" // Hugi 2026-05-05
 	private MSiteConfig _siteConfig;
 	private Number _port;
 	private int _intPort;
@@ -83,8 +82,7 @@ public class Application extends ERXApplication {
 		}
 
 		// Set up multicast listen thread
-		listenThread = new MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() );
-		listenThread.start();
+		new MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() ).start();
 
 		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
 		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
