@@ -126,6 +126,9 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			}
 		}
 
+		// Returning null here used to bypass response generation entirely, back when wotaskd's Application overrode dispatchRequest()
+		// to fast-path lifebeats (see commit 51c4677, issue #19). With the override gone, super.dispatchRequest upgrades null to
+		// an empty WOResponse, so this branch no longer expresses a meaningful behavior. Pending verification — issue #32.
 		if( "HTTP/1.0".equals( aRequest.httpVersion() ) ) {
 			aResponse = null;
 		}
