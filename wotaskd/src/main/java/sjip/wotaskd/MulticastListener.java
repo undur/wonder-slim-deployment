@@ -82,7 +82,7 @@ public class MulticastListener extends Thread {
 		}
 	}
 
-	public void closeRequestSocket() {
+	private void closeRequestSocket() {
 		try {
 			_socket.leaveGroup( _address );
 			logger.debug( "Leaving multicast group" );
@@ -95,7 +95,7 @@ public class MulticastListener extends Thread {
 		_socket.close();
 	}
 
-	public void sendReplyWithLengthTo( byte[] aReplyBytes, int aReplyBytesLength, DatagramPacket incomingPacket ) {
+	private void sendReplyWithLengthTo( byte[] aReplyBytes, int aReplyBytesLength, DatagramPacket incomingPacket ) {
 		DatagramPacket outgoingPacket = new DatagramPacket( aReplyBytes, aReplyBytesLength, incomingPacket.getAddress(), incomingPacket.getPort() );
 
 		try {
@@ -116,7 +116,7 @@ public class MulticastListener extends Thread {
 	}
 
 	// This is the main thread - we just look for a UDP packet that matches a known signature.
-	public void listenForRequests() {
+	private void listenForRequests() {
 		try {
 			String myName = WOApplication.application().host().toLowerCase() + ":" + _port;
 
