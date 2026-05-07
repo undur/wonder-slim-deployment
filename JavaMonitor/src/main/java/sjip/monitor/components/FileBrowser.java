@@ -203,13 +203,19 @@ public class FileBrowser extends MonitorComponent {
 		public static RemoteResult getFileList( final String path, final MHost host, final boolean showFiles ) throws MonitorException {
 
 			try {
+				final String urlString = "http://%s:%s%s".formatted(
+						host.name(),
+						WOApplication.application().lifebeatDestinationPort(),
+						RemoteBrowseClient.BROWSE_URL );
+
 				final Builder requestBuilder = HttpRequest
 						.newBuilder()
-						.uri( URI.create( "http://%s:%s%s".formatted( host.name(), WOApplication.application().lifebeatDestinationPort(), RemoteBrowseClient.BROWSE_URL ) ) )
+						.uri( URI.create( urlString ) )
 						.timeout( Duration.ofMillis( 5000 ) )
 						.GET();
 
 				final String password = WOTaskdHandler.siteConfig().passwordForRequest();
+
 				if( password != null ) {
 					requestBuilder.setHeader( "password", password );
 				}
