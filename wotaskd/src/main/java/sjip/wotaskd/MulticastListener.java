@@ -82,19 +82,6 @@ public class MulticastListener extends Thread {
 		}
 	}
 
-	private void closeRequestSocket() {
-		try {
-			_socket.leaveGroup( _address );
-			logger.debug( "Leaving multicast group" );
-		}
-		catch( IOException exception ) {
-			logger.debug( "Error leaving multicast group " + exception );
-			return;
-		}
-		logger.debug( "Closing request listen socket" );
-		_socket.close();
-	}
-
 	private void sendReplyWithLengthTo( byte[] aReplyBytes, int aReplyBytesLength, DatagramPacket incomingPacket ) {
 		DatagramPacket outgoingPacket = new DatagramPacket( aReplyBytes, aReplyBytesLength, incomingPacket.getAddress(), incomingPacket.getPort() );
 
