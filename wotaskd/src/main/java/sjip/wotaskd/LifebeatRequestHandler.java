@@ -32,28 +32,25 @@ public class LifebeatRequestHandler extends WORequestHandler {
 
 	private static final Logger log = LoggerFactory.getLogger( LifebeatRequestHandler.class );
 
+	private static final WOResponse BAD_LIFEBEAT_RESPONSE = constantResponse( 400, "HTTP/1.0" ); // Bad Request
+	private static final WOResponse GOOD_RESPONSE = constantResponse( 200, "HTTP/1.1" ); // OK
+	private static final WOResponse DIE_RESPONSE = constantResponse( 500, "HTTP/1.0" ); // InternalServerError -> Die Immediately
+
+	private final Application theApplication;
 	private final InetAddress myInetAddress;
 	private final String myHostName;
-	private final Application theApplication;
-	private final WOResponse BadLifebeatResponse, GoodResponse, DieResponse;
 
 	public LifebeatRequestHandler() {
 		theApplication = ((Application)WOApplication.application());
-
 		myInetAddress = theApplication.hostAddress();
 		myHostName = myInetAddress.getHostName();
+	}
 
-		GoodResponse = theApplication.createResponseInContext( null );
-		GoodResponse.setStatus( 200 ); // OK
-		GoodResponse.setHTTPVersion( "HTTP/1.1" );
-
-		BadLifebeatResponse = theApplication.createResponseInContext( null );
-		BadLifebeatResponse.setStatus( 400 ); // Bad Request
-		BadLifebeatResponse.setHTTPVersion( "HTTP/1.0" );
-
-		DieResponse = theApplication.createResponseInContext( null );
-		DieResponse.setStatus( 500 ); // InternalServerError -> Die Immediately
-		DieResponse.setHTTPVersion( "HTTP/1.0" );
+	private static WOResponse constantResponse( int status, String httpVersion ) {
+		final WOResponse r = new WOResponse();
+		r.setStatus( status );
+		r.setHTTPVersion( httpVersion );
+		return r;
 	}
 
 	@Override
@@ -78,7 +75,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 
 	private WOResponse _handleRequest( WORequest aRequest ) {
 
-		WOResponse aResponse = BadLifebeatResponse;
+		WOResponse aResponse = BAD_LIFEBEAT_RESPONSE;
 
 		// http://localhost:1085/cgi-bin/WebObjects/wotaskd.woa/wlb?<notification name>&<instance name>&<hostname>&<port>
 		// <notification name> = "hasStarted", "lifebeat", "willStop", "willCrash"
@@ -104,16 +101,16 @@ public class LifebeatRequestHandler extends WORequestHandler {
 				// if app is not yet registered, register
 				// if the instance should die, return DieResponse
 				if( registerLifebeat( instanceName, host, port ) == false ) {
-					aResponse = DieResponse;
+					aResponse = DIE_RESPONSE;
 				}
 				else {
-					aResponse = GoodResponse;
+					aResponse = GOOD_RESPONSE;
 				}
 			}
 			else if( notificationType.equals( "hasStarted" ) ) {
 				// app has just started - register instance
 				registerStart( instanceName, host, port );
-				aResponse = GoodResponse;
+				aResponse = GOOD_RESPONSE;
 			}
 			else if( notificationType.equals( "willStop" ) ) {
 				// app will stop - mark as dead
