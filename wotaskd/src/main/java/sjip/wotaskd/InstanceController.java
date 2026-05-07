@@ -6,9 +6,9 @@ IMPORTANT:  This Apple software is supplied to you by Apple Computer, Inc. (�A
 
 In consideration of your agreement to abide by the following terms, and subject to these terms, Apple grants you a personal, non-exclusive license, under Apple�s copyrights in this original Apple software (the �Apple Software�), to use, reproduce, modify and redistribute the Apple Software, with or without modifications, in source and/or binary forms; provided that if you redistribute the Apple Software in its entirety and without modifications, you must retain this notice and the following text and disclaimers in all such redistributions of the Apple Software.  Neither the name, trademarks, service marks or logos of Apple Computer, Inc. may be used to endorse or promote products derived from the Apple Software without specific prior written permission from Apple.  Except as expressly stated in this notice, no other rights or licenses, express or implied, are granted by Apple herein, including but not limited to any patent rights that may be infringed by your derivative works or by other works in which the Apple Software may be incorporated.
 
-The Apple Software is provided by Apple on an "AS IS" basis.  APPLE MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS. 
+The Apple Software is provided by Apple on an "AS IS" basis.  APPLE MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
 
-IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE, REPRODUCTION, MODIFICATION AND/OR DISTRIBUTION OF THE APPLE SOFTWARE, HOWEVER CAUSED AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN  ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE, REPRODUCTION, MODIFICATION AND/OR DISTRIBUTION OF THE APPLE SOFTWARE, HOWEVER CAUSED AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN  ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
  */
 
@@ -201,7 +201,7 @@ public class InstanceController implements IInstanceController {
 			if( appDict != null ) {
 				List<String> keysArray = appDict.allKeys();
 				if( (keysArray != null) && (keysArray.size() > 0) ) {
-					return (String)keysArray.get( 0 );
+					return keysArray.get( 0 );
 				}
 			}
 			return null;
@@ -333,8 +333,9 @@ public class InstanceController implements IInstanceController {
 			for( int i = 0; i < workers.length; i++ ) {
 				final int j = i;
 				Runnable work = new Runnable() {
+					@Override
 					public void run() {
-						localMonitor._autoRecoverApplication( (MApplication)appArray.get( j ) );
+						localMonitor._autoRecoverApplication( appArray.get( j ) );
 					}
 				};
 				workers[j] = new Thread( work );
@@ -342,8 +343,8 @@ public class InstanceController implements IInstanceController {
 			}
 
 			try {
-				for( int i = 0; i < workers.length; i++ ) {
-					workers[i].join();
+				for( Thread worker : workers ) {
+					worker.join();
 				}
 			}
 			catch( InterruptedException ie ) {
@@ -413,8 +414,9 @@ public class InstanceController implements IInstanceController {
 				final List<MInstance> instArray = theHost.instanceArray();
 				int instArrayCount = instArray.size();
 
-				if( instArrayCount == 0 )
+				if( instArrayCount == 0 ) {
 					return;
+				}
 
 				final Instant now = Instant.now();
 				final Thread[] workers = new Thread[instArrayCount];
@@ -423,9 +425,10 @@ public class InstanceController implements IInstanceController {
 				for( int i = 0; i < instArrayCount; i++ ) {
 					final int j = i;
 					Runnable work = new Runnable() {
+						@Override
 						public void run() {
 							try {
-								MInstance anInst = (MInstance)instArray.get( j );
+								MInstance anInst = instArray.get( j );
 								if( (anInst.isScheduled()) && (anInst.nearNextScheduledShutdown( now )) ) {
 									if( anInst.isGracefullyScheduled() ) {
 										localMonitor.stopInstance( anInst );
@@ -446,8 +449,8 @@ public class InstanceController implements IInstanceController {
 				}
 
 				try {
-					for( int i = 0; i < workers.length; i++ ) {
-						workers[i].join();
+					for( Thread worker : workers ) {
+						worker.join();
 					}
 				}
 				catch( InterruptedException ie ) {
@@ -466,23 +469,29 @@ public class InstanceController implements IInstanceController {
 	@Override
 	public String startInstance( MInstance anInstance ) {
 		MSiteConfig aConfig = theApplication().siteConfig();
-		if( anInstance == null )
+
+		if( anInstance == null ) {
 			return "Attempt to start null instance on " + _hostName;
-		if( anInstance.host() != aConfig.localHost() )
+		}
+
+		if( anInstance.host() != aConfig.localHost() ) {
 			return anInstance.displayName() + " does not exist on " + _hostName + "; START instance failed";
-		if( anInstance.isRunning_W() )
-			//            return _hostName + ": " + anInstance.displayName() + " is already running";
-			return null;
-		if( anInstance.state == MUtil.STARTING )
+		}
+
+		if( anInstance.isRunning_W() || (anInstance.state == MUtil.STARTING) ) {
 			//            return _hostName + ": " + anInstance.displayName() + " is currently starting";
 			return null;
-		if( _testConnection( anInstance ) )
+		}
+
+		if( _testConnection( anInstance ) ) {
 			return _hostName + ": " + anInstance.displayName() + " cannot be started because port " + anInstance.port() + " is still in use";
+		}
 
 		String aFullPath = anInstance.path();
 
-		if( aFullPath == null )
+		if( aFullPath == null ) {
 			return _hostName + ": Path for " + anInstance.displayName() + " does not exist";
+		}
 
 		aFullPath = anInstance.path().trim();
 		String arguments = anInstance.commandLineArguments();
@@ -492,10 +501,13 @@ public class InstanceController implements IInstanceController {
 
 		File aFile = new File( aFullPath );
 
-		if( !aFile.exists() )
+		if( !aFile.exists() ) {
 			return _hostName + ": Path '" + aFullPath + "' for " + anInstance.displayName() + " does not exist";
-		if( !aFile.isFile() )
+		}
+
+		if( !aFile.isFile() ) {
 			return _hostName + ": Path '" + aFullPath + "' for " + anInstance.displayName() + " is not a file";
+		}
 
 		if( _shouldUseSpawn ) {
 			if( _isOnWindows ) {
@@ -508,6 +520,7 @@ public class InstanceController implements IInstanceController {
 
 		try {
 			logger.debug( "Starting Instance: " + aLaunchPath );
+
 			if( DETACH_LAUNCH && !_isOnWindows ) {
 				logger.info( "starting instance {}:{} in detached mode", anInstance.applicationName(), anInstance.port() );
 				startInstanceDetached( aFullPath, anInstance.commandLineArgumentsAsArray() );
@@ -521,6 +534,7 @@ public class InstanceController implements IInstanceController {
 			logger.error( "Failed to start " + anInstance.displayName() + ": " + ioe );
 			return _hostName + ": Failed to start " + anInstance.displayName() + ": " + ioe;
 		}
+
 		return null;
 	}
 
@@ -572,8 +586,9 @@ public class InstanceController implements IInstanceController {
 
 	@Override
 	public ResponseWrapper terminateInstance( MInstance anInstance ) throws MonitorException {
-		if( !anInstance.isRunning_W() )
+		if( !anInstance.isRunning_W() ) {
 			return null;
+		}
 
 		//if WOTaskd.forceQuitTaskEnabled is true, setup a task to check
 		//the instance, if it still doesn't die, then force a QUIT command when
@@ -594,8 +609,9 @@ public class InstanceController implements IInstanceController {
 
 	@Override
 	public ResponseWrapper stopInstance( MInstance anInstance ) throws MonitorException {
-		if( !anInstance.isRunning_W() )
+		if( !anInstance.isRunning_W() ) {
 			return null;
+		}
 
 		//if WOTaskd.forceQuitTaskEnabled is true, setup a task to check the instance, this will retry WOTaskd.refuseNumRetries times
 		//the timer elapses minimum is 60 seconds, default 3600 seconds (the default session timeout)
@@ -629,13 +645,18 @@ public class InstanceController implements IInstanceController {
 	}
 
 	private void catchInstanceErrors( MInstance anInstance ) throws MonitorException {
-		MSiteConfig aConfig = theApplication().siteConfig();
-		if( anInstance == null )
+
+		if( anInstance == null ) {
 			throw new MonitorException( "Attempt to command null instance on " + _hostName );
-		if( anInstance.host() != aConfig.localHost() )
+		}
+
+		if( anInstance.host() != theApplication().siteConfig().localHost() ) {
 			throw new MonitorException( anInstance.displayName() + " does not exist on " + _hostName + "; command failed" );
-		if( !anInstance.isRunning_W() )
+		}
+
+		if( !anInstance.isRunning_W() ) {
 			throw new MonitorException( _hostName + ": " + anInstance.displayName() + " is not running" );
+		}
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger( InstanceController.class );
@@ -656,7 +677,7 @@ public class InstanceController implements IInstanceController {
 
 			final HttpResponse<String> response = XUtil.sendRequest( request );
 			final ResponseWrapper responseWrapper = new ResponseWrapper( response.body(), response.headers() );
-			
+
 			anInstance.succeededInConnection();
 			return responseWrapper;
 		}
@@ -746,7 +767,7 @@ public class InstanceController implements IInstanceController {
 			return false;
 		}
 	}
-	
+
 	private static Application theApplication() {
 		return (Application)WOApplication.application();
 	}
