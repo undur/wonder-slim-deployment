@@ -50,9 +50,6 @@ public class DirectAction extends WODirectAction {
 
 	private static final Logger logger = LoggerFactory.getLogger( DirectAction.class );
 
-	private NSMutableDictionary hostResponse;
-	private NSDictionary element;
-
 	private static final String _hostName;
 	private static final Object[] _hostQueryKeys;
 	private static final Object[] _appQueryKeys;
@@ -91,6 +88,11 @@ public class DirectAction extends WODirectAction {
 
 	// This is the biggie - this processes all requests from Monitor
 	public WOActionResults monitorRequestAction() {
+		
+		
+		NSMutableDictionary hostResponse = null; // CHECKME: Used to be a field and thus had a default of null. null assignment here as well to keep behaviour consistent, but this still smells // Hugi 2026-05-07
+		NSDictionary element;
+
 		Application theApplication = (Application)WOApplication.application();
 		MSiteConfig aConfig = theApplication.siteConfig();
 
