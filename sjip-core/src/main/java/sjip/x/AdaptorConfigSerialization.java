@@ -121,7 +121,7 @@ public class AdaptorConfigSerialization {
 		if( shouldIncludeUnregisteredInstances ) {
 			final IInstanceController instanceController = (IInstanceController)WOApplication.application().valueForKey( "instanceController" );
 			if( instanceController != null ) {
-				final StringBuffer unknownSB = instanceController.generateAdaptorConfigXML();
+				final String unknownSB = instanceController.generateAdaptorConfigXML();
 				if( unknownSB.length() > 0 ) {
 					sb.append( unknownSB );
 				}

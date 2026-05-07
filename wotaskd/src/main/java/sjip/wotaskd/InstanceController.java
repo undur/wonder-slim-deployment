@@ -246,17 +246,18 @@ public class InstanceController implements IInstanceController {
 
 	// this actually only returns unregistered applications
 	@Override
-	public StringBuffer generateAdaptorConfigXML() {
-		StringBuffer sb = null;
+	public String generateAdaptorConfigXML() {
+		StringBuilder sb = null;
 
 		_unknownAppLock.readLock().lock();
+
 		try {
 			NSMutableDictionary unknownApps = _unknownApplications;
-			sb = new StringBuffer();
+			sb = new StringBuilder();
 
 			if( (unknownApps.count() == 0) ) {
 				// the read lock is released in the finally block
-				return sb;
+				return sb.toString();
 			}
 
 			for( Enumeration e = unknownApps.keyEnumerator(); e.hasMoreElements(); ) {
@@ -287,7 +288,8 @@ public class InstanceController implements IInstanceController {
 		finally {
 			_unknownAppLock.readLock().unlock();
 		}
-		return sb;
+
+		return sb.toString();
 	}
 
 	/********** Timer Targets **********/

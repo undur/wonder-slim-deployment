@@ -25,5 +25,5 @@ public interface IInstanceController {
 
 	public ResponseWrapper queryInstance( MInstance anInstance ) throws SjipException;
 
-	public StringBuffer generateAdaptorConfigXML();
+	public String generateAdaptorConfigXML();
 }
