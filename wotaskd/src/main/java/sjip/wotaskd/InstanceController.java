@@ -211,7 +211,7 @@ public class InstanceController implements IInstanceController {
 		}
 	}
 
-	public void triageUnknownInstances() {
+	private void triageUnknownInstances() {
 		_unknownAppLock.writeLock().lock();
 
 		try {
@@ -291,7 +291,7 @@ public class InstanceController implements IInstanceController {
 	}
 
 	/********** Timer Targets **********/
-	public void _checkAutoRecover() {
+	private void _checkAutoRecover() {
 		logger.debug( "_checkAutoRecover START" );
 		theApplication()._lock.readLock().lock();
 		try {
@@ -319,7 +319,7 @@ public class InstanceController implements IInstanceController {
 	}
 
 	// This only runs once, on startup - then it starts the regular timer
-	public void _checkAutoRecoverStartup() {
+	private void _checkAutoRecoverStartup() {
 		logger.debug( "_checkAutoRecoverStartup START" );
 		theApplication()._lock.readLock().lock();
 		try {
@@ -404,7 +404,7 @@ public class InstanceController implements IInstanceController {
 		} // end for
 	}
 
-	public void _checkSchedules() {
+	private void _checkSchedules() {
 		logger.debug( "_checkSchedules START" );
 		theApplication()._lock.readLock().lock();
 		try {
