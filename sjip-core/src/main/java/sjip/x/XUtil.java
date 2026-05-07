@@ -45,9 +45,9 @@ public class XUtil {
 	/**
 	 * Builds the canonical wotaskd-protocol error envelope as an in-memory dictionary,
 	 * shaped:
-	 * <pre>
+	 * {@snippet :
 	 * { rootKey: { errorResponse: [ message ] } }
-	 * </pre>
+	 * }
 	 *
 	 * <p>{@code rootKey} is typically {@code "monitorResponse"} (JavaMonitor↔wotaskd) or
 	 * {@code "instanceResponse"} (wotaskd↔WOApp). Used at sites where the response could
@@ -64,13 +64,13 @@ public class XUtil {
 	 * Builds the canonical wotaskd-protocol error envelope and returns it as wire-encoded XML.
 	 *
 	 * <p>Resulting XML has shape (rendered with {@code rootKey="monitorResponse"}):
-	 * <pre>
-	 * &lt;monitorResponse type="NSDictionary"&gt;
-	 *   &lt;errorResponse type="NSArray"&gt;
-	 *     &lt;element type="NSString"&gt;...message...&lt;/element&gt;
-	 *   &lt;/errorResponse&gt;
-	 * &lt;/monitorResponse&gt;
-	 * </pre>
+	 * {@snippet lang="xml" :
+	 * <monitorResponse type="NSDictionary">
+	 *   <errorResponse type="NSArray">
+	 *     <element type="NSString">...message...</element>
+	 *   </errorResponse>
+	 * </monitorResponse>
+	 * }
 	 */
 	public static String errorResponseXML( final String rootKey, final String message ) {
 		final NSArray<Object> messages = new NSArray<>( message );

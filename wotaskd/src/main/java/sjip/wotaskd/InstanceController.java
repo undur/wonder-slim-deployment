@@ -102,9 +102,9 @@ public class InstanceController implements IInstanceController {
 	 *
 	 * <h4>Shape</h4>
 	 * <p>Two-level nested map:
-	 * <pre>
+	 * {@snippet :
 	 * appName (String) -> { port (String) -> lastLifebeat (Instant) }
-	 * </pre>
+	 * }
 	 * <p>The outer key is the application name (e.g. {@code "Hugi"}), the inner key
 	 * is the port the instance is listening on (e.g. {@code "2001"}, kept as a String
 	 * since nothing parses it as an int), and the inner value is the timestamp of
@@ -702,15 +702,15 @@ public class InstanceController implements IInstanceController {
 	 *
 	 * <h4>Command form ({@code commandString} non-null)</h4>
 	 * <p>Wraps the command in a nested dictionary under the {@code commandInstance} key:
-	 * <pre>
+	 * {@snippet :
 	 * {
 	 *   "commandInstance": {
-	 *     "command": &lt;commandString&gt;,
+	 *     "command": <commandString>,
 	 *     // when commandString is "REFUSE", also:
-	 *     "minimumActiveSessionsCount": &lt;int&gt;
+	 *     "minimumActiveSessionsCount": <int>
 	 *   }
 	 * }
-	 * </pre>
+	 * }
 	 * <p>Recognised commands: {@code TERMINATE} (immediate kill), {@code REFUSE} (graceful
 	 * shutdown — stop accepting new sessions, exit when the active-session count drops to
 	 * the configured minimum), {@code ACCEPT} (resume taking new sessions, cancelling a
@@ -718,11 +718,11 @@ public class InstanceController implements IInstanceController {
 	 *
 	 * <h4>Query form ({@code queryString} non-null)</h4>
 	 * <p>Stores the query verb directly under {@code queryInstance}:
-	 * <pre>
+	 * {@snippet :
 	 * {
-	 *   "queryInstance": &lt;queryString&gt;
+	 *   "queryInstance": <queryString>
 	 * }
-	 * </pre>
+	 * }
 	 * <p>The only query verb in use is {@code STATISTICS}, which asks the instance to
 	 * return its runtime statistics.
 	 *
