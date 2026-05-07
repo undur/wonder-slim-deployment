@@ -33,16 +33,15 @@ public class LifebeatRequestHandler extends WORequestHandler {
 	private static final Logger log = LoggerFactory.getLogger( LifebeatRequestHandler.class );
 
 	private final InetAddress myInetAddress;
-	private final String myName;
+	private final String myHostName;
 	private final Application theApplication;
 	private final WOResponse BadLifebeatResponse, GoodResponse, DieResponse;
 
 	public LifebeatRequestHandler() {
-		super();
 		theApplication = ((Application)WOApplication.application());
 
 		myInetAddress = theApplication.hostAddress();
-		myName = myInetAddress.getHostName();
+		myHostName = myInetAddress.getHostName();
 
 		GoodResponse = theApplication.createResponseInContext( null );
 		GoodResponse.setStatus( 200 ); // OK
@@ -87,8 +86,8 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		final List<String> values = NSArray.componentsSeparatedByString( aRequest.queryString(), "&" );
 
 		if( (values == null) || (values.size() != 4) ) {
-			theApplication.siteConfig().globalErrorDictionary.put( aRequest.queryString(), (myName + ": Received bad lifebeat: " + aRequest.queryString()) );
-			log.error( "{}: Received bad lifebeat: {}", myName, aRequest.queryString() );
+			theApplication.siteConfig().globalErrorDictionary.put( aRequest.queryString(), (myHostName + ": Received bad lifebeat: " + aRequest.queryString()) );
+			log.error( "{}: Received bad lifebeat: {}", myHostName, aRequest.queryString() );
 		}
 		else {
 			final String notificationType = values.get( 0 );
@@ -127,8 +126,8 @@ public class LifebeatRequestHandler extends WORequestHandler {
 				aResponse = null;
 			}
 			else {
-				theApplication.siteConfig().globalErrorDictionary.put( aRequest.queryString(), (myName + ": Received bad lifebeat: " + aRequest.queryString()) );
-				log.error( "{}: Received bad lifebeat: {}", myName, aRequest.queryString() );
+				theApplication.siteConfig().globalErrorDictionary.put( aRequest.queryString(), (myHostName + ": Received bad lifebeat: " + aRequest.queryString()) );
+				log.error( "{}: Received bad lifebeat: {}", myHostName, aRequest.queryString() );
 			}
 		}
 
