@@ -58,7 +58,7 @@ public abstract class MInstanceTask extends TimerTask {
 
 			Application app = (Application)WOApplication.application();
 			app._lock.readLock().lock();
-			InstanceController localMonitor = app.localMonitor();
+			InstanceController instanceController = app.instanceController();
 			try {
 
 				if( retries >= _numberOfRetriesBeforeForceQuit ) {
@@ -72,7 +72,7 @@ public abstract class MInstanceTask extends TimerTask {
 				}
 				else if( _instance.isRefusingNewSessions() == false ) {
 					//resend the REFUSE command
-					if( localMonitor.stopInstance( _instance ) != null ) {
+					if( instanceController.stopInstance( _instance ) != null ) {
 						//we got a response, let's reset the retry
 						//if retries reaches the max (WOTaskd.refuseNumRetries), force quit the instance
 						retries = 0;

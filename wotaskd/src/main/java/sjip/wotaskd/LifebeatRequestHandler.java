@@ -154,7 +154,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 				instance.setShouldDie( false );
 			}
 			else {
-				((Application)WOApplication.application()).localMonitor().registerUnknownInstance( instanceName, host, port );
+				((Application)WOApplication.application()).instanceController().registerUnknownInstance( instanceName, host, port );
 			}
 		}
 		finally {
@@ -177,7 +177,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 				// This call will reset shouldDie status!;
 				return !instance.shouldDieAndReset();
 			}
-			((Application)WOApplication.application()).localMonitor().registerUnknownInstance( instanceName, host, port );
+			((Application)WOApplication.application()).instanceController().registerUnknownInstance( instanceName, host, port );
 		}
 		finally {
 			theApplication._lock.readLock().unlock();

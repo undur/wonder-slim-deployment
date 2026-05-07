@@ -16,7 +16,7 @@ public class Application extends ERXApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger( Application.class );
 
-	private final InstanceController _localMonitor;
+	private final InstanceController _instanceController;
 	private final String _multicastAddress;
 	private final boolean _shouldWriteAdaptorConfig;
 	private final boolean _shouldRespondToMulticast;
@@ -61,8 +61,8 @@ public class Application extends ERXApplication {
 		_siteConfig = MSiteConfig.unarchiveSiteConfig( true );
 		_siteConfig.archiveSiteConfig();
 
-		// creating the localMonitor (used to control and query instances)
-		_localMonitor = new InstanceController();
+		// creating an InstanceController to control and query instances
+		_instanceController = new InstanceController();
 
 		// checking to see if we should save WOConfig.xml to disk for the adaptors.
 		_shouldWriteAdaptorConfig = XUtil.boolValue( System.getProperty( "WOSavesAdaptorConfiguration" ) );
@@ -133,8 +133,8 @@ public class Application extends ERXApplication {
 		_siteConfig = aConfig;
 	}
 
-	public InstanceController localMonitor() {
-		return _localMonitor;
+	public InstanceController instanceController() {
+		return _instanceController;
 	}
 
 	public boolean shouldWriteAdaptorConfig() {

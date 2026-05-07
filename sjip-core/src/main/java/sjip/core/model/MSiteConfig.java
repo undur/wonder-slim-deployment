@@ -458,10 +458,10 @@ public class MSiteConfig extends MObject {
 	public void removeInstance_W( MInstance anInstance ) {
 
 		if( (anInstance.host() == _localHost) && anInstance.isRunning_W() ) {
-			final IInstanceController plMonitor = (IInstanceController)WOApplication.application().valueForKey( "localMonitor" );
+			final IInstanceController instanceController = (IInstanceController)WOApplication.application().valueForKey( "instanceController" );
 
 			try {
-				plMonitor.stopInstance( anInstance );
+				instanceController.stopInstance( anInstance );
 			}
 			catch( final MonitorException me ) {
 				logger.error( "Can't remove", me );

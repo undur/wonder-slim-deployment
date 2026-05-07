@@ -326,7 +326,7 @@ public class InstanceController implements IInstanceController {
 			MSiteConfig aConfig = theApplication().siteConfig();
 			final List<MApplication> appArray = aConfig.applicationArray();
 			int appArrayCount = appArray.size();
-			final InstanceController localMonitor = this;
+			final InstanceController instanceController = this;
 
 			Thread[] workers = new Thread[appArrayCount];
 
@@ -335,7 +335,7 @@ public class InstanceController implements IInstanceController {
 				Runnable work = new Runnable() {
 					@Override
 					public void run() {
-						localMonitor._autoRecoverApplication( appArray.get( j ) );
+						instanceController._autoRecoverApplication( appArray.get( j ) );
 					}
 				};
 				workers[j] = new Thread( work );
@@ -420,7 +420,7 @@ public class InstanceController implements IInstanceController {
 
 				final Instant now = Instant.now();
 				final Thread[] workers = new Thread[instArrayCount];
-				final InstanceController localMonitor = this;
+				final InstanceController instanceController = this;
 
 				for( int i = 0; i < instArrayCount; i++ ) {
 					final int j = i;
@@ -431,10 +431,10 @@ public class InstanceController implements IInstanceController {
 								MInstance anInst = instArray.get( j );
 								if( (anInst.isScheduled()) && (anInst.nearNextScheduledShutdown( now )) ) {
 									if( anInst.isGracefullyScheduled() ) {
-										localMonitor.stopInstance( anInst );
+										instanceController.stopInstance( anInst );
 									}
 									else {
-										localMonitor.terminateInstance( anInst );
+										instanceController.terminateInstance( anInst );
 									}
 									anInst.calculateNextScheduledShutdown();
 								}

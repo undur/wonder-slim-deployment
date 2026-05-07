@@ -413,7 +413,7 @@ public class DirectAction extends WODirectAction {
 						if( anInstance != null ) {
 							if( anInstance.isLocal_W() ) {
 								if( command.equals( "START" ) ) {
-									String errorMsg = theApplication.localMonitor().startInstance( anInstance );
+									String errorMsg = theApplication.instanceController().startInstance( anInstance );
 									if( errorMsg != null ) {
 										element = new NSDictionary( new Object[] { Boolean.FALSE, errorMsg }, errorKeys );
 										commandWotaskdResponse.addObject( element );
@@ -427,16 +427,16 @@ public class DirectAction extends WODirectAction {
 									try {
 										if( command.equals( "STOP" ) ) {
 											//we need to expect a response here
-											if( theApplication.localMonitor().terminateInstance( anInstance ) == null )
+											if( theApplication.instanceController().terminateInstance( anInstance ) == null )
 												throw new MonitorException( "No response to STOP " + anInstance.displayName() );
 										}
 										else if( command.equals( "REFUSE" ) ) {
 											//we need to expect a response here
-											if( theApplication.localMonitor().stopInstance( anInstance ) == null )
+											if( theApplication.instanceController().stopInstance( anInstance ) == null )
 												throw new MonitorException( "No response to REFUSE " + anInstance.displayName() );
 										}
 										else if( command.equals( "ACCEPT" ) ) {
-											if( theApplication.localMonitor().setAcceptInstance( anInstance ) == null )
+											if( theApplication.instanceController().setAcceptInstance( anInstance ) == null )
 												throw new MonitorException( "No response to ACCEPT " + anInstance.displayName() );
 											//we got a response, cancel any force quit task
 											anInstance.cancelForceQuitTask();
@@ -622,7 +622,7 @@ public class DirectAction extends WODirectAction {
 	}
 
 	private void getStatisticsForInstanceArray( NSArray instArray, NSMutableArray errorResponse ) {
-		final InstanceController localMonitor = ((Application)WOApplication.application()).localMonitor();
+		final InstanceController instanceController = ((Application)WOApplication.application()).instanceController();
 
 		final NSArray instanceArray = instArray;
 		int theCount = instanceArray.count();
@@ -638,7 +638,7 @@ public class DirectAction extends WODirectAction {
 			Runnable work = new Runnable() {
 				public void run() {
 					try {
-						responses[j] = localMonitor.queryInstance( (MInstance)instanceArray.objectAtIndex( j ) );
+						responses[j] = instanceController.queryInstance( (MInstance)instanceArray.objectAtIndex( j ) );
 					}
 					catch( MonitorException me ) {
 						MInstance badInstance = ((MInstance)instanceArray.objectAtIndex( j ));
@@ -839,7 +839,7 @@ public class DirectAction extends WODirectAction {
 
 	// This will stop all instances in parallel, and return after each stopInstance call has returned.
 	private void stopAllInstances() {
-		final InstanceController localMonitor = ((Application)WOApplication.application()).localMonitor();
+		final InstanceController instanceController = ((Application)WOApplication.application()).instanceController();
 
 		final NSArray instanceArray = ((Application)WOApplication.application()).siteConfig().instanceArray();
 		int theCount = instanceArray.count();
@@ -854,7 +854,7 @@ public class DirectAction extends WODirectAction {
 			Runnable work = new Runnable() {
 				public void run() {
 					try {
-						localMonitor.stopInstance( (MInstance)instanceArray.objectAtIndex( j ) );
+						instanceController.stopInstance( (MInstance)instanceArray.objectAtIndex( j ) );
 					}
 					catch( MonitorException me ) {
 					}
@@ -977,7 +977,7 @@ public class DirectAction extends WODirectAction {
 		// We wouldn't have registered it in the first place, so we don't regenerate
 		if( WOHostUtilities.isAnyLocalInetAddress( aRequest._originatingAddress(), false ) ) {
 			String anAppName = request().stringFormValueForKey( "appName" );
-			portString = theApplication.localMonitor().portForUnregisteredAppNamed( anAppName );
+			portString = theApplication.instanceController().portForUnregisteredAppNamed( anAppName );
 		}
 
 		if( portString == null ) {
