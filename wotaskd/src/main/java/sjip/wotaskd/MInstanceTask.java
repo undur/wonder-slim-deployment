@@ -14,10 +14,9 @@ public abstract class MInstanceTask extends TimerTask {
 
 	private static final Logger logger = LoggerFactory.getLogger( MInstanceTask.class );
 
-	MInstance _instance;
+	final MInstance _instance;
 
 	public MInstanceTask( MInstance instance ) {
-		super();
 		_instance = instance;
 	}
 
@@ -55,7 +54,6 @@ public abstract class MInstanceTask extends TimerTask {
 
 		@Override
 		public void run() {
-
 			Application app = (Application)WOApplication.application();
 			app._lock.readLock().lock();
 			InstanceController instanceController = app.instanceController();
@@ -87,9 +85,6 @@ public abstract class MInstanceTask extends TimerTask {
 				++retries;
 				app._lock.readLock().unlock();
 			}
-
 		}
-
 	}
-
 }
