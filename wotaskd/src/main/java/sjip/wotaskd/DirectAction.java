@@ -50,37 +50,18 @@ public class DirectAction extends WODirectAction {
 
 	private static final Logger logger = LoggerFactory.getLogger( DirectAction.class );
 
-	private static final String _hostName;
-	private static final Object[] _hostQueryKeys;
-	private static final Object[] _appQueryKeys;
-	private static final Object[] _instanceQueryKeys;
-	private static final NSDictionary successElement;
-	private static final Object[] _errorKeys;
-	private static final String _accessDenied;
-	private static final String _invalidPassword;
-	private static final String _invalidXML;
-	private static final String _emptyXML;
-	private static final NSDictionary _argumentNumberCommandError;
+	private static final String _hostName = WOApplication.application().host();
+	private static final Object[] _hostQueryKeys = { "runningInstances", "processorType", "operatingSystem" };
+	private static final Object[] _appQueryKeys = { "name", "runningInstances" };
+	private static final Object[] _instanceQueryKeys = { "applicationName", "id", "host", "port", "runningState", "refusingNewSessions", "statistics", "deaths", "nextShutdown" };
+	private static final NSDictionary successElement = new NSDictionary( new Object[] { Boolean.TRUE }, new Object[] { "success" } );
+	private static final Object[] _errorKeys = { "success", "errorMessage" };
+	private static final String _accessDenied = XUtil.errorResponseXML( "monitorResponse", _hostName + ": wotaskd may not be accessed through a Web server - Access Denied" );
+	private static final String _invalidPassword = XUtil.errorResponseXML( "monitorResponse", _hostName + ": Invalid Password - Access Denied" );
+	private static final String _invalidXML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" );
+	private static final String _emptyXML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Empty" );
+	private static final NSDictionary _argumentNumberCommandError = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" }, _errorKeys );
 	private static final DateTimeFormatter HTTP_DATE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME.withZone( ZoneOffset.UTC );
-
-	static {
-		// get the hostname for the error messages
-		_hostName = WOApplication.application().host();
-
-		// pre-cache dictionary keys
-		_hostQueryKeys = new Object[] { "runningInstances", "processorType", "operatingSystem" };
-		_appQueryKeys = new Object[] { "name", "runningInstances" };
-		_instanceQueryKeys = new Object[] { "applicationName", "id", "host", "port", "runningState", "refusingNewSessions", "statistics", "deaths", "nextShutdown" };
-		successElement = new NSDictionary( new Object[] { Boolean.TRUE }, new Object[] { "success" } );
-		_errorKeys = new Object[] { "success", "errorMessage" };
-
-		// Pre-cache error messages
-		_accessDenied = XUtil.errorResponseXML( "monitorResponse", _hostName + ": wotaskd may not be accessed through a Web server - Access Denied" );
-		_invalidPassword = XUtil.errorResponseXML( "monitorResponse", _hostName + ": Invalid Password - Access Denied" );
-		_invalidXML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" );
-		_emptyXML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Empty" );
-		_argumentNumberCommandError = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" }, _errorKeys );
-	}
 
 	public DirectAction( WORequest aRequest ) {
 		super( aRequest );
