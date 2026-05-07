@@ -53,17 +53,17 @@ public class DirectAction extends WODirectAction {
 	private NSMutableDictionary hostResponse;
 	private NSDictionary element;
 
-	private static String _hostName;
-	private static Object[] hostQueryKeys;
-	private static Object[] appQueryKeys;
-	private static Object[] instanceQueryKeys;
-	private static NSDictionary successElement;
-	public static Object[] errorKeys;
-	private static String _accessDenied;
-	private static String _invalidPassword;
-	private static String _invalidXML;
-	private static String _emptyXML;
-	private static NSDictionary _argumentNumberCommandError;
+	private static final String _hostName;
+	private static final Object[] _hostQueryKeys;
+	private static final Object[] _appQueryKeys;
+	private static final Object[] _instanceQueryKeys;
+	private static final NSDictionary successElement;
+	private static final Object[] _errorKeys;
+	private static final String _accessDenied;
+	private static final String _invalidPassword;
+	private static final String _invalidXML;
+	private static final String _emptyXML;
+	private static final NSDictionary _argumentNumberCommandError;
 	private static final DateTimeFormatter HTTP_DATE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME.withZone( ZoneOffset.UTC );
 
 	static {
@@ -71,18 +71,18 @@ public class DirectAction extends WODirectAction {
 		_hostName = WOApplication.application().host();
 
 		// pre-cache dictionary keys
-		hostQueryKeys = new Object[] { "runningInstances", "processorType", "operatingSystem" };
-		appQueryKeys = new Object[] { "name", "runningInstances" };
-		instanceQueryKeys = new Object[] { "applicationName", "id", "host", "port", "runningState", "refusingNewSessions", "statistics", "deaths", "nextShutdown" };
+		_hostQueryKeys = new Object[] { "runningInstances", "processorType", "operatingSystem" };
+		_appQueryKeys = new Object[] { "name", "runningInstances" };
+		_instanceQueryKeys = new Object[] { "applicationName", "id", "host", "port", "runningState", "refusingNewSessions", "statistics", "deaths", "nextShutdown" };
 		successElement = new NSDictionary( new Object[] { Boolean.TRUE }, new Object[] { "success" } );
-		errorKeys = new Object[] { "success", "errorMessage" };
+		_errorKeys = new Object[] { "success", "errorMessage" };
 
 		// Pre-cache error messages
 		_accessDenied = XUtil.errorResponseXML( "monitorResponse", _hostName + ": wotaskd may not be accessed through a Web server - Access Denied" );
 		_invalidPassword = XUtil.errorResponseXML( "monitorResponse", _hostName + ": Invalid Password - Access Denied" );
 		_invalidXML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" );
 		_emptyXML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Empty" );
-		_argumentNumberCommandError = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" }, errorKeys );
+		_argumentNumberCommandError = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" }, _errorKeys );
 	}
 
 	public DirectAction( WORequest aRequest ) {
@@ -188,7 +188,7 @@ public class DirectAction extends WODirectAction {
 								String name = (String)aHost.valueForKey( "name" );
 								MHost anMHost = aConfig.hostWithName( name );
 								if( anMHost == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + name + " not found; REMOVE failed" }, errorKeys );
+									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + name + " not found; REMOVE failed" }, _errorKeys );
 									hostArrayResponse.addObject( element );
 								}
 								else {
@@ -213,7 +213,7 @@ public class DirectAction extends WODirectAction {
 								String name = (String)anApp.valueForKey( "name" );
 								MApplication anMApplication = aConfig.applicationWithName( name );
 								if( anMApplication == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Application " + name + " not found; REMOVE failed" }, errorKeys );
+									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Application " + name + " not found; REMOVE failed" }, _errorKeys );
 									applicationArrayResponse.addObject( element );
 								}
 								else {
@@ -233,7 +233,7 @@ public class DirectAction extends WODirectAction {
 								Integer port = (Integer)anInst.valueForKey( "port" );
 								MInstance anMInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
 								if( anMInstance == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + hostName + "-" + port + " not found; REMOVE failed" }, errorKeys );
+									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + hostName + "-" + port + " not found; REMOVE failed" }, _errorKeys );
 									instanceArrayResponse.addObject( element );
 								}
 								else {
@@ -311,7 +311,7 @@ public class DirectAction extends WODirectAction {
 								String name = (String)aHost.valueForKey( "name" );
 								MHost anMHost = aConfig.hostWithName( name );
 								if( anMHost == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + name + " not found; UPDATE failed" }, errorKeys );
+									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + name + " not found; UPDATE failed" }, _errorKeys );
 									hostArrayResponse.addObject( element );
 								}
 								else {
@@ -336,7 +336,7 @@ public class DirectAction extends WODirectAction {
 								}
 
 								if( anMApplication == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Application " + name + " not found; UPDATE failed" }, errorKeys );
+									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Application " + name + " not found; UPDATE failed" }, _errorKeys );
 									applicationArrayResponse.addObject( element );
 								}
 								else {
@@ -361,7 +361,7 @@ public class DirectAction extends WODirectAction {
 									anMInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
 								}
 								if( anMInstance == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + hostName + "-" + port + " not found; UPDATE failed" }, errorKeys );
+									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + hostName + "-" + port + " not found; UPDATE failed" }, _errorKeys );
 									instanceArrayResponse.addObject( element );
 								}
 								else {
@@ -398,7 +398,7 @@ public class DirectAction extends WODirectAction {
 					commandWotaskdResponse.addObject( successElement );
 				}
 				else {
-					element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Invalid Command " + command }, errorKeys );
+					element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Invalid Command " + command }, _errorKeys );
 					commandWotaskdResponse.addObject( element );
 				}
 
@@ -415,7 +415,7 @@ public class DirectAction extends WODirectAction {
 								if( command.equals( "START" ) ) {
 									String errorMsg = theApplication.instanceController().startInstance( anInstance );
 									if( errorMsg != null ) {
-										element = new NSDictionary( new Object[] { Boolean.FALSE, errorMsg }, errorKeys );
+										element = new NSDictionary( new Object[] { Boolean.FALSE, errorMsg }, _errorKeys );
 										commandWotaskdResponse.addObject( element );
 									}
 								}
@@ -447,7 +447,7 @@ public class DirectAction extends WODirectAction {
 										commandWotaskdResponse.addObject( successElement );
 									}
 									catch( SjipException me ) {
-										element = new NSDictionary( new Object[] { Boolean.FALSE, me.getMessage() }, errorKeys );
+										element = new NSDictionary( new Object[] { Boolean.FALSE, me.getMessage() }, _errorKeys );
 										commandWotaskdResponse.addObject( element );
 									}
 								}
@@ -459,7 +459,7 @@ public class DirectAction extends WODirectAction {
 							}
 						}
 						else {
-							element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": No instance found for Host " + hostName + " and Port: " + port + "; " + command + " failed" }, errorKeys );
+							element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": No instance found for Host " + hostName + " and Port: " + port + "; " + command + " failed" }, _errorKeys );
 							commandWotaskdResponse.addObject( element );
 						}
 					}
@@ -491,7 +491,7 @@ public class DirectAction extends WODirectAction {
 					String processorType = System.getProperties().getProperty( "os.arch" );
 					String operatingSystem = System.getProperties().getProperty( "os.name" ) + " " + System.getProperties().getProperty( "os.version" );
 
-					hostResponse = new NSMutableDictionary( new Object[] { runningInstances, processorType, operatingSystem }, hostQueryKeys );
+					hostResponse = new NSMutableDictionary( new Object[] { runningInstances, processorType, operatingSystem }, _hostQueryKeys );
 				}
 				theApplication._lock.readLock().lock();
 				try {
@@ -525,7 +525,7 @@ public class DirectAction extends WODirectAction {
 						anApp = (MApplication)appArray.objectAtIndex( i );
 						name = anApp.name();
 						runningInstances = anApp.runningInstancesCount_W();
-						elementApp = new NSDictionary( new Object[] { name, runningInstances }, appQueryKeys );
+						elementApp = new NSDictionary( new Object[] { name, runningInstances }, _appQueryKeys );
 						applicationResponse.addObject( elementApp );
 					}
 				}
@@ -586,7 +586,7 @@ public class DirectAction extends WODirectAction {
 						deaths = anInstance.deaths();
 						nextShutdown = anInstance.nextScheduledShutdownString();
 
-						elementInst = new NSDictionary( new Object[] { applicationName, id, host, port, runningState, refusingNewSessions, statistics, deaths, nextShutdown }, instanceQueryKeys );
+						elementInst = new NSDictionary( new Object[] { applicationName, id, host, port, runningState, refusingNewSessions, statistics, deaths, nextShutdown }, _instanceQueryKeys );
 						instanceResponse.addObject( elementInst );
 					}
 				}
