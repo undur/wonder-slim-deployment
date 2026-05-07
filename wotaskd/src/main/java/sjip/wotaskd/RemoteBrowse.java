@@ -33,18 +33,15 @@ public class RemoteBrowse extends WODirectAction {
 
 	private static final Object[] FILE_KEYS = new Object[] { "file", "fileType", "fileSize" };
 
-	private String[] rootStrings;
-	private boolean singleRoot = false;
-	private String xmlRoots;
+	private final String[] rootStrings;
+	private final boolean singleRoot;
+	private final String xmlRoots;
 
 	public RemoteBrowse( WORequest aRequest ) {
 		super( aRequest );
 
-		File[] roots = File.listRoots();
-
-		if( roots.length <= 1 ) {
-			singleRoot = true;
-		}
+		final File[] roots = File.listRoots();
+		singleRoot = roots.length <= 1;
 
 		rootStrings = new String[roots.length];
 
@@ -52,16 +49,14 @@ public class RemoteBrowse extends WODirectAction {
 			rootStrings[i] = Path.of( roots[i].getAbsolutePath() ).normalize().toString();
 		}
 
-		int anArrayCount = rootStrings.length;
+		final NSMutableArray rootArray = new NSMutableArray( rootStrings.length );
 
-		final NSMutableArray rootArray = new NSMutableArray( anArrayCount );
-
-		for( int i = 0; i < anArrayCount; i++ ) {
-			NSDictionary aFileDict = new NSDictionary( new Object[] { rootStrings[i], MUtil.FILE_TYPE_DIRECTORY, Long.valueOf( 0 ) }, FILE_KEYS );
+		for( int i = 0; i < rootStrings.length; i++ ) {
+			final NSDictionary aFileDict = new NSDictionary( new Object[] { rootStrings[i], MUtil.FILE_TYPE_DIRECTORY, Long.valueOf( 0 ) }, FILE_KEYS );
 			rootArray.addObject( aFileDict );
 		}
 
-		xmlRoots = ((new FoundationCoder()).encodeRootObjectForKey( rootArray, "pathArray" )) + " \r\n";
+		xmlRoots = new FoundationCoder().encodeRootObjectForKey( rootArray, "pathArray" ) + " \r\n";
 	}
 
 	private static List<Map<String,Object>> fileListForStartingPath( final String aStartingPath, final boolean showFiles ) {
