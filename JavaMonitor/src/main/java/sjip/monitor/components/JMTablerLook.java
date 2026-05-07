@@ -21,9 +21,9 @@ public class JMTablerLook extends MonitorComponent {
 	public String title;
 
 	/**
-	 * FIXME: wat?
+	 * Currently active page (purely for indicating currently selected page in menu)
 	 */
-	public int currentPage = APP_PAGE;
+	public int selectedPage;
 
 	/**
 	 * Item currently being iterated over in the top menu
@@ -54,7 +54,7 @@ public class JMTablerLook extends MonitorComponent {
 	}
 	
 	public boolean notSelected() {
-		return currentPage != currentMenuItem.id();
+		return selectedPage != currentMenuItem.id();
 	}
 	
 	/**

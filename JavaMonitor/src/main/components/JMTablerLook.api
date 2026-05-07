@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <wodefinitions>
-    <wo class="JMTablerLook" wocomponentcontent="false">
-        <binding name="currentPage"/>
-        <validation message="'currentPage' is a required binding.">
-            <unbound name="currentPage"/>
+    <wo wocomponentcontent="false" class="JMTablerLook">
+        <binding name="selectedPage"/>
+        <validation message="&apos;currentPage&apos; is a required binding.">
+            <unbound name="selectedPage"/>
         </validation>
     </wo>
 </wodefinitions>
