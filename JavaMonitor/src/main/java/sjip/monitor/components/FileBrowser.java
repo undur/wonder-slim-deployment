@@ -32,7 +32,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 
 import sjip.core.MUtil;
-import sjip.core.MonitorException;
+import sjip.core.SjipException;
 import sjip.core.model.MHost;
 import sjip.monitor.MonitorComponent;
 import sjip.monitor.components.FileBrowser.RemoteBrowseClient.RemoteFile;
@@ -82,7 +82,7 @@ public class FileBrowser extends MonitorComponent {
 			startingPath = fetched.filepath();
 			errorMsg = null;
 		}
-		catch( MonitorException me ) {
+		catch( SjipException me ) {
 			if( isRoots ) {
 				startingPath = null;
 			}
@@ -162,7 +162,7 @@ public class FileBrowser extends MonitorComponent {
 		// FIXME: Dear lord. I feel the pain of whomever wrote this // Hugi 2024-11-10
 		private static String EVIL_HACK = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
 
-		private static RemoteResult extractFileListFromResponse( final ResponseWrapper response, final String sourcePath ) throws MonitorException {
+		private static RemoteResult extractFileListFromResponse( final ResponseWrapper response, final String sourcePath ) throws SjipException {
 
 			final String responseContentString = response.contentString();
 
@@ -170,7 +170,7 @@ public class FileBrowser extends MonitorComponent {
 
 			if( responseContentString != null ) {
 				if( responseContentString.startsWith( "ERROR" ) ) {
-					throw new MonitorException( "Path " + sourcePath + " does not exist" );
+					throw new SjipException( "Path " + sourcePath + " does not exist" );
 				}
 
 				try {
@@ -178,12 +178,12 @@ public class FileBrowser extends MonitorComponent {
 				}
 				catch( Exception e ) {
 					logger.error( "RemoteBrowseClient _getFileListOutOfResponse Error decoding response: " + responseContentString );
-					throw new MonitorException( "Host returned bad response for path " + sourcePath, e );
+					throw new SjipException( "Host returned bad response for path " + sourcePath, e );
 				}
 			}
 			else {
 				logger.error( "RemoteBrowseClient _getFileListOutOfResponse Error decoding null response" );
-				throw new MonitorException( "Host returned null response for path " + sourcePath );
+				throw new SjipException( "Host returned null response for path " + sourcePath );
 			}
 
 			final String isRoots = response.headerForKey( "isRoots" );
@@ -201,7 +201,7 @@ public class FileBrowser extends MonitorComponent {
 			return remoteResult;
 		}
 
-		public static RemoteResult getFileList( final String path, final MHost host, final boolean showFiles ) throws MonitorException {
+		public static RemoteResult getFileList( final String path, final MHost host, final boolean showFiles ) throws SjipException {
 
 			try {
 				final String urlString = "http://%s:%s%s".formatted(
@@ -236,7 +236,7 @@ public class FileBrowser extends MonitorComponent {
 
 				// FIXME: Look into this error handling // Hugi 2024-11-10
 				if( response.statusCode() != 200 ) {
-					throw new MonitorException( "Error requesting directory listing for " + path + " from " + host.name() );
+					throw new SjipException( "Error requesting directory listing for " + path + " from " + host.name() );
 				}
 
 				final ResponseWrapper responseWrapper = new ResponseWrapper( response.body(), response.headers() );
@@ -247,20 +247,20 @@ public class FileBrowser extends MonitorComponent {
 
 				return result;
 			}
-			catch( MonitorException me ) {
+			catch( SjipException me ) {
 				host.isAvailable = true;
 				throw me;
 			}
 			catch( InterruptedException ie ) {
 				Thread.currentThread().interrupt();
 				host.isAvailable = false;
-				throw new MonitorException( "Interrupted while requesting directory listing for " + path + " from " + host.name(), ie );
+				throw new SjipException( "Interrupted while requesting directory listing for " + path + " from " + host.name(), ie );
 			}
 			catch( Exception localException ) {
 				host.isAvailable = false;
 				logger.error( "Exception requesting directory listing: " );
 				localException.printStackTrace();
-				throw new MonitorException( "Exception requesting directory listing for " + path + " from " + host.name() + ": " + localException.toString(), localException );
+				throw new SjipException( "Exception requesting directory listing for " + path + " from " + host.name() + ": " + localException.toString(), localException );
 			}
 		}
 	}

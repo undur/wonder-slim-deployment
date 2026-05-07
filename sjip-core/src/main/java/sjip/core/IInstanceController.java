@@ -17,13 +17,13 @@ import sjip.x.ResponseWrapper;
 
 public interface IInstanceController {
 
-	public String startInstance( MInstance anInstance ) throws MonitorException;
+	public String startInstance( MInstance anInstance ) throws SjipException;
 
-	public ResponseWrapper terminateInstance( MInstance anInstance ) throws MonitorException;
+	public ResponseWrapper terminateInstance( MInstance anInstance ) throws SjipException;
 
-	public ResponseWrapper stopInstance( MInstance anInstance ) throws MonitorException;
+	public ResponseWrapper stopInstance( MInstance anInstance ) throws SjipException;
 
-	public ResponseWrapper queryInstance( MInstance anInstance ) throws MonitorException;
+	public ResponseWrapper queryInstance( MInstance anInstance ) throws SjipException;
 
 	public StringBuffer generateAdaptorConfigXML();
 }

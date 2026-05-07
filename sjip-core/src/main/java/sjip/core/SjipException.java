@@ -12,17 +12,17 @@ SUCH DAMAGE.
  */
 package sjip.core;
 
-public class MonitorException extends Exception {
+public class SjipException extends Exception {
 
-	public MonitorException() {
+	public SjipException() {
 		super();
 	}
 
-	public MonitorException( String s ) {
+	public SjipException( String s ) {
 		super( s );
 	}
 
-	public MonitorException( String s, Exception e ) {
+	public SjipException( String s, Exception e ) {
 		super( s, e );
 	}
 }

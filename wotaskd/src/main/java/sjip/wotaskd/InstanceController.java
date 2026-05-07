@@ -46,7 +46,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 import er.extensions.foundation.ERXProperties;
 import sjip.core.IInstanceController;
 import sjip.core.MUtil;
-import sjip.core.MonitorException;
+import sjip.core.SjipException;
 import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
@@ -439,7 +439,7 @@ public class InstanceController implements IInstanceController {
 									anInst.calculateNextScheduledShutdown();
 								}
 							}
-							catch( MonitorException me ) {
+							catch( SjipException me ) {
 								logger.error( "Exception while scheduling: " + me.getMessage() );
 							}
 						}
@@ -585,7 +585,7 @@ public class InstanceController implements IInstanceController {
 	}
 
 	@Override
-	public ResponseWrapper terminateInstance( MInstance anInstance ) throws MonitorException {
+	public ResponseWrapper terminateInstance( MInstance anInstance ) throws SjipException {
 		if( !anInstance.isRunning_W() ) {
 			return null;
 		}
@@ -608,7 +608,7 @@ public class InstanceController implements IInstanceController {
 	}
 
 	@Override
-	public ResponseWrapper stopInstance( MInstance anInstance ) throws MonitorException {
+	public ResponseWrapper stopInstance( MInstance anInstance ) throws SjipException {
 		if( !anInstance.isRunning_W() ) {
 			return null;
 		}
@@ -631,37 +631,37 @@ public class InstanceController implements IInstanceController {
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
-	public ResponseWrapper setAcceptInstance( MInstance anInstance ) throws MonitorException {
+	public ResponseWrapper setAcceptInstance( MInstance anInstance ) throws SjipException {
 		catchInstanceErrors( anInstance );
 		final Map<String,Object> xmlDict = createInstanceRequestDictionary( "ACCEPT", null, anInstance );
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
 	@Override
-	public ResponseWrapper queryInstance( MInstance anInstance ) throws MonitorException {
+	public ResponseWrapper queryInstance( MInstance anInstance ) throws SjipException {
 		catchInstanceErrors( anInstance );
 		final Map<String,Object> xmlDict = createInstanceRequestDictionary( null, "STATISTICS", anInstance );
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
-	private void catchInstanceErrors( MInstance anInstance ) throws MonitorException {
+	private void catchInstanceErrors( MInstance anInstance ) throws SjipException {
 
 		if( anInstance == null ) {
-			throw new MonitorException( "Attempt to command null instance on " + _hostName );
+			throw new SjipException( "Attempt to command null instance on " + _hostName );
 		}
 
 		if( anInstance.host() != theApplication().siteConfig().localHost() ) {
-			throw new MonitorException( anInstance.displayName() + " does not exist on " + _hostName + "; command failed" );
+			throw new SjipException( anInstance.displayName() + " does not exist on " + _hostName + "; command failed" );
 		}
 
 		if( !anInstance.isRunning_W() ) {
-			throw new MonitorException( _hostName + ": " + anInstance.displayName() + " is not running" );
+			throw new SjipException( _hostName + ": " + anInstance.displayName() + " is not running" );
 		}
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger( InstanceController.class );
 
-	private static ResponseWrapper sendInstanceRequest( final String hostName, final MInstance anInstance, final Map<String,Object> xmlDict ) throws MonitorException {
+	private static ResponseWrapper sendInstanceRequest( final String hostName, final MInstance anInstance, final Map<String,Object> xmlDict ) throws SjipException {
 
 		final String requestContentXML = new FoundationCoder().encodeRootObjectForKey( xmlDict, "instanceRequest" );
 		final String urlString = MUtil.ADMIN_ACTION_STRING_PREFIX + anInstance.applicationName() + MUtil.ADMIN_ACTION_STRING_POSTFIX;
@@ -683,11 +683,11 @@ public class InstanceController implements IInstanceController {
 		}
 		catch( java.net.http.HttpTimeoutException te ) {
 			anInstance.failedToConnect();
-			throw new MonitorException( hostName + ": Timeout while connecting to " + anInstance.displayName() );
+			throw new SjipException( hostName + ": Timeout while connecting to " + anInstance.displayName() );
 		}
 		catch( Exception e ) {
 			anInstance.failedToConnect();
-			throw new MonitorException( hostName + ": Error while communicating with " + anInstance.displayName() + ": " + e );
+			throw new SjipException( hostName + ": Error while communicating with " + anInstance.displayName() + ": " + e );
 		}
 	}
 

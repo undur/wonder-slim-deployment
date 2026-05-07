@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
 
-import sjip.core.MonitorException;
+import sjip.core.SjipException;
 import sjip.core.model.MInstance;
 
 public abstract class MInstanceTask extends TimerTask {
@@ -80,7 +80,7 @@ public abstract class MInstanceTask extends TimerTask {
 				}
 
 			}
-			catch( MonitorException e ) {
+			catch( SjipException e ) {
 				logger.error( "Exception while scheduling forceQuit: " + e.getMessage() );
 			}
 			finally {

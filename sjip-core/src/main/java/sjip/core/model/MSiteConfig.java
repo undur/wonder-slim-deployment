@@ -44,7 +44,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.IInstanceController;
 import sjip.core.MUtil;
-import sjip.core.MonitorException;
+import sjip.core.SjipException;
 import sjip.x.AdaptorConfigSerialization;
 import sjip.x.FoundationCoder;
 import sjip.x.LegacyPasswordHash;
@@ -463,7 +463,7 @@ public class MSiteConfig extends MObject {
 			try {
 				instanceController.stopInstance( anInstance );
 			}
-			catch( final MonitorException me ) {
+			catch( final SjipException me ) {
 				logger.error( "Can't remove", me );
 			}
 		}

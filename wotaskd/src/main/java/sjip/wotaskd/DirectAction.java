@@ -35,7 +35,7 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.MUtil;
-import sjip.core.MonitorException;
+import sjip.core.SjipException;
 import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
@@ -428,16 +428,16 @@ public class DirectAction extends WODirectAction {
 										if( command.equals( "STOP" ) ) {
 											//we need to expect a response here
 											if( theApplication.instanceController().terminateInstance( anInstance ) == null )
-												throw new MonitorException( "No response to STOP " + anInstance.displayName() );
+												throw new SjipException( "No response to STOP " + anInstance.displayName() );
 										}
 										else if( command.equals( "REFUSE" ) ) {
 											//we need to expect a response here
 											if( theApplication.instanceController().stopInstance( anInstance ) == null )
-												throw new MonitorException( "No response to REFUSE " + anInstance.displayName() );
+												throw new SjipException( "No response to REFUSE " + anInstance.displayName() );
 										}
 										else if( command.equals( "ACCEPT" ) ) {
 											if( theApplication.instanceController().setAcceptInstance( anInstance ) == null )
-												throw new MonitorException( "No response to ACCEPT " + anInstance.displayName() );
+												throw new SjipException( "No response to ACCEPT " + anInstance.displayName() );
 											//we got a response, cancel any force quit task
 											anInstance.cancelForceQuitTask();
 										}
@@ -446,7 +446,7 @@ public class DirectAction extends WODirectAction {
 										}
 										commandWotaskdResponse.addObject( successElement );
 									}
-									catch( MonitorException me ) {
+									catch( SjipException me ) {
 										element = new NSDictionary( new Object[] { Boolean.FALSE, me.getMessage() }, errorKeys );
 										commandWotaskdResponse.addObject( element );
 									}
@@ -640,7 +640,7 @@ public class DirectAction extends WODirectAction {
 					try {
 						responses[j] = instanceController.queryInstance( (MInstance)instanceArray.objectAtIndex( j ) );
 					}
-					catch( MonitorException me ) {
+					catch( SjipException me ) {
 						MInstance badInstance = ((MInstance)instanceArray.objectAtIndex( j ));
 						if( !badInstance.isRunning_W() ) {
 							logger.debug( "Exception getting Statistics for instance: " + ((MInstance)instanceArray.objectAtIndex( j )).displayName() );
@@ -856,7 +856,7 @@ public class DirectAction extends WODirectAction {
 					try {
 						instanceController.stopInstance( (MInstance)instanceArray.objectAtIndex( j ) );
 					}
-					catch( MonitorException me ) {
+					catch( SjipException me ) {
 					}
 				}
 			};
