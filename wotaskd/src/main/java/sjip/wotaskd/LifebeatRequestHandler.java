@@ -37,13 +37,11 @@ public class LifebeatRequestHandler extends WORequestHandler {
 	private static final WOResponse DIE_RESPONSE = constantResponse( 500, "HTTP/1.0" ); // InternalServerError -> Die Immediately
 
 	private final Application theApplication;
-	private final InetAddress myInetAddress;
 	private final String myHostName;
 
 	public LifebeatRequestHandler() {
 		theApplication = ((Application)WOApplication.application());
-		myInetAddress = theApplication.hostAddress();
-		myHostName = myInetAddress.getHostName();
+		myHostName = theApplication.hostAddress().getHostName();
 	}
 
 	private static WOResponse constantResponse( int status, String httpVersion ) {
