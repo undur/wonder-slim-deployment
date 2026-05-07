@@ -22,8 +22,6 @@ public class Application extends ERXApplication {
 	private final boolean _shouldRespondToMulticast;
 	public final ReentrantReadWriteLock _lock;
 	private MSiteConfig _siteConfig;
-	private Number _port;
-	private int _intPort;
 
 	static public void main( String argv[] ) {
 		ERXApplication.main( argv, Application.class );
@@ -44,7 +42,7 @@ public class Application extends ERXApplication {
 		com.webobjects.appserver._private.WOHttpIO._alwaysAppendContentLength = false;
 
 		// Setting the ports
-		_setLifebeatDestinationPort( intPort() );
+		_setLifebeatDestinationPort( port().intValue() );
 
 		// Setting the multicast address
 		_multicastAddress = System.getProperty( "WOMulticastAddress", "239.128.14.2" );
@@ -82,7 +80,7 @@ public class Application extends ERXApplication {
 		}
 
 		// Set up multicast listen thread
-		new MulticastListener( shouldRespondToMulticast(), intPort(), multicastAddress(), siteConfig() ).start();
+		new MulticastListener( shouldRespondToMulticast(), port().intValue(), multicastAddress(), siteConfig() ).start();
 
 		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
 		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
@@ -93,24 +91,6 @@ public class Application extends ERXApplication {
 	@Override
 	public String name() {
 		return "wotaskd";
-	}
-
-	@Override
-	public Number port() {
-		if( _port == null ) {
-			if( super.port().intValue() > 0 ) {
-				_port = super.port();
-			}
-			else {
-				_port = Integer.valueOf( 1085 );
-			}
-			_intPort = _port.intValue();
-		}
-		return _port;
-	}
-
-	private int intPort() {
-		return _intPort;
 	}
 
 	public String multicastAddress() {
