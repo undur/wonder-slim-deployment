@@ -14,11 +14,6 @@ package sjip.core;
 
 public class MonitorException extends Exception {
 
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = 9035477737937670328L;
-
 	public MonitorException() {
 		super();
 	}
