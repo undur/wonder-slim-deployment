@@ -64,11 +64,11 @@ public class RemoteBrowse extends WODirectAction {
 		xmlRoots = ((new FoundationCoder()).encodeRootObjectForKey( rootArray, "pathArray" )) + " \r\n";
 	}
 
-	public List<Map<String,Object>> fileListForStartingPath( String aStartingPath, boolean showFiles ) {
+	private static List<Map<String,Object>> fileListForStartingPath( final String aStartingPath, final boolean showFiles ) {
 		
 		final File startingPathAsFile = new File( aStartingPath );
 
-		if( !(startingPathAsFile.exists()) ) {
+		if( !startingPathAsFile.exists() ) {
 			return null;
 		}
 
@@ -150,5 +150,4 @@ public class RemoteBrowse extends WODirectAction {
 
 		return aResponse;
 	}
-
 }
