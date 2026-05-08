@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
@@ -50,6 +49,7 @@ import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
+import sjip.x.FHosts;
 import sjip.x.FProperties;
 import sjip.x.FoundationCoder;
 import sjip.x.ResponseWrapper;
@@ -200,7 +200,7 @@ public class InstanceController implements IInstanceController {
 		try {
 			Instant currentTime = Instant.now();
 			// Don't regenerate the localhost list for random applications
-			if( WOHostUtilities.isLocalInetAddress( InetAddress.getByName( host ), false ) ) {
+			if( FHosts.isLocalInetAddress( InetAddress.getByName( host ), false ) ) {
 				NSMutableDictionary appDict = (NSMutableDictionary)_unknownApplications.valueForKey( name );
 				if( appDict != null ) {
 					appDict.takeValueForKey( currentTime, port );

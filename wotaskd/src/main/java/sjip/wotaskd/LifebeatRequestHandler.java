@@ -23,10 +23,10 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSArray;
 
 import sjip.core.model.MInstance;
+import sjip.x.FHosts;
 
 public class LifebeatRequestHandler extends WORequestHandler {
 
@@ -56,7 +56,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 
 		// Sadly, we do regenerate in the case of random lifebeats. Hopefully this won't be too often.
 		// Didn't pull this out so that we can rely on isUsingWebServer to catch some bad requests
-		if( !aRequest.isUsingWebServer() && WOHostUtilities.isLocalInetAddress( aRequest._originatingAddress(), true ) ) {
+		if( !aRequest.isUsingWebServer() && FHosts.isLocalInetAddress( aRequest._originatingAddress(), true ) ) {
 			final Object lock = WOApplication.application().requestHandlingLock();
 
 			if( lock != null ) {

@@ -28,7 +28,6 @@ import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
@@ -41,6 +40,7 @@ import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
 import sjip.x.AdaptorConfigSerialization;
+import sjip.x.FHosts;
 import sjip.x.FProperties;
 import sjip.x.FoundationCoder;
 import sjip.x.FoundationPropertyListSerialization;
@@ -931,7 +931,7 @@ public class DirectAction extends WODirectAction {
 
 		// This will return true if we match either WOHost or any known local address
 		// We aren't going to regenerate the list, though, since this gets called a lot.
-		boolean shouldIncludeUnregisteredInstances = WOHostUtilities.isAnyLocalInetAddress( aRequest._originatingAddress(), false );
+		boolean shouldIncludeUnregisteredInstances = FHosts.isAnyLocalInetAddress( aRequest._originatingAddress(), false );
 
 		theApplication._lock.readLock().lock();
 		String xml;
@@ -960,7 +960,7 @@ public class DirectAction extends WODirectAction {
 		String portString = null;
 
 		// We wouldn't have registered it in the first place, so we don't regenerate
-		if( WOHostUtilities.isAnyLocalInetAddress( aRequest._originatingAddress(), false ) ) {
+		if( FHosts.isAnyLocalInetAddress( aRequest._originatingAddress(), false ) ) {
 			String anAppName = request().stringFormValueForKey( "appName" );
 			portString = theApplication.instanceController().portForUnregisteredAppNamed( anAppName );
 		}

@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
@@ -46,6 +45,7 @@ import sjip.core.IInstanceController;
 import sjip.core.MUtil;
 import sjip.core.SjipException;
 import sjip.x.AdaptorConfigSerialization;
+import sjip.x.FHosts;
 import sjip.x.FProperties;
 import sjip.x.FoundationCoder;
 import sjip.x.LegacyPasswordHash;
@@ -304,7 +304,7 @@ public class MSiteConfig extends MObject {
 
 	private void _addHost( MHost newHost ) {
 		// If WOHost was passed, it'll resolve against that, otherwise, it'll resolve any local address
-		if( WOHostUtilities.isLocalInetAddress( newHost.address(), true ) ) {
+		if( FHosts.isLocalInetAddress( newHost.address(), true ) ) {
 			_localHost = newHost;
 		}
 		_hostArray.addObject( newHost );
