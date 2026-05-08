@@ -56,7 +56,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 
 		// Sadly, we do regenerate in the case of random lifebeats. Hopefully this won't be too often.
 		// Didn't pull this out so that we can rely on isUsingWebServer to catch some bad requests
-		if( !aRequest.isUsingWebServer() && FHosts.isLocalInetAddress( aRequest._originatingAddress(), true ) ) {
+		if( !FHosts.isUsingWebServer( aRequest.headerForKey( FHosts.ADAPTOR_VERSION_HEADER ) ) && FHosts.isLocalInetAddress( aRequest._originatingAddress(), true ) ) {
 			final Object lock = WOApplication.application().requestHandlingLock();
 
 			if( lock != null ) {

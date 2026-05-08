@@ -83,7 +83,7 @@ public class DirectAction extends WODirectAction {
 		WOResponse aResponse = theApplication.createResponseInContext( null );
 
 		// Aren't allowed to call this through the Web server.
-		if( aRequest.isUsingWebServer() ) {
+		if( FHosts.isUsingWebServer( aRequest.headerForKey( FHosts.ADAPTOR_VERSION_HEADER ) ) ) {
 			logger.debug( "Attempt to call DirectAction: monitorRequestAction through Web server" );
 			logger.debug( aRequest.contentString() );
 			aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );

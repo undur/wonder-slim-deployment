@@ -27,6 +27,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 
 import sjip.core.MUtil;
+import sjip.x.FHosts;
 import sjip.x.FoundationCoder;
 
 public class RemoteBrowse extends WODirectAction {
@@ -111,7 +112,7 @@ public class RemoteBrowse extends WODirectAction {
 		final WORequest aRequest = request();
 		final WOResponse aResponse = new WOResponse();
 
-		if( aRequest.isUsingWebServer() ) {
+		if( FHosts.isUsingWebServer( aRequest.headerForKey( FHosts.ADAPTOR_VERSION_HEADER ) ) ) {
 			aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 			aResponse.appendContentString( "Access Denied" );
 			return aResponse;
