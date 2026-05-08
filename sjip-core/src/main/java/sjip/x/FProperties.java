@@ -99,6 +99,17 @@ public final class FProperties {
 		/** Filesystem path where wotaskd/JavaMonitor look for {@code SiteConfig.xml}. */
 		public static final StringProperty DEPLOYMENT_CONFIGURATION_DIRECTORY = new StringProperty( "WODeploymentConfigurationDirectory", null );
 
+		// === sjip-core FHosts ===
+
+		/** When set, the platform binds to this single host address and treats only it as "local" for admin-action gating. When unset, every locally-bound interface address counts as local. */
+		public static final StringProperty WO_HOST = new StringProperty( "WOHost", null );
+
+		/** Operator escape hatch: when true, every request is treated as if it arrived through a web-server adaptor, regardless of the {@code x-webobjects-adaptor-version} header. Defaults false. */
+		public static final BooleanProperty IS_USING_WEB_SERVER_OVERRIDE = new BooleanProperty( "WORequestIsUsingWebServerOverride", false );
+
+		/** Comma- or whitespace-separated list of additional IP addresses to treat as local for admin-action gating. Useful in multi-homed setups where auto-detection misses a needed interface. Format mirrors ERXProperties array syntax: {@code (1.2.3.4, 5.6.7.8)} or just {@code 1.2.3.4,5.6.7.8}. */
+		public static final StringProperty LOCALHOST_IPS = new StringProperty( "er.extensions.WOHostUtilities.localhostips", null );
+
 		// === sjip-core Emailer ===
 
 		/** SMTP server hostname for outgoing notification mail. */

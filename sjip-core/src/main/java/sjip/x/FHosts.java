@@ -61,10 +61,6 @@ public final class FHosts {
 	/** HTTP header set by mod_WebObjects / modulo when proxying a request. Presence => web-server-routed. */
 	public static final String ADAPTOR_VERSION_HEADER = "x-webobjects-adaptor-version";
 
-	private static final String WO_HOST_PROPERTY = "WOHost";
-	private static final String IS_USING_WEB_SERVER_OVERRIDE_PROPERTY = "WORequestIsUsingWebServerOverride";
-	private static final String LOCALHOST_IPS_PROPERTY = "er.extensions.WOHostUtilities.localhostips";
-
 	private static final AtomicReference<Set<InetAddress>> localAddresses = new AtomicReference<>( computeLocalAddresses() );
 
 	private FHosts() {}
@@ -120,8 +116,7 @@ public final class FHosts {
 			return true;
 		}
 
-		final String override = System.getProperty( IS_USING_WEB_SERVER_OVERRIDE_PROPERTY );
-		return override != null && Boolean.parseBoolean( override.trim() );
+		return FProperties.booleanValue( FProperties.K.IS_USING_WEB_SERVER_OVERRIDE );
 	}
 
 	private static boolean isInLocalSet( final InetAddress address, final boolean refreshOnMiss ) {
@@ -146,7 +141,7 @@ public final class FHosts {
 	 *         case where WO would set {@code _unsetHost = true}.
 	 */
 	private static InetAddress configuredWOHost() {
-		final String hostProperty = System.getProperty( WO_HOST_PROPERTY );
+		final String hostProperty = FProperties.stringValue( FProperties.K.WO_HOST );
 		if( hostProperty == null || hostProperty.isEmpty() ) {
 			return null;
 		}
@@ -205,7 +200,7 @@ public final class FHosts {
 			logger.warn( "NetworkInterface.getNetworkInterfaces() failed: {}", e.toString() );
 		}
 
-		final String explicitIps = System.getProperty( LOCALHOST_IPS_PROPERTY );
+		final String explicitIps = FProperties.stringValue( FProperties.K.LOCALHOST_IPS );
 		if( explicitIps != null && !explicitIps.isEmpty() ) {
 			for( final String ip : explicitIps.split( "[\\s,()]+" ) ) {
 				if( !ip.isEmpty() ) {
