@@ -46,6 +46,7 @@ import sjip.core.IInstanceController;
 import sjip.core.MUtil;
 import sjip.core.SjipException;
 import sjip.x.AdaptorConfigSerialization;
+import sjip.x.FProperties;
 import sjip.x.FoundationCoder;
 import sjip.x.LegacyPasswordHash;
 
@@ -571,7 +572,7 @@ public class MSiteConfig extends MObject {
 
 		// setting the multiplier for assuming an application is dead
 		_appIsDeadMultiplier = 2 * 1000;
-		final String WOAssumeAppIsDeadMultiplier = System.getProperties().getProperty( "WOAssumeApplicationIsDeadMultiplier" );
+		final String WOAssumeAppIsDeadMultiplier = FProperties.stringValue( FProperties.K.ASSUME_APPLICATION_IS_DEAD_MULTIPLIER );
 		if( WOAssumeAppIsDeadMultiplier != null ) {
 			try {
 				final Integer tempInt = Integer.valueOf( WOAssumeAppIsDeadMultiplier );
@@ -632,7 +633,7 @@ public class MSiteConfig extends MObject {
 	public static String configDirectoryPath() {
 
 		if( _configDirectoryPath == null ) {
-			_configDirectoryPath = System.getProperty( "WODeploymentConfigurationDirectory" );
+			_configDirectoryPath = FProperties.stringValue( FProperties.K.DEPLOYMENT_CONFIGURATION_DIRECTORY );
 
 			if( _configDirectoryPath == null || _configDirectoryPath.isEmpty() ) {
 				logger.error( "WODeploymentConfigurationDirectory not set" );

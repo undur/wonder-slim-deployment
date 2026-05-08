@@ -43,7 +43,6 @@ import com.webobjects.appserver._private.WOHostUtilities;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.foundation.ERXProperties;
 import sjip.core.IInstanceController;
 import sjip.core.MUtil;
 import sjip.core.SjipException;
@@ -51,6 +50,7 @@ import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
+import sjip.x.FProperties;
 import sjip.x.FoundationCoder;
 import sjip.x.ResponseWrapper;
 import sjip.x.XUtil;
@@ -59,10 +59,10 @@ public class InstanceController implements IInstanceController {
 
 	private static final Logger logger = LoggerFactory.getLogger( InstanceController.class );
 
-	private static final int FORCE_QUIT_DELAY = ERXProperties.intForKeyWithDefault( "WOTaskd.killTimeout", 120000 );
-	private static final int RECEIVE_TIMEOUT = ERXProperties.intForKeyWithDefault( "WOTaskd.receiveTimeout", 5000 );
-	private static final boolean FORCE_QUIT_TASK_ENABLED = ERXProperties.booleanForKeyWithDefault( "WOTaskd.forceQuitTaskEnabled", false );
-	private static final boolean IS_ON_WINDOWS = System.getProperty( "os.name" ).toLowerCase().startsWith( "win" );
+	private static final int FORCE_QUIT_DELAY = FProperties.intValue( FProperties.K.FORCE_QUIT_DELAY );
+	private static final int RECEIVE_TIMEOUT = FProperties.intValue( FProperties.K.RECEIVE_TIMEOUT );
+	private static final boolean FORCE_QUIT_TASK_ENABLED = FProperties.booleanValue( FProperties.K.FORCE_QUIT_TASK_ENABLED );
+	private static final boolean IS_ON_WINDOWS = FProperties.sysProp( "os.name" ).toLowerCase().startsWith( "win" );
 
 	/**
 	 * When true, instances are launched in a way that detaches them from wotaskd's process
@@ -70,7 +70,7 @@ public class InstanceController implements IInstanceController {
 	 * the {@code WOTaskd.detachLaunch} system property. The legacy {@code Runtime.exec} path
 	 * is preserved unchanged for the off case. Unix-only — has no effect on Windows.
 	 */
-	private static final boolean DETACH_LAUNCH = ERXProperties.booleanForKeyWithDefault( "WOTaskd.detachLaunch", false );
+	private static final boolean DETACH_LAUNCH = FProperties.booleanValue( FProperties.K.DETACH_LAUNCH );
 
 	private final String _hostName;
 	private final boolean _shouldUseSpawn;
@@ -154,9 +154,9 @@ public class InstanceController implements IInstanceController {
 	public InstanceController() {
 		final MSiteConfig aConfig = theApplication().siteConfig();
 
-		final boolean spawnRequested = XUtil.boolValue( System.getProperty( "WOShouldUseSpawn" ) );
+		final boolean spawnRequested = FProperties.booleanValue( FProperties.K.SHOULD_USE_SPAWN );
 		if( spawnRequested ) {
-			final String userDir = System.getProperties().getProperty( "user.dir" );
+			final String userDir = FProperties.sysProp( "user.dir" );
 			final String spawnScript = IS_ON_WINDOWS ? "SpawnOfWotaskd.exe" : "SpawnOfWotaskd.sh";
 			final String appDir = Path.of( userDir, "Contents", "Resources", spawnScript ).toString();
 			final File theApp = new File( appDir );
@@ -772,7 +772,7 @@ public class InstanceController implements IInstanceController {
 		//an ACCEPT will cancel the monitoring
 		if( FORCE_QUIT_TASK_ENABLED ) {
 			if( FORCE_QUIT_DELAY >= 60000 ) {
-				anInstance.scheduleRefuseTask( new MInstanceTask.Refuse( anInstance, ERXProperties.intForKeyWithDefault( "WOTaskd.refuseNumRetries", 3 ) ), FORCE_QUIT_DELAY, FORCE_QUIT_DELAY );
+				anInstance.scheduleRefuseTask( new MInstanceTask.Refuse( anInstance, FProperties.intValue( FProperties.K.REFUSE_NUM_RETRIES ) ), FORCE_QUIT_DELAY, FORCE_QUIT_DELAY );
 			}
 			else {
 				logger.error( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );

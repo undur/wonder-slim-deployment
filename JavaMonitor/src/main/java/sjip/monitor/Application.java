@@ -20,6 +20,7 @@ import er.extensions.appserver.ERXApplication;
 import er.extensions.routes.RouteTable;
 import sjip.monitor.admin.AdminAction;
 import sjip.monitor.util.WOTaskdHandler;
+import sjip.x.FProperties;
 
 public class Application extends ERXApplication {
 
@@ -30,8 +31,8 @@ public class Application extends ERXApplication {
 	public Application() {
 
 		// FIXME: I know. We need a better method to enter "test" mode // Hugi 2026-05-01
-		if( "hugi".equals( System.getProperty( "user.name" ) ) ) {
-			System.setProperty( "WODeploymentConfigurationDirectory", "/Users/hugi/Desktop/woconfig" );
+		if( "hugi".equals( FProperties.sysProp( "user.name" ) ) ) {
+			System.setProperty( FProperties.K.DEPLOYMENT_CONFIGURATION_DIRECTORY.name(), "/Users/hugi/Desktop/woconfig" );
 		}
 
 		WOTaskdHandler.createSiteConfig();

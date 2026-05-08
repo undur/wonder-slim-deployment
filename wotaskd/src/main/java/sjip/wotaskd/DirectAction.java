@@ -41,6 +41,7 @@ import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
 import sjip.x.AdaptorConfigSerialization;
+import sjip.x.FProperties;
 import sjip.x.FoundationCoder;
 import sjip.x.FoundationPropertyListSerialization;
 import sjip.x.ResponseWrapper;
@@ -472,8 +473,8 @@ public class DirectAction extends WODirectAction {
 				// query - host.runningInstancesCount_W
 				if( hostResponse == null ) {
 					Integer runningInstances = Integer.valueOf( 0 );
-					String processorType = System.getProperties().getProperty( "os.arch" );
-					String operatingSystem = System.getProperties().getProperty( "os.name" ) + " " + System.getProperties().getProperty( "os.version" );
+					String processorType = FProperties.sysProp( "os.arch" );
+					String operatingSystem = FProperties.sysProp( "os.name" ) + " " + FProperties.sysProp( "os.version" );
 
 					hostResponse = new NSMutableDictionary( new Object[] { runningInstances, processorType, operatingSystem }, HOST_QUERY_KEYS );
 				}

@@ -10,7 +10,7 @@ import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.routes.RouteTable;
 import sjip.core.model.MSiteConfig;
-import sjip.x.XUtil;
+import sjip.x.FProperties;
 
 public class Application extends ERXApplication {
 
@@ -30,7 +30,7 @@ public class Application extends ERXApplication {
 	public Application() {
 		
 		// FIXME: I know.
-		if( "hugi".equals( System.getProperty( "user.name" ) ) ) {
+		if( "hugi".equals( FProperties.sysProp( "user.name" ) ) ) {
 			System.setProperty( "WODeploymentConfigurationDirectory", "/Users/hugi/Desktop/woconfig" );
 		}
 
@@ -45,7 +45,7 @@ public class Application extends ERXApplication {
 		_setLifebeatDestinationPort( port().intValue() );
 
 		// Setting the multicast address
-		_multicastAddress = System.getProperty( "WOMulticastAddress", "239.128.14.2" );
+		_multicastAddress = FProperties.stringValue( FProperties.K.MULTICAST_ADDRESS );
 
 		registerRequestHandler( new LifebeatRequestHandler(), "wlb" );
 
@@ -62,7 +62,7 @@ public class Application extends ERXApplication {
 		_instanceController = new InstanceController();
 
 		// checking to see if we should save WOConfig.xml to disk for the adaptors.
-		_shouldWriteAdaptorConfig = XUtil.boolValue( System.getProperty( "WOSavesAdaptorConfiguration" ) );
+		_shouldWriteAdaptorConfig = FProperties.booleanValue( FProperties.K.SAVES_ADAPTOR_CONFIGURATION );
 
 		if( _shouldWriteAdaptorConfig ) {
 			_siteConfig.archiveAdaptorConfig();
@@ -70,7 +70,7 @@ public class Application extends ERXApplication {
 
 		// checking to see if we should respond to adaptor multicast queries
 		// we will always respond to non-multicast UDP packets
-		_shouldRespondToMulticast = XUtil.boolValue( System.getProperty( "WORespondsToMulticastQuery" ) );
+		_shouldRespondToMulticast = FProperties.booleanValue( FProperties.K.RESPONDS_TO_MULTICAST_QUERY );
 
 		if( _shouldRespondToMulticast ) {
 			logger.info( "Multicast Response Enabled" );

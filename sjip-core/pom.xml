@@ -13,6 +13,9 @@
 
 		<webobjects.group>com.webobjects</webobjects.group>
 		<webobjects.version>5.4.3</webobjects.version>
+
+		<wonder.group>is.rebbi.slim</wonder.group>
+		<wonder.version>8.0.0</wonder.version>
 	</properties>
 
 	<dependencies>
@@ -26,6 +29,12 @@
 					<artifactId>JavaXML</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<!-- FIXME: Pulled in solely so FProperties can delegate to ERXProperties without behaviour drift. To be removed when FProperties owns its parsing — see #41. // 2026-05-08 -->
+		<dependency>
+			<groupId>${wonder.group}</groupId>
+			<artifactId>ERExtensions</artifactId>
+			<version>${wonder.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
