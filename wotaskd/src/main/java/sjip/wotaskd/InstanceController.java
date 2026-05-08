@@ -62,6 +62,7 @@ public class InstanceController implements IInstanceController {
 	private static final int FORCE_QUIT_DELAY = ERXProperties.intForKeyWithDefault( "WOTaskd.killTimeout", 120000 );
 	private static final int RECEIVE_TIMEOUT = ERXProperties.intForKeyWithDefault( "WOTaskd.receiveTimeout", 5000 );
 	private static final boolean FORCE_QUIT_TASK_ENABLED = ERXProperties.booleanForKeyWithDefault( "WOTaskd.forceQuitTaskEnabled", false );
+	private static final boolean IS_ON_WINDOWS = System.getProperty( "os.name" ).toLowerCase().startsWith( "win" );
 
 	/**
 	 * When true, instances are launched in a way that detaches them from wotaskd's process
@@ -72,7 +73,6 @@ public class InstanceController implements IInstanceController {
 	private static final boolean DETACH_LAUNCH = ERXProperties.booleanForKeyWithDefault( "WOTaskd.detachLaunch", false );
 
 	private final String _hostName;
-	private final boolean _isOnWindows;
 	private final boolean _shouldUseSpawn;
 	private final String spawningGrounds;
 
@@ -142,12 +142,10 @@ public class InstanceController implements IInstanceController {
 	public InstanceController() {
 		final MSiteConfig aConfig = theApplication().siteConfig();
 
-		_isOnWindows = System.getProperties().getProperty( "os.name" ).toLowerCase().startsWith( "win" );
-
 		final boolean spawnRequested = XUtil.boolValue( System.getProperty( "WOShouldUseSpawn" ) );
 		if( spawnRequested ) {
 			final String userDir = System.getProperties().getProperty( "user.dir" );
-			final String spawnScript = _isOnWindows ? "SpawnOfWotaskd.exe" : "SpawnOfWotaskd.sh";
+			final String spawnScript = IS_ON_WINDOWS ? "SpawnOfWotaskd.exe" : "SpawnOfWotaskd.sh";
 			final String appDir = Path.of( userDir, "Contents", "Resources", spawnScript ).toString();
 			final File theApp = new File( appDir );
 
@@ -514,7 +512,7 @@ public class InstanceController implements IInstanceController {
 		}
 
 		if( _shouldUseSpawn ) {
-			if( _isOnWindows ) {
+			if( IS_ON_WINDOWS ) {
 				aLaunchPath = spawningGrounds + aLaunchPath;
 			}
 			else {
@@ -525,7 +523,7 @@ public class InstanceController implements IInstanceController {
 		try {
 			logger.debug( "Starting Instance: " + aLaunchPath );
 
-			if( DETACH_LAUNCH && !_isOnWindows ) {
+			if( DETACH_LAUNCH && !IS_ON_WINDOWS ) {
 				logger.info( "starting instance {}:{} in detached mode", anInstance.applicationName(), anInstance.port() );
 				startInstanceDetached( aFullPath, anInstance.commandLineArgumentsAsArray() );
 			}
