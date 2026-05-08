@@ -256,7 +256,6 @@ public class InstanceController implements IInstanceController {
 			sb = new StringBuilder();
 
 			if( (unknownApps.count() == 0) ) {
-				// the read lock is released in the finally block
 				return sb.toString();
 			}
 
@@ -280,10 +279,10 @@ public class InstanceController implements IInstanceController {
 					sb.append( _hostName );
 
 					sb.append( "\"/>\n" );
-				} // end Instance Enumeration
+				}
 
 				sb.append( "  </application>\n" );
-			} // end Application Enumeration
+			}
 		}
 		finally {
 			_unknownAppLock.readLock().unlock();
