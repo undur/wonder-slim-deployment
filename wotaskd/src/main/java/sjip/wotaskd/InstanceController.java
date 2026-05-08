@@ -139,6 +139,18 @@ public class InstanceController implements IInstanceController {
 	private final NSMutableDictionary _unknownApplications = new NSMutableDictionary();
 	private final ReentrantReadWriteLock _unknownAppLock = new ReentrantReadWriteLock();
 
+	/**
+	 * Resolves the launch wrapper (if {@code WOShouldUseSpawn} is set), records the local
+	 * host name, and schedules the one-shot startup auto-recovery sweep. The repeating
+	 * auto-recovery and hourly schedule timers are armed by {@link #_checkAutoRecoverStartup}
+	 * after that initial sweep completes.
+	 *
+	 * <p>The {@code WOShouldUseSpawn} dance looks for a per-platform spawn helper next to
+	 * the wotaskd binary ({@code SpawnOfWotaskd.sh} on POSIX, {@code SpawnOfWotaskd.exe} on
+	 * Windows) and, if it exists, prepends it to every instance launch command. If the helper
+	 * isn't there, spawn mode silently falls back to direct {@code Runtime.exec}. The whole
+	 * mechanism predates the {@link #DETACH_LAUNCH} path — see #2 for the long-term direction.
+	 */
 	public InstanceController() {
 		final MSiteConfig aConfig = theApplication().siteConfig();
 
@@ -169,6 +181,19 @@ public class InstanceController implements IInstanceController {
 		_hostName = theApplication().host();
 	}
 
+	/**
+	 * Records or refreshes a lifebeat from an instance that wotaskd doesn't have a
+	 * SiteConfig entry for. Called from {@code LifebeatRequestHandler} for any "lifebeat"
+	 * notification whose instance name doesn't match a registered {@link MInstance}.
+	 *
+	 * <p>Only applies to instances on the local machine — a remote address silently no-ops,
+	 * since wotaskd has no business tracking foreign hosts' processes.
+	 *
+	 * <p>Failures (DNS lookup of {@code host}, locking, anything) are swallowed. Unknown
+	 * instances are best-effort bookkeeping; losing one is harmless.
+	 *
+	 * <p>See the {@link #_unknownApplications} field doc for the bigger picture.
+	 */
 	public void registerUnknownInstance( String name, String host, String port ) {
 		_unknownAppLock.writeLock().lock();
 
@@ -193,6 +218,14 @@ public class InstanceController implements IInstanceController {
 		}
 	}
 
+	/**
+	 * Returns *some* port at which an unknown instance of the named app is currently
+	 * listening, or {@code null} if no unknown instance with that name has been seen
+	 * recently. Picks the first port from the dictionary's iteration order — arbitrary
+	 * when multiple unknown instances of the same app are alive, which is uncommon in
+	 * practice. Used by {@code DirectAction#defaultAction} to route requests at app names
+	 * that have no managed instance but do have a manually-started one lifebeating.
+	 */
 	public String portForUnregisteredAppNamed( String name ) {
 		_unknownAppLock.readLock().lock();
 
@@ -211,6 +244,15 @@ public class InstanceController implements IInstanceController {
 		}
 	}
 
+	/**
+	 * Drops {@link #_unknownApplications} entries whose last lifebeat is older than 45
+	 * seconds — twice the default 30-second lifebeat interval, so two missed pings count
+	 * as dead. Called from {@link #_checkAutoRecover}'s periodic timer; keeps the registry
+	 * from growing without bound when manually-started apps come and go.
+	 *
+	 * <p>The 45-second cutoff is hardcoded; making it configurable hasn't been worth the
+	 * effort given how marginal this whole subsystem is.
+	 */
 	private void triageUnknownInstances() {
 		_unknownAppLock.writeLock().lock();
 
@@ -244,7 +286,20 @@ public class InstanceController implements IInstanceController {
 		}
 	}
 
-	// this actually only returns unregistered applications
+	/**
+	 * Emits {@code <application>}/{@code <instance>} XML fragments for every unknown
+	 * instance currently in {@link #_unknownApplications}, formatted for inclusion in
+	 * {@code WOConfig.xml} so the {@code mod_WebObjects} adaptor can route requests to
+	 * manually-started apps too. The "config" of the method's name refers to the adaptor's
+	 * {@code WOConfig.xml}, not wotaskd's {@code SiteConfig.xml}.
+	 *
+	 * <p>Despite the generic name, this method only handles the unknown-instance leg —
+	 * the registered-instance fragments are emitted separately by {@code MSiteConfig}.
+	 *
+	 * <p>Each {@code <instance>} gets a sentinel {@code id="-<port>"} (the negative-port
+	 * convention is how the adaptor distinguishes unknown from registered), and the host
+	 * is always wotaskd's own (an unknown instance is by definition local).
+	 */
 	@Override
 	public String generateAdaptorConfigXML() {
 		StringBuilder sb = null;
@@ -292,6 +347,18 @@ public class InstanceController implements IInstanceController {
 	}
 
 	/********** Timer Targets **********/
+
+	/**
+	 * Periodic auto-recovery sweep. For every local instance flagged as auto-recovering
+	 * or scheduled, restarts it if it isn't currently running and isn't already in the
+	 * STARTING state. Also calls {@link #triageUnknownInstances()} on each pass to expire
+	 * stale unknown-app entries.
+	 *
+	 * <p>Runs at the interval configured by {@code MSiteConfig.autoRecoverInterval}.
+	 * Holds the application read lock for the duration; instance starts happen synchronously
+	 * inside the lock, which is fine because {@link #startInstance} only kicks off the
+	 * launch — it doesn't wait for the instance to come up.
+	 */
 	private void _checkAutoRecover() {
 		logger.debug( "_checkAutoRecover START" );
 		theApplication()._lock.readLock().lock();
@@ -319,7 +386,19 @@ public class InstanceController implements IInstanceController {
 		logger.debug( "_checkAutoRecover STOP" );
 	}
 
-	// This only runs once, on startup - then it starts the regular timer
+	/**
+	 * One-shot startup auto-recovery, fired once after the initial
+	 * {@code autoRecoverInterval} delay. Walks every application in the SiteConfig in
+	 * parallel (one thread per app) and inside each thread starts that app's local
+	 * instances serially, optionally with a {@code timeForStartup} pause between them
+	 * (the per-app "phased startup" knob — staggers heavy-startup apps so they don't
+	 * thrash the host on boot).
+	 *
+	 * <p>After the parallel sweep returns, arms the two repeating timers that drive the
+	 * rest of the controller's lifecycle: the auto-recovery sweep ({@link #_checkAutoRecover})
+	 * at {@code autoRecoverInterval}, and the schedule sweep ({@link #_checkSchedules})
+	 * hourly on the hour.
+	 */
 	private void _checkAutoRecoverStartup() {
 		logger.debug( "_checkAutoRecoverStartup START" );
 		theApplication()._lock.readLock().lock();
@@ -366,6 +445,14 @@ public class InstanceController implements IInstanceController {
 		logger.debug( "_checkAutoRecoverStartup STOP" );
 	}
 
+	/**
+	 * Worker for {@link #_checkAutoRecoverStartup} — starts every local, auto-recovering
+	 * or scheduled instance of the given application that isn't already running. When the
+	 * application has phased startup enabled, sleeps {@code timeForStartup} seconds between
+	 * instance launches so they don't thunder onto the host all at once.
+	 *
+	 * <p>Falls back to {@link MInstance#TIME_FOR_STARTUP} if the per-app value isn't set.
+	 */
 	private void _autoRecoverApplication( MApplication anApplication ) {
 		List<MInstance> instArray = anApplication.instanceArray();
 		int instArrayCount = instArray.size();
@@ -405,6 +492,21 @@ public class InstanceController implements IInstanceController {
 		} // end for
 	}
 
+	/**
+	 * Hourly scheduled-shutdown sweep. For every local instance with a scheduled shutdown
+	 * approaching (via {@link MInstance#nearNextScheduledShutdown}), kicks off the right
+	 * shutdown shape: {@link #stopInstance} for graceful (REFUSE-based, drains active
+	 * sessions) or {@link #terminateInstance} for hard (immediate kill). After dispatching,
+	 * {@link MInstance#calculateNextScheduledShutdown} rolls the schedule forward to the
+	 * next occurrence so the same instance doesn't keep matching every tick.
+	 *
+	 * <p>Each instance is dispatched in its own thread; the sweep waits for all of them
+	 * before returning. Exceptions from a single instance's shutdown are logged but don't
+	 * stop the sweep.
+	 *
+	 * <p>See #9 for the open question about day-of-week / off-by-one behaviour in
+	 * {@code calculateNextScheduledShutdown} after the java.time migration.
+	 */
 	private void _checkSchedules() {
 		logger.debug( "_checkSchedules START" );
 		theApplication()._lock.readLock().lock();
@@ -466,7 +568,23 @@ public class InstanceController implements IInstanceController {
 	}
 
 	/********** Controlling Instances **********/
-	// Returns null if success
+
+	/**
+	 * Launches the given instance. Validates that the instance is local, isn't already
+	 * running or starting, that nothing's listening on its port, and that its launch path
+	 * exists and is a file. Then either invokes the detached launch path (POSIX-only,
+	 * orphans the child to PID 1 — see {@link #startInstanceDetached}) when
+	 * {@link #DETACH_LAUNCH} is enabled, or falls back to {@code Runtime.exec} for the
+	 * legacy attached-process behaviour.
+	 *
+	 * <p>Fire-and-forget: success means "the launch was kicked off without immediate
+	 * error," not "the instance is up." Liveness is observed asynchronously via lifebeats.
+	 *
+	 * @return {@code null} on success, or a human-readable error message describing why
+	 *         the launch couldn't be attempted (instance is null, isn't local, port is
+	 *         already taken, path doesn't exist, etc.). Errors during the actual
+	 *         {@code exec} call are also returned in this form.
+	 */
 	@Override
 	public String startInstance( MInstance anInstance ) {
 		MSiteConfig aConfig = theApplication().siteConfig();
@@ -585,6 +703,21 @@ public class InstanceController implements IInstanceController {
 		return "'" + s.replace( "'", "'\\''" ) + "'";
 	}
 
+	/**
+	 * Hard shutdown: sends {@code TERMINATE} to the instance's admin endpoint, expecting
+	 * the instance to exit immediately. No-op if the instance isn't currently running.
+	 *
+	 * <p>If {@link #FORCE_QUIT_TASK_ENABLED} is on and the instance doesn't actually exit,
+	 * a follow-up {@link MInstanceTask.ForceQuit} fires after {@link #FORCE_QUIT_DELAY}ms
+	 * to do something more aggressive. The minimum allowed delay is 60 seconds; sub-minute
+	 * values are logged as errors and the task is skipped.
+	 *
+	 * @return the instance's response wrapper, or {@code null} if the instance wasn't
+	 *         running (no-op case).
+	 * @throws SjipException if validation fails (null instance, non-local, not running)
+	 *                       or the HTTP call fails.
+	 * @see #stopInstance for the graceful (REFUSE-based) alternative.
+	 */
 	@Override
 	public ResponseWrapper terminateInstance( MInstance anInstance ) throws SjipException {
 		if( !anInstance.isRunning_W() ) {
@@ -608,6 +741,25 @@ public class InstanceController implements IInstanceController {
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
+	/**
+	 * Graceful shutdown: sends {@code REFUSE} to the instance, telling it to stop
+	 * accepting new sessions and exit when its active-session count drops to the
+	 * configured minimum. No-op if the instance isn't currently running.
+	 *
+	 * <p>If {@link #FORCE_QUIT_TASK_ENABLED} is on, schedules a periodic
+	 * {@link MInstanceTask.Refuse} watcher that retries up to {@code WOTaskd.refuseNumRetries}
+	 * times (default 3) before force-quitting an instance that still hasn't exited. An
+	 * intervening {@link #setAcceptInstance ACCEPT} cancels the watcher.
+	 *
+	 * <p>Caller-facing method name: this is the "graceful stop" verb. The wire-level command
+	 * is {@code REFUSE}, which is why this method maps to that string in the request dictionary
+	 * — the protocol vocabulary doesn't quite match the local API vocabulary.
+	 *
+	 * @return the instance's response wrapper, or {@code null} if the instance wasn't
+	 *         running.
+	 * @throws SjipException on validation or HTTP failure.
+	 * @see #terminateInstance for the immediate-kill alternative.
+	 */
 	@Override
 	public ResponseWrapper stopInstance( MInstance anInstance ) throws SjipException {
 		if( !anInstance.isRunning_W() ) {
@@ -632,12 +784,27 @@ public class InstanceController implements IInstanceController {
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
+	/**
+	 * Reverses a prior {@link #stopInstance REFUSE}: tells the instance to resume
+	 * accepting new sessions. Cancels any pending refuse-watcher task on the instance.
+	 *
+	 * @throws SjipException on validation or HTTP failure.
+	 */
 	public ResponseWrapper setAcceptInstance( MInstance anInstance ) throws SjipException {
 		catchInstanceErrors( anInstance );
 		final Map<String,Object> xmlDict = createInstanceRequestDictionary( "ACCEPT", null, anInstance );
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
+	/**
+	 * Sends a {@code STATISTICS} query to the instance's admin endpoint and returns its
+	 * response. The response body is an ASCII property-list of the instance's
+	 * {@code WOStatisticsStore.statistics()} dictionary; see the survey on
+	 * {@code wonder-slim-deployment#22} for the actual contents (and what JavaMonitor
+	 * does with them today, which is "almost nothing").
+	 *
+	 * @throws SjipException on validation or HTTP failure.
+	 */
 	@Override
 	public ResponseWrapper queryInstance( MInstance anInstance ) throws SjipException {
 		catchInstanceErrors( anInstance );
@@ -645,6 +812,15 @@ public class InstanceController implements IInstanceController {
 		return sendInstanceRequest( _hostName, anInstance, xmlDict );
 	}
 
+	/**
+	 * Common preflight for the four command/query methods ({@link #terminateInstance},
+	 * {@link #stopInstance}, {@link #setAcceptInstance}, {@link #queryInstance}). Throws
+	 * with a useful message if the target is null, on a different host, or not currently
+	 * running. Exists to keep those four methods short and consistent rather than repeating
+	 * the same three checks inline.
+	 *
+	 * <p>The method name is "catch errors" but it actually throws them — historical naming.
+	 */
 	private void catchInstanceErrors( MInstance anInstance ) throws SjipException {
 
 		if( anInstance == null ) {
@@ -660,6 +836,22 @@ public class InstanceController implements IInstanceController {
 		}
 	}
 
+	/**
+	 * Encodes the request dictionary as XML, POSTs it to the instance's
+	 * {@code /cgi-bin/WebObjects/<App>.woa/womp/instanceRequest} endpoint, and wraps the
+	 * response. Updates the instance's connection bookkeeping
+	 * ({@link MInstance#succeededInConnection} / {@link MInstance#failedToConnect}) based
+	 * on the outcome.
+	 *
+	 * <p>Distinguishes {@code HttpTimeoutException} (different error message: "Timeout
+	 * while connecting") from other failures so operators can tell stuck-instance from
+	 * unreachable-instance at a glance. Both still increment the instance's failure counter.
+	 *
+	 * @throws SjipException on timeout or any other communication failure. The original
+	 *                       exception is included in the message but not chained as a
+	 *                       cause, since {@code SjipException} doesn't currently expose a
+	 *                       chained-cause constructor.
+	 */
 	private static ResponseWrapper sendInstanceRequest( final String hostName, final MInstance anInstance, final Map<String,Object> xmlDict ) throws SjipException {
 
 		final String requestContentXML = new FoundationCoder().encodeRootObjectForKey( xmlDict, "instanceRequest" );
@@ -757,6 +949,16 @@ public class InstanceController implements IInstanceController {
 		return instanceRequest;
 	}
 
+	/**
+	 * Probes whether something is already listening on the instance's port. Returns
+	 * {@code true} if a TCP connect succeeds within 1 second — meaning the port is taken
+	 * and {@link #startInstance} should refuse to launch. {@code false} on connection
+	 * refused, timeout, or any other I/O error — port is available.
+	 *
+	 * <p>Used as a "don't start an instance over an existing one" guard. It can't tell
+	 * whether the listener is the right app or some unrelated service that happens to
+	 * have grabbed the port; either way, {@code startInstance} declines.
+	 */
 	private boolean _testConnection( MInstance anInstance ) {
 		try( Socket aSocket = new Socket() ) {
 			aSocket.connect( new InetSocketAddress( anInstance.host().name(), anInstance.port() ), 1000 );
