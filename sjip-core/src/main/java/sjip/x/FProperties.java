@@ -1,7 +1,5 @@
 package sjip.x;
 
-import er.extensions.foundation.ERXProperties;
-
 /**
  * Single facade for every configuration property the platform consumes.
  *
@@ -12,14 +10,35 @@ import er.extensions.foundation.ERXProperties;
  *       documenting what it does. {@code FProperties.K} <em>is</em> the canonical "what
  *       knobs exist?" reference.</li>
  *   <li>Reading — proxy methods ({@link #intValue}, {@link #booleanValue},
- *       {@link #stringValue}) wrap the actual property-reading mechanism. Today they
- *       delegate to {@link ERXProperties}; the shim shape means swapping that backing
- *       mechanism is a one-file change with no consumer impact.</li>
+ *       {@link #stringValue}) read directly from {@link System#getProperty}.</li>
  * </ol>
  *
  * <p>JVM-built-in properties (e.g. {@code user.name}, {@code os.arch}) are read via
  * {@link #sysProp} for raw passthrough — they aren't <em>our</em> knobs, so they don't
  * get constants in {@link K}.
+ *
+ * <h2>Load-order assumption</h2>
+ *
+ * <p>{@code FProperties} reads from {@link System#getProperty}. WO/Wonder loads
+ * application properties (from each framework's bundled {@code Properties} file, the
+ * user's {@code WebObjects.properties}, and the command line) into
+ * {@code System.getProperties()} during {@link com.webobjects.appserver.WOApplication}'s
+ * constructor — specifically inside {@code _initWOApp}, called from the {@code super()}
+ * chain. So any read after that constructor has run sees the loaded values.
+ *
+ * <p>The implicit invariant: <strong>no {@code static final} initializer anywhere in
+ * the codebase that runs before the application constructor's {@code super()} chain
+ * completes may call {@link #intValue}, {@link #booleanValue}, or {@link #stringValue}
+ * on a property that depends on Properties-file or command-line values.</strong>
+ * Today every such read happens in classes that are class-loaded after the application
+ * is instantiated ({@code InstanceController}, {@code MSiteConfig}, etc.), so the
+ * invariant holds. Adding a property read to a class loaded earlier in the bootstrap
+ * (e.g. anything touched by {@code main} before {@code WOApplication}'s constructor
+ * runs) would break it silently — the read would return the default value instead of
+ * the configured one.
+ *
+ * <p>If this becomes a problem, the fix is to defer the read until after bootstrap
+ * (e.g. read-on-first-use with a memoized supplier). Today it's a non-issue.
  *
  * <p>See issue #41 for the migration rationale.
  */
@@ -98,27 +117,47 @@ public final class FProperties {
 	public record StringProperty( String name, String defaultValue ) implements FProperty {}
 
 	/**
-	 * Reads the property as an int, falling back to its declared default when unset or
-	 * unparseable. Delegates to {@link ERXProperties#intForKeyWithDefault}.
+	 * Reads the property as an int. Falls back to the declared default when unset or
+	 * unparseable.
 	 */
 	public static int intValue( IntProperty property ) {
-		return ERXProperties.intForKeyWithDefault( property.name(), property.defaultValue() );
+		final String raw = System.getProperty( property.name() );
+		if( raw == null ) {
+			return property.defaultValue();
+		}
+		try {
+			return Integer.parseInt( raw.trim() );
+		}
+		catch( NumberFormatException e ) {
+			return property.defaultValue();
+		}
 	}
 
 	/**
-	 * Reads the property as a boolean, falling back to its declared default when unset
-	 * or unparseable. Delegates to {@link ERXProperties#booleanForKeyWithDefault}.
+	 * Reads the property as a boolean. Recognises {@code "true"}, {@code "yes"},
+	 * {@code "y"}, {@code "on"}, {@code "1"} (case-insensitive) as true and
+	 * {@code "false"}, {@code "no"}, {@code "n"}, {@code "off"}, {@code "0"} as false.
+	 * Anything else falls back to the declared default — matches the permissive
+	 * parsing the previous {@code ERXProperties} backing layer used.
 	 */
 	public static boolean booleanValue( BooleanProperty property ) {
-		return ERXProperties.booleanForKeyWithDefault( property.name(), property.defaultValue() );
+		final String raw = System.getProperty( property.name() );
+		if( raw == null ) {
+			return property.defaultValue();
+		}
+		return switch( raw.trim().toLowerCase() ) {
+			case "true", "yes", "y", "on", "1" -> true;
+			case "false", "no", "n", "off", "0" -> false;
+			default -> property.defaultValue();
+		};
 	}
 
 	/**
-	 * Reads the property as a String, falling back to its declared default when unset.
-	 * Delegates to {@link ERXProperties#stringForKeyWithDefault}.
+	 * Reads the property as a String. Returns the declared default when unset.
 	 */
 	public static String stringValue( StringProperty property ) {
-		return ERXProperties.stringForKeyWithDefault( property.name(), property.defaultValue() );
+		final String raw = System.getProperty( property.name() );
+		return raw != null ? raw : property.defaultValue();
 	}
 
 	/**
