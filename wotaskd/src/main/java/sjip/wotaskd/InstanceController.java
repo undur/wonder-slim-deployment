@@ -57,16 +57,30 @@ import sjip.x.XUtil;
 
 public class InstanceController implements IInstanceController {
 
-	private final ScheduledExecutorService _scheduler = Executors.newSingleThreadScheduledExecutor( r -> {
-		final Thread t = new Thread( r, "InstanceController-scheduler" );
-		t.setDaemon( true );
-		return t;
-	} );
+	private static final Logger logger = LoggerFactory.getLogger( InstanceController.class );
+
+	private static final int FORCE_QUIT_DELAY = ERXProperties.intForKeyWithDefault( "WOTaskd.killTimeout", 120000 );
+	private static final int RECEIVE_TIMEOUT = ERXProperties.intForKeyWithDefault( "WOTaskd.receiveTimeout", 5000 );
+	private static final boolean FORCE_QUIT_TASK_ENABLED = ERXProperties.booleanForKeyWithDefault( "WOTaskd.forceQuitTaskEnabled", false );
+
+	/**
+	 * When true, instances are launched in a way that detaches them from wotaskd's process
+	 * group, so killing wotaskd does not take the instances with it. Off by default; flip via
+	 * the {@code WOTaskd.detachLaunch} system property. The legacy {@code Runtime.exec} path
+	 * is preserved unchanged for the off case. Unix-only — has no effect on Windows.
+	 */
+	private static final boolean DETACH_LAUNCH = ERXProperties.booleanForKeyWithDefault( "WOTaskd.detachLaunch", false );
 
 	private final String _hostName;
 	private final boolean _isOnWindows;
 	private final boolean _shouldUseSpawn;
 	private final String spawningGrounds;
+
+	private final ScheduledExecutorService _scheduler = Executors.newSingleThreadScheduledExecutor( r -> {
+		final Thread t = new Thread( r, "InstanceController-scheduler" );
+		t.setDaemon( true );
+		return t;
+	} );
 
 	/**
 	 * Registry of running app instances that wotaskd <em>didn't</em> start — apps that
@@ -124,18 +138,6 @@ public class InstanceController implements IInstanceController {
 	 */
 	private final NSMutableDictionary _unknownApplications = new NSMutableDictionary();
 	private final ReentrantReadWriteLock _unknownAppLock = new ReentrantReadWriteLock();
-
-	private static final int FORCE_QUIT_DELAY = ERXProperties.intForKeyWithDefault( "WOTaskd.killTimeout", 120000 );
-	private static final int RECEIVE_TIMEOUT = ERXProperties.intForKeyWithDefault( "WOTaskd.receiveTimeout", 5000 );
-	private static final boolean FORCE_QUIT_TASK_ENABLED = ERXProperties.booleanForKeyWithDefault( "WOTaskd.forceQuitTaskEnabled", false );
-
-	/**
-	 * When true, instances are launched in a way that detaches them from wotaskd's process
-	 * group, so killing wotaskd does not take the instances with it. Off by default; flip via
-	 * the {@code WOTaskd.detachLaunch} system property. The legacy {@code Runtime.exec} path
-	 * is preserved unchanged for the off case. Unix-only — has no effect on Windows.
-	 */
-	private static final boolean DETACH_LAUNCH = ERXProperties.booleanForKeyWithDefault( "WOTaskd.detachLaunch", false );
 
 	public InstanceController() {
 		final MSiteConfig aConfig = theApplication().siteConfig();
@@ -660,8 +662,6 @@ public class InstanceController implements IInstanceController {
 			throw new SjipException( _hostName + ": " + anInstance.displayName() + " is not running" );
 		}
 	}
-
-	private static final Logger logger = LoggerFactory.getLogger( InstanceController.class );
 
 	private static ResponseWrapper sendInstanceRequest( final String hostName, final MInstance anInstance, final Map<String,Object> xmlDict ) throws SjipException {
 
