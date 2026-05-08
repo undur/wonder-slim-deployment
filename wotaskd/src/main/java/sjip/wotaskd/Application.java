@@ -86,6 +86,8 @@ public class Application extends ERXApplication {
 		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
 		final WODirectActionRequestHandler rootRequestHandler = new WODirectActionRequestHandler( DirectAction.class.getName(), "default", false );
 		RouteTable.defaultRouteTable().map( "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
+
+		FProperties.logCurrentValues( logger );
 	}
 
 	@Override

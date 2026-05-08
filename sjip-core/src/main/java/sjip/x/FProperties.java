@@ -1,5 +1,11 @@
 package sjip.x;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+
 /**
  * Single facade for every configuration property the platform consumes.
  *
@@ -102,19 +108,28 @@ public final class FProperties {
 		public static final StringProperty MAILER_SMTP_USERNAME = new StringProperty( "mailer.smtpUsername", null );
 
 		/** SMTP authentication password. */
-		public static final StringProperty MAILER_SMTP_PASSWORD = new StringProperty( "mailer.smtpPassword", null );
+		public static final StringProperty MAILER_SMTP_PASSWORD = new StringProperty( "mailer.smtpPassword", null, true );
 	}
 
 	/** Tag interface for the typed property records. Not generic over T because Java records can't quite express what's wanted across a sealed hierarchy. */
 	public sealed interface FProperty permits IntProperty, BooleanProperty, StringProperty {
 		String name();
+
+		/** True when the property's value should be elided from logs. Only meaningful for secrets. */
+		boolean redacted();
 	}
 
-	public record IntProperty( String name, int defaultValue ) implements FProperty {}
+	public record IntProperty( String name, int defaultValue, boolean redacted ) implements FProperty {
+		public IntProperty( String name, int defaultValue ) { this( name, defaultValue, false ); }
+	}
 
-	public record BooleanProperty( String name, boolean defaultValue ) implements FProperty {}
+	public record BooleanProperty( String name, boolean defaultValue, boolean redacted ) implements FProperty {
+		public BooleanProperty( String name, boolean defaultValue ) { this( name, defaultValue, false ); }
+	}
 
-	public record StringProperty( String name, String defaultValue ) implements FProperty {}
+	public record StringProperty( String name, String defaultValue, boolean redacted ) implements FProperty {
+		public StringProperty( String name, String defaultValue ) { this( name, defaultValue, false ); }
+	}
 
 	/**
 	 * Reads the property as an int. Falls back to the declared default when unset or
@@ -167,5 +182,109 @@ public final class FProperties {
 	 */
 	public static String sysProp( String name ) {
 		return System.getProperty( name );
+	}
+
+	/**
+	 * Logs the value currently in effect for every property declared in {@link K}. One
+	 * line per property, aligned, with each entry tagged {@code [set]} or {@code [default]}
+	 * to show whether the operator has overridden it. Redacted properties show
+	 * {@code *** (N chars)} instead of their value.
+	 *
+	 * <p>Intended to be called once per component at the end of the application's
+	 * constructor — gives operators a clean snapshot of the configuration the platform
+	 * actually started with, and surfaces any load-order surprises (a property the
+	 * operator set but that the platform doesn't see) as a {@code [default]} marker
+	 * where {@code [set]} was expected.
+	 *
+	 * <p>Output is shaped to match Wonder's own startup banner format (a section heading
+	 * framed by {@code =} separators, a header row, then content rows).
+	 */
+	public static void logCurrentValues( final Logger logger ) {
+		final List<FProperty> all = registry();
+
+		final String headerName = "-- Property --";
+		final String headerValue = "-- Value --";
+		final String headerSource = "-- Source --";
+
+		final int nameWidth = Math.max( headerName.length(), all.stream().mapToInt( p -> p.name().length() ).max().orElse( 0 ) );
+		final int valueWidth = Math.max( headerValue.length(), all.stream().mapToInt( p -> displayValue( p ).length() ).max().orElse( 0 ) );
+		final int totalWidth = nameWidth + 3 + valueWidth + 3 + headerSource.length();
+
+		final String title = " CONFIGURATION ";
+		final int sideBars = Math.max( 4, (totalWidth - title.length()) / 2 );
+		final String topBar = repeat( '=', sideBars ) + title + repeat( '=', totalWidth - sideBars - title.length() );
+		final String bottomBar = repeat( '=', topBar.length() );
+
+		final StringBuilder sb = new StringBuilder();
+		sb.append( '\n' ).append( topBar );
+		sb.append( '\n' ).append( padRight( headerName, nameWidth ) ).append( "   " ).append( padRight( headerValue, valueWidth ) ).append( "   " ).append( headerSource );
+		for( final FProperty property : all ) {
+			final boolean isSet = System.getProperty( property.name() ) != null;
+			sb.append( '\n' );
+			sb.append( padRight( property.name(), nameWidth ) );
+			sb.append( "   " );
+			sb.append( padRight( displayValue( property ), valueWidth ) );
+			sb.append( "   [" );
+			sb.append( isSet ? "set" : "default" );
+			sb.append( ']' );
+		}
+		sb.append( '\n' ).append( bottomBar );
+
+		logger.info( sb.toString() );
+	}
+
+	/**
+	 * Reflectively gathers every {@link FProperty} constant declared in {@link K}, in
+	 * declaration order. Cached on first call.
+	 */
+	private static List<FProperty> registry() {
+		final List<FProperty> list = new ArrayList<>();
+		for( final Field field : K.class.getDeclaredFields() ) {
+			if( FProperty.class.isAssignableFrom( field.getType() ) ) {
+				try {
+					list.add( (FProperty)field.get( null ) );
+				}
+				catch( IllegalAccessException e ) {
+					throw new AssertionError( "FProperties.K field not accessible: " + field.getName(), e );
+				}
+			}
+		}
+		return list;
+	}
+
+	private static String displayValue( final FProperty property ) {
+		final String raw = System.getProperty( property.name() );
+		final String effective = switch( property ) {
+			case IntProperty p -> Integer.toString( intValue( p ) );
+			case BooleanProperty p -> Boolean.toString( booleanValue( p ) );
+			case StringProperty p -> {
+				final String v = stringValue( p );
+				yield v != null ? v : "(unset)";
+			}
+		};
+
+		if( property.redacted() && raw != null ) {
+			return "*** (" + raw.length() + " chars)";
+		}
+
+		return effective;
+	}
+
+	private static String padRight( final String s, final int width ) {
+		if( s.length() >= width ) {
+			return s;
+		}
+		final StringBuilder sb = new StringBuilder( width );
+		sb.append( s );
+		while( sb.length() < width ) {
+			sb.append( ' ' );
+		}
+		return sb.toString();
+	}
+
+	private static String repeat( final char c, final int count ) {
+		final char[] buf = new char[count];
+		java.util.Arrays.fill( buf, c );
+		return new String( buf );
 	}
 }

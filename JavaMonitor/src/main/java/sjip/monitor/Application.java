@@ -12,6 +12,9 @@ package sjip.monitor;
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE, REPRODUCTION, MODIFICATION AND/OR DISTRIBUTION OF THE APPLE SOFTWARE, HOWEVER CAUSED AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN  ADVISED OF THE POSSIBILITY OF 
  SUCH DAMAGE.
  */
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
@@ -23,6 +26,8 @@ import sjip.monitor.util.WOTaskdHandler;
 import sjip.x.FProperties;
 
 public class Application extends ERXApplication {
+
+	private static final Logger logger = LoggerFactory.getLogger( Application.class );
 
 	public static void main( String argv[] ) {
 		ERXApplication.main( argv, Application.class );
@@ -57,5 +62,7 @@ public class Application extends ERXApplication {
 		// FIXME: This should be handled by ERExtensions // Hugi 2026-05-05
 		final String defaultRoute = adaptorPath() + "/" + name() + ".woa";
 		RouteTable.defaultRouteTable().map( defaultRoute, routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
+
+		FProperties.logCurrentValues( logger );
 	}
 }
