@@ -36,10 +36,9 @@ import org.slf4j.LoggerFactory;
  *       every address bound to an up network interface (the default) or the
  *       operator-supplied list in {@code er.extensions.WOHostUtilities.localhostips}
  *       when that property is set (the property replaces the interface walk for
- *       restriction or curated-allow-list scenarios), plus DNS aliases of all of
- *       the above. Use this for security-shaped checks where the operator's
- *       declared host policy should be respected — lifebeat reception, model-side
- *       host matching, anything privileged.</li>
+ *       restriction or curated-allow-list scenarios). Use this for security-shaped
+ *       checks where the operator's declared host policy should be respected —
+ *       lifebeat reception, model-side host matching, anything privileged.</li>
  *   <li>{@link #isAnyMachineLocalAddress} — "did this come from somewhere on this
  *       machine?" Always checks the union — every locally-bound interface address
  *       <em>plus</em> the configured {@code WOHost} — regardless of the operator's
@@ -185,8 +184,9 @@ public final class FHosts {
 
 	/**
 	 * Builds the complete local-address set. Always includes {@code InetAddress.getLocalHost()}
-	 * and the loopback aliases ({@code localhost}, {@code 127.0.0.1}, {@code ::1}). For the
-	 * machine-address layer there are two modes:
+	 * and the loopback aliases ({@code localhost}, {@code 127.0.0.1}, {@code ::1}, each looked
+	 * up via {@link InetAddress#getAllByName}). For the machine-address layer there are
+	 * two modes:
 	 *
 	 * <ul>
 	 *   <li><strong>Auto-detection</strong> (default): every address bound to any up network
@@ -198,33 +198,38 @@ public final class FHosts {
 	 *       environments.</li>
 	 * </ul>
 	 *
-	 * <p>Either way, a final pass pulls in DNS aliases of every address we've found so far,
-	 * to catch multi-homed hosts whose names resolve to more addresses than were directly
-	 * discovered.
+	 * <p>No reverse DNS is performed at any point — only forward lookups of well-known names
+	 * ({@code localhost} and friends), which are fast and reliable. This is a load-bearing
+	 * invariant: a misconfigured PTR record must never be able to hang the platform.
+	 * Operators with multi-homed-aliased setups whose extra addresses don't show up in the
+	 * interface walk supply them explicitly via {@code er.extensions.WOHostUtilities.localhostips}.
+	 * See deployment issue #46 for the broader DNS-freedom architectural goal.
 	 *
-	 * <p>Each step is wrapped in its own try/catch so a partial failure (DNS misery, a
-	 * single broken interface) doesn't drop the rest of the discovery.
+	 * <p>Each step is wrapped in its own try/catch so a partial failure (a single broken
+	 * interface, a missing forward lookup) doesn't drop the rest of the discovery.
 	 */
 	private static Set<InetAddress> computeLocalAddresses() {
-		final Set<InetAddress> seeds = new LinkedHashSet<>();
+		final Set<InetAddress> addresses = new LinkedHashSet<>();
 
 		try {
-			seeds.add( InetAddress.getLocalHost() );
+			addresses.add( InetAddress.getLocalHost() );
 		}
 		catch( UnknownHostException e ) {
 			logger.warn( "InetAddress.getLocalHost() failed: {}", e.toString() );
 		}
 
-		addByName( "localhost", seeds );
-		addByName( "127.0.0.1", seeds );
-		addByName( "::1", seeds );
+		final List<String> namedSeeds = List.of( "localhost", "127.0.0.1", "::1" );
+		for( final String name : namedSeeds ) {
+			addByName( name, addresses );
+		}
 
+		// Machine-address layer: either the operator's explicit list or the interface walk.
 		final String explicitIps = FProperties.stringValue( FProperties.K.LOCALHOST_IPS );
 		if( explicitIps != null && !explicitIps.isEmpty() ) {
 			// Operator override: skip auto-detection and use the supplied list instead.
 			for( final String ip : explicitIps.split( "[\\s,()]+" ) ) {
 				if( !ip.isEmpty() ) {
-					addByName( ip, seeds );
+					addByName( ip, addresses );
 				}
 			}
 		}
@@ -238,9 +243,9 @@ public final class FHosts {
 						if( !iface.isUp() ) {
 							continue;
 						}
-						final var addresses = iface.getInetAddresses();
-						while( addresses.hasMoreElements() ) {
-							seeds.add( addresses.nextElement() );
+						final var ifaceAddresses = iface.getInetAddresses();
+						while( ifaceAddresses.hasMoreElements() ) {
+							addresses.add( ifaceAddresses.nextElement() );
 						}
 					}
 					catch( SocketException e ) {
@@ -253,22 +258,7 @@ public final class FHosts {
 			}
 		}
 
-		// Final pass: pull in DNS aliases for every address we've found so far. Picks up
-		// multi-homed hosts where the same machine has more reachable names than its
-		// interface addresses suggest.
-		final Set<InetAddress> withAliases = new LinkedHashSet<>( seeds );
-		for( final InetAddress seed : seeds ) {
-			try {
-				for( final InetAddress alias : InetAddress.getAllByName( seed.getHostName() ) ) {
-					withAliases.add( alias );
-				}
-			}
-			catch( UnknownHostException e ) {
-				// One DNS failure shouldn't poison the rest.
-			}
-		}
-
-		return Set.copyOf( withAliases );
+		return Set.copyOf( addresses );
 	}
 
 	private static void addByName( final String hostOrIp, final Set<InetAddress> set ) {
