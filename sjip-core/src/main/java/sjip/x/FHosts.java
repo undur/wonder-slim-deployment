@@ -23,21 +23,36 @@ import org.slf4j.LoggerFactory;
  *
  * <h2>Local-address determination</h2>
  *
- * <p>{@link #isLocalInetAddress} respects the operator's stated host policy: if
- * {@code WOHost} is set and resolves to a valid address, only that single address
- * is treated as local. If {@code WOHost} is unset or unresolvable, falls back to
- * the loopback aliases ({@code 127.0.0.1}, {@code localhost}, {@code ::1}) plus
- * either every address bound to an up network interface (the default) or the
- * operator-supplied list in {@code er.extensions.WOHostUtilities.localhostips}
- * when that property is set (which replaces the interface walk for restriction
- * or curated-allow-list scenarios), plus DNS aliases of all of the above.
+ * <p>Two related but distinct questions, each with its own method:
  *
- * <p>{@link #isAnyLocalInetAddress} always checks the union — every local-interface
- * address <em>and</em> the configured {@code WOHost} — regardless of the policy.
+ * <ul>
+ *   <li>{@link #isConfiguredHostAddress} — "does this match the operator's stated
+ *       host?" When {@code WOHost} is set and resolves to a valid address, only that
+ *       single address qualifies; the operator's stated identity is authoritative.
+ *       When {@code WOHost} is unset or unresolvable, falls back to the loopback
+ *       aliases ({@code 127.0.0.1}, {@code localhost}, {@code ::1}) plus either
+ *       every address bound to an up network interface (the default) or the
+ *       operator-supplied list in {@code er.extensions.WOHostUtilities.localhostips}
+ *       when that property is set (the property replaces the interface walk for
+ *       restriction or curated-allow-list scenarios), plus DNS aliases of all of
+ *       the above. Use this for security-shaped checks where the operator's
+ *       declared host policy should be respected — lifebeat reception, model-side
+ *       host matching, anything privileged.</li>
+ *   <li>{@link #isAnyMachineLocalAddress} — "did this come from somewhere on this
+ *       machine?" Always checks the union — every locally-bound interface address
+ *       <em>plus</em> the configured {@code WOHost} — regardless of the operator's
+ *       stated host policy. Use this for permissive coexistence checks where the
+ *       question is presence on the same machine rather than identity (for example,
+ *       a web-server adaptor calling {@code woconfig} that may bind to an interface
+ *       different from {@code WOHost}).</li>
+ * </ul>
  *
- * <p>Use the strict variant for security-shaped checks (lifebeat reception, model
- * host matching). Use the union variant for permissive routing decisions ("does
- * this request look like it came from the same machine?").
+ * <p>The two methods are not redundant — they answer categorically different
+ * questions. The first respects the operator's policy; the second ignores it.
+ * Future direction may unify both under a first-class admin access policy
+ * (deployment issue #45), at which point each becomes one preset matcher among
+ * several. Until then, prefer the strict variant unless the call site is genuinely
+ * about machine-wide presence rather than identity.
  *
  * <p>The cached local-address set is built once at class load and rebuilt on a miss
  * when {@code refreshOnMiss} is true — that handles network interfaces being
@@ -67,12 +82,13 @@ public final class FHosts {
 	private FHosts() {}
 
 	/**
-	 * @return true if {@code address} should be considered local under the operator's
-	 *         stated host policy. When {@code WOHost} is set and resolvable, only that
-	 *         exact address qualifies; otherwise the union of all known local addresses
-	 *         applies. Returns false on null input.
+	 * @return true if {@code address} matches the operator's stated host policy.
+	 *         When {@code WOHost} is set and resolvable, only that exact address
+	 *         qualifies; otherwise the union of all known local addresses applies.
+	 *         Returns false on null input. Strict variant — use for security-shaped
+	 *         checks where the operator's stated identity must be respected.
 	 */
-	public static boolean isLocalInetAddress( final InetAddress address, final boolean refreshOnMiss ) {
+	public static boolean isConfiguredHostAddress( final InetAddress address, final boolean refreshOnMiss ) {
 		if( address == null ) {
 			return false;
 		}
@@ -87,11 +103,13 @@ public final class FHosts {
 
 	/**
 	 * @return true if {@code address} matches any locally-bound interface address
-	 *         <em>or</em> the configured {@code WOHost}. Permissive variant — used for
-	 *         "did this come from the same machine?" rather than for honoring the
-	 *         operator's stated host policy.
+	 *         <em>or</em> the configured {@code WOHost}. Permissive variant — use
+	 *         for coexistence checks ("did this come from somewhere on this
+	 *         machine?") rather than identity ("does this match my stated host?").
+	 *         Ignores whether {@code WOHost} is set — if it is, that address is
+	 *         accepted alongside the auto-detected machine-wide set.
 	 */
-	public static boolean isAnyLocalInetAddress( final InetAddress address, final boolean refreshOnMiss ) {
+	public static boolean isAnyMachineLocalAddress( final InetAddress address, final boolean refreshOnMiss ) {
 		if( address == null ) {
 			return false;
 		}

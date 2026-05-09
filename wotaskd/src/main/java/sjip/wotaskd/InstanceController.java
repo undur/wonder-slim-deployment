@@ -194,7 +194,7 @@ public class InstanceController implements IInstanceController {
 		try {
 			Instant currentTime = Instant.now();
 			// Don't regenerate the localhost list for random applications
-			if( FHosts.isLocalInetAddress( InetAddress.getByName( host ), false ) ) {
+			if( FHosts.isConfiguredHostAddress( InetAddress.getByName( host ), false ) ) {
 				NSMutableDictionary appDict = (NSMutableDictionary)_unknownApplications.valueForKey( name );
 				if( appDict != null ) {
 					appDict.takeValueForKey( currentTime, port );

@@ -929,9 +929,8 @@ public class DirectAction extends WODirectAction {
 		Application theApplication = (Application)WOApplication.application();
 		WORequest aRequest = request();
 
-		// This will return true if we match either WOHost or any known local address
 		// We aren't going to regenerate the list, though, since this gets called a lot.
-		boolean shouldIncludeUnregisteredInstances = FHosts.isAnyLocalInetAddress( aRequest._originatingAddress(), false );
+		boolean shouldIncludeUnregisteredInstances = FHosts.isAnyMachineLocalAddress( aRequest._originatingAddress(), false );
 
 		theApplication._lock.readLock().lock();
 		String xml;

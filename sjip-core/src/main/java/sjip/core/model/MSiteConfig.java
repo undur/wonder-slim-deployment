@@ -304,7 +304,7 @@ public class MSiteConfig extends MObject {
 
 	private void _addHost( MHost newHost ) {
 		// If WOHost was passed, it'll resolve against that, otherwise, it'll resolve any local address
-		if( FHosts.isLocalInetAddress( newHost.address(), true ) ) {
+		if( FHosts.isConfiguredHostAddress( newHost.address(), true ) ) {
 			_localHost = newHost;
 		}
 		_hostArray.addObject( newHost );
