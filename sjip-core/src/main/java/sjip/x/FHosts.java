@@ -5,6 +5,8 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -61,21 +63,18 @@ import org.slf4j.LoggerFactory;
  *
  * <h2>Web-server detection</h2>
  *
- * <p>{@link #isUsingWebServer(String)} mirrors WO's {@code WORequest.isUsingWebServer}:
- * a request is "via web server" iff the {@code x-webobjects-adaptor-version} header
- * is present with a non-empty value, or the {@code WORequestIsUsingWebServerOverride}
- * system property is set true (an emergency operator escape hatch).
- *
- * <p>Header lookup at the wire level is case-insensitive; callers should obtain the
- * value via whatever case-folding lookup their request abstraction provides
- * ({@code WORequest.headerForKey(FHosts.ADAPTOR_VERSION_HEADER)} does this).
+ * <p>{@link #isUsingWebServer} reports whether an HTTP request arrived through a
+ * web-server adaptor. The check is positive if a recognised adaptor-version header
+ * is present in the request with a non-empty value. The specific header name is
+ * an implementation detail; callers pass the whole request-headers map and let
+ * {@code FHosts} do the lookup.
  */
 public final class FHosts {
 
 	private static final Logger logger = LoggerFactory.getLogger( FHosts.class );
 
 	/** HTTP header set by mod_WebObjects / modulo when proxying a request. Presence => web-server-routed. */
-	public static final String ADAPTOR_VERSION_HEADER = "x-webobjects-adaptor-version";
+	private static final String ADAPTOR_VERSION_HEADER = "x-webobjects-adaptor-version";
 
 	private static final AtomicReference<Set<InetAddress>> localAddresses = new AtomicReference<>( computeLocalAddresses() );
 
@@ -123,19 +122,30 @@ public final class FHosts {
 	}
 
 	/**
-	 * Mirrors {@code WORequest.isUsingWebServer()}: returns true iff the
-	 * {@code x-webobjects-adaptor-version} header is present with a non-empty value,
-	 * or the {@code WORequestIsUsingWebServerOverride} system property is set.
+	 * @return true if the request arrived through a web-server adaptor — that is, the
+	 *         request carries a non-empty adaptor-version header (presence is the signal).
+	 *         The specific header name is an implementation detail; pass the whole
+	 *         request-headers map and {@code FHosts} performs the lookup.
 	 *
-	 * @param adaptorVersionHeaderValue value of the {@code x-webobjects-adaptor-version}
-	 *                                  HTTP header, or {@code null} if absent
+	 * @param requestHeaders the request's HTTP headers, in the standard
+	 *                       {@code Map<String, List<String>>} shape (the
+	 *                       {@code ? extends List<String>} bound accommodates
+	 *                       framework-specific list subtypes such as WO's
+	 *                       {@code NSArray}); may be {@code null}, in which case
+	 *                       returns false.
 	 */
-	public static boolean isUsingWebServer( final String adaptorVersionHeaderValue ) {
-		if( adaptorVersionHeaderValue != null && !adaptorVersionHeaderValue.isEmpty() ) {
-			return true;
+	public static boolean isUsingWebServer( final Map<String, ? extends List<String>> requestHeaders ) {
+		if( requestHeaders == null ) {
+			return false;
 		}
 
-		return FProperties.booleanValue( FProperties.K.IS_USING_WEB_SERVER_OVERRIDE );
+		final List<String> values = requestHeaders.get( ADAPTOR_VERSION_HEADER );
+		if( values == null || values.isEmpty() ) {
+			return false;
+		}
+
+		final String first = values.get( 0 );
+		return first != null && !first.isEmpty();
 	}
 
 	private static boolean isInLocalSet( final InetAddress address, final boolean refreshOnMiss ) {

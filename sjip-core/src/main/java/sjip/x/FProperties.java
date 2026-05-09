@@ -104,9 +104,6 @@ public final class FProperties {
 		/** When set, the platform binds to this single host address and treats only it as "local" for admin-action gating. When unset, every locally-bound interface address counts as local. */
 		public static final StringProperty WO_HOST = new StringProperty( "WOHost", null );
 
-		/** Operator escape hatch: when true, every request is treated as if it arrived through a web-server adaptor, regardless of the {@code x-webobjects-adaptor-version} header. Defaults false. */
-		public static final BooleanProperty IS_USING_WEB_SERVER_OVERRIDE = new BooleanProperty( "WORequestIsUsingWebServerOverride", false );
-
 		/**
 		 * Comma- or whitespace-separated list of IP addresses to treat as local for admin-action
 		 * gating. When set, replaces the auto-detected list of locally-bound interface addresses,

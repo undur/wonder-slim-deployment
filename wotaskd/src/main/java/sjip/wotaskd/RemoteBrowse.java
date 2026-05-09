@@ -112,7 +112,7 @@ public class RemoteBrowse extends WODirectAction {
 		final WORequest aRequest = request();
 		final WOResponse aResponse = new WOResponse();
 
-		if( FHosts.isUsingWebServer( aRequest.headerForKey( FHosts.ADAPTOR_VERSION_HEADER ) ) ) {
+		if( FHosts.isUsingWebServer( aRequest.headers() ) ) {
 			aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 			aResponse.appendContentString( "Access Denied" );
 			return aResponse;
