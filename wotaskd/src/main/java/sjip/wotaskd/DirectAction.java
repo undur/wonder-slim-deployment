@@ -929,6 +929,10 @@ public class DirectAction extends WODirectAction {
 		Application theApplication = (Application)WOApplication.application();
 		WORequest aRequest = request();
 
+		// FIXME: WO-era cargo with a weak rationale — same-host adaptors get to see manually-started
+		// instances; remote adaptors don't. The privacy boundary is asymmetric (registered instances
+		// are visible to everyone) and the access-control intent is fuzzy. Goes away when the
+		// unknown-applications subsystem is retired (#31).
 		// We aren't going to regenerate the list, though, since this gets called a lot.
 		boolean shouldIncludeUnregisteredInstances = FHosts.isAnyMachineLocalAddress( aRequest._originatingAddress(), false );
 
