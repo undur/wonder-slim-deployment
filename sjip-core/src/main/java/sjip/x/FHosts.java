@@ -26,10 +26,11 @@ import org.slf4j.LoggerFactory;
  * <p>{@link #isLocalInetAddress} respects the operator's stated host policy: if
  * {@code WOHost} is set and resolves to a valid address, only that single address
  * is treated as local. If {@code WOHost} is unset or unresolvable, falls back to
- * the union of all addresses bound to up network interfaces, plus the loopback
- * aliases ({@code 127.0.0.1}, {@code localhost}, {@code ::1}), plus any addresses
- * specified by the {@code er.extensions.WOHostUtilities.localhostips} property,
- * plus DNS aliases of all of the above.
+ * the loopback aliases ({@code 127.0.0.1}, {@code localhost}, {@code ::1}) plus
+ * either every address bound to an up network interface (the default) or the
+ * operator-supplied list in {@code er.extensions.WOHostUtilities.localhostips}
+ * when that property is set (which replaces the interface walk for restriction
+ * or curated-allow-list scenarios), plus DNS aliases of all of the above.
  *
  * <p>{@link #isAnyLocalInetAddress} always checks the union — every local-interface
  * address <em>and</em> the configured {@code WOHost} — regardless of the policy.
@@ -155,14 +156,26 @@ public final class FHosts {
 	}
 
 	/**
-	 * Builds the complete local-address set: {@code InetAddress.getLocalHost()},
-	 * the {@code localhost} aliases, the explicit loopback aliases, every address
-	 * bound to any up network interface (including IPv6, including loopback interface
-	 * addresses), the operator-supplied {@code er.extensions.WOHostUtilities.localhostips}
-	 * list, and finally DNS aliases of all of the above.
+	 * Builds the complete local-address set. Always includes {@code InetAddress.getLocalHost()}
+	 * and the loopback aliases ({@code localhost}, {@code 127.0.0.1}, {@code ::1}). For the
+	 * machine-address layer there are two modes:
 	 *
-	 * <p>Each step is wrapped in its own try/catch so a partial failure (DNS misery,
-	 * a single broken interface) doesn't drop the rest of the discovery.
+	 * <ul>
+	 *   <li><strong>Auto-detection</strong> (default): every address bound to any up network
+	 *       interface counts as local. Used when the {@code er.extensions.WOHostUtilities.localhostips}
+	 *       property is unset.</li>
+	 *   <li><strong>Operator override</strong>: when the property is set, its addresses replace
+	 *       the auto-detection step. Useful for restricting which interfaces of a multi-homed
+	 *       host count as local, or for declaring a curated allow-list in pre-configured
+	 *       environments.</li>
+	 * </ul>
+	 *
+	 * <p>Either way, a final pass pulls in DNS aliases of every address we've found so far,
+	 * to catch multi-homed hosts whose names resolve to more addresses than were directly
+	 * discovered.
+	 *
+	 * <p>Each step is wrapped in its own try/catch so a partial failure (DNS misery, a
+	 * single broken interface) doesn't drop the rest of the discovery.
 	 */
 	private static Set<InetAddress> computeLocalAddresses() {
 		final Set<InetAddress> seeds = new LinkedHashSet<>();
@@ -178,34 +191,37 @@ public final class FHosts {
 		addByName( "127.0.0.1", seeds );
 		addByName( "::1", seeds );
 
-		try {
-			final var interfaces = NetworkInterface.getNetworkInterfaces();
-			while( interfaces.hasMoreElements() ) {
-				final NetworkInterface iface = interfaces.nextElement();
-				try {
-					if( !iface.isUp() ) {
-						continue;
-					}
-					final var addresses = iface.getInetAddresses();
-					while( addresses.hasMoreElements() ) {
-						seeds.add( addresses.nextElement() );
-					}
-				}
-				catch( SocketException e ) {
-					logger.warn( "Couldn't read addresses from interface {}: {}", iface.getName(), e.toString() );
-				}
-			}
-		}
-		catch( SocketException e ) {
-			logger.warn( "NetworkInterface.getNetworkInterfaces() failed: {}", e.toString() );
-		}
-
 		final String explicitIps = FProperties.stringValue( FProperties.K.LOCALHOST_IPS );
 		if( explicitIps != null && !explicitIps.isEmpty() ) {
+			// Operator override: skip auto-detection and use the supplied list instead.
 			for( final String ip : explicitIps.split( "[\\s,()]+" ) ) {
 				if( !ip.isEmpty() ) {
 					addByName( ip, seeds );
 				}
+			}
+		}
+		else {
+			// Default: walk every up interface and add every address it has bound.
+			try {
+				final var interfaces = NetworkInterface.getNetworkInterfaces();
+				while( interfaces.hasMoreElements() ) {
+					final NetworkInterface iface = interfaces.nextElement();
+					try {
+						if( !iface.isUp() ) {
+							continue;
+						}
+						final var addresses = iface.getInetAddresses();
+						while( addresses.hasMoreElements() ) {
+							seeds.add( addresses.nextElement() );
+						}
+					}
+					catch( SocketException e ) {
+						logger.warn( "Couldn't read addresses from interface {}: {}", iface.getName(), e.toString() );
+					}
+				}
+			}
+			catch( SocketException e ) {
+				logger.warn( "NetworkInterface.getNetworkInterfaces() failed: {}", e.toString() );
 			}
 		}
 

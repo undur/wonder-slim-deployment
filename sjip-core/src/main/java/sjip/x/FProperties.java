@@ -107,7 +107,19 @@ public final class FProperties {
 		/** Operator escape hatch: when true, every request is treated as if it arrived through a web-server adaptor, regardless of the {@code x-webobjects-adaptor-version} header. Defaults false. */
 		public static final BooleanProperty IS_USING_WEB_SERVER_OVERRIDE = new BooleanProperty( "WORequestIsUsingWebServerOverride", false );
 
-		/** Comma- or whitespace-separated list of additional IP addresses to treat as local for admin-action gating. Useful in multi-homed setups where auto-detection misses a needed interface. Format mirrors ERXProperties array syntax: {@code (1.2.3.4, 5.6.7.8)} or just {@code 1.2.3.4,5.6.7.8}. */
+		/**
+		 * Comma- or whitespace-separated list of IP addresses to treat as local for admin-action
+		 * gating. When set, replaces the auto-detected list of locally-bound interface addresses,
+		 * letting an operator restrict admin access to a curated set (e.g. only the management-plane
+		 * interface on a multi-NIC host) or declare an allow-list in pre-configured environments.
+		 * Loopback aliases and DNS aliases are still included regardless. Format mirrors
+		 * ERXProperties array syntax: {@code (1.2.3.4, 5.6.7.8)} or just {@code 1.2.3.4,5.6.7.8}.
+		 *
+		 * <p>FIXME: This property exists for backwards compatibility with the override semantic
+		 * established in the wonder-slim {@code WOHostUtilities} patch. The future direction —
+		 * first-class admin access policy supporting both restriction and expansion as legitimate
+		 * cases, plus future auth-shaped access — is captured in deployment issue #45.
+		 */
 		public static final StringProperty LOCALHOST_IPS = new StringProperty( "er.extensions.WOHostUtilities.localhostips", null );
 
 		// === sjip-core Emailer ===
