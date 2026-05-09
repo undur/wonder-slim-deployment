@@ -98,16 +98,10 @@ public class InstanceController implements IInstanceController {
 	 * </ul>
 	 *
 	 * <h4>What we do with them</h4>
-	 * <ol>
-	 *   <li><b>Adaptor routing.</b> {@link #generateAdaptorConfigXML()} emits these as
-	 *       {@code <application>}/{@code <instance>} entries (with a negative {@code id}
-	 *       sentinel) so the {@code mod_WebObjects} adaptor can route incoming HTTP
-	 *       requests to manually-started apps too.</li>
-	 *   <li><b>Lookup by name.</b> {@link #portForUnregisteredAppNamed(String)} returns
-	 *       any known port for a given app name; called from
-	 *       {@code DirectAction#defaultAction} when handling requests for apps that have
-	 *       no managed instance.</li>
-	 * </ol>
+	 * <p><b>Adaptor routing.</b> {@link #generateAdaptorConfigXML()} emits these as
+	 * {@code <application>}/{@code <instance>} entries (with a negative {@code id}
+	 * sentinel) so the {@code mod_WebObjects} adaptor can route incoming HTTP
+	 * requests to manually-started apps too.
 	 *
 	 * <h4>Triage</h4>
 	 * <p>{@link #triageUnknownInstances()} runs periodically and drops entries whose last
@@ -215,32 +209,6 @@ public class InstanceController implements IInstanceController {
 		}
 		finally {
 			_unknownAppLock.writeLock().unlock();
-		}
-	}
-
-	/**
-	 * Returns *some* port at which an unknown instance of the named app is currently
-	 * listening, or {@code null} if no unknown instance with that name has been seen
-	 * recently. Picks the first port from the dictionary's iteration order — arbitrary
-	 * when multiple unknown instances of the same app are alive, which is uncommon in
-	 * practice. Used by {@code DirectAction#defaultAction} to route requests at app names
-	 * that have no managed instance but do have a manually-started one lifebeating.
-	 */
-	public String portForUnregisteredAppNamed( String name ) {
-		_unknownAppLock.readLock().lock();
-
-		try {
-			NSDictionary appDict = (NSDictionary)_unknownApplications.valueForKey( name );
-			if( appDict != null ) {
-				List<String> keysArray = appDict.allKeys();
-				if( (keysArray != null) && (keysArray.size() > 0) ) {
-					return keysArray.get( 0 );
-				}
-			}
-			return null;
-		}
-		finally {
-			_unknownAppLock.readLock().unlock();
 		}
 	}
 

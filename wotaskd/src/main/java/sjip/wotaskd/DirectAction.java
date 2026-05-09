@@ -950,26 +950,4 @@ public class DirectAction extends WODirectAction {
 		return aResponse;
 	}
 
-	/**********/
-
-	// used by WOInfoCenter and perhaps others
-	public WOActionResults findPortAction() {
-		Application theApplication = (Application)WOApplication.application();
-		WOResponse aResponse = theApplication.createResponseInContext( null );
-		WORequest aRequest = request();
-		String portString = null;
-
-		// We wouldn't have registered it in the first place, so we don't regenerate
-		if( FHosts.isAnyLocalInetAddress( aRequest._originatingAddress(), false ) ) {
-			String anAppName = request().stringFormValueForKey( "appName" );
-			portString = theApplication.instanceController().portForUnregisteredAppNamed( anAppName );
-		}
-
-		if( portString == null ) {
-			portString = "-1";
-		}
-		aResponse.appendContentString( portString );
-		return aResponse;
-	}
-
 }
