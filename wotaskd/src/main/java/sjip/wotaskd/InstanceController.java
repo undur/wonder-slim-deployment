@@ -328,7 +328,7 @@ public class InstanceController implements IInstanceController {
 	 */
 	private void _checkAutoRecover() {
 		logger.debug( "_checkAutoRecover START" );
-		theApplication()._lock.readLock().lock();
+		appLock().readLock().lock();
 		try {
 			MHost theHost = appSiteConfig().localHost();
 			if( theHost != null ) {
@@ -348,7 +348,7 @@ public class InstanceController implements IInstanceController {
 			triageUnknownInstances();
 		}
 		finally {
-			theApplication()._lock.readLock().unlock();
+			appLock().readLock().unlock();
 		}
 		logger.debug( "_checkAutoRecover STOP" );
 	}
@@ -368,7 +368,7 @@ public class InstanceController implements IInstanceController {
 	 */
 	private void _checkAutoRecoverStartup() {
 		logger.debug( "_checkAutoRecoverStartup START" );
-		theApplication()._lock.readLock().lock();
+		appLock().readLock().lock();
 		try {
 			MSiteConfig aConfig = appSiteConfig();
 			final List<MApplication> appArray = aConfig.applicationArray();
@@ -407,7 +407,7 @@ public class InstanceController implements IInstanceController {
 
 		}
 		finally {
-			theApplication()._lock.readLock().unlock();
+			appLock().readLock().unlock();
 		}
 		logger.debug( "_checkAutoRecoverStartup STOP" );
 	}
@@ -476,7 +476,7 @@ public class InstanceController implements IInstanceController {
 	 */
 	private void _checkSchedules() {
 		logger.debug( "_checkSchedules START" );
-		theApplication()._lock.readLock().lock();
+		appLock().readLock().lock();
 		try {
 
 			MHost theHost = appSiteConfig().localHost();
@@ -529,7 +529,7 @@ public class InstanceController implements IInstanceController {
 			}
 		}
 		finally {
-			theApplication()._lock.readLock().unlock();
+			appLock().readLock().unlock();
 		}
 		logger.debug( "_checkSchedules STOP" );
 	}
@@ -942,5 +942,9 @@ public class InstanceController implements IInstanceController {
 	
 	private MSiteConfig appSiteConfig() {
 		return theApplication().siteConfig();
+	}
+	
+	private ReentrantReadWriteLock appLock() {
+		return theApplication()._lock;
 	}
 }
