@@ -37,11 +37,11 @@ public class LifebeatRequestHandler extends WORequestHandler {
 	private static final WOResponse DIE_RESPONSE = constantResponse( 500, "HTTP/1.0" ); // InternalServerError -> Die Immediately
 
 	private final Application theApplication;
-	private final String myHostName;
+	private final String _hostName;
 
 	public LifebeatRequestHandler() {
 		theApplication = ((Application)WOApplication.application());
-		myHostName = theApplication.hostAddress().getHostName();
+		_hostName = theApplication.hostAddress().getHostName();
 	}
 
 	private static WOResponse constantResponse( int status, String httpVersion ) {
@@ -81,8 +81,8 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		final List<String> values = NSArray.componentsSeparatedByString( aRequest.queryString(), "&" );
 
 		if( (values == null) || (values.size() != 4) ) {
-			theApplication.siteConfig().globalErrorDictionary.put( aRequest.queryString(), (myHostName + ": Received bad lifebeat: " + aRequest.queryString()) );
-			log.error( "{}: Received bad lifebeat: {}", myHostName, aRequest.queryString() );
+			theApplication.siteConfig().globalErrorDictionary.put( aRequest.queryString(), (_hostName + ": Received bad lifebeat: " + aRequest.queryString()) );
+			log.error( "{}: Received bad lifebeat: {}", _hostName, aRequest.queryString() );
 		}
 		else {
 			final String notificationType = values.get( 0 );
@@ -121,8 +121,8 @@ public class LifebeatRequestHandler extends WORequestHandler {
 				aResponse = null;
 			}
 			else {
-				theApplication.siteConfig().globalErrorDictionary.put( aRequest.queryString(), (myHostName + ": Received bad lifebeat: " + aRequest.queryString()) );
-				log.error( "{}: Received bad lifebeat: {}", myHostName, aRequest.queryString() );
+				theApplication.siteConfig().globalErrorDictionary.put( aRequest.queryString(), (_hostName + ": Received bad lifebeat: " + aRequest.queryString()) );
+				log.error( "{}: Received bad lifebeat: {}", _hostName, aRequest.queryString() );
 			}
 		}
 
