@@ -245,7 +245,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 	}
 	
 	private static ReentrantReadWriteLock appLock() {
-		return theApplication()._lock;
+		return theApplication().appTaskd().lock();
 	}
 	
 	private static InstanceController appInstanceController() {

@@ -1,7 +1,5 @@
 package sjip.wotaskd;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +18,7 @@ public class Application extends ERXApplication {
 	private final String _multicastAddress;
 	private final boolean _shouldWriteAdaptorConfig;
 	private final boolean _shouldRespondToMulticast;
-	public final ReentrantReadWriteLock _lock;
+	private final AppTaskd _appTaskd;
 	private MSiteConfig _siteConfig;
 
 	static public void main( String argv[] ) {
@@ -34,7 +32,7 @@ public class Application extends ERXApplication {
 			System.setProperty( "WODeploymentConfigurationDirectory", "/Users/hugi/Desktop/woconfig" );
 		}
 
-		_lock = new ReentrantReadWriteLock();
+		_appTaskd = new AppTaskd();
 
 		// Required: keeps zero-length lifebeat responses small enough for the WOApp's
 		// fixed-width parser in WOApplication._LifebeatThread.sendMessage() to read without
@@ -90,6 +88,10 @@ public class Application extends ERXApplication {
 		FProperties.logCurrentValues( logger );
 	}
 
+	public AppTaskd appTaskd() {
+		return _appTaskd;
+	}
+
 	@Override
 	public String name() {
 		return "wotaskd";
@@ -131,7 +133,7 @@ public class Application extends ERXApplication {
 	// FIXME: This is horrid. Serialization should be triggered by changes in the model. See https://github.com/undur/wonder-slim-deployment/issues/18 // Hugi 2026-05-05
 	@Override
 	public void sleep() {
-		_lock.readLock().lock();
+		appTaskd().lock().readLock().lock();
 		try {
 			if( (_siteConfig != null) && _siteConfig.hasChanges() ) {
 				// archiving the siteConfig
@@ -143,7 +145,7 @@ public class Application extends ERXApplication {
 			}
 		}
 		finally {
-			_lock.readLock().unlock();
+			appTaskd().lock().readLock().unlock();
 		}
 	}
 }

@@ -941,6 +941,6 @@ public class InstanceController implements IInstanceController {
 	}
 	
 	private static ReentrantReadWriteLock appLock() {
-		return ((Application)WOApplication.application())._lock;
+		return ((Application)WOApplication.application()).appTaskd().lock();
 	}
 }

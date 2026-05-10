@@ -92,7 +92,7 @@ public class DirectAction extends WODirectAction {
 		}
 
 		// Checking to see if the password was corrent
-		theApplication._lock.readLock().lock();
+		theApplication.appTaskd().lock().readLock().lock();
 		try {
 			String passwordHeader = aRequest.headerForKey( "password" );
 			if( !aConfig.checkPasswordEncrypted( passwordHeader ) ) {
@@ -104,7 +104,7 @@ public class DirectAction extends WODirectAction {
 			}
 		}
 		finally {
-			theApplication._lock.readLock().unlock();
+			theApplication.appTaskd().lock().readLock().unlock();
 		}
 
 		NSDictionary requestDict;
@@ -131,7 +131,7 @@ public class DirectAction extends WODirectAction {
 
 		// Checking for Updates
 		if( updateWotaskdDict != null ) {
-			theApplication._lock.writeLock().lock();
+			theApplication.appTaskd().lock().writeLock().lock();
 			try {
 				NSMutableDictionary updateWotaskdResponse = new NSMutableDictionary( 2 );
 
@@ -362,7 +362,7 @@ public class DirectAction extends WODirectAction {
 				monitorResponse.takeValueForKey( updateWotaskdResponse, "updateWotaskdResponse" );
 			}
 			finally {
-				theApplication._lock.writeLock().unlock();
+				theApplication.appTaskd().lock().writeLock().unlock();
 			}
 		}
 
@@ -392,7 +392,7 @@ public class DirectAction extends WODirectAction {
 					NSDictionary instDict = (NSDictionary)commandWotaskdArray.objectAtIndex( i );
 					String hostName = (String)instDict.valueForKey( "hostName" );
 					Integer port = (Integer)instDict.valueForKey( "port" );
-					theApplication._lock.readLock().lock();
+					theApplication.appTaskd().lock().readLock().lock();
 					try {
 						MInstance anInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
 						if( anInstance != null ) {
@@ -449,7 +449,7 @@ public class DirectAction extends WODirectAction {
 						}
 					}
 					finally {
-						theApplication._lock.readLock().unlock();
+						theApplication.appTaskd().lock().readLock().unlock();
 					}
 				}
 			}
@@ -461,12 +461,12 @@ public class DirectAction extends WODirectAction {
 			NSMutableDictionary queryWotaskdResponse = new NSMutableDictionary( 1 );
 
 			if( queryWotaskdString.equals( "SITE" ) ) {
-				theApplication._lock.readLock().lock();
+				theApplication.appTaskd().lock().readLock().lock();
 				try {
 					queryWotaskdResponse.takeValueForKey( aConfig.dictionaryForArchive(), "SiteConfig" );
 				}
 				finally {
-					theApplication._lock.readLock().unlock();
+					theApplication.appTaskd().lock().readLock().unlock();
 				}
 			}
 			else if( queryWotaskdString.equals( "HOST" ) ) {
@@ -478,7 +478,7 @@ public class DirectAction extends WODirectAction {
 
 					hostResponse = new NSMutableDictionary( new Object[] { runningInstances, processorType, operatingSystem }, HOST_QUERY_KEYS );
 				}
-				theApplication._lock.readLock().lock();
+				theApplication.appTaskd().lock().readLock().lock();
 				try {
 					if( aConfig.localHost() != null ) {
 						hostResponse.takeValueForKey( aConfig.localHost().runningInstancesCount_W(), "runningInstances" );
@@ -488,13 +488,13 @@ public class DirectAction extends WODirectAction {
 					}
 				}
 				finally {
-					theApplication._lock.readLock().unlock();
+					theApplication.appTaskd().lock().readLock().unlock();
 				}
 				queryWotaskdResponse.takeValueForKey( hostResponse, "hostResponse" );
 			}
 			else if( queryWotaskdString.equals( "APPLICATION" ) ) {
 				NSMutableArray applicationResponse = null;
-				theApplication._lock.readLock().lock();
+				theApplication.appTaskd().lock().readLock().lock();
 				try {
 					NSArray appArray = aConfig.applicationArray();
 					int appArrayCount = appArray.count();
@@ -515,14 +515,14 @@ public class DirectAction extends WODirectAction {
 					}
 				}
 				finally {
-					theApplication._lock.readLock().unlock();
+					theApplication.appTaskd().lock().readLock().unlock();
 				}
 
 				queryWotaskdResponse.takeValueForKey( applicationResponse, "applicationResponse" );
 			}
 			else if( queryWotaskdString.equals( "INSTANCE" ) ) {
 				NSMutableArray instanceResponse = null;
-				theApplication._lock.readLock().lock();
+				theApplication.appTaskd().lock().readLock().lock();
 				try {
 					NSArray instanceArray = (aConfig.localHost() != null) ? aConfig.localHost().instanceArray() : NSArray.EmptyArray;
 					int instanceArrayCount = instanceArray.count();
@@ -576,7 +576,7 @@ public class DirectAction extends WODirectAction {
 					}
 				}
 				finally {
-					theApplication._lock.readLock().unlock();
+					theApplication.appTaskd().lock().readLock().unlock();
 				}
 
 				queryWotaskdResponse.takeValueForKey( instanceResponse, "instanceResponse" );
@@ -866,7 +866,7 @@ public class DirectAction extends WODirectAction {
 		WORequest aRequest = request();
 		MSiteConfig aConfig = theApplication.siteConfig();
 
-		theApplication._lock.readLock().lock();
+		theApplication.appTaskd().lock().readLock().lock();
 		try {
 
 			// Check for correct password
@@ -918,7 +918,7 @@ public class DirectAction extends WODirectAction {
 			aResponse.appendContentString( "</pre><br><br></body></html>" );
 		}
 		finally {
-			theApplication._lock.readLock().unlock();
+			theApplication.appTaskd().lock().readLock().unlock();
 		}
 
 		return aResponse;
@@ -936,13 +936,13 @@ public class DirectAction extends WODirectAction {
 		// We aren't going to regenerate the list, though, since this gets called a lot.
 		boolean shouldIncludeUnregisteredInstances = FHosts.isAnyMachineLocalAddress( aRequest._originatingAddress(), false );
 
-		theApplication._lock.readLock().lock();
+		theApplication.appTaskd().lock().readLock().lock();
 		String xml;
 		try {
 			xml = AdaptorConfigSerialization.generateAdaptorConfigXML( ((Application)WOApplication.application()).siteConfig(), true, shouldIncludeUnregisteredInstances );
 		}
 		finally {
-			theApplication._lock.readLock().unlock();
+			theApplication.appTaskd().lock().readLock().unlock();
 		}
 		WOResponse aResponse = WOApplication.application().createResponseInContext( null );
 		aResponse.appendContentString( xml );
