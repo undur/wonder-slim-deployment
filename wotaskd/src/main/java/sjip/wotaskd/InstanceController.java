@@ -894,7 +894,7 @@ public class InstanceController implements IInstanceController {
 	 *         {@link FoundationCoder#encodeRootObjectForKey} under the root tag
 	 *         {@code "instanceRequest"} before posting.
 	 */
-	private Map<String,Object> createInstanceRequestDictionary( final String commandString, final String queryString, final MInstance anInstance ) {
+	private static Map<String,Object> createInstanceRequestDictionary( final String commandString, final String queryString, final MInstance anInstance ) {
 		final Map<String,Object> instanceRequest = new HashMap<>( 2 );
 
 		if( commandString != null ) {
@@ -926,9 +926,9 @@ public class InstanceController implements IInstanceController {
 	 * whether the listener is the right app or some unrelated service that happens to
 	 * have grabbed the port; either way, {@code startInstance} declines.
 	 */
-	private boolean _testConnection( MInstance anInstance ) {
+	private static boolean _testConnection( final MInstance instance ) {
 		try( Socket aSocket = new Socket() ) {
-			aSocket.connect( new InetSocketAddress( anInstance.host().name(), anInstance.port() ), 1000 );
+			aSocket.connect( new InetSocketAddress( instance.host().name(), instance.port() ), 1000 );
 			return true;
 		}
 		catch( IOException e ) {
@@ -936,11 +936,11 @@ public class InstanceController implements IInstanceController {
 		}
 	}
 	
-	private MSiteConfig appSiteConfig() {
+	private static MSiteConfig appSiteConfig() {
 		return ((Application)WOApplication.application()).siteConfig();
 	}
 	
-	private ReentrantReadWriteLock appLock() {
+	private static ReentrantReadWriteLock appLock() {
 		return ((Application)WOApplication.application())._lock;
 	}
 }
