@@ -128,6 +128,7 @@ public class Application extends ERXApplication {
 	// sleep will check if there have been changes to the siteConfig.
 	// if so, it will write the new siteConfig to disk as SiteConfig.xml
 	// if requested, it will also write the new adaptorConfig to disk as WOConfig.xml
+	// FIXME: This is horrid. Serialization should be triggered by changes in the model. See https://github.com/undur/wonder-slim-deployment/issues/18 // Hugi 2026-05-05
 	@Override
 	public void sleep() {
 		_lock.readLock().lock();
