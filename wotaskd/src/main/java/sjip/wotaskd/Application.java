@@ -59,7 +59,7 @@ public class Application extends ERXApplication {
 		_siteConfig.archiveSiteConfig();
 
 		// creating an InstanceController to control and query instances
-		_instanceController = new InstanceController();
+		_instanceController = new InstanceController( host() );
 
 		// checking to see if we should save WOConfig.xml to disk for the adaptors.
 		_shouldWriteAdaptorConfig = FProperties.booleanValue( FProperties.K.SAVES_ADAPTOR_CONFIGURATION );

@@ -144,7 +144,7 @@ public class InstanceController implements IInstanceController {
 	 * isn't there, spawn mode silently falls back to direct {@code Runtime.exec}. The whole
 	 * mechanism predates the {@link #DETACH_LAUNCH} path — see #2 for the long-term direction.
 	 */
-	public InstanceController() {
+	public InstanceController( final String hostName ) {
 		final MSiteConfig aConfig = appSiteConfig();
 
 		final boolean spawnRequested = FProperties.booleanValue( FProperties.K.SHOULD_USE_SPAWN );
@@ -171,7 +171,7 @@ public class InstanceController implements IInstanceController {
 		// Used to do phased startup the first time startup
 		_scheduler.schedule( this::_checkAutoRecoverStartup, aConfig.autoRecoverInterval(), TimeUnit.MILLISECONDS );
 
-		_hostName = theApplication().host();
+		_hostName = hostName;
 	}
 
 	/**
@@ -935,16 +935,12 @@ public class InstanceController implements IInstanceController {
 			return false;
 		}
 	}
-
-	private static Application theApplication() {
-		return (Application)WOApplication.application();
-	}
 	
 	private MSiteConfig appSiteConfig() {
-		return theApplication().siteConfig();
+		return ((Application)WOApplication.application()).siteConfig();
 	}
 	
 	private ReentrantReadWriteLock appLock() {
-		return theApplication()._lock;
+		return ((Application)WOApplication.application())._lock;
 	}
 }
