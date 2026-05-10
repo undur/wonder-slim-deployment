@@ -32,13 +32,11 @@ public class Application extends ERXApplication {
 			System.setProperty( "WODeploymentConfigurationDirectory", "/Users/hugi/Desktop/woconfig" );
 		}
 
-		_appTaskd = new AppTaskd();
-
 		// Required: keeps zero-length lifebeat responses small enough for the WOApp's
 		// fixed-width parser in WOApplication._LifebeatThread.sendMessage() to read without
 		// desyncing. See issue #21.
 		com.webobjects.appserver._private.WOHttpIO._alwaysAppendContentLength = false;
-
+		
 		// Sets the WOLifebeatDestinationPort property to wotaskd's own listening port.
 		// Wotaskd itself doesn't send lifebeats, so the setter's literal name is a misnomer
 		// here — the value gets read later, on wotaskd's side, when building a launch
@@ -52,15 +50,17 @@ public class Application extends ERXApplication {
 		// wotaskd's port from a clearly-named platform value, not from a WO global.
 		_setLifebeatDestinationPort( port().intValue() );
 
-		// Setting the multicast address
-		_multicastAddress = FProperties.stringValue( FProperties.K.MULTICAST_ADDRESS );
-
 		registerRequestHandler( new LifebeatRequestHandler( host() ), "wlb" );
-
+		
 		// unregistering the WOComponent / WOResource request handlers
 		removeRequestHandlerForKey( "wo" );
 		removeRequestHandlerForKey( "wr" );
 		removeRequestHandlerForKey( "womp" );
+
+		_appTaskd = new AppTaskd();
+
+		// Setting the multicast address
+		_multicastAddress = FProperties.stringValue( FProperties.K.MULTICAST_ADDRESS );
 
 		// getting the siteConfig (+ all Hosts, Apps, Instances) from disk
 		_siteConfig = MSiteConfig.unarchiveSiteConfig( true );
