@@ -14,12 +14,9 @@ public class Application extends ERXApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger( Application.class );
 
-	private final InstanceController _instanceController;
-	private final String _multicastAddress;
-	private final boolean _shouldWriteAdaptorConfig;
-	private final boolean _shouldRespondToMulticast;
 	private final AppTaskd _appTaskd;
-	private MSiteConfig _siteConfig;
+
+	private final InstanceController _instanceController;
 
 	static public void main( String argv[] ) {
 		ERXApplication.main( argv, Application.class );
@@ -57,38 +54,11 @@ public class Application extends ERXApplication {
 		removeRequestHandlerForKey( "wr" );
 		removeRequestHandlerForKey( "womp" );
 
-		_appTaskd = new AppTaskd();
-
-		// Setting the multicast address
-		_multicastAddress = FProperties.stringValue( FProperties.K.MULTICAST_ADDRESS );
-
-		// getting the siteConfig (+ all Hosts, Apps, Instances) from disk
-		_siteConfig = MSiteConfig.unarchiveSiteConfig( true );
-		_siteConfig.archiveSiteConfig();
+		_appTaskd = new AppTaskd( port().intValue() );
 
 		// creating an InstanceController to control and query instances
+		// FIXME: This should be in AppTaskd, but InstanceController's initialization requires appTaskd to be already set. Fix // Hugi 2026-05-10
 		_instanceController = new InstanceController( host() );
-
-		// checking to see if we should save WOConfig.xml to disk for the adaptors.
-		_shouldWriteAdaptorConfig = FProperties.booleanValue( FProperties.K.SAVES_ADAPTOR_CONFIGURATION );
-
-		if( _shouldWriteAdaptorConfig ) {
-			_siteConfig.archiveAdaptorConfig();
-		}
-
-		// checking to see if we should respond to adaptor multicast queries
-		// we will always respond to non-multicast UDP packets
-		_shouldRespondToMulticast = FProperties.booleanValue( FProperties.K.RESPONDS_TO_MULTICAST_QUERY );
-
-		if( _shouldRespondToMulticast ) {
-			logger.info( "Multicast Response Enabled" );
-		}
-		else {
-			logger.info( "Multicast Response Disabled" );
-		}
-
-		// Set up multicast listen thread
-		new MulticastListener( shouldRespondToMulticast(), port().intValue(), multicastAddress(), siteConfig() ).start();
 
 		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
 		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
@@ -108,7 +78,7 @@ public class Application extends ERXApplication {
 	}
 
 	public String multicastAddress() {
-		return _multicastAddress;
+		return appTaskd().multicastAddress();
 	}
 
 	@Override
@@ -117,12 +87,12 @@ public class Application extends ERXApplication {
 	}
 
 	public MSiteConfig siteConfig() {
-		return _siteConfig;
+		return appTaskd().siteConfig();
 	}
 
 	public void setSiteConfig( MSiteConfig aConfig ) {
 		// Don't need to call dataHasChanged, since a new MSiteConfig is already dirty
-		_siteConfig = aConfig;
+		appTaskd().setSiteConfig( aConfig );
 	}
 
 	public InstanceController instanceController() {
@@ -130,11 +100,11 @@ public class Application extends ERXApplication {
 	}
 
 	public boolean shouldWriteAdaptorConfig() {
-		return _shouldWriteAdaptorConfig;
+		return appTaskd().shouldWriteAdaptorConfig();
 	}
 
 	public boolean shouldRespondToMulticast() {
-		return _shouldRespondToMulticast;
+		return appTaskd().shouldRespondToMulticast();
 	}
 
 	// sleep will check if there have been changes to the siteConfig.
@@ -145,13 +115,13 @@ public class Application extends ERXApplication {
 	public void sleep() {
 		appTaskd().lock().readLock().lock();
 		try {
-			if( (_siteConfig != null) && _siteConfig.hasChanges() ) {
+			if( (siteConfig() != null) && siteConfig().hasChanges() ) {
 				// archiving the siteConfig
-				_siteConfig.archiveSiteConfig();
-				if( _shouldWriteAdaptorConfig ) {
-					_siteConfig.archiveAdaptorConfig();
+				siteConfig().archiveSiteConfig();
+				if( shouldWriteAdaptorConfig() ) {
+					siteConfig().archiveAdaptorConfig();
 				}
-				_siteConfig.resetChanges();
+				siteConfig().resetChanges();
 			}
 		}
 		finally {
