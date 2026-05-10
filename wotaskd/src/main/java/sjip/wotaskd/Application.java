@@ -39,7 +39,17 @@ public class Application extends ERXApplication {
 		// desyncing. See issue #21.
 		com.webobjects.appserver._private.WOHttpIO._alwaysAppendContentLength = false;
 
-		// Setting the ports
+		// Sets the WOLifebeatDestinationPort property to wotaskd's own listening port.
+		// Wotaskd itself doesn't send lifebeats, so the setter's literal name is a misnomer
+		// here — the value gets read later, on wotaskd's side, when building a launch
+		// command for a managed instance: the {@code -WOLifebeatDestinationPort <port>}
+		// argument added to that command tells the spawned WO app where to send its
+		// lifebeats. Without this call, that argument would carry whatever default the
+		// JVM's WOLifebeatDestinationPort property happened to have at startup, which
+		// isn't guaranteed to match the port wotaskd is actually listening on.
+		// FIXME: Declare our own port-publishing mechanism that doesn't piggyback on the
+		// confusingly-named WO lifebeat property — the launch-command builder should read
+		// wotaskd's port from a clearly-named platform value, not from a WO global.
 		_setLifebeatDestinationPort( port().intValue() );
 
 		// Setting the multicast address
