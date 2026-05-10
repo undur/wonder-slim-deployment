@@ -145,7 +145,7 @@ public class InstanceController implements IInstanceController {
 	 * mechanism predates the {@link #DETACH_LAUNCH} path — see #2 for the long-term direction.
 	 */
 	public InstanceController() {
-		final MSiteConfig aConfig = theApplication().siteConfig();
+		final MSiteConfig aConfig = appSiteConfig();
 
 		final boolean spawnRequested = FProperties.booleanValue( FProperties.K.SHOULD_USE_SPAWN );
 		if( spawnRequested ) {
@@ -330,7 +330,7 @@ public class InstanceController implements IInstanceController {
 		logger.debug( "_checkAutoRecover START" );
 		theApplication()._lock.readLock().lock();
 		try {
-			MHost theHost = theApplication().siteConfig().localHost();
+			MHost theHost = appSiteConfig().localHost();
 			if( theHost != null ) {
 				List<MInstance> instArray = theHost.instanceArray();
 				int instArrayCount = instArray.size();
@@ -370,7 +370,7 @@ public class InstanceController implements IInstanceController {
 		logger.debug( "_checkAutoRecoverStartup START" );
 		theApplication()._lock.readLock().lock();
 		try {
-			MSiteConfig aConfig = theApplication().siteConfig();
+			MSiteConfig aConfig = appSiteConfig();
 			final List<MApplication> appArray = aConfig.applicationArray();
 			int appArrayCount = appArray.size();
 			final InstanceController instanceController = this;
@@ -479,7 +479,7 @@ public class InstanceController implements IInstanceController {
 		theApplication()._lock.readLock().lock();
 		try {
 
-			MHost theHost = theApplication().siteConfig().localHost();
+			MHost theHost = appSiteConfig().localHost();
 			if( theHost != null ) {
 				final List<MInstance> instArray = theHost.instanceArray();
 				int instArrayCount = instArray.size();
@@ -554,7 +554,7 @@ public class InstanceController implements IInstanceController {
 	 */
 	@Override
 	public String startInstance( MInstance anInstance ) {
-		MSiteConfig aConfig = theApplication().siteConfig();
+		MSiteConfig aConfig = appSiteConfig();
 
 		if( anInstance == null ) {
 			return "Attempt to start null instance on " + _hostName;
@@ -794,7 +794,7 @@ public class InstanceController implements IInstanceController {
 			throw new SjipException( "Attempt to command null instance on " + _hostName );
 		}
 
-		if( anInstance.host() != theApplication().siteConfig().localHost() ) {
+		if( anInstance.host() != appSiteConfig().localHost() ) {
 			throw new SjipException( anInstance.displayName() + " does not exist on " + _hostName + "; command failed" );
 		}
 
@@ -938,5 +938,9 @@ public class InstanceController implements IInstanceController {
 
 	private static Application theApplication() {
 		return (Application)WOApplication.application();
+	}
+	
+	private MSiteConfig appSiteConfig() {
+		return theApplication().siteConfig();
 	}
 }
