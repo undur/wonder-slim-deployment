@@ -15,6 +15,7 @@ SUCH DAMAGE.
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 
 import sjip.core.model.MInstance;
+import sjip.core.model.MSiteConfig;
 import sjip.x.FHosts;
 
 public class LifebeatRequestHandler extends WORequestHandler {
@@ -79,7 +81,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		final List<String> values = NSArray.componentsSeparatedByString( aRequest.queryString(), "&" );
 
 		if( (values == null) || (values.size() != 4) ) {
-			theApplication().siteConfig().globalErrorDictionary.put( aRequest.queryString(), (_hostName + ": Received bad lifebeat: " + aRequest.queryString()) );
+			appSiteConfig().globalErrorDictionary.put( aRequest.queryString(), (_hostName + ": Received bad lifebeat: " + aRequest.queryString()) );
 			log.error( "{}: Received bad lifebeat: {}", _hostName, aRequest.queryString() );
 		}
 		else {
@@ -119,7 +121,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 				aResponse = null;
 			}
 			else {
-				theApplication().siteConfig().globalErrorDictionary.put( aRequest.queryString(), (_hostName + ": Received bad lifebeat: " + aRequest.queryString()) );
+				appSiteConfig().globalErrorDictionary.put( aRequest.queryString(), (_hostName + ": Received bad lifebeat: " + aRequest.queryString()) );
 				log.error( "{}: Received bad lifebeat: {}", _hostName, aRequest.queryString() );
 			}
 		}
@@ -139,21 +141,21 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// KH - can we cache this for better speed?
 		final InetAddress hostAddress = addressForName( host );
 
-		theApplication()._lock.readLock().lock();
+		appLock().readLock().lock();
 
 		try {
-			final MInstance instance = theApplication().siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = appSiteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.startRegistration();
 				instance.setShouldDie( false );
 			}
 			else {
-				theApplication().instanceController().registerUnknownInstance( instanceName, host, port );
+				appInstanceController().registerUnknownInstance( instanceName, host, port );
 			}
 		}
 		finally {
-			theApplication()._lock.readLock().unlock();
+			appLock().readLock().unlock();
 		}
 	}
 
@@ -162,20 +164,20 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// KH - can we cache this for better speed?
 		final InetAddress hostAddress = addressForName( host );
 
-		theApplication()._lock.readLock().lock();
+		appLock().readLock().lock();
 
 		try {
-			final MInstance instance = theApplication().siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = appSiteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.updateRegistration();
 				// This call will reset shouldDie status!;
 				return !instance.shouldDieAndReset();
 			}
-			theApplication().instanceController().registerUnknownInstance( instanceName, host, port );
+			appInstanceController().registerUnknownInstance( instanceName, host, port );
 		}
 		finally {
-			theApplication()._lock.readLock().unlock();
+			appLock().readLock().unlock();
 		}
 		return true;
 	}
@@ -185,10 +187,10 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// app will stop in a good way - we requested it.
 		final InetAddress hostAddress = addressForName( host );
 
-		theApplication()._lock.readLock().lock();
+		appLock().readLock().lock();
 
 		try {
-			final MInstance instance = theApplication().siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = appSiteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.registerStop();
@@ -197,7 +199,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			}
 		}
 		finally {
-			theApplication()._lock.readLock().unlock();
+			appLock().readLock().unlock();
 		}
 	}
 
@@ -207,10 +209,10 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// app will stop in a bad way - notify if necessary
 		final InetAddress hostAddress = addressForName( host );
 
-		theApplication()._lock.readLock().lock();
+		appLock().readLock().lock();
 
 		try {
-			final MInstance instance = theApplication().siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = appSiteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.registerCrash();
@@ -219,7 +221,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			}
 		}
 		finally {
-			theApplication()._lock.readLock().unlock();
+			appLock().readLock().unlock();
 		}
 	}
 
@@ -234,7 +236,19 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		return null;
 	}
 
-	private Application theApplication() {
+	private static Application theApplication() {
 		return (Application)WOApplication.application();
+	}
+	
+	private static MSiteConfig appSiteConfig() {
+		return theApplication().siteConfig();
+	}
+	
+	private static ReentrantReadWriteLock appLock() {
+		return theApplication()._lock;
+	}
+	
+	private static InstanceController appInstanceController() {
+		return theApplication().instanceController();
 	}
 }
