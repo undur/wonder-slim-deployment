@@ -17,8 +17,9 @@ public class AppTaskd {
 	private final boolean _shouldWriteAdaptorConfig;
 	private final boolean _shouldRespondToMulticast;
 	private MSiteConfig _siteConfig;
+	private final InstanceController _instanceController;
 
-	public AppTaskd( final int port ) {
+	public AppTaskd( final String hostName, final int port ) {
 		_lock = new ReentrantReadWriteLock();
 
 		// Setting the multicast address
@@ -49,6 +50,9 @@ public class AppTaskd {
 		// Set up multicast listen thread
 		// FIXME: Currently a side-effect of constructing an AppTaskd. Should be explicit // Hugi 2026-05-10
 		new MulticastListener( shouldRespondToMulticast(), port, multicastAddress(), siteConfig() ).start();
+		
+		// creating an InstanceController to control and query instances
+		_instanceController = new InstanceController( hostName, this );
 	}
 
 	public ReentrantReadWriteLock lock() {
@@ -73,5 +77,9 @@ public class AppTaskd {
 
 	public boolean shouldRespondToMulticast() {
 		return _shouldRespondToMulticast;
+	}
+
+	public InstanceController instanceController() {
+		return _instanceController;
 	}
 }

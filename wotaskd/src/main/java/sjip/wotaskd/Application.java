@@ -16,8 +16,6 @@ public class Application extends ERXApplication {
 
 	private final AppTaskd _appTaskd;
 
-	private final InstanceController _instanceController;
-
 	static public void main( String argv[] ) {
 		ERXApplication.main( argv, Application.class );
 	}
@@ -54,11 +52,7 @@ public class Application extends ERXApplication {
 		removeRequestHandlerForKey( "wr" );
 		removeRequestHandlerForKey( "womp" );
 
-		_appTaskd = new AppTaskd( port().intValue() );
-
-		// creating an InstanceController to control and query instances
-		// FIXME: This should be in AppTaskd, but InstanceController's initialization requires appTaskd to be already set. Fix // Hugi 2026-05-10
-		_instanceController = new InstanceController( host() );
+		_appTaskd = new AppTaskd( host(), port().intValue() );
 
 		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
 		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
@@ -77,32 +71,38 @@ public class Application extends ERXApplication {
 		return "wotaskd";
 	}
 
-	public String multicastAddress() {
-		return appTaskd().multicastAddress();
-	}
-
 	@Override
 	public boolean allowsConcurrentRequestHandling() {
 		return true;
 	}
 
+	@Deprecated
+	public String multicastAddress() {
+		return appTaskd().multicastAddress();
+	}
+
+	@Deprecated
 	public MSiteConfig siteConfig() {
 		return appTaskd().siteConfig();
 	}
 
+	@Deprecated
 	public void setSiteConfig( MSiteConfig aConfig ) {
 		// Don't need to call dataHasChanged, since a new MSiteConfig is already dirty
 		appTaskd().setSiteConfig( aConfig );
 	}
 
+	@Deprecated
 	public InstanceController instanceController() {
-		return _instanceController;
+		return appTaskd().instanceController();
 	}
 
+	@Deprecated
 	public boolean shouldWriteAdaptorConfig() {
 		return appTaskd().shouldWriteAdaptorConfig();
 	}
 
+	@Deprecated
 	public boolean shouldRespondToMulticast() {
 		return appTaskd().shouldRespondToMulticast();
 	}

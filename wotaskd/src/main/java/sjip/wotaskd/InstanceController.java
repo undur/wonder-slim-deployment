@@ -38,7 +38,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.IInstanceController;
@@ -70,6 +69,8 @@ public class InstanceController implements IInstanceController {
 	 * is preserved unchanged for the off case. Unix-only — has no effect on Windows.
 	 */
 	private static final boolean DETACH_LAUNCH = FProperties.booleanValue( FProperties.K.DETACH_LAUNCH );
+
+	private final AppTaskd _appTaskd;
 
 	private final String _hostName;
 	private final boolean _shouldUseSpawn;
@@ -144,7 +145,8 @@ public class InstanceController implements IInstanceController {
 	 * isn't there, spawn mode silently falls back to direct {@code Runtime.exec}. The whole
 	 * mechanism predates the {@link #DETACH_LAUNCH} path — see #2 for the long-term direction.
 	 */
-	public InstanceController( final String hostName ) {
+	public InstanceController( final String hostName, final AppTaskd appTaskd ) {
+		_appTaskd = appTaskd;
 		final MSiteConfig aConfig = appSiteConfig();
 
 		final boolean spawnRequested = FProperties.booleanValue( FProperties.K.SHOULD_USE_SPAWN );
@@ -936,11 +938,11 @@ public class InstanceController implements IInstanceController {
 		}
 	}
 	
-	private static MSiteConfig appSiteConfig() {
-		return ((Application)WOApplication.application()).siteConfig();
+	private MSiteConfig appSiteConfig() {
+		return _appTaskd.siteConfig();
 	}
 	
-	private static ReentrantReadWriteLock appLock() {
-		return ((Application)WOApplication.application()).appTaskd().lock();
+	private ReentrantReadWriteLock appLock() {
+		return _appTaskd.lock();
 	}
 }
