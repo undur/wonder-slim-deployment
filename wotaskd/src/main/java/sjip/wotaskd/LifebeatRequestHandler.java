@@ -39,9 +39,9 @@ public class LifebeatRequestHandler extends WORequestHandler {
 	private final Application theApplication;
 	private final String _hostName;
 
-	public LifebeatRequestHandler() {
+	public LifebeatRequestHandler( final String hostName ) {
 		theApplication = ((Application)WOApplication.application());
-		_hostName = theApplication.hostAddress().getHostName();
+		_hostName = hostName;
 	}
 
 	private static WOResponse constantResponse( int status, String httpVersion ) {
