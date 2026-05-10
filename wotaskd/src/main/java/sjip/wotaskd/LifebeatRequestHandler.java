@@ -57,7 +57,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// Sadly, we do regenerate in the case of random lifebeats. Hopefully this won't be too often.
 		// Didn't pull this out so that we can rely on isUsingWebServer to catch some bad requests
 		if( !FHosts.isUsingWebServer( aRequest.headers() ) && FHosts.isConfiguredHostAddress( aRequest._originatingAddress(), true ) ) {
-			final Object lock = WOApplication.application().requestHandlingLock();
+			final Object lock = theApplication.requestHandlingLock();
 
 			if( lock != null ) {
 				synchronized( lock ) {
@@ -144,14 +144,14 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		theApplication._lock.readLock().lock();
 
 		try {
-			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = theApplication.siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.startRegistration();
 				instance.setShouldDie( false );
 			}
 			else {
-				((Application)WOApplication.application()).instanceController().registerUnknownInstance( instanceName, host, port );
+				theApplication.instanceController().registerUnknownInstance( instanceName, host, port );
 			}
 		}
 		finally {
@@ -167,14 +167,14 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		theApplication._lock.readLock().lock();
 
 		try {
-			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = theApplication.siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.updateRegistration();
 				// This call will reset shouldDie status!;
 				return !instance.shouldDieAndReset();
 			}
-			((Application)WOApplication.application()).instanceController().registerUnknownInstance( instanceName, host, port );
+			theApplication.instanceController().registerUnknownInstance( instanceName, host, port );
 		}
 		finally {
 			theApplication._lock.readLock().unlock();
@@ -190,7 +190,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		theApplication._lock.readLock().lock();
 
 		try {
-			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = theApplication.siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.registerStop();
@@ -212,7 +212,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		theApplication._lock.readLock().lock();
 
 		try {
-			final MInstance instance = ((Application)WOApplication.application()).siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
+			final MInstance instance = theApplication.siteConfig().instanceWithHostAndPort( instanceName, hostAddress, port );
 
 			if( instance != null ) {
 				instance.registerCrash();
