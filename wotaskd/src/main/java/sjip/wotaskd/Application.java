@@ -47,7 +47,7 @@ public class Application extends ERXApplication {
 		// Setting the multicast address
 		_multicastAddress = FProperties.stringValue( FProperties.K.MULTICAST_ADDRESS );
 
-		registerRequestHandler( new LifebeatRequestHandler( hostAddress().getHostName() ), "wlb" );
+		registerRequestHandler( new LifebeatRequestHandler( host() ), "wlb" );
 
 		// unregistering the WOComponent / WOResource request handlers
 		removeRequestHandlerForKey( "wo" );
