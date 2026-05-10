@@ -43,10 +43,6 @@ public abstract class MonitorComponent extends ERXComponent {
 		return _message;
 	}
 
-	public Application application() {
-		return (Application)super.application();
-	}
-
 	public Session session() {
 		return (Session)super.session();
 	}
