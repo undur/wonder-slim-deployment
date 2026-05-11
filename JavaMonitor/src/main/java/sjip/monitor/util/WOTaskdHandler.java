@@ -291,6 +291,10 @@ public class WOTaskdHandler {
 		_sendOverwriteClearToWotaskd( aHost, "overwrite", data );
 	}
 
+	// FIXME: Dead code — no caller in JavaMonitor or anywhere else in our repos. The wire-level
+	// "clear" command still exists on the wotaskd receive side (DirectAction.monitorRequestAction)
+	// but nothing here invokes it. Likely vestigial from a removed UI affordance. Candidate for
+	// deletion alongside the receive-side handler. // Hugi 2026-05-11
 	private void sendClearToWotaskd( MHost aHost ) {
 		final String data = new String( "SITE" );
 		_sendOverwriteClearToWotaskd( aHost, "clear", data );

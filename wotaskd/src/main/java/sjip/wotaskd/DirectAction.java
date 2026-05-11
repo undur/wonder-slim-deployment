@@ -142,6 +142,10 @@ public class DirectAction extends WODirectAction {
 				NSDictionary addDict = (NSDictionary)updateWotaskdDict.valueForKey( "add" );
 				NSDictionary configureDict = (NSDictionary)updateWotaskdDict.valueForKey( "configure" );
 
+				// FIXME: Dead branch — no client in our codebase sends the "clear" command. The
+				// corresponding send-side (WOTaskdHandler.sendClearToWotaskd) is itself unused.
+				// Candidate for deletion alongside that helper. Functionally redundant with an
+				// "overwrite" carrying an empty SiteConfig. // Hugi 2026-05-11
 				if( clearString != null ) {
 					stopAllInstances();
 					((Application)WOApplication.application()).setSiteConfig( new MSiteConfig( null ) );
