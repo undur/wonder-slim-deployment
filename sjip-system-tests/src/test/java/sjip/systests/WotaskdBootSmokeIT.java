@@ -67,7 +67,7 @@ class WotaskdBootSmokeIT {
 	void wotaskdBoots_createsEmptySiteConfigFile( TestReport report ) throws IOException {
 		final Path siteConfig = _wotaskd.siteConfigFile();
 		report.note( "On startup, wotaskd writes a SiteConfig.xml to its configured directory even if no config exists yet." );
-		report.action( "Read " + siteConfig );
+		report.action( "Read wotaskd's SiteConfig.xml from its config directory" );
 		assertTrue( Files.exists( siteConfig ), "SiteConfig.xml should be created on wotaskd startup at " + siteConfig );
 		report.state( "wotaskd SiteConfig.xml after boot", Files.readString( siteConfig, StandardCharsets.UTF_8 ) );
 	}

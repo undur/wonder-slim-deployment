@@ -2,7 +2,7 @@
 
 > On startup, wotaskd writes a SiteConfig.xml to its configured directory even if no config exists yet.
 
-### Action — Read /var/folders/nd/kssgl2r105d82srsbjx_9vdr0000gn/T/sjip-systests-wotaskd-2179990911581632208/SiteConfig.xml
+### Action — Read wotaskd's SiteConfig.xml from its config directory
 
 ### State — wotaskd SiteConfig.xml after boot
 
