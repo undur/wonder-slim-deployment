@@ -81,7 +81,7 @@ monitorRequest → updateWotaskd → sync → SiteConfig
 JavaMonitor sends this to wotaskds that had previous errors, to re-establish
 the canonical view. See `WOTaskdComms.syncHostsWithErrors`.
 
-#### `add` — **[partial]**
+#### `add` — **[covered]**
 
 ```
 monitorRequest → updateWotaskd → add → hostArray|applicationArray|instanceArray
@@ -90,8 +90,8 @@ monitorRequest → updateWotaskd → add → hostArray|applicationArray|instance
 Per-element response shape: `[{success: YES}, ...]` or error elements.
 
 - `hostArray`: **[covered]** — `AddHostScenario/addHost-request.xml` + `addHost-response.xml`
-- `applicationArray`: **[missing]**
-- `instanceArray`: **[missing]**
+- `applicationArray`: **[covered]** — `AddApplicationScenario/addApplication-request.xml` + `addApplication-response.xml`
+- `instanceArray`: **[covered]** — `AddInstanceScenario/addInstance-request.xml` + `addInstance-response.xml`
 
 #### `remove` — **[missing]**
 
@@ -236,7 +236,7 @@ Listed here for completeness only.
 | `updateWotaskd/clear`          |       0 |       0 |       1 |
 | `updateWotaskd/overwrite`      |       1 |       0 |       0 |
 | `updateWotaskd/sync`           |       0 |       0 |       1 |
-| `updateWotaskd/add` (3 arrays) |       1 |       0 |       2 |
+| `updateWotaskd/add` (3 arrays) |       3 |       0 |       0 |
 | `updateWotaskd/remove` (3 arrays) |    0 |       0 |       3 |
 | `updateWotaskd/configure` (4 entries) |  0 |       0 |       4 |
 | `commandWotaskd` (6 commands)  |       0 |       0 |       6 |
@@ -244,7 +244,7 @@ Listed here for completeness only.
 | Lifebeat (4 notifications)     |       0 |       1 |       3 |
 | `defaultAction`                |       0 |       1 |       0 |
 | `woconfigAction`               |       0 |       0 |       1 |
-| **Total**                      |   **4** |   **2** |  **24** |
+| **Total**                      |   **6** |   **2** |  **22** |
 
 `getPathAction` is intentionally not counted — out of scope for the wire
 inventory.

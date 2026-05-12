@@ -1,0 +1,14 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<add type="NSDictionary">
+			<instanceArray type="NSArray">
+				<element type="NSDictionary">
+					<applicationName type="NSString">DemoApp</applicationName>
+					<hostName type="NSString">localhost</hostName>
+					<id type="NSNumber">1</id>
+					<port type="NSNumber">12345</port>
+				</element>
+			</instanceArray>
+		</add>
+	</updateWotaskd>
+</monitorRequest>
