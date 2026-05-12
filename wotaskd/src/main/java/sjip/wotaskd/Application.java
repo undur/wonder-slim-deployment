@@ -22,11 +22,6 @@ public class Application extends ERXApplication {
 
 	public Application() {
 		
-		// FIXME: I know.
-		if( "hugi".equals( FProperties.sysProp( "user.name" ) ) ) {
-			System.setProperty( "WODeploymentConfigurationDirectory", "/Users/hugi/Desktop/woconfig" );
-		}
-
 		// Required: keeps zero-length lifebeat responses small enough for the WOApp's
 		// fixed-width parser in WOApplication._LifebeatThread.sendMessage() to read without
 		// desyncing. See issue #21.
