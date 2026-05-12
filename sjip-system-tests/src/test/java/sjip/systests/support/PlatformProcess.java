@@ -88,7 +88,12 @@ public final class PlatformProcess implements AutoCloseable {
 	 */
 	public static PlatformProcess startJavaMonitor( final int port, final Path configDirectory, final int lifebeatDestinationPort ) throws IOException {
 		final Path woa = locateWoa( "JavaMonitor" );
-		final List<String> extraArgs = List.of( "-WOLifebeatDestinationPort", String.valueOf( lifebeatDestinationPort ) );
+		final List<String> extraArgs = List.of(
+				"-WOLifebeatDestinationPort", String.valueOf( lifebeatDestinationPort ),
+				// Enable TestDirectAction's endpoints in this JVM — they're 403'd by default
+				// so they can't be reached on a production JavaMonitor where the property
+				// isn't set.
+				"-Dsjip.testDirectActions.enabled=true" );
 		return start( "JavaMonitor", woa, port, configDirectory, extraArgs );
 	}
 

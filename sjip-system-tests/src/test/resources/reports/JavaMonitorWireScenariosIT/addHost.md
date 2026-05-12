@@ -1,8 +1,8 @@
-# addFirstHost_propagatesToWotaskd
+# addHost
 
-## Initial state
+## Initial state (before addHost)
 
-### State — wotaskd SiteConfig.xml (empty)
+### State — wotaskd SiteConfig.xml
 
 ```xml
 <SiteConfig type="NSDictionary">
@@ -19,11 +19,9 @@
 </SiteConfig>
 ```
 
-## Drive JavaMonitor's addHost direct action
+## addHost
 
-> JavaMonitor's `WOTaskdHandler.sendOverwriteToWotaskd` should push the new SiteConfig to wotaskd over the wire — captured by the proxy below.
-
-### Action — POST JavaMonitor /test/addHost (name=localhost, hostType=UNIX)
+### Action — POST JavaMonitor /test/addHost
 
 ### Wire send — test → JavaMonitor (POST /test/addHost)
 
@@ -78,7 +76,7 @@ OK
 
 ## Resulting state
 
-### State — wotaskd SiteConfig.xml after addHost
+### State — wotaskd SiteConfig.xml
 
 ```xml
 <SiteConfig type="NSDictionary">

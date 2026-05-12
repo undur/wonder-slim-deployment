@@ -1,0 +1,31 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<add type="NSDictionary">
+			<instanceArray type="NSArray">
+				<element type="NSDictionary">
+					<additionalArgs type="NSString"></additionalArgs>
+					<applicationName type="NSString">DemoApp</applicationName>
+					<autoOpenInBrowser type="NSString">NO</autoOpenInBrowser>
+					<autoRecover type="NSString">YES</autoRecover>
+					<cachingEnabled type="NSString">YES</cachingEnabled>
+					<debuggingEnabled type="NSString">NO</debuggingEnabled>
+					<gracefulScheduling type="NSString">YES</gracefulScheduling>
+					<hostName type="NSString">localhost</hostName>
+					<id type="NSNumber">1</id>
+					<lifebeatInterval type="NSNumber">30</lifebeatInterval>
+					<minimumActiveSessionsCount type="NSNumber">0</minimumActiveSessionsCount>
+					<oldport type="NSNumber">2001</oldport>
+					<outputPath type="NSString">/dev/null</outputPath>
+					<port type="NSNumber">12345</port>
+					<schedulingDailyStartTime type="NSNumber">3</schedulingDailyStartTime>
+					<schedulingEnabled type="NSString">NO</schedulingEnabled>
+					<schedulingHourlyStartTime type="NSNumber">3</schedulingHourlyStartTime>
+					<schedulingInterval type="NSNumber">12</schedulingInterval>
+					<schedulingStartDay type="NSNumber">1</schedulingStartDay>
+					<schedulingType type="NSString">DAILY</schedulingType>
+					<schedulingWeeklyStartTime type="NSNumber">3</schedulingWeeklyStartTime>
+				</element>
+			</instanceArray>
+		</add>
+	</updateWotaskd>
+</monitorRequest>

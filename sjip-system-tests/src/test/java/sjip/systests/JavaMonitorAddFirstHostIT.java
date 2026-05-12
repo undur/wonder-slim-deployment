@@ -21,7 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import sjip.systests.support.JavaMonitorAdminClient;
+import sjip.systests.support.JavaMonitorTestActionClient;
 import sjip.systests.support.PlatformProcess;
 import sjip.systests.support.SnapshotAsserter;
 import sjip.systests.support.TestReport;
@@ -32,7 +32,7 @@ import sjip.systests.support.WotaskdClient.WireExchange;
 
 /**
  * Scenario: a fresh JavaMonitor and a fresh wotaskd, both with empty configs. The test
- * drives JavaMonitor's {@code admin/addHost} direct action to add wotaskd as the first
+ * drives JavaMonitor's {@code test/addHost} direct action to add wotaskd as the first
  * host in JavaMonitor's site config. JavaMonitor's production code path
  * ({@code WOTaskdHandler.sendOverwriteToWotaskd}) pushes the new site config to that
  * wotaskd over the wire.
@@ -72,7 +72,7 @@ class JavaMonitorAddFirstHostIT {
 	private PlatformProcess _javaMonitor;
 	private WireCapturingProxy _proxy;
 	private WotaskdClient _wotaskdClient;
-	private JavaMonitorAdminClient _javaMonitorClient;
+	private JavaMonitorTestActionClient _javaMonitorClient;
 	private final SnapshotAsserter _snapshots = new SnapshotAsserter( "JavaMonitorAddFirstHost" );
 
 	@BeforeAll
@@ -90,7 +90,7 @@ class JavaMonitorAddFirstHostIT {
 		final int javaMonitorPort = freePort();
 		_javaMonitor = PlatformProcess.startJavaMonitor( javaMonitorPort, _javaMonitorConfigDir, _proxy.port() );
 		_javaMonitor.awaitReady( Duration.ofSeconds( 30 ) );
-		_javaMonitorClient = new JavaMonitorAdminClient( javaMonitorPort );
+		_javaMonitorClient = new JavaMonitorTestActionClient( javaMonitorPort );
 	}
 
 	@AfterAll
@@ -119,7 +119,7 @@ class JavaMonitorAddFirstHostIT {
 
 		report.heading( "Drive JavaMonitor's addHost direct action" );
 		report.note( "JavaMonitor's `WOTaskdHandler.sendOverwriteToWotaskd` should push the new SiteConfig to wotaskd over the wire — captured by the proxy below." );
-		report.action( "POST JavaMonitor /admin/addHost (name=" + HOST_NAME + ", hostType=" + HOST_TYPE + ")" );
+		report.action( "POST JavaMonitor /test/addHost (name=" + HOST_NAME + ", hostType=" + HOST_TYPE + ")" );
 
 		final HttpResponse<String> response = _javaMonitorClient.addHost( HOST_NAME, HOST_TYPE );
 

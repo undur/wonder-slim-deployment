@@ -22,6 +22,7 @@ import com.webobjects.foundation.NSArray;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.routes.RouteTable;
 import sjip.monitor.admin.AdminAction;
+import sjip.monitor.test.TestDirectAction;
 import sjip.monitor.util.WOTaskdHandler;
 import sjip.x.FProperties;
 
@@ -53,6 +54,20 @@ public class Application extends ERXApplication {
 			}
 
 		}, "admin" );
+
+		// Convenience prefix for TestDirectAction's endpoints so test URLs read
+		// `/test/<action>` instead of `/wa/TestDirectAction/<action>`. The prefix is
+		// purely cosmetic — WO's default direct-action handler resolves
+		// `WODirectAction` subclasses by classname regardless, so the class is reachable
+		// either way. The real production gate is in TestDirectAction.performActionNamed,
+		// which returns 403 unless `sjip.testDirectActions.enabled=true`.
+		registerRequestHandler( new WODirectActionRequestHandler() {
+			@Override
+			public NSArray getRequestHandlerPathForRequest( WORequest worequest ) {
+				NSArray nsarray = new NSArray( TestDirectAction.class.getName() );
+				return nsarray.arrayByAddingObject( worequest.requestHandlerPath() );
+			}
+		}, "test" );
 
 		
 		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()

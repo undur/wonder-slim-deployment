@@ -10,7 +10,6 @@ import com.webobjects.appserver.WOResponse;
 
 import sjip.core.MUtil;
 import sjip.core.model.MApplication;
-import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
 import sjip.monitor.Session;
@@ -510,50 +509,6 @@ public class AdminAction extends WODirectAction {
 			applicationsPage().setAdditionalArgs( instances, arguments );
 	}
 
-	/**
-	 * Programmatic counterpart to {@code HostsPage.addHostClicked()}. Adds a host to
-	 * JavaMonitor's site config and pushes the change out to the wotaskd peers.
-	 *
-	 * <p>Form values:
-	 * <ul>
-	 *   <li>{@code name} — hostname or IP of the host to add</li>
-	 *   <li>{@code hostType} — one of {@code UNIX}, {@code WINDOWS}, {@code MACOSX}</li>
-	 * </ul>
-	 *
-	 * <p>FIXME: This is a minimal extraction driven by system-test needs — the
-	 * validation that {@code HostsPage.addHostClicked()} carries (localhost-only-when-empty
-	 * rule, version check, dedup) isn't replicated here yet. Full controller extraction
-	 * is a separate piece of work. // Hugi 2026-05-12
-	 */
-	public WOActionResults addHostAction() {
-		final String name = (String)context().request().formValueForKey( "name" );
-		final String hostType = (String)context().request().formValueForKey( "hostType" );
-
-		if( name == null || name.isEmpty() ) {
-			throw new DirectActionException( "name form value is required", 406 );
-		}
-		if( hostType == null || hostType.isEmpty() ) {
-			throw new DirectActionException( "hostType form value is required", 406 );
-		}
-
-		_handler.whileWriting( () -> {
-			final MHost host = new MHost( siteConfig(), name, hostType.toUpperCase() );
-
-			final List<MHost> peerWotaskds = new ArrayList<>( siteConfig().hostArray() );
-			siteConfig().addHost_M( host );
-
-			_handler.sendOverwriteToWotaskd( host );
-
-			if( !peerWotaskds.isEmpty() ) {
-				_handler.sendAddHostToWotaskds( host, peerWotaskds );
-			}
-		} );
-
-		final WOResponse response = new WOResponse();
-		response.setContent( "OK" );
-		return response;
-	}
-
 	public void turnScheduledOnAction() {
 		applicationsPage().turnScheduledOn( instances );
 	}
@@ -664,12 +619,6 @@ public class AdminAction extends WODirectAction {
 	}
 
 	private WOActionResults performMonitorActionNamed( String s ) {
-		// Host-level admin actions don't operate on instances/applications, so they
-		// skip the type/name resolution that the instance-oriented actions need.
-		if( "addHost".equals( s ) ) {
-			return super.performActionNamed( s );
-		}
-
 		String typeParam = (String)context().request().formValueForKey( "type" );
 
 		if( "all".equalsIgnoreCase( typeParam ) ) {

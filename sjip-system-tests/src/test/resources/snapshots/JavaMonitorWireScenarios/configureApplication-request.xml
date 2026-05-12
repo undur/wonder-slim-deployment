@@ -1,0 +1,32 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<configure type="NSDictionary">
+			<applicationArray type="NSArray">
+				<element type="NSDictionary">
+					<adaptor type="NSString">WODefaultAdaptor</adaptor>
+					<adaptorThreads type="NSNumber">8</adaptorThreads>
+					<adaptorThreadsMax type="NSNumber">256</adaptorThreadsMax>
+					<adaptorThreadsMin type="NSNumber">16</adaptorThreadsMin>
+					<additionalArgs type="NSString"></additionalArgs>
+					<autoOpenInBrowser type="NSString">NO</autoOpenInBrowser>
+					<autoRecover type="NSString">YES</autoRecover>
+					<cachingEnabled type="NSString">YES</cachingEnabled>
+					<debuggingEnabled type="NSString">NO</debuggingEnabled>
+					<lifebeatInterval type="NSNumber">30</lifebeatInterval>
+					<listenQueueSize type="NSNumber">128</listenQueueSize>
+					<macOutputPath type="NSString"></macOutputPath>
+					<macPath type="NSString"></macPath>
+					<minimumActiveSessionsCount type="NSNumber">0</minimumActiveSessionsCount>
+					<name type="NSString">DemoApp</name>
+					<notificationEmailEnabled type="NSString">NO</notificationEmailEnabled>
+					<phasedStartup type="NSString">YES</phasedStartup>
+					<projectSearchPath type="NSString">()</projectSearchPath>
+					<sessionTimeOut type="NSNumber">3600</sessionTimeOut>
+					<startingPort type="NSNumber">2001</startingPort>
+					<statisticsPassword type="NSString"></statisticsPassword>
+					<timeForStartup type="NSNumber">30</timeForStartup>
+				</element>
+			</applicationArray>
+		</configure>
+	</updateWotaskd>
+</monitorRequest>

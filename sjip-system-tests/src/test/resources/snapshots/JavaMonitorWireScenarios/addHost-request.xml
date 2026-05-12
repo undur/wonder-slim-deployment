@@ -1,0 +1,22 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<overwrite type="NSDictionary">
+			<SiteConfig type="NSDictionary">
+				<applicationArray type="NSArray">
+				</applicationArray>
+				<hostArray type="NSArray">
+					<element type="NSDictionary">
+						<name type="NSString">localhost</name>
+						<type type="NSString">UNIX</type>
+					</element>
+				</hostArray>
+				<instanceArray type="NSArray">
+				</instanceArray>
+				<site type="NSDictionary">
+					<viewRefreshEnabled type="NSString">YES</viewRefreshEnabled>
+					<viewRefreshRate type="NSNumber">60</viewRefreshRate>
+				</site>
+			</SiteConfig>
+		</overwrite>
+	</updateWotaskd>
+</monitorRequest>
