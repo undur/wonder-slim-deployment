@@ -58,6 +58,16 @@ public final class TestReportExtension implements ParameterResolver, BeforeTestE
 		if( report == null ) {
 			return;
 		}
+
+		// If the test threw, append the failure to the report so the on-disk artifact
+		// shows the narrative *and* the assertion that aborted it. Without this, a failed
+		// test's report ends at whatever step ran last before the throw, with no
+		// indication that anything went wrong.
+		context.getExecutionException().ifPresent( throwable -> {
+			report.heading( "Test FAILED" );
+			report.state( throwable.getClass().getSimpleName(), throwable.getMessage() != null ? throwable.getMessage() : "(no message)" );
+		} );
+
 		final Path output = Paths.get( "src", "test", "resources", "reports", context.getRequiredTestClass().getSimpleName(), context.getRequiredTestMethod().getName() + ".md" );
 		Files.createDirectories( output.getParent() );
 		Files.writeString( output, TestReportRenderer.render( report ), StandardCharsets.UTF_8 );
