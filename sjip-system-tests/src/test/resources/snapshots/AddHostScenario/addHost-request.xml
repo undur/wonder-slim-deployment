@@ -1,0 +1,12 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<add type="NSDictionary">
+			<hostArray type="NSArray">
+				<element type="NSDictionary">
+					<name type="NSString">localhost</name>
+					<type type="NSString">UNIX</type>
+				</element>
+			</hostArray>
+		</add>
+	</updateWotaskd>
+</monitorRequest>
