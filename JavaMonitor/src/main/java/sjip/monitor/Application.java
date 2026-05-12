@@ -35,6 +35,12 @@ public class Application extends ERXApplication {
 
 	public Application() {
 
+		// FIXME: Oh my god. Publish the local-host identity into FProperties so MSiteConfig
+		// can read it without reaching back through WOApplication.application(). Temporary
+		// seam for testability; goes away with the MSiteConfig clusterfudge cleanup. // Hugi 2026-05-12
+		FProperties.siteConfigLocalHostName = host();
+		FProperties.siteConfigLocalHostAddress = hostAddress();
+
 		WOTaskdHandler.createSiteConfig();
 
 		setAllowsConcurrentRequestHandling( true );

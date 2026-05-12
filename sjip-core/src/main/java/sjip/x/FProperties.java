@@ -1,6 +1,7 @@
 package sjip.x;
 
 import java.lang.reflect.Field;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +52,30 @@ import org.slf4j.Logger;
 public final class FProperties {
 
 	private FProperties() {}
+
+	/**
+	 * Local host name as MSiteConfig should record it. Assigned by the hosting
+	 * Application (wotaskd or JavaMonitor) at startup, before any MSiteConfig is
+	 * constructed; read by MSiteConfig's constructor.
+	 *
+	 * <p>FIXME: Oh my god. This field exists purely as a temporary seam so MSiteConfig
+	 * can be instantiated in system tests without booting a WOApplication. The "right"
+	 * shape is for MSiteConfig to receive its local-host identity through a constructor
+	 * argument (or be split apart so its model layer doesn't carry this state at all).
+	 * Will go away with the MSiteConfig clusterfudge cleanup. // Hugi 2026-05-12
+	 */
+	@Deprecated
+	public static String siteConfigLocalHostName;
+
+	/**
+	 * Local host address as MSiteConfig should record it. Same lifecycle as
+	 * {@link #siteConfigLocalHostName}.
+	 *
+	 * <p>FIXME: Oh my god. Same story as {@link #siteConfigLocalHostName} — temporary
+	 * seam for testability, will go away with the MSiteConfig cleanup. // Hugi 2026-05-12
+	 */
+	@Deprecated
+	public static InetAddress siteConfigLocalHostAddress;
 
 	/**
 	 * The canonical registry of platform-defined properties. Add a constant here when

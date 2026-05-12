@@ -539,8 +539,13 @@ public class MSiteConfig extends MObject {
 	}
 
 	public MSiteConfig( NSDictionary xmlDict ) {
-		localHostAddress = WOApplication.application().hostAddress();
-		localHostName = WOApplication.application().host();
+		// FIXME: Oh my god. localHost{Address,Name} are read from FProperties' deprecated
+		// static fields as a temporary seam — tests can assign them without booting a
+		// WOApplication. The "right" shape is to receive these through the constructor
+		// (or move them out of MSiteConfig entirely). Goes away with the MSiteConfig
+		// clusterfudge cleanup. // Hugi 2026-05-12
+		localHostAddress = FProperties.siteConfigLocalHostAddress;
+		localHostName = FProperties.siteConfigLocalHostName;
 
 		_siteConfig = this;
 		if( xmlDict == null ) {

@@ -47,6 +47,12 @@ public class Application extends ERXApplication {
 		removeRequestHandlerForKey( "wr" );
 		removeRequestHandlerForKey( "womp" );
 
+		// FIXME: Oh my god. Publish the local-host identity into FProperties so MSiteConfig
+		// can read it without reaching back through WOApplication.application(). Temporary
+		// seam for testability; goes away with the MSiteConfig clusterfudge cleanup. // Hugi 2026-05-12
+		FProperties.siteConfigLocalHostName = host();
+		FProperties.siteConfigLocalHostAddress = hostAddress();
+
 		_appTaskd = new AppTaskd( host(), port().intValue() );
 
 		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
