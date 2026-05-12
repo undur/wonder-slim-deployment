@@ -8,6 +8,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
@@ -197,7 +198,11 @@ public class WOTaskdHandler {
 
 	private ResponseWrapper[] sendRequest( NSDictionary monitorRequest, List<MHost> wotaskdArray, boolean willChange ) {
 		final String encodedString = new FoundationCoder().encodeRootObjectForKey( monitorRequest, "monitorRequest" );
-		return WOTaskdComms.sendRequestToWotaskdArray( encodedString, wotaskdArray, willChange );
+		// FIXME: Sourcing the port from WOApplication.application() here is the call site
+		// pulling it out of MHost so MHost's wire path can be exercised without a WOApplication.
+		// Needs a nice central declaration of the wotaskd port. // Hugi 2026-05-12
+		final int port = WOApplication.application().lifebeatDestinationPort();
+		return WOTaskdComms.sendRequestToWotaskdArray( encodedString, wotaskdArray, port, willChange );
 	}
 
 	/* ******** ADDING (UPDATE) ********* */

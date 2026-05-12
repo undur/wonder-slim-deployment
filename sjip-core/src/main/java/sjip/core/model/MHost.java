@@ -26,7 +26,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
@@ -194,8 +193,13 @@ public class MHost extends MObject {
 	 * Sends the given request to this host's wotaskd, returning wotaskd's response
 	 *
 	 * FIXME: We need to go over this, especially WRT error handling, reporting and management // Hugi 2024-11-06
+	 *
+	 * FIXME: {@code port} was added as a parameter to break a hard dependency on
+	 * {@code WOApplication.application().lifebeatDestinationPort()} so this method
+	 * is reachable from system tests without booting a WOApplication. Needs a nice
+	 * central declaration of the wotaskd port. // Hugi 2026-05-12
 	 */
-	public ResponseWrapper sendRequestToWotaskd( final String contentString, final String password, final boolean willChange, final boolean isSync ) {
+	public ResponseWrapper sendRequestToWotaskd( final String contentString, final String password, final int port, final boolean willChange, final boolean isSync ) {
 
 		// FIXME: Should be configurable. Used to be the property "JavaMonitor.receiveTimeout" // Hugi 2024-11-04
 		final int WOTASKD_RECEIVE_TIMEOUT = 10_000;
@@ -204,7 +208,7 @@ public class MHost extends MObject {
 
 		final Builder requestBuilder = HttpRequest
 				.newBuilder()
-				.uri( URI.create( "http://%s:%s%s".formatted( name(), WOApplication.application().lifebeatDestinationPort(), MUtil.WOTASKD_DIRECT_ACTION_URL ) ) )
+				.uri( URI.create( "http://%s:%s%s".formatted( name(), port, MUtil.WOTASKD_DIRECT_ACTION_URL ) ) )
 				.timeout( Duration.ofMillis( WOTASKD_RECEIVE_TIMEOUT ) )
 				.POST( BodyPublishers.ofString( contentString ) );
 
@@ -235,7 +239,7 @@ public class MHost extends MObject {
 			}
 
 			// FIXME: This is a really, really weird method of error handling // Hugi 2024-11-03
-			responseContentString = XUtil.errorResponseXML( "instanceResponse", "Failed to contact " + this.name() + "-" + WOApplication.application().lifebeatDestinationPort() );
+			responseContentString = XUtil.errorResponseXML( "instanceResponse", "Failed to contact " + this.name() + "-" + port );
 		}
 		else {
 			// if we successfully synced, clear the error dictionary

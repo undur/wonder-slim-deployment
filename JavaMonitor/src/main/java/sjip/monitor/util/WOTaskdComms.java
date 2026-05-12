@@ -15,8 +15,13 @@ public class WOTaskdComms {
 
 	/**
 	 * Communications Goop
+	 *
+	 * FIXME: {@code port} was added as a parameter to break MHost's hard dependency on
+	 * {@code WOApplication.application().lifebeatDestinationPort()} so the wire layer
+	 * is reachable from system tests without booting a WOApplication. Needs a nice
+	 * central declaration of the wotaskd port. // Hugi 2026-05-12
 	 */
-	public static ResponseWrapper[] sendRequestToWotaskdArray( final String contentString, final List<MHost> hosts, final boolean willChange ) {
+	public static ResponseWrapper[] sendRequestToWotaskdArray( final String contentString, final List<MHost> hosts, final int port, final boolean willChange ) {
 
 		final MHost aHost = hosts.get( 0 );
 
@@ -29,7 +34,7 @@ public class WOTaskdComms {
 
 		// we had errors reaching a host last time - do it again!
 		if( !siteConfig.hostErrorArray.isEmpty() ) {
-			syncHostsWithErrors( siteConfig );
+			syncHostsWithErrors( siteConfig, port );
 		}
 
 		final Thread[] workers = new Thread[hosts.size()];
@@ -42,7 +47,7 @@ public class WOTaskdComms {
 				@Override
 				public void run() {
 					final MHost host = hosts.get( j );
-					responses[j] = host.sendRequestToWotaskd( contentString, siteConfig.passwordForRequest(), willChange, false );
+					responses[j] = host.sendRequestToWotaskd( contentString, siteConfig.passwordForRequest(), port, willChange, false );
 				}
 			};
 
@@ -62,7 +67,7 @@ public class WOTaskdComms {
 		return responses;
 	}
 
-	private static void syncHostsWithErrors( final MSiteConfig siteConfig ) {
+	private static void syncHostsWithErrors( final MSiteConfig siteConfig, final int port ) {
 		final List<MHost> hosts = new ArrayList<>( siteConfig.hostErrorArray );
 
 		final Thread[] workers = new Thread[hosts.size()];
@@ -74,7 +79,7 @@ public class WOTaskdComms {
 				@Override
 				public void run() {
 					MHost host = hosts.get( j );
-					host.sendRequestToWotaskd( syncRequestContent( siteConfig ), siteConfig.passwordForRequest(), true, true );
+					host.sendRequestToWotaskd( syncRequestContent( siteConfig ), siteConfig.passwordForRequest(), port, true, true );
 				}
 			};
 
