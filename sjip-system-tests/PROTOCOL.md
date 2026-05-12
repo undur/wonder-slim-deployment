@@ -236,19 +236,30 @@ GET-only, semicolon-style query string. Four notification types from the
 JavaMonitor also sends `hasStarted` for itself at boot — we see this in
 `JavaMonitorAddFirstHost` exchanges captured by the proxy.
 
-#### **[partial]** — captured but not asserted
+#### **[covered]** — all four notification types snapshotted
 
-The wire-capturing proxy in `JavaMonitorAddFirstHostIT` sees JavaMonitor's
-own `hasStarted` lifebeat, but the test doesn't snapshot it (the proxy
-records it as a `CapturedExchange` but the report-recording filter excludes
-the `/wlb` path).
+`LifebeatScenariosIT` sends each notification kind against a seeded host +
+application + instance, plus two malformed-request cases (unknown
+notification type, wrong field count). Snapshots capture HTTP status +
+response body for each — the URL format itself is also documented in the
+generated reports.
 
-Adding coverage means snapshotting at least one lifebeat per notification
-type. Could live in a dedicated `LifebeatIT` that:
+| Notification | Status | Snapshot |
+|---|---|---|
+| `hasStarted` | 200 | `LifebeatScenarios/hasStarted-response-status.txt` |
+| `lifebeat` | 200 | `LifebeatScenarios/lifebeat-response-status.txt` |
+| `willStop` | 200 | `LifebeatScenarios/willStop-response-status.txt` |
+| `willCrash` | 200 | `LifebeatScenarios/willCrash-response-status.txt` |
+| (unknown notification) | 400 | `LifebeatScenarios/malformed-unknownNotification-response-status.txt` |
+| (wrong field count) | 400 | `LifebeatScenarios/malformed-wrongFieldCount-response-status.txt` |
 
-1. Boots wotaskd
-2. Sends a hand-crafted GET to `/wlb?<notification>;<args>` for each type
-3. Snapshots wotaskd's response and the resulting SiteConfig state
+Wire detail caught while writing the test: the lifebeat handler nulls out
+its response for HTTP/1.0 requests (see `LifebeatRequestHandler.java` around
+line 132), which means HTTP/1.0 clients can't observe 400s on malformed
+requests — they get an empty 200 instead. The test uses HTTP/1.1 with
+{@code Connection: close} to work around this. Worth knowing if/when that
+HTTP/1.0 branch gets revisited (already flagged as pending verification in
+the source).
 
 ## Other wotaskd endpoints
 
@@ -294,17 +305,15 @@ Listed here for completeness only.
 | `updateWotaskd/configure` (6 variants) |  6 |     0 |       0 |
 | `commandWotaskd` (6 commands)  |       6 |       0 |       0 |
 | `queryWotaskd` (4 kinds)       |       4 |       0 |       0 |
-| Lifebeat (4 notifications)     |       0 |       1 |       3 |
+| Lifebeat (4 notifications + 2 errors) | 6 |   0 |       0 |
 | `defaultAction`                |       0 |       1 |       0 |
 | `woconfigAction`               |       1 |       0 |       0 |
-| **Total**                      |  **26** |   **2** |   **3** |
+| **Total**                      |  **32** |   **1** |   **0** |
 
 `getPathAction` is intentionally not counted — out of scope for the wire
 inventory.
 
-The remaining gaps are all lifebeat notifications (`willStop`, `willCrash`,
-non-JavaMonitor `hasStarted`) which would need either a dedicated
-`LifebeatIT` that sends hand-crafted GETs to `/wlb`, or a richer test
-harness that spins up a real WO instance to emit them. Low priority for
-the domain-refactor safety net since the lifebeat path doesn't touch the
-M-model directly.
+The remaining `partial` is `defaultAction`, which we only use as a
+readiness probe; the human-readable HTML body isn't a wire shape we depend
+on. Could be promoted to covered if we ever want to lock in that page's
+content, but low value.
