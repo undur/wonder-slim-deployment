@@ -1,0 +1,9 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<configure type="NSDictionary">
+			<site type="NSDictionary">
+				<viewRefreshRate type="NSNumber">30</viewRefreshRate>
+			</site>
+		</configure>
+	</updateWotaskd>
+</monitorRequest>

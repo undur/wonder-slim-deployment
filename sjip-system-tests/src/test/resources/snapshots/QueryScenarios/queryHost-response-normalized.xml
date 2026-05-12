@@ -1,0 +1,9 @@
+<monitorResponse type="NSDictionary">
+	<queryWotaskdResponse type="NSDictionary">
+		<hostResponse type="NSDictionary">
+			<operatingSystem type="NSString">{NORMALIZED-os.name os.version}</operatingSystem>
+			<processorType type="NSString">{NORMALIZED-os.arch}</processorType>
+			<runningInstances type="NSNumber">0</runningInstances>
+		</hostResponse>
+	</queryWotaskdResponse>
+</monitorResponse>

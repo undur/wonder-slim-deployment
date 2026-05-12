@@ -1,0 +1,11 @@
+<monitorResponse type="NSDictionary">
+	<updateWotaskdResponse type="NSDictionary">
+		<remove type="NSDictionary">
+			<hostArray type="NSArray">
+				<element type="NSDictionary">
+					<success type="NSString">YES</success>
+				</element>
+			</hostArray>
+		</remove>
+	</updateWotaskdResponse>
+</monitorResponse>

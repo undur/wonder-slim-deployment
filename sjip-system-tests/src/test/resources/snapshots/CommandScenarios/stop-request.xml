@@ -1,0 +1,9 @@
+<monitorRequest type="NSDictionary">
+	<commandWotaskd type="NSArray">
+		<element type="NSString">STOP</element>
+		<element type="NSDictionary">
+			<hostName type="NSString">1.2.3.4</hostName>
+			<port type="NSNumber">12345</port>
+		</element>
+	</commandWotaskd>
+</monitorRequest>

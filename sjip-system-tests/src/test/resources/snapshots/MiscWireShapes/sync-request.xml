@@ -1,0 +1,19 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<sync type="NSDictionary">
+			<SiteConfig type="NSDictionary">
+				<applicationArray type="NSArray">
+					<element type="NSDictionary">
+						<name type="NSString">DemoApp</name>
+					</element>
+				</applicationArray>
+				<hostArray type="NSArray">
+					<element type="NSDictionary">
+						<name type="NSString">localhost</name>
+						<type type="NSString">UNIX</type>
+					</element>
+				</hostArray>
+			</SiteConfig>
+		</sync>
+	</updateWotaskd>
+</monitorRequest>

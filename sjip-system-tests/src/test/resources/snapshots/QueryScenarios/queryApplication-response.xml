@@ -1,0 +1,10 @@
+<monitorResponse type="NSDictionary">
+	<queryWotaskdResponse type="NSDictionary">
+		<applicationResponse type="NSArray">
+			<element type="NSDictionary">
+				<name type="NSString">DemoApp</name>
+				<runningInstances type="NSNumber">0</runningInstances>
+			</element>
+		</applicationResponse>
+	</queryWotaskdResponse>
+</monitorResponse>

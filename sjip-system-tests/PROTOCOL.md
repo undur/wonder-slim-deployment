@@ -50,14 +50,18 @@ Inner dict carries one of `clear`, `overwrite`, `sync`, `remove`, `add`, or
 `remove`/`add`/`configure` can carry any combination of `hostArray`,
 `applicationArray`, `instanceArray` (with `configure` also accepting `site`).
 
-#### `clear` — **[missing]**
+#### `clear` — **[covered]**
 
 ```
 monitorRequest → updateWotaskd → clear (any string value)
 ```
 
 Dead-code branch on the wotaskd side (see FIXME at `DirectAction.java:145`
-— no client sends this today). Listed for completeness; coverage optional.
+— no client sends this today). Snapshotted anyway so a future deletion is a
+deliberate decision rather than an accidental one.
+
+- Request: `MiscWireShapes/clear-request.xml`
+- Response: `MiscWireShapes/clear-response.xml`
 
 #### `overwrite` — **[covered]**
 
@@ -72,14 +76,20 @@ bootstrap it with the full topology).
 - Request: `JavaMonitorAddFirstHost/javamonitor-to-wotaskd-overwrite-request.xml`
 - Response: `JavaMonitorAddFirstHost/javamonitor-to-wotaskd-overwrite-response.xml`
 
-#### `sync` — **[missing]**
+#### `sync` — **[covered]**
 
 ```
 monitorRequest → updateWotaskd → sync → SiteConfig
 ```
 
 JavaMonitor sends this to wotaskds that had previous errors, to re-establish
-the canonical view. See `WOTaskdComms.syncHostsWithErrors`.
+the canonical view. See `WOTaskdComms.syncHostsWithErrors`. Wire detail
+caught by snapshotting: the response carries an *empty* `updateWotaskdResponse`
+with no `sync` key inside (wotaskd processes the sync but doesn't add a per-call
+response entry).
+
+- Request: `MiscWireShapes/sync-request.xml`
+- Response: `MiscWireShapes/sync-response.xml`
 
 #### `add` — **[covered]**
 
@@ -93,21 +103,19 @@ Per-element response shape: `[{success: YES}, ...]` or error elements.
 - `applicationArray`: **[covered]** — `AddApplicationScenario/addApplication-request.xml` + `addApplication-response.xml`
 - `instanceArray`: **[covered]** — `AddInstanceScenario/addInstance-request.xml` + `addInstance-response.xml`
 
-#### `remove` — **[missing]**
+#### `remove` — **[covered]**
 
 ```
 monitorRequest → updateWotaskd → remove → hostArray|applicationArray|instanceArray
 ```
 
-Symmetric to `add`. Same three sub-shapes, all uncovered.
+Symmetric to `add`. All three sub-shapes covered by `RemoveScenariosIT`.
 
-- `hostArray`: **[missing]** — note also the special case where removing the
-  local host triggers `stopAllInstances + setSiteConfig(new MSiteConfig(null))`
-  rather than `removeHost_W` (see `DirectAction.java:184-191`)
-- `applicationArray`: **[missing]**
-- `instanceArray`: **[missing]**
+- `hostArray`: **[covered]** — `RemoveScenarios/removeHost-request.xml` + `removeHost-response.xml`. Exercises the special local-host branch (`stopAllInstances + setSiteConfig(new MSiteConfig(null))`) since the seeded host is `localhost`.
+- `applicationArray`: **[covered]** — `RemoveScenarios/removeApplication-*.xml`
+- `instanceArray`: **[covered]** — `RemoveScenarios/removeInstance-*.xml`
 
-#### `configure` — **[missing]**
+#### `configure` — **[covered]**
 
 ```
 monitorRequest → updateWotaskd → configure → site|hostArray|applicationArray|instanceArray
@@ -115,11 +123,20 @@ monitorRequest → updateWotaskd → configure → site|hostArray|applicationArr
 
 Modifies existing entries in place. `applicationArray` and `instanceArray`
 elements may carry `oldname`/`oldport` to identify the entry being renamed.
+All four sub-shapes plus both rename variants covered by `ConfigureScenariosIT`.
 
-- `site`: **[missing]** — touches global site settings (`viewRefreshEnabled`, `viewRefreshRate`, etc.)
-- `hostArray`: **[missing]**
-- `applicationArray`: **[missing]** — including the rename path
-- `instanceArray`: **[missing]** — including the port-change path
+- `site`: **[covered]** — `ConfigureScenarios/configureSite-*.xml`. Wire detail
+  caught: `updateValues` does a wholesale replacement, so a configure with just
+  `{viewRefreshRate: 30}` drops the previous `viewRefreshEnabled` key from the
+  persisted site dict.
+- `hostArray`: **[covered]** — `ConfigureScenarios/configureHost-*.xml`
+- `applicationArray`: **[covered]** — `ConfigureScenarios/configureApplication-*.xml`
+- `applicationArray (rename)`: **[covered]** — `ConfigureScenarios/configureApplication-rename-*.xml`.
+  Wire detail caught: the `oldname` key persists in the SiteConfig dict after the rename;
+  instances' `applicationName` is *not* cascade-updated.
+- `instanceArray`: **[covered]** — `ConfigureScenarios/configureInstance-*.xml`
+- `instanceArray (port change)`: **[covered]** — `ConfigureScenarios/configureInstance-portchange-*.xml`.
+  Wire detail caught: `oldport` persists in the dict after the change.
 
 ### `commandWotaskd`
 
@@ -129,7 +146,7 @@ element is the command name; subsequent elements are instance identifiers
 
 Valid commands: `START`, `STOP`, `REFUSE`, `ACCEPT`, `QUIT`, `CLEAR`.
 
-#### **[missing]** — each command needs a snapshot
+#### **[covered]** — all six commands snapshotted
 
 ```
 monitorRequest → commandWotaskd: ["START", {hostName, port}, ...]
@@ -142,10 +159,21 @@ monitorRequest → commandWotaskd: ["START", {hostName, port}, ...]
 
 Response per-instance: `{success: YES}` or `{failure: YES, errorMessage: ...}`.
 
-Adding meaningful coverage here requires the test to first stand up an
-instance — i.e. add host → add application → add instance → command it. So
-this depends on `add/applicationArray` and `add/instanceArray` shapes being
-exercisable first.
+Each command covered in `CommandScenariosIT` (six test methods,
+`start-*.xml` / `stop-*.xml` / `refuse-*.xml` / `accept-*.xml` /
+`quit-*.xml` / `clear-*.xml`).
+
+Wire detail caught: the response array has *two* success elements per
+command, not one — wotaskd appends an unconditional success on dispatch
+recognition before processing per-instance entries.
+
+The seeded instance is hosted at `1.2.3.4` (a numeric IP that parses
+without DNS and is non-local from wotaskd's point of view), which puts
+each command through the "non-local instance" short-circuit branch that
+returns success without trying to manipulate a real process. That's the
+canonical success-response shape; error-response shapes (instance not
+found, etc.) are future work and would need normalization of the host
+name in error messages.
 
 ### `queryWotaskd`
 
@@ -158,21 +186,40 @@ Returns the full SiteConfig dict.
 - Empty config: `WotaskdBootSmoke/querySite-emptyConfig-request.xml` + `...-response.xml`
 - After adding a host: `AddHostScenario/querySite-afterAddHost-response.xml`, `JavaMonitorAddFirstHost/wotaskd-querySite-afterAddHost-response.xml`
 
-#### `HOST` — **[missing]**
+#### `HOST` — **[covered, normalized]**
 
 Returns `{hostResponse: {runningInstances, processorType, operatingSystem}}`.
 
-#### `APPLICATION` — **[missing]**
+- Request: `QueryScenarios/queryHost-request.xml`
+- Response (normalized): `QueryScenarios/queryHost-response-normalized.xml`
+
+`processorType` and `operatingSystem` are read from the local machine's
+system properties (`os.arch`, `os.name`, `os.version`), so the test
+normalizes those values to placeholders before snapshotting. The shape is
+locked in; the values aren't.
+
+#### `APPLICATION` — **[covered]**
 
 Returns `{applicationResponse: [{name, runningInstances}, ...]}`.
 
-#### `INSTANCE` — **[missing]**
+- Request: `QueryScenarios/queryApplication-request.xml`
+- Response: `QueryScenarios/queryApplication-response.xml`
 
-Returns `{instanceResponse: [{applicationName, id, hostName, port, runningState, refusingNewSessions, statistics, deaths, nextScheduledShutdown}, ...]}`.
+#### `INSTANCE` — **[covered, normalized]**
+
+Returns `{instanceResponse: [{applicationName, id, host, port, runningState, refusingNewSessions, statistics, deaths, nextShutdown}, ...]}`.
 
 The richest shape on the response side — touches `statistics()`, which is
 itself a small nested dict — and the one most likely to grow during the
 domain refactor.
+
+- Request: `QueryScenarios/queryInstance-request.xml`
+- Response (normalized): `QueryScenarios/queryInstance-response-normalized.xml`
+
+The `<statistics>` sub-dict is replaced with a placeholder in the
+snapshot since its contents may shift run-to-run; everything else
+(state, deaths, etc.) is deterministic for an instance that's never
+been started.
 
 ## Lifebeat (`/wlb`)
 
@@ -212,11 +259,17 @@ Currently we only assert "responds with some HTTP status," not the body.
 Coverage low priority — the body is human-readable HTML, not a wire shape
 we depend on.
 
-#### `woconfigAction` — **[missing]**
+#### `woconfigAction` — **[covered]**
 
 Returns adaptor config XML — small, deterministic, single response shape.
-Used by WO HTTP adaptors (e.g. mod_WebObjects), not by JavaMonitor. Worth
-one snapshot of the empty-config and one-host cases.
+Used by WO HTTP adaptors (e.g. mod_WebObjects), not by JavaMonitor.
+
+- Response: `MiscWireShapes/woconfig-response.xml`
+
+The current snapshot captures the empty-config case (no registered
+instances → `<adaptor></adaptor>`). A richer snapshot with running
+instances would require a real instance process, which the test harness
+doesn't spin up today.
 
 #### `getPathAction` — **[out of scope]**
 
@@ -233,18 +286,25 @@ Listed here for completeness only.
 
 | Category                       | Covered | Partial | Missing |
 |--------------------------------|--------:|--------:|--------:|
-| `updateWotaskd/clear`          |       0 |       0 |       1 |
+| `updateWotaskd/clear`          |       1 |       0 |       0 |
 | `updateWotaskd/overwrite`      |       1 |       0 |       0 |
-| `updateWotaskd/sync`           |       0 |       0 |       1 |
+| `updateWotaskd/sync`           |       1 |       0 |       0 |
 | `updateWotaskd/add` (3 arrays) |       3 |       0 |       0 |
-| `updateWotaskd/remove` (3 arrays) |    0 |       0 |       3 |
-| `updateWotaskd/configure` (4 entries) |  0 |       0 |       4 |
-| `commandWotaskd` (6 commands)  |       0 |       0 |       6 |
-| `queryWotaskd` (4 kinds)       |       1 |       0 |       3 |
+| `updateWotaskd/remove` (3 arrays) |    3 |       0 |       0 |
+| `updateWotaskd/configure` (6 variants) |  6 |     0 |       0 |
+| `commandWotaskd` (6 commands)  |       6 |       0 |       0 |
+| `queryWotaskd` (4 kinds)       |       4 |       0 |       0 |
 | Lifebeat (4 notifications)     |       0 |       1 |       3 |
 | `defaultAction`                |       0 |       1 |       0 |
-| `woconfigAction`               |       0 |       0 |       1 |
-| **Total**                      |   **6** |   **2** |  **22** |
+| `woconfigAction`               |       1 |       0 |       0 |
+| **Total**                      |  **26** |   **2** |   **3** |
 
 `getPathAction` is intentionally not counted — out of scope for the wire
 inventory.
+
+The remaining gaps are all lifebeat notifications (`willStop`, `willCrash`,
+non-JavaMonitor `hasStarted`) which would need either a dedicated
+`LifebeatIT` that sends hand-crafted GETs to `/wlb`, or a richer test
+harness that spins up a real WO instance to emit them. Low priority for
+the domain-refactor safety net since the lifebeat path doesn't touch the
+M-model directly.

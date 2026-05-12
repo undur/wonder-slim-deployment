@@ -1,0 +1,18 @@
+<monitorResponse type="NSDictionary">
+	<queryWotaskdResponse type="NSDictionary">
+		<instanceResponse type="NSArray">
+			<element type="NSDictionary">
+				<applicationName type="NSString">DemoApp</applicationName>
+				<deaths type="NSArray">
+				</deaths>
+				<host type="NSString">localhost</host>
+				<id type="NSNumber">1</id>
+				<nextShutdown type="NSString">-</nextShutdown>
+				<port type="NSNumber">12345</port>
+				<refusingNewSessions type="NSString">NO</refusingNewSessions>
+				<runningState type="NSString">DEAD</runningState>
+				<statistics type="NSDictionary">{NORMALIZED-statistics-subdict}</statistics>
+			</element>
+		</instanceResponse>
+	</queryWotaskdResponse>
+</monitorResponse>

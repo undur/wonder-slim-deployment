@@ -1,0 +1,15 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<configure type="NSDictionary">
+			<instanceArray type="NSArray">
+				<element type="NSDictionary">
+					<applicationName type="NSString">RenamedApp</applicationName>
+					<hostName type="NSString">localhost</hostName>
+					<id type="NSNumber">1</id>
+					<port type="NSNumber">12345</port>
+					<scheduled type="NSString">YES</scheduled>
+				</element>
+			</instanceArray>
+		</configure>
+	</updateWotaskd>
+</monitorRequest>

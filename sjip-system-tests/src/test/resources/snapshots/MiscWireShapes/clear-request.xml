@@ -1,0 +1,5 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<clear type="NSString">y</clear>
+	</updateWotaskd>
+</monitorRequest>

@@ -1,0 +1,11 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<remove type="NSDictionary">
+			<applicationArray type="NSArray">
+				<element type="NSDictionary">
+					<name type="NSString">DemoApp</name>
+				</element>
+			</applicationArray>
+		</remove>
+	</updateWotaskd>
+</monitorRequest>

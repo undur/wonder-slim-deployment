@@ -1,0 +1,25 @@
+<SiteConfig type="NSDictionary">
+	<applicationArray type="NSArray">
+		<element type="NSDictionary">
+			<name type="NSString">RenamedApp</name>
+			<oldname type="NSString">DemoApp</oldname>
+		</element>
+	</applicationArray>
+	<hostArray type="NSArray">
+		<element type="NSDictionary">
+			<name type="NSString">localhost</name>
+			<type type="NSString">MACOSX</type>
+		</element>
+	</hostArray>
+	<instanceArray type="NSArray">
+		<element type="NSDictionary">
+			<applicationName type="NSString">DemoApp</applicationName>
+			<hostName type="NSString">localhost</hostName>
+			<id type="NSNumber">1</id>
+			<port type="NSNumber">12345</port>
+		</element>
+	</instanceArray>
+	<site type="NSDictionary">
+		<viewRefreshRate type="NSNumber">30</viewRefreshRate>
+	</site>
+</SiteConfig>

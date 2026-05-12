@@ -1,0 +1,12 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<configure type="NSDictionary">
+			<applicationArray type="NSArray">
+				<element type="NSDictionary">
+					<autoRecover type="NSString">YES</autoRecover>
+					<name type="NSString">DemoApp</name>
+				</element>
+			</applicationArray>
+		</configure>
+	</updateWotaskd>
+</monitorRequest>

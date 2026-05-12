@@ -1,0 +1,12 @@
+<monitorRequest type="NSDictionary">
+	<updateWotaskd type="NSDictionary">
+		<configure type="NSDictionary">
+			<applicationArray type="NSArray">
+				<element type="NSDictionary">
+					<name type="NSString">RenamedApp</name>
+					<oldname type="NSString">DemoApp</oldname>
+				</element>
+			</applicationArray>
+		</configure>
+	</updateWotaskd>
+</monitorRequest>

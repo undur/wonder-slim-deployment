@@ -1,0 +1,9 @@
+<monitorResponse type="NSDictionary">
+	<updateWotaskdResponse type="NSDictionary">
+		<configure type="NSDictionary">
+			<site type="NSDictionary">
+				<success type="NSString">YES</success>
+			</site>
+		</configure>
+	</updateWotaskdResponse>
+</monitorResponse>
