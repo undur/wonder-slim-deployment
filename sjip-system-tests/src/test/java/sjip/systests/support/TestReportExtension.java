@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 /**
  * JUnit Jupiter extension that gives every test method a fresh {@link TestReport} and
- * writes the rendered Markdown to {@code src/test/resources/reports/<ClassName>/<methodName>.md}
+ * writes the rendered Markdown to {@code target/test-reports/<ClassName>/<methodName>.md}
  * once the test finishes.
  *
  * <p>Test methods that want to record steps declare a {@code TestReport} parameter:
@@ -26,9 +26,11 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  * }
  * }
  *
- * <p>Reports are checked in alongside snapshots; they're documentation of what each test
- * does, reviewable on PR diff. A diff in a report file means the test's <em>narrative</em>
- * changed (which is usually a signal worth eyeballing) even if all assertions still pass.
+ * <p>Reports are generated build artifacts — they live under {@code target/} and aren't
+ * committed. The on-disk artifact is for live inspection while iterating: open the
+ * latest run's report to see the narrative of what each test did, including the
+ * captured wire bytes and any failure that aborted it. The committed contract is in
+ * the snapshot files under {@code src/test/resources/snapshots/}.
  */
 public final class TestReportExtension implements ParameterResolver, BeforeTestExecutionCallback, AfterTestExecutionCallback {
 
@@ -68,7 +70,7 @@ public final class TestReportExtension implements ParameterResolver, BeforeTestE
 			report.state( throwable.getClass().getSimpleName(), throwable.getMessage() != null ? throwable.getMessage() : "(no message)" );
 		} );
 
-		final Path output = Paths.get( "src", "test", "resources", "reports", context.getRequiredTestClass().getSimpleName(), context.getRequiredTestMethod().getName() + ".md" );
+		final Path output = Paths.get( "target", "test-reports", context.getRequiredTestClass().getSimpleName(), context.getRequiredTestMethod().getName() + ".md" );
 		Files.createDirectories( output.getParent() );
 		Files.writeString( output, TestReportRenderer.render( report ), StandardCharsets.UTF_8 );
 	}
