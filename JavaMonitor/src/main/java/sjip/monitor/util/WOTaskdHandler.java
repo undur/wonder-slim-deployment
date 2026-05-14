@@ -18,6 +18,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 import sjip.core.MUtil;
 import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
+import sjip.core.model.MHostDto;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
 import sjip.monitor.components.AppDetailPage;
@@ -169,7 +170,7 @@ public class WOTaskdHandler {
 		}
 
 		if( _Host != null ) {
-			final List<MHost> hostArray = new NSArray( _Host.dictionaryForArchive() );
+			final List<MHostDto> hostArray = new NSArray( _Host.toDto() );
 			requestTypeDict.takeValueForKey( hostArray, "hostArray" );
 		}
 

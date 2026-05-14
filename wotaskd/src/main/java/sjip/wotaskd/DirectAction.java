@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +38,10 @@ import sjip.core.MUtil;
 import sjip.core.SjipException;
 import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
+import sjip.core.model.MHostDto;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
+import sjip.x.FoundationCoder;
 import sjip.x.AdaptorConfigSerialization;
 import sjip.x.FHosts;
 import sjip.x.FProperties;
@@ -248,7 +251,9 @@ public class DirectAction extends WODirectAction {
 							// update-add - for each host listed - addHost_W
 							for( Enumeration e = hostArray.objectEnumerator(); e.hasMoreElements(); ) {
 								NSDictionary aHost = (NSDictionary)e.nextElement();
-								aConfig.addHost_W( new MHost( aHost, aConfig ) );
+								@SuppressWarnings("unchecked")
+								final MHostDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)aHost, MHostDto.class );
+								aConfig.addHost_W( new MHost( dto, aConfig ) );
 								hostArrayResponse.addObject( SUCCESS_ELEMENT );
 							}
 							addResponse.takeValueForKey( hostArrayResponse, "hostArray" );
@@ -297,14 +302,15 @@ public class DirectAction extends WODirectAction {
 							// update-configure - for each host listed - hostWithName + updateValues
 							for( Enumeration e = hostArray.objectEnumerator(); e.hasMoreElements(); ) {
 								NSDictionary aHost = (NSDictionary)e.nextElement();
-								String name = (String)aHost.valueForKey( "name" );
-								MHost anMHost = aConfig.hostWithName( name );
+								@SuppressWarnings("unchecked")
+								final MHostDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)aHost, MHostDto.class );
+								MHost anMHost = aConfig.hostWithName( dto.name() );
 								if( anMHost == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + name + " not found; UPDATE failed" }, ERROR_KEYS );
+									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + dto.name() + " not found; UPDATE failed" }, ERROR_KEYS );
 									hostArrayResponse.addObject( element );
 								}
 								else {
-									anMHost.updateValues( aHost );
+									anMHost.updateValues( dto );
 									hostArrayResponse.addObject( SUCCESS_ELEMENT );
 								}
 							}
@@ -742,17 +748,19 @@ public class DirectAction extends WODirectAction {
 		// Look through the array of hosts, and see if we need to add/remove any - configure the rest
 		NSMutableArray currentHosts = new NSMutableArray( aConfig.hostArray() );
 		if( hostArray != null ) {
+			final FoundationCoder coder = new FoundationCoder();
 			for( Enumeration e = hostArray.objectEnumerator(); e.hasMoreElements(); ) {
 				NSDictionary aHost = (NSDictionary)e.nextElement();
-				String name = (String)aHost.valueForKey( "name" );
-				MHost anMHost = aConfig.hostWithName( name );
+				@SuppressWarnings("unchecked")
+				final MHostDto dto = coder.decodeRecord( (Map<String, Object>)aHost, MHostDto.class );
+				MHost anMHost = aConfig.hostWithName( dto.name() );
 				if( anMHost == null ) {
 					// we have to add it
-					aConfig.addHost_W( new MHost( aHost, aConfig ) );
+					aConfig.addHost_W( new MHost( dto, aConfig ) );
 				}
 				else {
 					// configure and remove from currentHosts
-					anMHost.updateValues( aHost );
+					anMHost.updateValues( dto );
 					currentHosts.removeObject( anMHost );
 				}
 			}

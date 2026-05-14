@@ -26,9 +26,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.MUtil;
 import sjip.x.ResponseWrapper;
@@ -42,8 +40,8 @@ public class MHost extends MObject {
 	// Persistence state
 	// --------------------------------------------------------------------
 	// Fields below are the canonical persisted state of this object — they
-	// round-trip through dictionaryForArchive()/updateValues() to and from
-	// the wire and SiteConfig.xml. Renaming or restructuring any of these
+	// round-trip through toDto()/updateValues(MHostDto) to and from the
+	// wire and SiteConfig.xml. Renaming or restructuring any of these
 	// changes the on-disk and on-wire shape; the system-tests snapshot
 	// suite will catch the drift.
 	// ====================================================================
@@ -78,41 +76,34 @@ public class MHost extends MObject {
 		resolveAddress();
 	}
 
-	// Unarchiving or Monitor Update
-	public MHost( NSDictionary valuesDict, MSiteConfig siteConfig ) {
-		_name = (String)valuesDict.valueForKey( "name" );
-		// NB: pre-refactor, the dict-taking constructor also stored `type` raw. Same reason.
-		_type = (String)valuesDict.valueForKey( "type" );
+	/**
+	 * Reconstructs an MHost from its wire DTO. Used by the unarchive path
+	 * ({@code MSiteConfig._initHostsWithArray}) and by wotaskd's add-host receive path.
+	 */
+	public MHost( final MHostDto dto, final MSiteConfig siteConfig ) {
+		_name = dto.name();
+		_type = dto.type();
 		_siteConfig = siteConfig;
 		resolveAddress();
 	}
 
 	/**
-	 * Replaces this host's persisted state from a wire/disk dict. Called on the
-	 * wotaskd receive side during {@code updateWotaskd/configure} (see
+	 * Replaces this host's persisted state from a wire DTO. Called on the wotaskd
+	 * receive side during {@code updateWotaskd/configure} (see
 	 * {@code DirectAction.monitorRequestAction}).
 	 */
-	public void updateValues( NSDictionary<String, Object> aDict ) {
-		_name = (String)aDict.valueForKey( "name" );
-		_type = (String)aDict.valueForKey( "type" );
+	public void updateValues( final MHostDto dto ) {
+		_name = dto.name();
+		_type = dto.type();
 		dataChanged();
 	}
 
 	/**
-	 * Snapshot of this host's persisted state, in the shape that goes onto the wire
-	 * and into {@code SiteConfig.xml}. Mutable so callers can layer in extra keys
-	 * before sending (the wire layer occasionally does this for transient
-	 * envelope-shaping concerns).
+	 * Snapshot of this host's persisted state as a typed DTO. The codec encodes this
+	 * directly to the wire — no dictionary in between.
 	 */
-	public NSDictionary<String, Object> dictionaryForArchive() {
-		final NSMutableDictionary<String, Object> dict = new NSMutableDictionary<>();
-		if( _name != null ) {
-			dict.takeValueForKey( _name, "name" );
-		}
-		if( _type != null ) {
-			dict.takeValueForKey( _type, "type" );
-		}
-		return dict;
+	public MHostDto toDto() {
+		return new MHostDto( _name, _type );
 	}
 
 	private void resolveAddress() {

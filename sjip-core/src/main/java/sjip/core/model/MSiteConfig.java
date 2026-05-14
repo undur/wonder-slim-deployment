@@ -684,8 +684,11 @@ public class MSiteConfig extends MObject {
 			return;
 		}
 
+		final FoundationCoder coder = new FoundationCoder();
 		for( final NSDictionary map : list ) {
-			final MHost aHost = new MHost( map, this );
+			@SuppressWarnings("unchecked")
+			final MHostDto dto = coder.decodeRecord( (Map<String, Object>)map, MHostDto.class );
+			final MHost aHost = new MHost( dto, this );
 			_addHost( aHost );
 		}
 	}
@@ -960,11 +963,11 @@ public class MSiteConfig extends MObject {
 
 		final NSMutableDictionary site = siteScalarsDict();
 
-		final NSMutableArray<MHost> hostArray = new NSMutableArray<>( hostArrayCount );
+		final NSMutableArray<MHostDto> hostArray = new NSMutableArray<>( hostArrayCount );
 
 		for( int i = 0; i < hostArrayCount; i++ ) {
 			final MHost anMobject = _hostArray.get( i );
-			hostArray.addObject( anMobject.dictionaryForArchive() );
+			hostArray.addObject( anMobject.toDto() );
 		}
 
 		final NSMutableArray<MApplication> applicationArray = new NSMutableArray<>( applicationArrayCount );
