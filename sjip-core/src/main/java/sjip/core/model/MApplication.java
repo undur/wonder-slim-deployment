@@ -23,56 +23,63 @@ import sjip.core.MUtil;
 
 public class MApplication extends MObject {
 
-	// Old common code
-	private NSMutableDictionary<String, Object> values;
+	// ====================================================================
+	// Persistence state
+	// --------------------------------------------------------------------
+	// Fields below are the canonical persisted state of this object — they
+	// round-trip through dictionaryForArchive()/updateValues() to and from
+	// the wire and SiteConfig.xml. Renaming or restructuring any of these
+	// changes the on-disk and on-wire shape; the system-tests snapshot
+	// suite will catch the drift.
+	// ====================================================================
 
-	public void updateValues( NSDictionary<String, Object> aDict ) {
-		values = new NSMutableDictionary<>( aDict );
-		dataChanged();
-	}
+	private String _name;
+	private Integer _startingPort;
+	private Integer _timeForStartup;
+	private Boolean _phasedStartup;
+	private Boolean _autoRecover;
+	private Integer _minimumActiveSessionsCount;
+	private String _unixPath;
+	private String _winPath;
+	private String _macPath;
+	private Boolean _cachingEnabled;
+	private String _adaptor;
+	private Integer _adaptorThreads;
+	private Integer _listenQueueSize;
+	private Integer _adaptorThreadsMin;
+	private Integer _adaptorThreadsMax;
+	private String _projectSearchPath;
+	private Integer _sessionTimeOut;
+	private String _statisticsPassword;
+	private Boolean _debuggingEnabled;
+	private String _unixOutputPath;
+	private String _winOutputPath;
+	private String _macOutputPath;
+	private Boolean _autoOpenInBrowser;
+	private Integer _lifebeatInterval;
+	private String _additionalArgs;
+	private Boolean _notificationEmailEnabled;
+	private String _notificationEmailAddr;
+	private Integer _retries;
+	private String _scheduler; // "RANDOM" | "ROUNDROBIN" | "LOADAVERAGE"
+	private Integer _dormant;
+	private String _redir;
+	private Integer _sendTimeout;
+	private Integer _recvTimeout;
+	private Integer _cnctTimeout;
+	private Integer _sendBufSize;
+	private Integer _recvBufSize;
+	private Integer _poolsize;
+	private Integer _urlVersion; // 3 | 4
+	private String _oldname;
 
-	public NSDictionary<String, Object> dictionaryForArchive() {
-		return values.mutableClone();
-	}
-
-	//	String name;
-	//	Integer startingPort;
-	//	Integer timeForStartup;
-	//	Boolean phasedStartup;
-	//	Boolean autoRecover;
-	//	Integer minimumActiveSessionsCount;
-	//	String unixPath;
-	//	String winPath;
-	//	String macPath;
-	//	Boolean cachingEnabled;
-	//	String adaptor;
-	//	Integer adaptorThreads;
-	//	Integer listenQueueSize;
-	//	Integer adaptorThreadsMin;
-	//	Integer adaptorThreadsMax;
-	//	String projectSearchPath;
-	//	Integer sessionTimeOut;
-	//	String statisticsPassword;
-	//	Boolean debuggingEnabled;
-	//	String unixOutputPath;
-	//	String winOutputPath;
-	//	String macOutputPath;
-	//	Boolean autoOpenInBrowser;
-	//	Integer lifebeatInterval;
-	//	String additionalArgs;
-	//	Boolean notificationEmailEnabled;
-	//	String notificationEmailAddr;
-	//	Integer retries;
-	//	String scheduler;	// "RANDOM" | "ROUNDROBIN" | "LOADAVERAGE"
-	//	Integer dormant;
-	//	String redir;
-	//	Integer sendTimeout;
-	//	Integer recvTimeout;
-	//	Integer cnctTimeout;
-	//	Integer sendBufSize;
-	//	Integer recvBufSize;
-	//	Integer poolsize;
-	//	Integer urlVersion;	// 3 | 4
+	// ====================================================================
+	// Runtime state (not persisted)
+	// --------------------------------------------------------------------
+	// Fields below are derived/transient — populated at runtime, not part
+	// of the persisted contract. Slated to move out of MApplication entirely
+	// in a later cleanup round.
+	// ====================================================================
 
 	private final NSMutableArray<MInstance> _instanceArray = new NSMutableArray<>();
 	private final NSMutableArray<MHost> _hostArray = new NSMutableArray<>();
@@ -82,8 +89,10 @@ public class MApplication extends MObject {
 
 	// For UI
 	public MApplication( String aName, MSiteConfig aConfig ) {
-		this( new NSDictionary<Object, Object>( new Object[] { aName }, new Object[] { "name" } ), aConfig );
+		_siteConfig = aConfig;
+		_name = aName;
 		takeValuesFromDefaults();
+		dataChanged();
 	}
 
 	// For Unarchiving
@@ -92,354 +101,477 @@ public class MApplication extends MObject {
 		updateValues( aDict );
 	}
 
-	// For Cheating on the AppConfigurePage
+	/**
+	 * For Cheating on the AppConfigurePage — populates the application from a dict
+	 * without notifying {@link #dataChanged()}. Used to construct a transient
+	 * "preview" copy that mustn't trigger a SiteConfig save just because the user
+	 * is mid-edit. The unused {@code Object o} parameter exists purely as a
+	 * disambiguator from the unarchive constructor.
+	 */
 	public MApplication( NSDictionary<String, Object> aDict, MSiteConfig aConfig, Object o ) {
 		_siteConfig = aConfig;
-		values = aDict.mutableClone();
+		// NB: pre-refactor, the dict-taking constructors stored values raw — no
+		// validators were applied at dict-read time (validation only happens via
+		// individual setters). Preserving that exactly so snapshots don't drift.
+		readFromDictRaw( aDict );
+	}
+
+	/**
+	 * Replaces this application's persisted state from a wire/disk dict. Called on
+	 * the wotaskd receive side during {@code updateWotaskd/configure} (see
+	 * {@code DirectAction.monitorRequestAction}) and from the unarchive constructor.
+	 */
+	public void updateValues( NSDictionary<String, Object> aDict ) {
+		readFromDictRaw( aDict );
+		dataChanged();
+	}
+
+	/**
+	 * Snapshot of this application's persisted state, in the shape that goes onto
+	 * the wire and into {@code SiteConfig.xml}. Only non-null fields are included
+	 * — matches the legacy behaviour where the dict only contained keys that had
+	 * been explicitly set.
+	 */
+	public NSDictionary<String, Object> dictionaryForArchive() {
+		final NSMutableDictionary<String, Object> dict = new NSMutableDictionary<>();
+		putIfNotNull( dict, "name", _name );
+		putIfNotNull( dict, "startingPort", _startingPort );
+		putIfNotNull( dict, "timeForStartup", _timeForStartup );
+		putIfNotNull( dict, "phasedStartup", _phasedStartup );
+		putIfNotNull( dict, "autoRecover", _autoRecover );
+		putIfNotNull( dict, "minimumActiveSessionsCount", _minimumActiveSessionsCount );
+		putIfNotNull( dict, "unixPath", _unixPath );
+		putIfNotNull( dict, "winPath", _winPath );
+		putIfNotNull( dict, "macPath", _macPath );
+		putIfNotNull( dict, "cachingEnabled", _cachingEnabled );
+		putIfNotNull( dict, "adaptor", _adaptor );
+		putIfNotNull( dict, "adaptorThreads", _adaptorThreads );
+		putIfNotNull( dict, "listenQueueSize", _listenQueueSize );
+		putIfNotNull( dict, "adaptorThreadsMin", _adaptorThreadsMin );
+		putIfNotNull( dict, "adaptorThreadsMax", _adaptorThreadsMax );
+		putIfNotNull( dict, "projectSearchPath", _projectSearchPath );
+		putIfNotNull( dict, "sessionTimeOut", _sessionTimeOut );
+		putIfNotNull( dict, "statisticsPassword", _statisticsPassword );
+		putIfNotNull( dict, "debuggingEnabled", _debuggingEnabled );
+		putIfNotNull( dict, "unixOutputPath", _unixOutputPath );
+		putIfNotNull( dict, "winOutputPath", _winOutputPath );
+		putIfNotNull( dict, "macOutputPath", _macOutputPath );
+		putIfNotNull( dict, "autoOpenInBrowser", _autoOpenInBrowser );
+		putIfNotNull( dict, "lifebeatInterval", _lifebeatInterval );
+		putIfNotNull( dict, "additionalArgs", _additionalArgs );
+		putIfNotNull( dict, "notificationEmailEnabled", _notificationEmailEnabled );
+		putIfNotNull( dict, "notificationEmailAddr", _notificationEmailAddr );
+		putIfNotNull( dict, "retries", _retries );
+		putIfNotNull( dict, "scheduler", _scheduler );
+		putIfNotNull( dict, "dormant", _dormant );
+		putIfNotNull( dict, "redir", _redir );
+		putIfNotNull( dict, "sendTimeout", _sendTimeout );
+		putIfNotNull( dict, "recvTimeout", _recvTimeout );
+		putIfNotNull( dict, "cnctTimeout", _cnctTimeout );
+		putIfNotNull( dict, "sendBufSize", _sendBufSize );
+		putIfNotNull( dict, "recvBufSize", _recvBufSize );
+		putIfNotNull( dict, "poolsize", _poolsize );
+		putIfNotNull( dict, "urlVersion", _urlVersion );
+		putIfNotNull( dict, "oldname", _oldname );
+		return dict;
+	}
+
+	private static void putIfNotNull( final NSMutableDictionary<String, Object> dict, final String key, final Object value ) {
+		if( value != null ) {
+			dict.takeValueForKey( value, key );
+		}
+	}
+
+	/**
+	 * Reads every persistence field from the given dict without applying any
+	 * validators — matches the original wholesale-replacement semantics of
+	 * {@code values = new NSMutableDictionary(aDict)}. Keys absent from the
+	 * dict come through as null fields.
+	 */
+	private void readFromDictRaw( final NSDictionary<String, Object> aDict ) {
+		_name = (String)aDict.valueForKey( "name" );
+		_startingPort = (Integer)aDict.valueForKey( "startingPort" );
+		_timeForStartup = (Integer)aDict.valueForKey( "timeForStartup" );
+		_phasedStartup = (Boolean)aDict.valueForKey( "phasedStartup" );
+		_autoRecover = (Boolean)aDict.valueForKey( "autoRecover" );
+		_minimumActiveSessionsCount = (Integer)aDict.valueForKey( "minimumActiveSessionsCount" );
+		_unixPath = (String)aDict.valueForKey( "unixPath" );
+		_winPath = (String)aDict.valueForKey( "winPath" );
+		_macPath = (String)aDict.valueForKey( "macPath" );
+		_cachingEnabled = (Boolean)aDict.valueForKey( "cachingEnabled" );
+		_adaptor = (String)aDict.valueForKey( "adaptor" );
+		_adaptorThreads = (Integer)aDict.valueForKey( "adaptorThreads" );
+		_listenQueueSize = (Integer)aDict.valueForKey( "listenQueueSize" );
+		_adaptorThreadsMin = (Integer)aDict.valueForKey( "adaptorThreadsMin" );
+		_adaptorThreadsMax = (Integer)aDict.valueForKey( "adaptorThreadsMax" );
+		_projectSearchPath = (String)aDict.valueForKey( "projectSearchPath" );
+		_sessionTimeOut = (Integer)aDict.valueForKey( "sessionTimeOut" );
+		_statisticsPassword = (String)aDict.valueForKey( "statisticsPassword" );
+		_debuggingEnabled = (Boolean)aDict.valueForKey( "debuggingEnabled" );
+		_unixOutputPath = (String)aDict.valueForKey( "unixOutputPath" );
+		_winOutputPath = (String)aDict.valueForKey( "winOutputPath" );
+		_macOutputPath = (String)aDict.valueForKey( "macOutputPath" );
+		_autoOpenInBrowser = (Boolean)aDict.valueForKey( "autoOpenInBrowser" );
+		_lifebeatInterval = (Integer)aDict.valueForKey( "lifebeatInterval" );
+		_additionalArgs = (String)aDict.valueForKey( "additionalArgs" );
+		_notificationEmailEnabled = (Boolean)aDict.valueForKey( "notificationEmailEnabled" );
+		_notificationEmailAddr = (String)aDict.valueForKey( "notificationEmailAddr" );
+		_retries = (Integer)aDict.valueForKey( "retries" );
+		_scheduler = (String)aDict.valueForKey( "scheduler" );
+		_dormant = (Integer)aDict.valueForKey( "dormant" );
+		_redir = (String)aDict.valueForKey( "redir" );
+		_sendTimeout = (Integer)aDict.valueForKey( "sendTimeout" );
+		_recvTimeout = (Integer)aDict.valueForKey( "recvTimeout" );
+		_cnctTimeout = (Integer)aDict.valueForKey( "cnctTimeout" );
+		_sendBufSize = (Integer)aDict.valueForKey( "sendBufSize" );
+		_recvBufSize = (Integer)aDict.valueForKey( "recvBufSize" );
+		_poolsize = (Integer)aDict.valueForKey( "poolsize" );
+		_urlVersion = (Integer)aDict.valueForKey( "urlVersion" );
+		_oldname = (String)aDict.valueForKey( "oldname" );
 	}
 
 	public String name() {
-		return (String)values.valueForKey( "name" );
+		return _name;
 	}
 
 	public void setName( String value ) {
 		if( !value.equals( name() ) ) {
 			setOldname( name() );
-			values.takeValueForKey( value, "name" );
+			_name = value;
 			dataChanged();
 		}
 	}
 
 	public Integer startingPort() {
-		return (Integer)values.valueForKey( "startingPort" );
+		return _startingPort;
 	}
 
 	public void setStartingPort( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "startingPort" );
+		_startingPort = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer timeForStartup() {
-		return (Integer)values.valueForKey( "timeForStartup" );
+		return _timeForStartup;
 	}
 
 	public void setTimeForStartup( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "timeForStartup" );
+		_timeForStartup = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Boolean phasedStartup() {
-		return (Boolean)values.valueForKey( "phasedStartup" );
+		return _phasedStartup;
 	}
 
 	public void setPhasedStartup( Boolean value ) {
-		values.takeValueForKey( value, "phasedStartup" );
+		_phasedStartup = value;
 		dataChanged();
 	}
 
 	public Boolean autoRecover() {
-		return (Boolean)values.valueForKey( "autoRecover" );
+		return _autoRecover;
 	}
 
 	public void setAutoRecover( Boolean value ) {
-		values.takeValueForKey( value, "autoRecover" );
+		_autoRecover = value;
 		dataChanged();
 	}
 
 	public Integer minimumActiveSessionsCount() {
-		return (Integer)values.valueForKey( "minimumActiveSessionsCount" );
+		return _minimumActiveSessionsCount;
 	}
 
 	public void setMinimumActiveSessionsCount( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "minimumActiveSessionsCount" );
+		_minimumActiveSessionsCount = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public String unixPath() {
-		return (String)values.valueForKey( "unixPath" );
+		return _unixPath;
 	}
 
 	public void setUnixPath( String value ) {
-		values.takeValueForKey( value, "unixPath" );
+		_unixPath = value;
 		dataChanged();
 	}
 
 	public String winPath() {
-		return (String)values.valueForKey( "winPath" );
+		return _winPath;
 	}
 
 	public void setWinPath( String value ) {
-		values.takeValueForKey( value, "winPath" );
+		_winPath = value;
 		dataChanged();
 	}
 
 	public String macPath() {
-		return (String)values.valueForKey( "macPath" );
+		return _macPath;
 	}
 
 	public void setMacPath( String value ) {
-		values.takeValueForKey( value, "macPath" );
+		_macPath = value;
 		dataChanged();
 	}
 
 	public Boolean cachingEnabled() {
-		return (Boolean)values.valueForKey( "cachingEnabled" );
+		return _cachingEnabled;
 	}
 
 	public void setCachingEnabled( Boolean value ) {
-		values.takeValueForKey( value, "cachingEnabled" );
+		_cachingEnabled = value;
 		dataChanged();
 	}
 
 	public String adaptor() {
-		return (String)values.valueForKey( "adaptor" );
+		return _adaptor;
 	}
 
 	public void setAdaptor( String value ) {
-		values.takeValueForKey( value, "adaptor" );
+		_adaptor = value;
 		dataChanged();
 	}
 
 	public Integer adaptorThreads() {
-		return (Integer)values.valueForKey( "adaptorThreads" );
+		return _adaptorThreads;
 	}
 
 	public void setAdaptorThreads( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "adaptorThreads" );
+		_adaptorThreads = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer listenQueueSize() {
-		return (Integer)values.valueForKey( "listenQueueSize" );
+		return _listenQueueSize;
 	}
 
 	public void setListenQueueSize( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "listenQueueSize" );
+		_listenQueueSize = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer adaptorThreadsMin() {
-		return (Integer)values.valueForKey( "adaptorThreadsMin" );
+		return _adaptorThreadsMin;
 	}
 
 	public void setAdaptorThreadsMin( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "adaptorThreadsMin" );
+		_adaptorThreadsMin = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer adaptorThreadsMax() {
-		return (Integer)values.valueForKey( "adaptorThreadsMax" );
+		return _adaptorThreadsMax;
 	}
 
 	public void setAdaptorThreadsMax( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "adaptorThreadsMax" );
+		_adaptorThreadsMax = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public String projectSearchPath() {
-		return (String)values.valueForKey( "projectSearchPath" );
+		return _projectSearchPath;
 	}
 
 	public void setProjectSearchPath( String value ) {
-		values.takeValueForKey( value, "projectSearchPath" );
+		_projectSearchPath = value;
 		dataChanged();
 	}
 
 	public Integer sessionTimeOut() {
-		return (Integer)values.valueForKey( "sessionTimeOut" );
+		return _sessionTimeOut;
 	}
 
 	public void setSessionTimeOut( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "sessionTimeOut" );
+		_sessionTimeOut = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public String statisticsPassword() {
-		return (String)values.valueForKey( "statisticsPassword" );
+		return _statisticsPassword;
 	}
 
 	public void setStatisticsPassword( String value ) {
-		values.takeValueForKey( value, "statisticsPassword" );
+		_statisticsPassword = value;
 		dataChanged();
 	}
 
 	public Boolean debuggingEnabled() {
-		return (Boolean)values.valueForKey( "debuggingEnabled" );
+		return _debuggingEnabled;
 	}
 
 	public void setDebuggingEnabled( Boolean value ) {
-		values.takeValueForKey( value, "debuggingEnabled" );
+		_debuggingEnabled = value;
 		dataChanged();
 	}
 
 	public String unixOutputPath() {
-		return (String)values.valueForKey( "unixOutputPath" );
+		return _unixOutputPath;
 	}
 
 	public void setUnixOutputPath( String value ) {
-		values.takeValueForKey( value, "unixOutputPath" );
+		_unixOutputPath = value;
 		dataChanged();
 	}
 
 	public String winOutputPath() {
-		return (String)values.valueForKey( "winOutputPath" );
+		return _winOutputPath;
 	}
 
 	public void setWinOutputPath( String value ) {
-		values.takeValueForKey( value, "winOutputPath" );
+		_winOutputPath = value;
 		dataChanged();
 	}
 
 	public String macOutputPath() {
-		return (String)values.valueForKey( "macOutputPath" );
+		return _macOutputPath;
 	}
 
 	public void setMacOutputPath( String value ) {
-		values.takeValueForKey( value, "macOutputPath" );
+		_macOutputPath = value;
 		dataChanged();
 	}
 
 	public Boolean autoOpenInBrowser() {
-		return (Boolean)values.valueForKey( "autoOpenInBrowser" );
+		return _autoOpenInBrowser;
 	}
 
 	public void setAutoOpenInBrowser( Boolean value ) {
-		values.takeValueForKey( value, "autoOpenInBrowser" );
+		_autoOpenInBrowser = value;
 		dataChanged();
 	}
 
 	public Integer lifebeatInterval() {
-		return (Integer)values.valueForKey( "lifebeatInterval" );
+		return _lifebeatInterval;
 	}
 
 	public void setLifebeatInterval( Integer value ) {
-		values.takeValueForKey( MUtil.validatedLifebeatInterval( value ), "lifebeatInterval" );
+		_lifebeatInterval = MUtil.validatedLifebeatInterval( value );
 		dataChanged();
 	}
 
 	public String additionalArgs() {
-		return (String)values.valueForKey( "additionalArgs" );
+		return _additionalArgs;
 	}
 
 	public void setAdditionalArgs( String value ) {
-		values.takeValueForKey( value, "additionalArgs" );
+		_additionalArgs = value;
 		dataChanged();
 	}
 
 	public Boolean notificationEmailEnabled() {
-		return (Boolean)values.valueForKey( "notificationEmailEnabled" );
+		return _notificationEmailEnabled;
 	}
 
 	public void setNotificationEmailEnabled( Boolean value ) {
-		values.takeValueForKey( value, "notificationEmailEnabled" );
+		_notificationEmailEnabled = value;
 		dataChanged();
 	}
 
 	public String notificationEmailAddr() {
-		return (String)values.valueForKey( "notificationEmailAddr" );
+		return _notificationEmailAddr;
 	}
 
 	public void setNotificationEmailAddr( String value ) {
-		values.takeValueForKey( value, "notificationEmailAddr" );
+		_notificationEmailAddr = value;
 		dataChanged();
 	}
 
 	public Integer retries() {
-		return (Integer)values.valueForKey( "retries" );
+		return _retries;
 	}
 
 	public void setRetries( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "retries" );
+		_retries = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public String scheduler() {
-		return (String)values.valueForKey( "scheduler" );
+		return _scheduler;
 	}
 
 	public void setScheduler( String value ) {
-		values.takeValueForKey( value, "scheduler" );
+		_scheduler = value;
 		dataChanged();
 	}
 
 	public Integer dormant() {
-		return (Integer)values.valueForKey( "dormant" );
+		return _dormant;
 	}
 
 	public void setDormant( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "dormant" );
+		_dormant = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public String redir() {
-		return (String)values.valueForKey( "redir" );
+		return _redir;
 	}
 
 	public void setRedir( String value ) {
-		values.takeValueForKey( value, "redir" );
+		_redir = value;
 		dataChanged();
 	}
 
 	public Integer sendTimeout() {
-		return (Integer)values.valueForKey( "sendTimeout" );
+		return _sendTimeout;
 	}
 
 	public void setSendTimeout( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "sendTimeout" );
+		_sendTimeout = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer recvTimeout() {
-		return (Integer)values.valueForKey( "recvTimeout" );
+		return _recvTimeout;
 	}
 
 	public void setRecvTimeout( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "recvTimeout" );
+		_recvTimeout = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer cnctTimeout() {
-		return (Integer)values.valueForKey( "cnctTimeout" );
+		return _cnctTimeout;
 	}
 
 	public void setCnctTimeout( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "cnctTimeout" );
+		_cnctTimeout = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer sendBufSize() {
-		return (Integer)values.valueForKey( "sendBufSize" );
+		return _sendBufSize;
 	}
 
 	public void setSendBufSize( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "sendBufSize" );
+		_sendBufSize = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer recvBufSize() {
-		return (Integer)values.valueForKey( "recvBufSize" );
+		return _recvBufSize;
 	}
 
 	public void setRecvBufSize( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "recvBufSize" );
+		_recvBufSize = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer poolsize() {
-		return (Integer)values.valueForKey( "poolsize" );
+		return _poolsize;
 	}
 
 	public void setPoolsize( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "poolsize" );
+		_poolsize = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer urlVersion() {
-		return (Integer)values.valueForKey( "urlVersion" );
+		return _urlVersion;
 	}
 
 	public void setUrlVersion( Integer value ) {
-		values.takeValueForKey( MUtil.validatedUrlVersion( value ), "urlVersion" );
+		_urlVersion = MUtil.validatedUrlVersion( value );
 		dataChanged();
 	}
 
@@ -447,14 +579,14 @@ public class MApplication extends MObject {
 	 * ??
 	 */
 	public String oldname() {
-		return (String)values.valueForKey( "oldname" );
+		return _oldname;
 	}
 
 	/**
 	 * ??
 	 */
 	public void setOldname( String value ) {
-		values.takeValueForKey( value, "oldname" );
+		_oldname = value;
 		dataChanged();
 	}
 
@@ -494,53 +626,33 @@ public class MApplication extends MObject {
 		return _hostArray;
 	}
 
-	private static NSDictionary<Object, Object> _defaults = new NSDictionary<>( new Object[] {
-			2001,
-			30,
-			Boolean.TRUE,
-			Boolean.TRUE,
-			0,
-			Boolean.TRUE,
-			"WODefaultAdaptor",
-			8,
-			128,
-			16,
-			256,
-			"()",
-			3600,
-			"",
-			Boolean.FALSE,
-			Boolean.FALSE,
-			30,
-			"",
-			Boolean.FALSE,
-			"",
-			"" },
-			new Object[] {
-					"startingPort",
-					"timeForStartup",
-					"phasedStartup",
-					"autoRecover",
-					"minimumActiveSessionsCount",
-					"cachingEnabled",
-					"adaptor",
-					"adaptorThreads",
-					"listenQueueSize",
-					"adaptorThreadsMin",
-					"adaptorThreadsMax",
-					"projectSearchPath",
-					"sessionTimeOut",
-					"statisticsPassword",
-					"debuggingEnabled",
-					"autoOpenInBrowser",
-					"lifebeatInterval",
-					"additionalArgs",
-					"notificationEmailEnabled",
-					"macOutputPath",
-					"macPath" } );
-
+	/**
+	 * Defaults applied by the UI add-application path. Field assignment intentionally
+	 * mirrors the legacy dict's contents — same keys, same values — so the on-wire
+	 * shape after a UI-initiated add is byte-for-byte identical.
+	 */
 	private void takeValuesFromDefaults() {
-		values.addEntriesFromDictionary( _defaults );
+		_startingPort = 2001;
+		_timeForStartup = 30;
+		_phasedStartup = Boolean.TRUE;
+		_autoRecover = Boolean.TRUE;
+		_minimumActiveSessionsCount = 0;
+		_cachingEnabled = Boolean.TRUE;
+		_adaptor = "WODefaultAdaptor";
+		_adaptorThreads = 8;
+		_listenQueueSize = 128;
+		_adaptorThreadsMin = 16;
+		_adaptorThreadsMax = 256;
+		_projectSearchPath = "()";
+		_sessionTimeOut = 3600;
+		_statisticsPassword = "";
+		_debuggingEnabled = Boolean.FALSE;
+		_autoOpenInBrowser = Boolean.FALSE;
+		_lifebeatInterval = 30;
+		_additionalArgs = "";
+		_notificationEmailEnabled = Boolean.FALSE;
+		_macOutputPath = "";
+		_macPath = "";
 	}
 
 	public void pushValuesToInstances() {
