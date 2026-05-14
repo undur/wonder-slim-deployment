@@ -8,6 +8,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.model.MHost;
 import sjip.core.model.MSiteConfig;
+import sjip.core.model.MSiteConfigDto;
 import sjip.x.FoundationCoder;
 import sjip.x.ResponseWrapper;
 
@@ -96,9 +97,9 @@ public class WOTaskdComms {
 	}
 
 	private static String syncRequestContent( final MSiteConfig siteConfig ) {
-		final NSMutableDictionary<String, NSDictionary> data = new NSMutableDictionary<>( siteConfig.dictionaryForArchive(), "SiteConfig" );
-		final NSMutableDictionary<String, NSMutableDictionary<String, NSDictionary>> updateWotaskd = new NSMutableDictionary<>( data, "sync" );
-		final NSMutableDictionary<String, NSMutableDictionary<String, NSMutableDictionary<String, NSDictionary>>> monitorRequest = new NSMutableDictionary<>( updateWotaskd, "updateWotaskd" );
+		final NSMutableDictionary<String, MSiteConfigDto> data = new NSMutableDictionary<>( siteConfig.toDto(), "SiteConfig" );
+		final NSMutableDictionary<String, NSMutableDictionary<String, MSiteConfigDto>> updateWotaskd = new NSMutableDictionary<>( data, "sync" );
+		final NSMutableDictionary<String, NSMutableDictionary<String, NSMutableDictionary<String, MSiteConfigDto>>> monitorRequest = new NSMutableDictionary<>( updateWotaskd, "updateWotaskd" );
 		final String syncRequestString = new FoundationCoder().encodeRootObjectForKey( monitorRequest, "monitorRequest" );
 		return syncRequestString;
 	}

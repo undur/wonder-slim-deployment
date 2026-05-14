@@ -43,6 +43,8 @@ import sjip.core.model.MHostDto;
 import sjip.core.model.MInstance;
 import sjip.core.model.MInstanceDto;
 import sjip.core.model.MSiteConfig;
+import sjip.core.model.MSiteConfigDto;
+import sjip.core.model.MSiteConfigSiteDto;
 import sjip.x.FoundationCoder;
 import sjip.x.AdaptorConfigSerialization;
 import sjip.x.FHosts;
@@ -158,7 +160,10 @@ public class DirectAction extends WODirectAction {
 				}
 				else if( overwriteDict != null ) {
 					stopAllInstances();
-					((Application)WOApplication.application()).setSiteConfig( new MSiteConfig( (NSDictionary)overwriteDict.valueForKey( "SiteConfig" ) ) );
+					@SuppressWarnings("unchecked")
+					final Map<String, Object> siteConfigDict = (Map<String, Object>)overwriteDict.valueForKey( "SiteConfig" );
+					final MSiteConfigDto dto = new FoundationCoder().decodeRecord( siteConfigDict, MSiteConfigDto.class );
+					((Application)WOApplication.application()).setSiteConfig( new MSiteConfig( dto ) );
 					updateWotaskdResponse.takeValueForKey( SUCCESS_ELEMENT, "overwrite" );
 				}
 				else if( syncDict != null ) {
@@ -299,7 +304,9 @@ public class DirectAction extends WODirectAction {
 
 						if( siteDict != null ) {
 							// update-configure - siteConfig.updateValues
-							aConfig.updateValues( siteDict );
+							@SuppressWarnings("unchecked")
+							final MSiteConfigSiteDto siteDto = new FoundationCoder().decodeRecord( (Map<String, Object>)siteDict, MSiteConfigSiteDto.class );
+							aConfig.updateValues( siteDto );
 							configureResponse.takeValueForKey( SUCCESS_ELEMENT, "site" );
 						}
 						if( hostArray != null ) {
@@ -482,7 +489,7 @@ public class DirectAction extends WODirectAction {
 			if( queryWotaskdString.equals( "SITE" ) ) {
 				theApplication.appTaskd().lock().readLock().lock();
 				try {
-					queryWotaskdResponse.takeValueForKey( aConfig.dictionaryForArchive(), "SiteConfig" );
+					queryWotaskdResponse.takeValueForKey( aConfig.toDto(), "SiteConfig" );
 				}
 				finally {
 					theApplication.appTaskd().lock().readLock().unlock();
@@ -751,8 +758,11 @@ public class DirectAction extends WODirectAction {
 		NSArray instanceArray = (NSArray)config.valueForKey( "instanceArray" );
 
 		// Configure the site
-		if( siteDict != null )
-			aConfig.updateValues( siteDict );
+		if( siteDict != null ) {
+			@SuppressWarnings("unchecked")
+			final MSiteConfigSiteDto siteDto = new FoundationCoder().decodeRecord( (Map<String, Object>)siteDict, MSiteConfigSiteDto.class );
+			aConfig.updateValues( siteDto );
+		}
 
 		// Look through the array of hosts, and see if we need to add/remove any - configure the rest
 		NSMutableArray currentHosts = new NSMutableArray( aConfig.hostArray() );

@@ -23,6 +23,8 @@ import sjip.core.model.MHostDto;
 import sjip.core.model.MInstance;
 import sjip.core.model.MInstanceDto;
 import sjip.core.model.MSiteConfig;
+import sjip.core.model.MSiteConfigDto;
+import sjip.core.model.MSiteConfigSiteDto;
 import sjip.monitor.components.AppDetailPage;
 import sjip.monitor.components.ApplicationsPage;
 import sjip.monitor.components.HostsPage;
@@ -167,7 +169,7 @@ public class WOTaskdHandler {
 		final NSMutableDictionary requestTypeDict = new NSMutableDictionary();
 
 		if( _Config != null ) {
-			final NSDictionary site = _Config.dictionaryForWireUpdate();
+			final MSiteConfigSiteDto site = _Config.toSiteDto();
 			requestTypeDict.takeValueForKey( site, "site" );
 		}
 
@@ -294,7 +296,7 @@ public class WOTaskdHandler {
 
 	/* ******** OVERWRITE / CLEAR (UPDATE) ********* */
 	public void sendOverwriteToWotaskd( MHost aHost ) {
-		final NSDictionary SiteConfig = siteConfig().dictionaryForArchive();
+		final MSiteConfigDto SiteConfig = siteConfig().toDto();
 		final NSMutableDictionary data = new NSMutableDictionary( SiteConfig, "SiteConfig" );
 		_sendOverwriteClearToWotaskd( aHost, "overwrite", data );
 	}

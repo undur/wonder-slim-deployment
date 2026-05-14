@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,7 +40,6 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.IInstanceController;
 import sjip.core.MUtil;
@@ -58,10 +58,10 @@ public class MSiteConfig extends MObject {
 	// Persistence state — site-level scalars
 	// --------------------------------------------------------------------
 	// Fields below are the canonical persisted site-level state — they
-	// round-trip through dictionaryForArchive()/updateValues() to and from
-	// the wire and SiteConfig.xml. The full persisted shape composes these
-	// scalars (under the "site" key) with the host/application/instance
-	// arrays — see dictionaryForArchive().
+	// round-trip through toSiteDto()/updateValues(MSiteConfigSiteDto) to
+	// and from the wire and SiteConfig.xml. The full persisted shape
+	// composes these scalars (under the "site" key) with the
+	// host/application/instance arrays — see toDto().
 	// ====================================================================
 
 	private String _password; // stored as a salted hash, never plain text
@@ -87,10 +87,10 @@ public class MSiteConfig extends MObject {
 	// --------------------------------------------------------------------
 	// The arrays below hold the child M-objects (hosts, applications,
 	// instances). The arrays themselves aren't serialized as scalar fields;
-	// dictionaryForArchive() walks them and composes each child's own
-	// dictionaryForArchive() into the hostArray/applicationArray/
-	// instanceArray keys of the persisted shape. Without these, the on-disk
-	// SiteConfig.xml would lose every host/app/instance.
+	// toDto() walks them and composes each child's own toDto() into the
+	// hostArray/applicationArray/instanceArray components of the persisted
+	// shape. Without these, the on-disk SiteConfig.xml would lose every
+	// host/app/instance.
 	// ====================================================================
 
 	private final NSMutableArray<MHost> _hostArray = new NSMutableArray<>();
@@ -127,18 +127,22 @@ public class MSiteConfig extends MObject {
 
 	public int _appIsDeadMultiplier;
 
-	public MSiteConfig( NSDictionary xmlDict ) {
+	/**
+	 * Constructs an MSiteConfig from a wire/disk DTO. {@code dto == null} means
+	 * empty config; the site-level defaults ({@code viewRefreshEnabled=TRUE,
+	 * viewRefreshRate=60}) are applied.
+	 */
+	public MSiteConfig( final MSiteConfigDto dto ) {
 		_localHostAddress = FProperties.siteConfigLocalHostAddress;
 		_localHostName = FProperties.siteConfigLocalHostName;
 
 		_siteConfig = this;
-		if( xmlDict == null ) {
+		if( dto == null ) {
 			setViewRefreshEnabled( Boolean.TRUE );
 			setViewRefreshRate( 60 );
 		}
 		else {
-			final NSDictionary siteDict = (NSDictionary)xmlDict.valueForKey( "site" );
-			if( siteDict == null ) {
+			if( dto.site() == null ) {
 				// rdar://3935864 - Seed: "Null Pointer Exception" for WO Application Instances
 				// It seems this should not be necessary, but there is no other place for default values to get fed in. -rrk
 				_viewRefreshEnabled = Boolean.TRUE;
@@ -148,17 +152,12 @@ public class MSiteConfig extends MObject {
 				// NB: pre-refactor, the site dict was stored raw — no validators were
 				// applied at dict-read time (validation only happens via individual
 				// setters). Preserving that exactly so snapshots don't drift.
-				readSiteFromDictRaw( siteDict );
+				readSiteFromDto( dto.site() );
 			}
 
-			final NSArray hostArray = (NSArray)xmlDict.valueForKey( "hostArray" );
-			_initHostsWithArray( hostArray );
-
-			final NSArray applicationArray = (NSArray)xmlDict.valueForKey( "applicationArray" );
-			_initApplicationsWithArray( applicationArray );
-
-			final NSArray instanceArray = (NSArray)xmlDict.valueForKey( "instanceArray" );
-			_initInstancesWithArray( instanceArray );
+			_initHostsFromDtos( dto.hostArray() );
+			_initApplicationsFromDtos( dto.applicationArray() );
+			_initInstancesFromDtos( dto.instanceArray() );
 		}
 
 		// setting the multiplier for assuming an application is dead
@@ -178,82 +177,66 @@ public class MSiteConfig extends MObject {
 
 	/**
 	 * @return A cloned dict of the site-level scalars (no nested host/application/instance arrays),
-	 *         suitable for the {@code "site"} payload in a wotaskd update request.
+	 *         suitable for the {@code site} payload in a wotaskd configure request.
 	 *
-	 *         <p>Distinct from {@link #dictionaryForArchive()}, which returns the full archive
-	 *         shape (site scalars wrapped alongside hostArray/applicationArray/instanceArray).
+	 *         <p>Distinct from {@link #toDto()}, which returns the full archive shape
+	 *         (site scalars composed with the host/application/instance lists).
 	 */
-	public NSDictionary<String, Object> dictionaryForWireUpdate() {
-		return siteScalarsDict();
+	public MSiteConfigSiteDto toSiteDto() {
+		return new MSiteConfigSiteDto(
+				_password,
+				_woAdaptor,
+				_SMTPhost,
+				_emailReturnAddr,
+				_viewRefreshEnabled,
+				_viewRefreshRate,
+				_retries,
+				_scheduler,
+				_dormant,
+				_redir,
+				_sendTimeout,
+				_recvTimeout,
+				_cnctTimeout,
+				_sendBufSize,
+				_recvBufSize,
+				_poolsize,
+				_urlVersion );
 	}
 
 	/**
-	 * Replaces this site config's site-level scalars from a wire/disk dict. Called
-	 * on the wotaskd receive side during {@code updateWotaskd/configure} with a
-	 * site sub-dict (see {@code DirectAction.monitorRequestAction}).
+	 * Replaces this site config's site-level scalars from a wire DTO. Called on the
+	 * wotaskd receive side during {@code updateWotaskd/configure} with a site sub-dict
+	 * (see {@code DirectAction.monitorRequestAction}).
 	 */
-	public void updateValues( NSDictionary<String, Object> aDict ) {
-		readSiteFromDictRaw( aDict );
+	public void updateValues( final MSiteConfigSiteDto dto ) {
+		readSiteFromDto( dto );
 		dataChanged();
 	}
 
 	/**
-	 * Reads every site-level persistence field from the given dict without applying
-	 * any validators — matches the original wholesale-replacement semantics of
-	 * {@code values = new NSMutableDictionary(aDict)}. Keys absent from the dict
-	 * come through as null fields.
+	 * Reads every site-level persistence field from the given DTO. Matches the legacy
+	 * wholesale-replacement semantics — components null in the DTO produce null fields.
+	 * No validators applied at this layer; validation happens via individual setters
+	 * when used through the UI path.
 	 */
-	private void readSiteFromDictRaw( final NSDictionary aDict ) {
-		_password = (String)aDict.valueForKey( "password" );
-		_woAdaptor = (String)aDict.valueForKey( "woAdaptor" );
-		_SMTPhost = (String)aDict.valueForKey( "SMTPhost" );
-		_emailReturnAddr = (String)aDict.valueForKey( "emailReturnAddr" );
-		_viewRefreshEnabled = (Boolean)aDict.valueForKey( "viewRefreshEnabled" );
-		_viewRefreshRate = (Integer)aDict.valueForKey( "viewRefreshRate" );
-		_retries = (Integer)aDict.valueForKey( "retries" );
-		_scheduler = (String)aDict.valueForKey( "scheduler" );
-		_dormant = (Integer)aDict.valueForKey( "dormant" );
-		_redir = (String)aDict.valueForKey( "redir" );
-		_sendTimeout = (Integer)aDict.valueForKey( "sendTimeout" );
-		_recvTimeout = (Integer)aDict.valueForKey( "recvTimeout" );
-		_cnctTimeout = (Integer)aDict.valueForKey( "cnctTimeout" );
-		_sendBufSize = (Integer)aDict.valueForKey( "sendBufSize" );
-		_recvBufSize = (Integer)aDict.valueForKey( "recvBufSize" );
-		_poolsize = (Integer)aDict.valueForKey( "poolsize" );
-		_urlVersion = (Integer)aDict.valueForKey( "urlVersion" );
-	}
-
-	/**
-	 * Builds a dict of the site-level scalars. Only non-null fields are included
-	 * — matches the legacy behaviour where the dict only contained keys that had
-	 * been explicitly set.
-	 */
-	private NSMutableDictionary<String, Object> siteScalarsDict() {
-		final NSMutableDictionary<String, Object> dict = new NSMutableDictionary<>();
-		putIfNotNull( dict, "password", _password );
-		putIfNotNull( dict, "woAdaptor", _woAdaptor );
-		putIfNotNull( dict, "SMTPhost", _SMTPhost );
-		putIfNotNull( dict, "emailReturnAddr", _emailReturnAddr );
-		putIfNotNull( dict, "viewRefreshEnabled", _viewRefreshEnabled );
-		putIfNotNull( dict, "viewRefreshRate", _viewRefreshRate );
-		putIfNotNull( dict, "retries", _retries );
-		putIfNotNull( dict, "scheduler", _scheduler );
-		putIfNotNull( dict, "dormant", _dormant );
-		putIfNotNull( dict, "redir", _redir );
-		putIfNotNull( dict, "sendTimeout", _sendTimeout );
-		putIfNotNull( dict, "recvTimeout", _recvTimeout );
-		putIfNotNull( dict, "cnctTimeout", _cnctTimeout );
-		putIfNotNull( dict, "sendBufSize", _sendBufSize );
-		putIfNotNull( dict, "recvBufSize", _recvBufSize );
-		putIfNotNull( dict, "poolsize", _poolsize );
-		putIfNotNull( dict, "urlVersion", _urlVersion );
-		return dict;
-	}
-
-	private static void putIfNotNull( final NSMutableDictionary<String, Object> dict, final String key, final Object value ) {
-		if( value != null ) {
-			dict.takeValueForKey( value, key );
-		}
+	private void readSiteFromDto( final MSiteConfigSiteDto dto ) {
+		_password = dto.password();
+		_woAdaptor = dto.woAdaptor();
+		_SMTPhost = dto.SMTPhost();
+		_emailReturnAddr = dto.emailReturnAddr();
+		_viewRefreshEnabled = dto.viewRefreshEnabled();
+		_viewRefreshRate = dto.viewRefreshRate();
+		_retries = dto.retries();
+		_scheduler = dto.scheduler();
+		_dormant = dto.dormant();
+		_redir = dto.redir();
+		_sendTimeout = dto.sendTimeout();
+		_recvTimeout = dto.recvTimeout();
+		_cnctTimeout = dto.cnctTimeout();
+		_sendBufSize = dto.sendBufSize();
+		_recvBufSize = dto.recvBufSize();
+		_poolsize = dto.poolsize();
+		_urlVersion = dto.urlVersion();
 	}
 
 	/********** 'values' accessors **********/
@@ -678,48 +661,30 @@ public class MSiteConfig extends MObject {
 		return password();
 	}
 
-	private void _initHostsWithArray( final List<NSDictionary> list ) {
-
+	private void _initHostsFromDtos( final List<MHostDto> list ) {
 		if( list == null ) {
 			return;
 		}
-
-		final FoundationCoder coder = new FoundationCoder();
-		for( final NSDictionary map : list ) {
-			@SuppressWarnings("unchecked")
-			final MHostDto dto = coder.decodeRecord( (Map<String, Object>)map, MHostDto.class );
-			final MHost aHost = new MHost( dto, this );
-			_addHost( aHost );
+		for( final MHostDto dto : list ) {
+			_addHost( new MHost( dto, this ) );
 		}
 	}
 
-	private void _initApplicationsWithArray( final List<NSDictionary> list ) {
-
+	private void _initApplicationsFromDtos( final List<MApplicationDto> list ) {
 		if( list == null ) {
 			return;
 		}
-
-		final FoundationCoder coder = new FoundationCoder();
-		for( final NSDictionary map : list ) {
-			@SuppressWarnings("unchecked")
-			final MApplicationDto dto = coder.decodeRecord( (Map<String, Object>)map, MApplicationDto.class );
-			final MApplication anApplication = new MApplication( dto, this );
-			_addApplication( anApplication );
+		for( final MApplicationDto dto : list ) {
+			_addApplication( new MApplication( dto, this ) );
 		}
 	}
 
-	private void _initInstancesWithArray( final List<NSDictionary> list ) {
-
+	private void _initInstancesFromDtos( final List<MInstanceDto> list ) {
 		if( list == null ) {
 			return;
 		}
-
-		final FoundationCoder coder = new FoundationCoder();
-		for( final NSDictionary map : list ) {
-			@SuppressWarnings("unchecked")
-			final MInstanceDto dto = coder.decodeRecord( (Map<String, Object>)map, MInstanceDto.class );
-			final MInstance anInstance = new MInstance( dto, this );
-			_addInstance( anInstance );
+		for( final MInstanceDto dto : list ) {
+			_addInstance( new MInstance( dto, this ) );
 		}
 	}
 
@@ -825,9 +790,12 @@ public class MSiteConfig extends MObject {
 		if( fileForSiteConfig().exists() ) {
 			if( fileForSiteConfig().canRead() ) {
 				try {
-					final NSDictionary siteDict = (NSDictionary)new FoundationCoder().decodeRootObject( pathForSiteConfig() );
+					final FoundationCoder coder = new FoundationCoder();
+					@SuppressWarnings("unchecked")
+					final Map<String, Object> siteDict = (Map<String, Object>)coder.decodeRootObject( pathForSiteConfig() );
+					final MSiteConfigDto dto = coder.decodeRecord( siteDict, MSiteConfigDto.class );
 
-					aConfig = new MSiteConfig( siteDict );
+					aConfig = new MSiteConfig( dto );
 
 					logger.debug( "the SiteConfig is \n" + aConfig.generateSiteConfigXML() );
 				}
@@ -933,7 +901,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	public String generateSiteConfigXML() {
-		return new FoundationCoder().encodeRootObjectForKey( dictionaryForArchive(), "SiteConfig" );
+		return new FoundationCoder().encodeRootObjectForKey( toDto(), "SiteConfig" );
 	}
 
 	private void backup( String action ) {
@@ -954,53 +922,37 @@ public class MSiteConfig extends MObject {
 	}
 
 	/**
-	 * Snapshot of the full persisted state in the shape that goes onto the wire
-	 * and into {@code SiteConfig.xml}: site-level scalars under {@code "site"},
-	 * plus the {@code hostArray}/{@code applicationArray}/{@code instanceArray}
-	 * lists composed from each child object's own {@link MHost#dictionaryForArchive},
-	 * {@link MApplication#dictionaryForArchive}, {@link MInstance#dictionaryForArchive}.
+	 * Snapshot of the full persisted state as a typed DTO. The codec encodes this
+	 * directly to the wire — no dictionary in between. Composes the site-level
+	 * scalars (via {@link #toSiteDto()}) with the host/application/instance lists
+	 * (via each child's own {@code toDto()}).
 	 */
-	public NSDictionary<String, Object> dictionaryForArchive() {
+	public MSiteConfigDto toDto() {
 		final int hostArrayCount = _hostArray.size();
 		final int applicationArrayCount = _applicationArray.size();
 		final int instanceArrayCount = _instanceArray.size();
 
-		final NSMutableDictionary siteConfig = new NSMutableDictionary( 4 );
-
-		final NSMutableDictionary site = siteScalarsDict();
-
-		final NSMutableArray<MHostDto> hostArray = new NSMutableArray<>( hostArrayCount );
-
+		final List<MHostDto> hostArray = new ArrayList<>( hostArrayCount );
 		for( int i = 0; i < hostArrayCount; i++ ) {
-			final MHost anMobject = _hostArray.get( i );
-			hostArray.addObject( anMobject.toDto() );
+			hostArray.add( _hostArray.get( i ).toDto() );
 		}
 
-		final NSMutableArray<MApplicationDto> applicationArray = new NSMutableArray<>( applicationArrayCount );
-
+		final List<MApplicationDto> applicationArray = new ArrayList<>( applicationArrayCount );
 		for( int i = 0; i < applicationArrayCount; i++ ) {
-			final MApplication anMobject = _applicationArray.get( i );
-			applicationArray.addObject( anMobject.toDto() );
+			applicationArray.add( _applicationArray.get( i ).toDto() );
 		}
 
-		final NSMutableArray<MInstanceDto> instanceArray = new NSMutableArray<>( instanceArrayCount );
-
+		final List<MInstanceDto> instanceArray = new ArrayList<>( instanceArrayCount );
 		for( int i = 0; i < instanceArrayCount; i++ ) {
-			final MInstance anMobject = _instanceArray.get( i );
-			instanceArray.addObject( anMobject.toDto() );
+			instanceArray.add( _instanceArray.get( i ).toDto() );
 		}
 
-		siteConfig.takeValueForKey( site, "site" );
-		siteConfig.takeValueForKey( hostArray, "hostArray" );
-		siteConfig.takeValueForKey( applicationArray, "applicationArray" );
-		siteConfig.takeValueForKey( instanceArray, "instanceArray" );
-
-		return siteConfig;
+		return new MSiteConfigDto( toSiteDto(), hostArray, applicationArray, instanceArray );
 	}
 
 	@Override
 	public String toString() {
-		return siteScalarsDict().toString() + "\n" + "hasChanges = " + _hasChanges + "\n" + "configDirectoryPath = " + _configDirectoryPath;
+		return toSiteDto().toString() + "\n" + "hasChanges = " + _hasChanges + "\n" + "configDirectoryPath = " + _configDirectoryPath;
 	}
 
 	// KH - all these should be cached!
