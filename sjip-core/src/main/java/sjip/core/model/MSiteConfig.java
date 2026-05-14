@@ -711,8 +711,11 @@ public class MSiteConfig extends MObject {
 			return;
 		}
 
+		final FoundationCoder coder = new FoundationCoder();
 		for( final NSDictionary map : list ) {
-			final MInstance anInstance = new MInstance( map, this );
+			@SuppressWarnings("unchecked")
+			final MInstanceDto dto = coder.decodeRecord( (Map<String, Object>)map, MInstanceDto.class );
+			final MInstance anInstance = new MInstance( dto, this );
 			_addInstance( anInstance );
 		}
 	}
@@ -977,11 +980,11 @@ public class MSiteConfig extends MObject {
 			applicationArray.addObject( anMobject.dictionaryForArchive() );
 		}
 
-		final NSMutableArray<MInstance> instanceArray = new NSMutableArray<>( instanceArrayCount );
+		final NSMutableArray<MInstanceDto> instanceArray = new NSMutableArray<>( instanceArrayCount );
 
 		for( int i = 0; i < instanceArrayCount; i++ ) {
 			final MInstance anMobject = _instanceArray.get( i );
-			instanceArray.addObject( anMobject.dictionaryForArchive() );
+			instanceArray.addObject( anMobject.toDto() );
 		}
 
 		siteConfig.takeValueForKey( site, "site" );

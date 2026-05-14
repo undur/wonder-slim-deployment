@@ -31,9 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.MUtil;
 import sjip.x.FNotifications;
@@ -51,7 +49,7 @@ public class MInstance extends MObject {
 	// Persistence state
 	// --------------------------------------------------------------------
 	// Fields below are the canonical persisted state of this object — they
-	// round-trip through dictionaryForArchive()/updateValues() to and from
+	// round-trip through toDto()/updateValues(MInstanceDto) to and from
 	// the wire and SiteConfig.xml. Renaming or restructuring any of these
 	// changes the on-disk and on-wire shape; the system-tests snapshot
 	// suite will catch the drift.
@@ -131,12 +129,14 @@ public class MInstance extends MObject {
 		setGracefulScheduling( Boolean.TRUE );
 	}
 
-	// This constructor is for unarchiving Instances
-	public MInstance( NSDictionary aDict, MSiteConfig aConfig ) {
-		// NB: pre-refactor, the dict-taking constructor stored values raw — no
-		// validators were applied at dict-read time (validation only happens via
-		// individual setters). Preserving that exactly so snapshots don't drift.
-		readFromDictRaw( aDict );
+	/**
+	 * Reconstructs an MInstance from its wire DTO. Used by the unarchive path
+	 * ({@code MSiteConfig._initInstancesWithArray}) and by wotaskd's add-instance
+	 * receive path. {@code _host} and {@code _application} are looked up from the
+	 * site config by the names carried on the DTO.
+	 */
+	public MInstance( final MInstanceDto dto, final MSiteConfig aConfig ) {
+		readFromDto( dto );
 
 		_host = aConfig.hostWithName( hostName() );
 		_application = aConfig.applicationWithName( applicationName() );
@@ -145,16 +145,16 @@ public class MInstance extends MObject {
 	}
 
 	/**
-	 * Replaces this instance's persisted state from a wire/disk dict. Called on
-	 * the wotaskd receive side during {@code updateWotaskd/configure} (see
+	 * Replaces this instance's persisted state from a wire DTO. Called on the
+	 * wotaskd receive side during {@code updateWotaskd/configure} (see
 	 * {@code DirectAction.monitorRequestAction}).
 	 *
 	 * <p>Triggers {@link #calculateNextScheduledShutdown} when the freshly-read
-	 * state has scheduling enabled, since the dict may have rewritten the
+	 * state has scheduling enabled, since the DTO may have rewritten the
 	 * schedule.
 	 */
-	public void updateValues( NSDictionary aDict ) {
-		readFromDictRaw( aDict );
+	public void updateValues( final MInstanceDto dto ) {
+		readFromDto( dto );
 		dataChanged();
 
 		if( isScheduled() ) {
@@ -163,83 +163,74 @@ public class MInstance extends MObject {
 	}
 
 	/**
-	 * Snapshot of this instance's persisted state, in the shape that goes onto
-	 * the wire and into {@code SiteConfig.xml}. Only non-null fields are
-	 * included — matches the legacy behaviour where the dict only contained
-	 * keys that had been explicitly set.
+	 * Snapshot of this instance's persisted state as a typed DTO. The codec encodes
+	 * this directly to the wire — no dictionary in between.
 	 */
-	public NSDictionary<String, Object> dictionaryForArchive() {
-		final NSMutableDictionary<String, Object> dict = new NSMutableDictionary<>();
-		putIfNotNull( dict, "hostName", _hostName );
-		putIfNotNull( dict, "id", _id );
-		putIfNotNull( dict, "port", _port );
-		putIfNotNull( dict, "applicationName", _applicationName );
-		putIfNotNull( dict, "autoRecover", _autoRecover );
-		putIfNotNull( dict, "minimumActiveSessionsCount", _minimumActiveSessionsCount );
-		putIfNotNull( dict, "path", _path );
-		putIfNotNull( dict, "cachingEnabled", _cachingEnabled );
-		putIfNotNull( dict, "debuggingEnabled", _debuggingEnabled );
-		putIfNotNull( dict, "outputPath", _outputPath );
-		putIfNotNull( dict, "autoOpenInBrowser", _autoOpenInBrowser );
-		putIfNotNull( dict, "lifebeatInterval", _lifebeatInterval );
-		putIfNotNull( dict, "additionalArgs", _additionalArgs );
-		putIfNotNull( dict, "schedulingEnabled", _schedulingEnabled );
-		putIfNotNull( dict, "schedulingType", _schedulingType );
-		putIfNotNull( dict, "schedulingHourlyStartTime", _schedulingHourlyStartTime );
-		putIfNotNull( dict, "schedulingDailyStartTime", _schedulingDailyStartTime );
-		putIfNotNull( dict, "schedulingWeeklyStartTime", _schedulingWeeklyStartTime );
-		putIfNotNull( dict, "schedulingStartDay", _schedulingStartDay );
-		putIfNotNull( dict, "schedulingInterval", _schedulingInterval );
-		putIfNotNull( dict, "gracefulScheduling", _gracefulScheduling );
-		putIfNotNull( dict, "sendTimeout", _sendTimeout );
-		putIfNotNull( dict, "recvTimeout", _recvTimeout );
-		putIfNotNull( dict, "cnctTimeout", _cnctTimeout );
-		putIfNotNull( dict, "sendBufSize", _sendBufSize );
-		putIfNotNull( dict, "recvBufSize", _recvBufSize );
-		putIfNotNull( dict, "oldport", _oldport );
-		return dict;
-	}
-
-	private static void putIfNotNull( final NSMutableDictionary<String, Object> dict, final String key, final Object value ) {
-		if( value != null ) {
-			dict.takeValueForKey( value, key );
-		}
+	public MInstanceDto toDto() {
+		return new MInstanceDto(
+				_hostName,
+				_id,
+				_port,
+				_applicationName,
+				_autoRecover,
+				_minimumActiveSessionsCount,
+				_path,
+				_cachingEnabled,
+				_debuggingEnabled,
+				_outputPath,
+				_autoOpenInBrowser,
+				_lifebeatInterval,
+				_additionalArgs,
+				_schedulingEnabled,
+				_schedulingType,
+				_schedulingHourlyStartTime,
+				_schedulingDailyStartTime,
+				_schedulingWeeklyStartTime,
+				_schedulingStartDay,
+				_schedulingInterval,
+				_gracefulScheduling,
+				_sendTimeout,
+				_recvTimeout,
+				_cnctTimeout,
+				_sendBufSize,
+				_recvBufSize,
+				_oldport );
 	}
 
 	/**
-	 * Reads every persistence field from the given dict without applying any
-	 * validators — matches the original wholesale-replacement semantics of
-	 * {@code values = new NSMutableDictionary(aDict)}. Keys absent from the
-	 * dict come through as null fields.
+	 * Reads every persistence field from the given DTO. Matches the legacy
+	 * wholesale-replacement semantics — components null in the DTO produce null
+	 * fields on the instance. No validators applied at this layer; validation
+	 * happens via individual setters when used through the UI path.
 	 */
-	private void readFromDictRaw( final NSDictionary aDict ) {
-		_hostName = (String)aDict.valueForKey( "hostName" );
-		_id = (Integer)aDict.valueForKey( "id" );
-		_port = (Integer)aDict.valueForKey( "port" );
-		_applicationName = (String)aDict.valueForKey( "applicationName" );
-		_autoRecover = (Boolean)aDict.valueForKey( "autoRecover" );
-		_minimumActiveSessionsCount = (Integer)aDict.valueForKey( "minimumActiveSessionsCount" );
-		_path = (String)aDict.valueForKey( "path" );
-		_cachingEnabled = (Boolean)aDict.valueForKey( "cachingEnabled" );
-		_debuggingEnabled = (Boolean)aDict.valueForKey( "debuggingEnabled" );
-		_outputPath = (String)aDict.valueForKey( "outputPath" );
-		_autoOpenInBrowser = (Boolean)aDict.valueForKey( "autoOpenInBrowser" );
-		_lifebeatInterval = (Integer)aDict.valueForKey( "lifebeatInterval" );
-		_additionalArgs = (String)aDict.valueForKey( "additionalArgs" );
-		_schedulingEnabled = (Boolean)aDict.valueForKey( "schedulingEnabled" );
-		_schedulingType = (String)aDict.valueForKey( "schedulingType" );
-		_schedulingHourlyStartTime = (Integer)aDict.valueForKey( "schedulingHourlyStartTime" );
-		_schedulingDailyStartTime = (Integer)aDict.valueForKey( "schedulingDailyStartTime" );
-		_schedulingWeeklyStartTime = (Integer)aDict.valueForKey( "schedulingWeeklyStartTime" );
-		_schedulingStartDay = (Integer)aDict.valueForKey( "schedulingStartDay" );
-		_schedulingInterval = (Integer)aDict.valueForKey( "schedulingInterval" );
-		_gracefulScheduling = (Boolean)aDict.valueForKey( "gracefulScheduling" );
-		_sendTimeout = (Integer)aDict.valueForKey( "sendTimeout" );
-		_recvTimeout = (Integer)aDict.valueForKey( "recvTimeout" );
-		_cnctTimeout = (Integer)aDict.valueForKey( "cnctTimeout" );
-		_sendBufSize = (Integer)aDict.valueForKey( "sendBufSize" );
-		_recvBufSize = (Integer)aDict.valueForKey( "recvBufSize" );
-		_oldport = (Integer)aDict.valueForKey( "oldport" );
+	private void readFromDto( final MInstanceDto dto ) {
+		_hostName = dto.hostName();
+		_id = dto.id();
+		_port = dto.port();
+		_applicationName = dto.applicationName();
+		_autoRecover = dto.autoRecover();
+		_minimumActiveSessionsCount = dto.minimumActiveSessionsCount();
+		_path = dto.path();
+		_cachingEnabled = dto.cachingEnabled();
+		_debuggingEnabled = dto.debuggingEnabled();
+		_outputPath = dto.outputPath();
+		_autoOpenInBrowser = dto.autoOpenInBrowser();
+		_lifebeatInterval = dto.lifebeatInterval();
+		_additionalArgs = dto.additionalArgs();
+		_schedulingEnabled = dto.schedulingEnabled();
+		_schedulingType = dto.schedulingType();
+		_schedulingHourlyStartTime = dto.schedulingHourlyStartTime();
+		_schedulingDailyStartTime = dto.schedulingDailyStartTime();
+		_schedulingWeeklyStartTime = dto.schedulingWeeklyStartTime();
+		_schedulingStartDay = dto.schedulingStartDay();
+		_schedulingInterval = dto.schedulingInterval();
+		_gracefulScheduling = dto.gracefulScheduling();
+		_sendTimeout = dto.sendTimeout();
+		_recvTimeout = dto.recvTimeout();
+		_cnctTimeout = dto.cnctTimeout();
+		_sendBufSize = dto.sendBufSize();
+		_recvBufSize = dto.recvBufSize();
+		_oldport = dto.oldport();
 	}
 
 	public String hostName() {

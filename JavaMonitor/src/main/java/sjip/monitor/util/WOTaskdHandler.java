@@ -20,6 +20,7 @@ import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
 import sjip.core.model.MHostDto;
 import sjip.core.model.MInstance;
+import sjip.core.model.MInstanceDto;
 import sjip.core.model.MSiteConfig;
 import sjip.monitor.components.AppDetailPage;
 import sjip.monitor.components.ApplicationsPage;
@@ -181,11 +182,11 @@ public class WOTaskdHandler {
 
 		if( _InstanceArray != null ) {
 			final int instanceCount = _InstanceArray.size();
-			final NSMutableArray instanceArray = new NSMutableArray( instanceCount );
+			final NSMutableArray<MInstanceDto> instanceArray = new NSMutableArray<>( instanceCount );
 
 			for( int i = 0; i < instanceCount; i++ ) {
 				MInstance anInst = _InstanceArray.get( i );
-				instanceArray.addObject( anInst.dictionaryForArchive() );
+				instanceArray.addObject( anInst.toDto() );
 			}
 
 			requestTypeDict.takeValueForKey( instanceArray, "instanceArray" );

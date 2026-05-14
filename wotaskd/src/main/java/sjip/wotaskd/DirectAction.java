@@ -40,6 +40,7 @@ import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
 import sjip.core.model.MHostDto;
 import sjip.core.model.MInstance;
+import sjip.core.model.MInstanceDto;
 import sjip.core.model.MSiteConfig;
 import sjip.x.FoundationCoder;
 import sjip.x.AdaptorConfigSerialization;
@@ -275,7 +276,9 @@ public class DirectAction extends WODirectAction {
 							//  update-add - for each instance listed - addInstance_W
 							for( Enumeration e = instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
 								NSDictionary anInst = (NSDictionary)e.nextElement();
-								aConfig.addInstance_W( new MInstance( anInst, aConfig ) );
+								@SuppressWarnings("unchecked")
+								final MInstanceDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)anInst, MInstanceDto.class );
+								aConfig.addInstance_W( new MInstance( dto, aConfig ) );
 								instanceArrayResponse.addObject( SUCCESS_ELEMENT );
 							}
 							addResponse.takeValueForKey( instanceArrayResponse, "instanceArray" );
@@ -347,20 +350,21 @@ public class DirectAction extends WODirectAction {
 							// update-configure - for each instance listed - instanceWithHostnameAndPort + updateValues
 							for( Enumeration e = instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
 								NSDictionary anInst = (NSDictionary)e.nextElement();
-								String hostName = (String)anInst.valueForKey( "hostName" );
-								Integer port = (Integer)anInst.valueForKey( "port" );
-								MInstance anMInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
+								@SuppressWarnings("unchecked")
+								final MInstanceDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)anInst, MInstanceDto.class );
+								Integer port = dto.port();
+								MInstance anMInstance = aConfig.instanceWithHostnameAndPort( dto.hostName(), port );
 								// if I can't find the instance, I might be updating the port - in that case, look under the oldport number.
 								if( anMInstance == null ) {
-									port = (Integer)anInst.valueForKey( "oldport" );
-									anMInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
+									port = dto.oldport();
+									anMInstance = aConfig.instanceWithHostnameAndPort( dto.hostName(), port );
 								}
 								if( anMInstance == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + hostName + "-" + port + " not found; UPDATE failed" }, ERROR_KEYS );
+									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + dto.hostName() + "-" + port + " not found; UPDATE failed" }, ERROR_KEYS );
 									instanceArrayResponse.addObject( element );
 								}
 								else {
-									anMInstance.updateValues( anInst );
+									anMInstance.updateValues( dto );
 									instanceArrayResponse.addObject( SUCCESS_ELEMENT );
 								}
 							}
@@ -807,23 +811,25 @@ public class DirectAction extends WODirectAction {
 		// Look through the array of instances, and see if we need to add/remove any - configure the rest
 		NSMutableArray currentInstances = new NSMutableArray( aConfig.instanceArray() );
 		if( instanceArray != null ) {
+			final FoundationCoder coder = new FoundationCoder();
 			for( Enumeration e = instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
 				NSDictionary anInst = (NSDictionary)e.nextElement();
-				String hostName = (String)anInst.valueForKey( "hostName" );
-				Integer port = (Integer)anInst.valueForKey( "port" );
-				MInstance anMInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
+				@SuppressWarnings("unchecked")
+				final MInstanceDto dto = coder.decodeRecord( (Map<String, Object>)anInst, MInstanceDto.class );
+				Integer port = dto.port();
+				MInstance anMInstance = aConfig.instanceWithHostnameAndPort( dto.hostName(), port );
 				// if I can't find the instance, I might be updating the port - in that case, look under the oldport number.
 				if( anMInstance == null ) {
-					port = (Integer)anInst.valueForKey( "oldport" );
-					anMInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
+					port = dto.oldport();
+					anMInstance = aConfig.instanceWithHostnameAndPort( dto.hostName(), port );
 				}
 				if( anMInstance == null ) {
 					// we have to add it
-					aConfig.addInstance_W( new MInstance( anInst, aConfig ) );
+					aConfig.addInstance_W( new MInstance( dto, aConfig ) );
 				}
 				else {
 					// configure and remove from currentHosts
-					anMInstance.updateValues( anInst );
+					anMInstance.updateValues( dto );
 					currentInstances.removeObject( anMInstance );
 				}
 			}
