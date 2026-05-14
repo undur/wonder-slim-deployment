@@ -299,8 +299,8 @@ public class MSiteConfig extends MObject {
 	}
 
 	/********** Adding and Deleting **********/
-	private final InetAddress localHostAddress;
-	private final String localHostName;
+	private final InetAddress _localHostAddress;
+	private final String _localHostName;
 
 	private void _addHost( MHost newHost ) {
 		// If WOHost was passed, it'll resolve against that, otherwise, it'll resolve any local address
@@ -544,8 +544,8 @@ public class MSiteConfig extends MObject {
 		// WOApplication. The "right" shape is to receive these through the constructor
 		// (or move them out of MSiteConfig entirely). Goes away with the MSiteConfig
 		// clusterfudge cleanup. // Hugi 2026-05-12
-		localHostAddress = FProperties.siteConfigLocalHostAddress;
-		localHostName = FProperties.siteConfigLocalHostName;
+		_localHostAddress = FProperties.siteConfigLocalHostAddress;
+		_localHostName = FProperties.siteConfigLocalHostName;
 
 		_siteConfig = this;
 		if( xmlDict == null ) {
@@ -780,7 +780,7 @@ public class MSiteConfig extends MObject {
 		try {
 			if( siteConfigFile.exists() && !siteConfigFile.canWrite() ) {
 				logger.error( "Don't have permission to write to file {} as this user, please change the permissions.", siteConfigFile.getAbsolutePath() );
-				final String pre = WOApplication.application().name() + " - " + localHostName;
+				final String pre = WOApplication.application().name() + " - " + _localHostName;
 				globalErrorDictionary.put( "archiveSiteConfig", pre + " Don't have permission to write to file " + siteConfigFile.getAbsolutePath() + " as this user, please change the permissions." );
 				return;
 			}
@@ -798,7 +798,7 @@ public class MSiteConfig extends MObject {
 		catch( final IOException e ) {
 			final String message = "Cannot write to file " + siteConfigFile.getAbsolutePath() + ". IOException: " + e.getLocalizedMessage();
 			logger.error( message );
-			final String pre = WOApplication.application().name() + " - " + localHostName;
+			final String pre = WOApplication.application().name() + " - " + _localHostName;
 			globalErrorDictionary.put( "archiveSiteConfig", pre + message );
 		}
 	}
@@ -820,7 +820,7 @@ public class MSiteConfig extends MObject {
 			final File ac = fileForAdaptorConfig();
 			if( ac.exists() && !ac.canWrite() ) {
 				logger.error( "Don't have permission to write to file {} as this user, please change the permissions.", fileForAdaptorConfig() );
-				final String pre = WOApplication.application().name() + " - " + localHostName;
+				final String pre = WOApplication.application().name() + " - " + _localHostName;
 				globalErrorDictionary.put( "archiveSiteConfig", pre + " Don't have permission to write to file " + fileForAdaptorConfig() + "as this user, please change the permissions." );
 				return;
 			}
@@ -830,7 +830,7 @@ public class MSiteConfig extends MObject {
 		catch( final IOException e ) {
 			final String message = "Cannot write to file " + pathForAdaptorConfig() + ". IOException: " + e.getLocalizedMessage();
 			logger.error( message );
-			final String pre = WOApplication.application().name() + " - " + localHostName;
+			final String pre = WOApplication.application().name() + " - " + _localHostName;
 			globalErrorDictionary.put( "archiveAdaptorConfig", pre + " " + message );
 		}
 	}
@@ -975,7 +975,7 @@ public class MSiteConfig extends MObject {
 			return null;
 		}
 
-		if( _localHost != null && anAddress.equals( localHostAddress ) ) {
+		if( _localHost != null && anAddress.equals( _localHostAddress ) ) {
 			return _localHost;
 		}
 
