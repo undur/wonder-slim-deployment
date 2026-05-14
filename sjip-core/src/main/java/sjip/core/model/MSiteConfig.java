@@ -52,8 +52,129 @@ import sjip.x.LegacyPasswordHash;
 
 public class MSiteConfig extends MObject {
 
-	// Old common code
-	private NSMutableDictionary<String, Object> values;
+	private static final Logger logger = LoggerFactory.getLogger( MSiteConfig.class );
+
+	// ====================================================================
+	// Persistence state — site-level scalars
+	// --------------------------------------------------------------------
+	// Fields below are the canonical persisted site-level state — they
+	// round-trip through dictionaryForArchive()/updateValues() to and from
+	// the wire and SiteConfig.xml. The full persisted shape composes these
+	// scalars (under the "site" key) with the host/application/instance
+	// arrays — see dictionaryForArchive().
+	// ====================================================================
+
+	private String _password; // stored as a salted hash, never plain text
+	private String _woAdaptor;
+	private String _SMTPhost;
+	private String _emailReturnAddr;
+	private Boolean _viewRefreshEnabled;
+	private Integer _viewRefreshRate;
+	private Integer _retries;
+	private String _scheduler; // "RANDOM" | "ROUNDROBIN" | "LOADAVERAGE" | <Custom Scheduler Name>
+	private Integer _dormant;
+	private String _redir;
+	private Integer _sendTimeout;
+	private Integer _recvTimeout;
+	private Integer _cnctTimeout;
+	private Integer _sendBufSize;
+	private Integer _recvBufSize;
+	private Integer _poolsize;
+	private Integer _urlVersion; // 3 | 4
+
+	// ====================================================================
+	// Persistence state — composed children
+	// --------------------------------------------------------------------
+	// The arrays below hold the child M-objects (hosts, applications,
+	// instances). The arrays themselves aren't serialized as scalar fields;
+	// dictionaryForArchive() walks them and composes each child's own
+	// dictionaryForArchive() into the hostArray/applicationArray/
+	// instanceArray keys of the persisted shape. Without these, the on-disk
+	// SiteConfig.xml would lose every host/app/instance.
+	// ====================================================================
+
+	private final NSMutableArray<MHost> _hostArray = new NSMutableArray<>();
+	private final NSMutableArray<MInstance> _instanceArray = new NSMutableArray<>();
+	private final NSMutableArray<MApplication> _applicationArray = new NSMutableArray<>();
+
+	// ====================================================================
+	// Runtime state (not persisted)
+	// --------------------------------------------------------------------
+	// Fields below are derived/transient — populated at runtime, not part
+	// of the persisted contract. Slated to move out of MSiteConfig entirely
+	// in a later cleanup round.
+	// ====================================================================
+
+	public final Map<String, String> globalErrorDictionary = Collections.synchronizedMap( new HashMap<>() );
+	public final Set<MHost> hostErrorArray = Collections.synchronizedSet( new HashSet<>() );
+
+	private MHost _localHost;
+
+	private boolean _hasChanges = true;
+
+	// FIXME: Oh my god. localHost{Address,Name} are read from FProperties' deprecated
+	// static fields as a temporary seam — tests can assign them without booting a
+	// WOApplication. The "right" shape is to receive these through the constructor
+	// (or move them out of MSiteConfig entirely). Goes away with the MSiteConfig
+	// clusterfudge cleanup. // Hugi 2026-05-12
+	private final InetAddress _localHostAddress;
+	private final String _localHostName;
+
+	private String _oldPassword = null;
+	private boolean _oldPasswordSet = false;
+
+	private String _lastConfig;
+
+	public int _appIsDeadMultiplier;
+
+	public MSiteConfig( NSDictionary xmlDict ) {
+		_localHostAddress = FProperties.siteConfigLocalHostAddress;
+		_localHostName = FProperties.siteConfigLocalHostName;
+
+		_siteConfig = this;
+		if( xmlDict == null ) {
+			setViewRefreshEnabled( Boolean.TRUE );
+			setViewRefreshRate( 60 );
+		}
+		else {
+			final NSDictionary siteDict = (NSDictionary)xmlDict.valueForKey( "site" );
+			if( siteDict == null ) {
+				// rdar://3935864 - Seed: "Null Pointer Exception" for WO Application Instances
+				// It seems this should not be necessary, but there is no other place for default values to get fed in. -rrk
+				_viewRefreshEnabled = Boolean.TRUE;
+				_viewRefreshRate = 60;
+			}
+			else {
+				// NB: pre-refactor, the site dict was stored raw — no validators were
+				// applied at dict-read time (validation only happens via individual
+				// setters). Preserving that exactly so snapshots don't drift.
+				readSiteFromDictRaw( siteDict );
+			}
+
+			final NSArray hostArray = (NSArray)xmlDict.valueForKey( "hostArray" );
+			_initHostsWithArray( hostArray );
+
+			final NSArray applicationArray = (NSArray)xmlDict.valueForKey( "applicationArray" );
+			_initApplicationsWithArray( applicationArray );
+
+			final NSArray instanceArray = (NSArray)xmlDict.valueForKey( "instanceArray" );
+			_initInstancesWithArray( instanceArray );
+		}
+
+		// setting the multiplier for assuming an application is dead
+		_appIsDeadMultiplier = 2 * 1000;
+		final String WOAssumeAppIsDeadMultiplier = FProperties.K.ASSUME_APPLICATION_IS_DEAD_MULTIPLIER.value();
+		if( WOAssumeAppIsDeadMultiplier != null ) {
+			try {
+				final Integer tempInt = Integer.valueOf( WOAssumeAppIsDeadMultiplier );
+				_appIsDeadMultiplier = tempInt.intValue() * 1000;
+			}
+			catch( final NumberFormatException e ) {
+				logger.debug( "WOAssumeApplicationIsDeadMultiplier is not a valid integer: '{}'. Using default.", WOAssumeAppIsDeadMultiplier );
+			}
+		}
+		_lastConfig = generateSiteConfigXML();
+	}
 
 	/**
 	 * @return A cloned dict of the site-level scalars (no nested host/application/instance arrays),
@@ -63,209 +184,237 @@ public class MSiteConfig extends MObject {
 	 *         shape (site scalars wrapped alongside hostArray/applicationArray/instanceArray).
 	 */
 	public NSDictionary<String, Object> dictionaryForWireUpdate() {
-		return values.mutableClone();
+		return siteScalarsDict();
 	}
 
+	/**
+	 * Replaces this site config's site-level scalars from a wire/disk dict. Called
+	 * on the wotaskd receive side during {@code updateWotaskd/configure} with a
+	 * site sub-dict (see {@code DirectAction.monitorRequestAction}).
+	 */
 	public void updateValues( NSDictionary<String, Object> aDict ) {
-		values = new NSMutableDictionary<>( aDict );
+		readSiteFromDictRaw( aDict );
 		dataChanged();
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger( MSiteConfig.class );
+	/**
+	 * Reads every site-level persistence field from the given dict without applying
+	 * any validators — matches the original wholesale-replacement semantics of
+	 * {@code values = new NSMutableDictionary(aDict)}. Keys absent from the dict
+	 * come through as null fields.
+	 */
+	private void readSiteFromDictRaw( final NSDictionary aDict ) {
+		_password = (String)aDict.valueForKey( "password" );
+		_woAdaptor = (String)aDict.valueForKey( "woAdaptor" );
+		_SMTPhost = (String)aDict.valueForKey( "SMTPhost" );
+		_emailReturnAddr = (String)aDict.valueForKey( "emailReturnAddr" );
+		_viewRefreshEnabled = (Boolean)aDict.valueForKey( "viewRefreshEnabled" );
+		_viewRefreshRate = (Integer)aDict.valueForKey( "viewRefreshRate" );
+		_retries = (Integer)aDict.valueForKey( "retries" );
+		_scheduler = (String)aDict.valueForKey( "scheduler" );
+		_dormant = (Integer)aDict.valueForKey( "dormant" );
+		_redir = (String)aDict.valueForKey( "redir" );
+		_sendTimeout = (Integer)aDict.valueForKey( "sendTimeout" );
+		_recvTimeout = (Integer)aDict.valueForKey( "recvTimeout" );
+		_cnctTimeout = (Integer)aDict.valueForKey( "cnctTimeout" );
+		_sendBufSize = (Integer)aDict.valueForKey( "sendBufSize" );
+		_recvBufSize = (Integer)aDict.valueForKey( "recvBufSize" );
+		_poolsize = (Integer)aDict.valueForKey( "poolsize" );
+		_urlVersion = (Integer)aDict.valueForKey( "urlVersion" );
+	}
 
-	/*
-	// Site
-	String password;
-	String woAdaptor;
-	String SMTPhost;
-	String emailReturnAddr;
-	Boolean viewRefreshEnabled;
-	Integer viewRefreshRate;
-	// Adaptor
-	Integer retries;
-	String scheduler;	// "RANDOM" | "ROUNDROBIN" | "LOADAVERAGE" | <Custom Scheduler Name>
-	Integer dormant;
-	String redir;
-	Integer sendTimeout;
-	Integer recvTimeout;
-	Integer cnctTimeout;
-	Integer sendBufSize;
-	Integer recvBufSize;
-	Integer poolsize;
-	Integer urlVersion;	// 3 | 4
-	*/
+	/**
+	 * Builds a dict of the site-level scalars. Only non-null fields are included
+	 * — matches the legacy behaviour where the dict only contained keys that had
+	 * been explicitly set.
+	 */
+	private NSMutableDictionary<String, Object> siteScalarsDict() {
+		final NSMutableDictionary<String, Object> dict = new NSMutableDictionary<>();
+		putIfNotNull( dict, "password", _password );
+		putIfNotNull( dict, "woAdaptor", _woAdaptor );
+		putIfNotNull( dict, "SMTPhost", _SMTPhost );
+		putIfNotNull( dict, "emailReturnAddr", _emailReturnAddr );
+		putIfNotNull( dict, "viewRefreshEnabled", _viewRefreshEnabled );
+		putIfNotNull( dict, "viewRefreshRate", _viewRefreshRate );
+		putIfNotNull( dict, "retries", _retries );
+		putIfNotNull( dict, "scheduler", _scheduler );
+		putIfNotNull( dict, "dormant", _dormant );
+		putIfNotNull( dict, "redir", _redir );
+		putIfNotNull( dict, "sendTimeout", _sendTimeout );
+		putIfNotNull( dict, "recvTimeout", _recvTimeout );
+		putIfNotNull( dict, "cnctTimeout", _cnctTimeout );
+		putIfNotNull( dict, "sendBufSize", _sendBufSize );
+		putIfNotNull( dict, "recvBufSize", _recvBufSize );
+		putIfNotNull( dict, "poolsize", _poolsize );
+		putIfNotNull( dict, "urlVersion", _urlVersion );
+		return dict;
+	}
+
+	private static void putIfNotNull( final NSMutableDictionary<String, Object> dict, final String key, final Object value ) {
+		if( value != null ) {
+			dict.takeValueForKey( value, key );
+		}
+	}
 
 	/********** 'values' accessors **********/
 	public String password() {
-		return (String)values.valueForKey( "password" );
+		return _password;
 	}
 
 	// Special treatment - the password is stored encrypted!
 	public void setPassword( String value ) {
 		if( value != null ) {
-			values.takeValueForKey( LegacyPasswordHash.encryptStringWithKey( value, null ), "password" );
+			_password = LegacyPasswordHash.encryptStringWithKey( value, null );
 		}
 		else {
-			values.takeValueForKey( null, "password" );
+			_password = null;
 		}
 		dataChanged();
 	}
 
 	public String woAdaptor() {
-		return (String)values.valueForKey( "woAdaptor" );
+		return _woAdaptor;
 	}
 
 	public void setWoAdaptor( String value ) {
-		values.takeValueForKey( value, "woAdaptor" );
+		_woAdaptor = value;
 		dataChanged();
 	}
 
 	public String SMTPhost() {
-		return (String)values.valueForKey( "SMTPhost" );
+		return _SMTPhost;
 	}
 
 	public void setSMTPhost( String value ) {
-		values.takeValueForKey( value, "SMTPhost" );
+		_SMTPhost = value;
 		dataChanged();
 	}
 
 	public String emailReturnAddr() {
-		return (String)values.valueForKey( "emailReturnAddr" );
+		return _emailReturnAddr;
 	}
 
 	public void setEmailReturnAddr( String value ) {
-		values.takeValueForKey( value, "emailReturnAddr" );
+		_emailReturnAddr = value;
 		dataChanged();
 	}
 
 	public Boolean viewRefreshEnabled() {
-		return (Boolean)values.valueForKey( "viewRefreshEnabled" );
+		return _viewRefreshEnabled;
 	}
 
 	public void setViewRefreshEnabled( Boolean value ) {
-		values.takeValueForKey( value, "viewRefreshEnabled" );
+		_viewRefreshEnabled = value;
 		dataChanged();
 	}
 
 	public Integer viewRefreshRate() {
-		return (Integer)values.valueForKey( "viewRefreshRate" );
+		return _viewRefreshRate;
 	}
 
 	public void setViewRefreshRate( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "viewRefreshRate" );
+		_viewRefreshRate = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer retries() {
-		return (Integer)values.valueForKey( "retries" );
+		return _retries;
 	}
 
 	public void setRetries( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "retries" );
+		_retries = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public String scheduler() {
-		return (String)values.valueForKey( "scheduler" );
+		return _scheduler;
 	}
 
 	public void setScheduler( String value ) {
-		values.takeValueForKey( value, "scheduler" );
+		_scheduler = value;
 		dataChanged();
 	}
 
 	public Integer dormant() {
-		return (Integer)values.valueForKey( "dormant" );
+		return _dormant;
 	}
 
 	public void setDormant( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "dormant" );
+		_dormant = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public String redir() {
-		return (String)values.valueForKey( "redir" );
+		return _redir;
 	}
 
 	public void setRedir( String value ) {
-		values.takeValueForKey( value, "redir" );
+		_redir = value;
 		dataChanged();
 	}
 
 	public Integer sendTimeout() {
-		return (Integer)values.valueForKey( "sendTimeout" );
+		return _sendTimeout;
 	}
 
 	public void setSendTimeout( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "sendTimeout" );
+		_sendTimeout = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer recvTimeout() {
-		return (Integer)values.valueForKey( "recvTimeout" );
+		return _recvTimeout;
 	}
 
 	public void setRecvTimeout( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "recvTimeout" );
+		_recvTimeout = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer cnctTimeout() {
-		return (Integer)values.valueForKey( "cnctTimeout" );
+		return _cnctTimeout;
 	}
 
 	public void setCnctTimeout( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "cnctTimeout" );
+		_cnctTimeout = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer sendBufSize() {
-		return (Integer)values.valueForKey( "sendBufSize" );
+		return _sendBufSize;
 	}
 
 	public void setSendBufSize( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "sendBufSize" );
+		_sendBufSize = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer recvBufSize() {
-		return (Integer)values.valueForKey( "recvBufSize" );
+		return _recvBufSize;
 	}
 
 	public void setRecvBufSize( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "recvBufSize" );
+		_recvBufSize = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer poolsize() {
-		return (Integer)values.valueForKey( "poolsize" );
+		return _poolsize;
 	}
 
 	public void setPoolsize( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "poolsize" );
+		_poolsize = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer urlVersion() {
-		return (Integer)values.valueForKey( "urlVersion" );
+		return _urlVersion;
 	}
 
 	public void setUrlVersion( Integer value ) {
-		values.takeValueForKey( MUtil.validatedUrlVersion( value ), "urlVersion" );
+		_urlVersion = MUtil.validatedUrlVersion( value );
 		dataChanged();
 	}
-
-	/********** Errors  **********/
-	public final Map<String, String> globalErrorDictionary = Collections.synchronizedMap( new HashMap<>() );
-
-	public final Set<MHost> hostErrorArray = Collections.synchronizedSet( new HashSet<>() );
-
-	/********** Object Graph  **********/
-	private final NSMutableArray<MHost> _hostArray = new NSMutableArray<>();
-	private final NSMutableArray<MInstance> _instanceArray = new NSMutableArray<>();
-	private final NSMutableArray<MApplication> _applicationArray = new NSMutableArray<>();
-
-	private MHost _localHost;
 
 	public NSMutableArray<MHost> hostArray() {
 		return _hostArray;
@@ -283,9 +432,6 @@ public class MSiteConfig extends MObject {
 		return _localHost;
 	}
 
-	/********** Change Notifications **********/
-	private boolean _hasChanges = true;
-
 	public boolean hasChanges() {
 		return _hasChanges;
 	}
@@ -299,9 +445,6 @@ public class MSiteConfig extends MObject {
 	}
 
 	/********** Adding and Deleting **********/
-	private final InetAddress _localHostAddress;
-	private final String _localHostName;
-
 	private void _addHost( MHost newHost ) {
 		// If WOHost was passed, it'll resolve against that, otherwise, it'll resolve any local address
 		if( FHosts.isConfiguredHostAddress( newHost.address(), true ) ) {
@@ -476,9 +619,6 @@ public class MSiteConfig extends MObject {
 		return password() != null;
 	}
 
-	private String _oldPassword = null;
-	private boolean _oldPasswordSet = false;
-
 	public void _setOldPassword() {
 		_oldPassword = password();
 		_oldPasswordSet = true;
@@ -536,58 +676,6 @@ public class MSiteConfig extends MObject {
 			return _oldPassword;
 		}
 		return password();
-	}
-
-	public MSiteConfig( NSDictionary xmlDict ) {
-		// FIXME: Oh my god. localHost{Address,Name} are read from FProperties' deprecated
-		// static fields as a temporary seam — tests can assign them without booting a
-		// WOApplication. The "right" shape is to receive these through the constructor
-		// (or move them out of MSiteConfig entirely). Goes away with the MSiteConfig
-		// clusterfudge cleanup. // Hugi 2026-05-12
-		_localHostAddress = FProperties.siteConfigLocalHostAddress;
-		_localHostName = FProperties.siteConfigLocalHostName;
-
-		_siteConfig = this;
-		if( xmlDict == null ) {
-			values = new NSMutableDictionary();
-			setViewRefreshEnabled( Boolean.TRUE );
-			setViewRefreshRate( 60 );
-		}
-		else {
-			final NSDictionary siteDict = (NSDictionary)xmlDict.valueForKey( "site" );
-			if( siteDict == null ) {
-				// rdar://3935864 - Seed: "Null Pointer Exception" for WO Application Instances
-				// It seems this should not be necessary, but there is no other place for default values to get fed in. -rrk
-				//
-				values = new NSMutableDictionary( new NSArray( new Object[] { Boolean.TRUE, 60 } ), new NSArray( new Object[] { "viewRefreshEnabled", "viewRefreshRate" } ) );
-			}
-			else {
-				values = new NSMutableDictionary( siteDict );
-			}
-
-			final NSArray hostArray = (NSArray)xmlDict.valueForKey( "hostArray" );
-			_initHostsWithArray( hostArray );
-
-			final NSArray applicationArray = (NSArray)xmlDict.valueForKey( "applicationArray" );
-			_initApplicationsWithArray( applicationArray );
-
-			final NSArray instanceArray = (NSArray)xmlDict.valueForKey( "instanceArray" );
-			_initInstancesWithArray( instanceArray );
-		}
-
-		// setting the multiplier for assuming an application is dead
-		_appIsDeadMultiplier = 2 * 1000;
-		final String WOAssumeAppIsDeadMultiplier = FProperties.K.ASSUME_APPLICATION_IS_DEAD_MULTIPLIER.value();
-		if( WOAssumeAppIsDeadMultiplier != null ) {
-			try {
-				final Integer tempInt = Integer.valueOf( WOAssumeAppIsDeadMultiplier );
-				_appIsDeadMultiplier = tempInt.intValue() * 1000;
-			}
-			catch( final NumberFormatException e ) {
-				logger.debug( "WOAssumeApplicationIsDeadMultiplier is not a valid integer: '{}'. Using default.", WOAssumeAppIsDeadMultiplier );
-			}
-		}
-		_lastConfig = generateSiteConfigXML();
 	}
 
 	private void _initHostsWithArray( final List<NSDictionary> list ) {
@@ -839,8 +927,6 @@ public class MSiteConfig extends MObject {
 		return new FoundationCoder().encodeRootObjectForKey( dictionaryForArchive(), "SiteConfig" );
 	}
 
-	private String _lastConfig;
-
 	private void backup( String action ) {
 		if( Boolean.getBoolean( "WODeploymentBackups" ) ) {
 			final String currentSiteConfig = generateSiteConfigXML();
@@ -858,6 +944,13 @@ public class MSiteConfig extends MObject {
 		saveSiteConfig( new File( fileForSiteConfig().getParentFile(), "SiteConfigBackup.xml." + date + reason ), generateSiteConfigXML(), true );
 	}
 
+	/**
+	 * Snapshot of the full persisted state in the shape that goes onto the wire
+	 * and into {@code SiteConfig.xml}: site-level scalars under {@code "site"},
+	 * plus the {@code hostArray}/{@code applicationArray}/{@code instanceArray}
+	 * lists composed from each child object's own {@link MHost#dictionaryForArchive},
+	 * {@link MApplication#dictionaryForArchive}, {@link MInstance#dictionaryForArchive}.
+	 */
 	public NSDictionary<String, Object> dictionaryForArchive() {
 		final int hostArrayCount = _hostArray.size();
 		final int applicationArrayCount = _applicationArray.size();
@@ -865,7 +958,7 @@ public class MSiteConfig extends MObject {
 
 		final NSMutableDictionary siteConfig = new NSMutableDictionary( 4 );
 
-		final NSMutableDictionary site = values.mutableClone();
+		final NSMutableDictionary site = siteScalarsDict();
 
 		final NSMutableArray<MHost> hostArray = new NSMutableArray<>( hostArrayCount );
 
@@ -898,7 +991,7 @@ public class MSiteConfig extends MObject {
 
 	@Override
 	public String toString() {
-		return values.toString() + "\n" + "hasChanges = " + _hasChanges + "\n" + "configDirectoryPath = " + _configDirectoryPath;
+		return siteScalarsDict().toString() + "\n" + "hasChanges = " + _hasChanges + "\n" + "configDirectoryPath = " + _configDirectoryPath;
 	}
 
 	// KH - all these should be cached!
@@ -1038,6 +1131,4 @@ public class MSiteConfig extends MObject {
 
 		return null;
 	}
-
-	public int _appIsDeadMultiplier;
 }
