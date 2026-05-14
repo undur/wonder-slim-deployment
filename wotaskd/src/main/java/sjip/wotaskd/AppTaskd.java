@@ -23,14 +23,14 @@ public class AppTaskd {
 		_lock = new ReentrantReadWriteLock();
 
 		// Setting the multicast address
-		_multicastAddress = FProperties.stringValue( FProperties.K.MULTICAST_ADDRESS );
+		_multicastAddress = FProperties.K.MULTICAST_ADDRESS.value();
 
 		// getting the siteConfig (+ all Hosts, Apps, Instances) from disk
 		_siteConfig = MSiteConfig.unarchiveSiteConfig( true );
 		_siteConfig.archiveSiteConfig(); // FIXME: I have no idea why we're re-serializing the config here // Hugi 2026-05-10
 
 		// checking to see if we should save WOConfig.xml to disk for the adaptors.
-		_shouldWriteAdaptorConfig = FProperties.booleanValue( FProperties.K.SAVES_ADAPTOR_CONFIGURATION );
+		_shouldWriteAdaptorConfig = FProperties.K.SAVES_ADAPTOR_CONFIGURATION.value();
 
 		if( _shouldWriteAdaptorConfig ) {
 			_siteConfig.archiveAdaptorConfig();
@@ -38,7 +38,7 @@ public class AppTaskd {
 
 		// checking to see if we should respond to adaptor multicast queries
 		// we will always respond to non-multicast UDP packets
-		_shouldRespondToMulticast = FProperties.booleanValue( FProperties.K.RESPONDS_TO_MULTICAST_QUERY );
+		_shouldRespondToMulticast = FProperties.K.RESPONDS_TO_MULTICAST_QUERY.value();
 
 		if( _shouldRespondToMulticast ) {
 			logger.info( "Multicast Response Enabled" );

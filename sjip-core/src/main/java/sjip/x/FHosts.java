@@ -169,7 +169,7 @@ public final class FHosts {
 	 *         case where WO would set {@code _unsetHost = true}.
 	 */
 	private static InetAddress configuredWOHost() {
-		final String hostProperty = FProperties.stringValue( FProperties.K.WO_HOST );
+		final String hostProperty = FProperties.K.WO_HOST.value();
 		if( hostProperty == null || hostProperty.isEmpty() ) {
 			return null;
 		}
@@ -224,7 +224,7 @@ public final class FHosts {
 		}
 
 		// Machine-address layer: either the operator's explicit list or the interface walk.
-		final String explicitIps = FProperties.stringValue( FProperties.K.LOCALHOST_IPS );
+		final String explicitIps = FProperties.K.LOCALHOST_IPS.value();
 		if( explicitIps != null && !explicitIps.isEmpty() ) {
 			// Operator override: skip auto-detection and use the supplied list instead.
 			for( final String ip : explicitIps.split( "[\\s,()]+" ) ) {

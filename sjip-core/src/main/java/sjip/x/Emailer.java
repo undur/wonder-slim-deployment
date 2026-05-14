@@ -43,11 +43,11 @@ public class Emailer {
 	 * FIXME: We need to make more of those configurable. Current settings are mostly for testing 	// Hugi 2026-05-02
 	 */
 	private org.simplejavamail.api.mailer.Mailer createWrappedMailer() {
-		final String smtpHost = FProperties.stringValue( FProperties.K.MAILER_SMTP_HOST );
+		final String smtpHost = FProperties.K.MAILER_SMTP_HOST.value();
 		final int smtpPort = 587;
 		final boolean useTLS = true;
-		final String smtpUsername = FProperties.stringValue( FProperties.K.MAILER_SMTP_USERNAME );
-		final String smtpPassword = FProperties.stringValue( FProperties.K.MAILER_SMTP_PASSWORD );
+		final String smtpUsername = FProperties.K.MAILER_SMTP_USERNAME.value();
+		final String smtpPassword = FProperties.K.MAILER_SMTP_PASSWORD.value();
 
 		// FIXME: Horrid, awaiting propert persisted configuration // Hugi 2026-05-02
 		if( smtpHost == null ) {

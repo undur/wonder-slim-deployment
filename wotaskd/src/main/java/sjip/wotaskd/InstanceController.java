@@ -57,9 +57,9 @@ public class InstanceController implements IInstanceController {
 
 	private static final Logger logger = LoggerFactory.getLogger( InstanceController.class );
 
-	private static final int FORCE_QUIT_DELAY = FProperties.intValue( FProperties.K.FORCE_QUIT_DELAY );
-	private static final int RECEIVE_TIMEOUT = FProperties.intValue( FProperties.K.RECEIVE_TIMEOUT );
-	private static final boolean FORCE_QUIT_TASK_ENABLED = FProperties.booleanValue( FProperties.K.FORCE_QUIT_TASK_ENABLED );
+	private static final int FORCE_QUIT_DELAY = FProperties.K.FORCE_QUIT_DELAY.value();
+	private static final int RECEIVE_TIMEOUT = FProperties.K.RECEIVE_TIMEOUT.value();
+	private static final boolean FORCE_QUIT_TASK_ENABLED = FProperties.K.FORCE_QUIT_TASK_ENABLED.value();
 	private static final boolean IS_ON_WINDOWS = FProperties.sysProp( "os.name" ).toLowerCase().startsWith( "win" );
 
 	/**
@@ -68,7 +68,7 @@ public class InstanceController implements IInstanceController {
 	 * the {@code WOTaskd.detachLaunch} system property. The legacy {@code Runtime.exec} path
 	 * is preserved unchanged for the off case. Unix-only — has no effect on Windows.
 	 */
-	private static final boolean DETACH_LAUNCH = FProperties.booleanValue( FProperties.K.DETACH_LAUNCH );
+	private static final boolean DETACH_LAUNCH = FProperties.K.DETACH_LAUNCH.value();
 
 	private final AppTaskd _appTaskd;
 
@@ -149,7 +149,7 @@ public class InstanceController implements IInstanceController {
 		_appTaskd = appTaskd;
 		final MSiteConfig aConfig = appSiteConfig();
 
-		final boolean spawnRequested = FProperties.booleanValue( FProperties.K.SHOULD_USE_SPAWN );
+		final boolean spawnRequested = FProperties.K.SHOULD_USE_SPAWN.value();
 		if( spawnRequested ) {
 			final String userDir = FProperties.sysProp( "user.dir" );
 			final String spawnScript = IS_ON_WINDOWS ? "SpawnOfWotaskd.exe" : "SpawnOfWotaskd.sh";
@@ -741,7 +741,7 @@ public class InstanceController implements IInstanceController {
 		//an ACCEPT will cancel the monitoring
 		if( FORCE_QUIT_TASK_ENABLED ) {
 			if( FORCE_QUIT_DELAY >= 60000 ) {
-				anInstance.scheduleRefuseTask( new MInstanceTask.Refuse( anInstance, FProperties.intValue( FProperties.K.REFUSE_NUM_RETRIES ) ), FORCE_QUIT_DELAY, FORCE_QUIT_DELAY );
+				anInstance.scheduleRefuseTask( new MInstanceTask.Refuse( anInstance, FProperties.K.REFUSE_NUM_RETRIES.value() ), FORCE_QUIT_DELAY, FORCE_QUIT_DELAY );
 			}
 			else {
 				logger.error( "WOtaskd.killTimeout: " + FORCE_QUIT_DELAY + " is too small. 60000 milliseconds is the minimum" );

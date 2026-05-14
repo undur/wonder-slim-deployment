@@ -166,58 +166,58 @@ public final class FProperties {
 
 	public record IntProperty( String name, int defaultValue, boolean redacted ) implements FProperty {
 		public IntProperty( String name, int defaultValue ) { this( name, defaultValue, false ); }
+
+		/**
+		 * Reads the property as an int. Falls back to the declared default when unset or
+		 * unparseable.
+		 */
+		public int value() {
+			final String raw = System.getProperty( name );
+			if( raw == null ) {
+				return defaultValue;
+			}
+			try {
+				return Integer.parseInt( raw.trim() );
+			}
+			catch( NumberFormatException e ) {
+				return defaultValue;
+			}
+		}
 	}
 
 	public record BooleanProperty( String name, boolean defaultValue, boolean redacted ) implements FProperty {
 		public BooleanProperty( String name, boolean defaultValue ) { this( name, defaultValue, false ); }
+
+		/**
+		 * Reads the property as a boolean. Recognises {@code "true"}, {@code "yes"},
+		 * {@code "y"}, {@code "on"}, {@code "1"} (case-insensitive) as true and
+		 * {@code "false"}, {@code "no"}, {@code "n"}, {@code "off"}, {@code "0"} as false.
+		 * Anything else falls back to the declared default — matches the permissive
+		 * parsing the previous {@code ERXProperties} backing layer used.
+		 */
+		public boolean value() {
+			final String raw = System.getProperty( name );
+			if( raw == null ) {
+				return defaultValue;
+			}
+			return switch( raw.trim().toLowerCase() ) {
+				case "true", "yes", "y", "on", "1" -> true;
+				case "false", "no", "n", "off", "0" -> false;
+				default -> defaultValue;
+			};
+		}
 	}
 
 	public record StringProperty( String name, String defaultValue, boolean redacted ) implements FProperty {
 		public StringProperty( String name, String defaultValue ) { this( name, defaultValue, false ); }
-	}
 
-	/**
-	 * Reads the property as an int. Falls back to the declared default when unset or
-	 * unparseable.
-	 */
-	public static int intValue( IntProperty property ) {
-		final String raw = System.getProperty( property.name() );
-		if( raw == null ) {
-			return property.defaultValue();
+		/**
+		 * Reads the property as a String. Returns the declared default when unset.
+		 */
+		public String value() {
+			final String raw = System.getProperty( name );
+			return raw != null ? raw : defaultValue;
 		}
-		try {
-			return Integer.parseInt( raw.trim() );
-		}
-		catch( NumberFormatException e ) {
-			return property.defaultValue();
-		}
-	}
-
-	/**
-	 * Reads the property as a boolean. Recognises {@code "true"}, {@code "yes"},
-	 * {@code "y"}, {@code "on"}, {@code "1"} (case-insensitive) as true and
-	 * {@code "false"}, {@code "no"}, {@code "n"}, {@code "off"}, {@code "0"} as false.
-	 * Anything else falls back to the declared default — matches the permissive
-	 * parsing the previous {@code ERXProperties} backing layer used.
-	 */
-	public static boolean booleanValue( BooleanProperty property ) {
-		final String raw = System.getProperty( property.name() );
-		if( raw == null ) {
-			return property.defaultValue();
-		}
-		return switch( raw.trim().toLowerCase() ) {
-			case "true", "yes", "y", "on", "1" -> true;
-			case "false", "no", "n", "off", "0" -> false;
-			default -> property.defaultValue();
-		};
-	}
-
-	/**
-	 * Reads the property as a String. Returns the declared default when unset.
-	 */
-	public static String stringValue( StringProperty property ) {
-		final String raw = System.getProperty( property.name() );
-		return raw != null ? raw : property.defaultValue();
 	}
 
 	/**
@@ -300,10 +300,10 @@ public final class FProperties {
 	private static String displayValue( final FProperty property ) {
 		final String raw = System.getProperty( property.name() );
 		final String effective = switch( property ) {
-			case IntProperty p -> Integer.toString( intValue( p ) );
-			case BooleanProperty p -> Boolean.toString( booleanValue( p ) );
+			case IntProperty p -> Integer.toString( p.value() );
+			case BooleanProperty p -> Boolean.toString( p.value() );
 			case StringProperty p -> {
-				final String v = stringValue( p );
+				final String v = p.value();
 				yield v != null ? v : "(unset)";
 			}
 		};

@@ -577,7 +577,7 @@ public class MSiteConfig extends MObject {
 
 		// setting the multiplier for assuming an application is dead
 		_appIsDeadMultiplier = 2 * 1000;
-		final String WOAssumeAppIsDeadMultiplier = FProperties.stringValue( FProperties.K.ASSUME_APPLICATION_IS_DEAD_MULTIPLIER );
+		final String WOAssumeAppIsDeadMultiplier = FProperties.K.ASSUME_APPLICATION_IS_DEAD_MULTIPLIER.value();
 		if( WOAssumeAppIsDeadMultiplier != null ) {
 			try {
 				final Integer tempInt = Integer.valueOf( WOAssumeAppIsDeadMultiplier );
@@ -638,7 +638,7 @@ public class MSiteConfig extends MObject {
 	public static String configDirectoryPath() {
 
 		if( _configDirectoryPath == null ) {
-			_configDirectoryPath = FProperties.stringValue( FProperties.K.DEPLOYMENT_CONFIGURATION_DIRECTORY );
+			_configDirectoryPath = FProperties.K.DEPLOYMENT_CONFIGURATION_DIRECTORY.value();
 
 			if( _configDirectoryPath == null || _configDirectoryPath.isEmpty() ) {
 				logger.error( "WODeploymentConfigurationDirectory not set" );
