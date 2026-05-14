@@ -17,7 +17,6 @@
 			<hostName type="NSString">localhost</hostName>
 			<id type="NSNumber">1</id>
 			<port type="NSNumber">12345</port>
-			<scheduled type="NSString">YES</scheduled>
 		</element>
 	</instanceArray>
 	<site type="NSDictionary">

@@ -43,43 +43,55 @@ public class MInstance extends MObject {
 
 	private static final Logger logger = LoggerFactory.getLogger( MInstance.class );
 
-	// Old common code
-	private NSMutableDictionary<String, Object> values;
-
-	public NSDictionary<String, Object> dictionaryForArchive() {
-		return values.mutableClone();
-	}
-
-	//	String hostName;
-	//	Integer id;
-	//	Integer port;
-	//	String applicationName;
-	//	Boolean autoRecover;
-	//	Integer minimumActiveSessionsCount;
-	//	String path;
-	//	Boolean cachingEnabled;
-	//	Boolean debuggingEnabled;
-	//	String outputPath;
-	//	Boolean autoOpenInBrowser;
-	//	Integer lifebeatInterval;
-	//	String additionalArgs;
-	//	Boolean schedulingEnabled;
-	//	String schedulingType; // HOURLY | WEEKLY | DAILY
-	//	Integer schedulingHourlyStartTime; // 1-24 O'clock
-	//	Integer schedulingDailyStartTime; // 1-24 O'clock
-	//	Integer schedulingWeeklyStartTime; // 1-24 O'clock
-	//	Integer schedulingStartDay; // 1-7 (Mon-Sun)
-	//	Integer schedulingInterval; // in hours
-	//	Boolean gracefulScheduling;
-	//	Integer sendTimeout;
-	//	Integer recvTimeout;
-	//	Integer cnctTimeout;
-	//	Integer sendBufSize;
-	//	Integer recvBufSize;
-
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern( "MM/dd/yyyy HH:mm:ss zzz", Locale.US );
 	private static final DateTimeFormatter SHUTDOWN_FORMATTER = DateTimeFormatter.ofPattern( "EEE '@' HH:00", Locale.US ).withZone( ZoneId.of( "UTC" ) );
 	public static final long TIME_FOR_STARTUP = 30;
+
+	// ====================================================================
+	// Persistence state
+	// --------------------------------------------------------------------
+	// Fields below are the canonical persisted state of this object — they
+	// round-trip through dictionaryForArchive()/updateValues() to and from
+	// the wire and SiteConfig.xml. Renaming or restructuring any of these
+	// changes the on-disk and on-wire shape; the system-tests snapshot
+	// suite will catch the drift.
+	// ====================================================================
+
+	private String _hostName;
+	private Integer _id;
+	private Integer _port;
+	private String _applicationName;
+	private Boolean _autoRecover;
+	private Integer _minimumActiveSessionsCount;
+	private String _path;
+	private Boolean _cachingEnabled;
+	private Boolean _debuggingEnabled;
+	private String _outputPath;
+	private Boolean _autoOpenInBrowser;
+	private Integer _lifebeatInterval;
+	private String _additionalArgs;
+	private Boolean _schedulingEnabled;
+	private String _schedulingType; // HOURLY | WEEKLY | DAILY
+	private Integer _schedulingHourlyStartTime;
+	private Integer _schedulingDailyStartTime;
+	private Integer _schedulingWeeklyStartTime;
+	private Integer _schedulingStartDay; // 0=Sun..6=Sat
+	private Integer _schedulingInterval;
+	private Boolean _gracefulScheduling;
+	private Integer _sendTimeout;
+	private Integer _recvTimeout;
+	private Integer _cnctTimeout;
+	private Integer _sendBufSize;
+	private Integer _recvBufSize;
+	private Integer _oldport;
+
+	// ====================================================================
+	// Runtime state (not persisted)
+	// --------------------------------------------------------------------
+	// Fields below are derived/transient — populated at runtime, not part
+	// of the persisted contract. Slated to move out of MInstance entirely
+	// in a later cleanup round.
+	// ====================================================================
 
 	private final MHost _host;
 	private final MApplication _application;
@@ -95,10 +107,10 @@ public class MInstance extends MObject {
 	private Instant _finishStartingByDate = Instant.now();
 	private String _statisticsError = null;
 	private int _connectFailureCount = 0;
+	private boolean _shouldDie = false;
 
 	// This constructor is for adding new instances through the UI
 	public MInstance( MHost aHost, MApplication anApplication, Integer anID, MSiteConfig aConfig ) {
-		values = new NSMutableDictionary();
 		_host = aHost;
 		_application = anApplication;
 		_siteConfig = aConfig;
@@ -121,7 +133,10 @@ public class MInstance extends MObject {
 
 	// This constructor is for unarchiving Instances
 	public MInstance( NSDictionary aDict, MSiteConfig aConfig ) {
-		values = new NSMutableDictionary( aDict );
+		// NB: pre-refactor, the dict-taking constructor stored values raw — no
+		// validators were applied at dict-read time (validation only happens via
+		// individual setters). Preserving that exactly so snapshots don't drift.
+		readFromDictRaw( aDict );
 
 		_host = aConfig.hostWithName( hostName() );
 		_application = aConfig.applicationWithName( applicationName() );
@@ -129,241 +144,339 @@ public class MInstance extends MObject {
 		calculateNextScheduledShutdown();
 	}
 
+	/**
+	 * Replaces this instance's persisted state from a wire/disk dict. Called on
+	 * the wotaskd receive side during {@code updateWotaskd/configure} (see
+	 * {@code DirectAction.monitorRequestAction}).
+	 *
+	 * <p>Triggers {@link #calculateNextScheduledShutdown} when the freshly-read
+	 * state has scheduling enabled, since the dict may have rewritten the
+	 * schedule.
+	 */
+	public void updateValues( NSDictionary aDict ) {
+		readFromDictRaw( aDict );
+		dataChanged();
+
+		if( isScheduled() ) {
+			calculateNextScheduledShutdown();
+		}
+	}
+
+	/**
+	 * Snapshot of this instance's persisted state, in the shape that goes onto
+	 * the wire and into {@code SiteConfig.xml}. Only non-null fields are
+	 * included — matches the legacy behaviour where the dict only contained
+	 * keys that had been explicitly set.
+	 */
+	public NSDictionary<String, Object> dictionaryForArchive() {
+		final NSMutableDictionary<String, Object> dict = new NSMutableDictionary<>();
+		putIfNotNull( dict, "hostName", _hostName );
+		putIfNotNull( dict, "id", _id );
+		putIfNotNull( dict, "port", _port );
+		putIfNotNull( dict, "applicationName", _applicationName );
+		putIfNotNull( dict, "autoRecover", _autoRecover );
+		putIfNotNull( dict, "minimumActiveSessionsCount", _minimumActiveSessionsCount );
+		putIfNotNull( dict, "path", _path );
+		putIfNotNull( dict, "cachingEnabled", _cachingEnabled );
+		putIfNotNull( dict, "debuggingEnabled", _debuggingEnabled );
+		putIfNotNull( dict, "outputPath", _outputPath );
+		putIfNotNull( dict, "autoOpenInBrowser", _autoOpenInBrowser );
+		putIfNotNull( dict, "lifebeatInterval", _lifebeatInterval );
+		putIfNotNull( dict, "additionalArgs", _additionalArgs );
+		putIfNotNull( dict, "schedulingEnabled", _schedulingEnabled );
+		putIfNotNull( dict, "schedulingType", _schedulingType );
+		putIfNotNull( dict, "schedulingHourlyStartTime", _schedulingHourlyStartTime );
+		putIfNotNull( dict, "schedulingDailyStartTime", _schedulingDailyStartTime );
+		putIfNotNull( dict, "schedulingWeeklyStartTime", _schedulingWeeklyStartTime );
+		putIfNotNull( dict, "schedulingStartDay", _schedulingStartDay );
+		putIfNotNull( dict, "schedulingInterval", _schedulingInterval );
+		putIfNotNull( dict, "gracefulScheduling", _gracefulScheduling );
+		putIfNotNull( dict, "sendTimeout", _sendTimeout );
+		putIfNotNull( dict, "recvTimeout", _recvTimeout );
+		putIfNotNull( dict, "cnctTimeout", _cnctTimeout );
+		putIfNotNull( dict, "sendBufSize", _sendBufSize );
+		putIfNotNull( dict, "recvBufSize", _recvBufSize );
+		putIfNotNull( dict, "oldport", _oldport );
+		return dict;
+	}
+
+	private static void putIfNotNull( final NSMutableDictionary<String, Object> dict, final String key, final Object value ) {
+		if( value != null ) {
+			dict.takeValueForKey( value, key );
+		}
+	}
+
+	/**
+	 * Reads every persistence field from the given dict without applying any
+	 * validators — matches the original wholesale-replacement semantics of
+	 * {@code values = new NSMutableDictionary(aDict)}. Keys absent from the
+	 * dict come through as null fields.
+	 */
+	private void readFromDictRaw( final NSDictionary aDict ) {
+		_hostName = (String)aDict.valueForKey( "hostName" );
+		_id = (Integer)aDict.valueForKey( "id" );
+		_port = (Integer)aDict.valueForKey( "port" );
+		_applicationName = (String)aDict.valueForKey( "applicationName" );
+		_autoRecover = (Boolean)aDict.valueForKey( "autoRecover" );
+		_minimumActiveSessionsCount = (Integer)aDict.valueForKey( "minimumActiveSessionsCount" );
+		_path = (String)aDict.valueForKey( "path" );
+		_cachingEnabled = (Boolean)aDict.valueForKey( "cachingEnabled" );
+		_debuggingEnabled = (Boolean)aDict.valueForKey( "debuggingEnabled" );
+		_outputPath = (String)aDict.valueForKey( "outputPath" );
+		_autoOpenInBrowser = (Boolean)aDict.valueForKey( "autoOpenInBrowser" );
+		_lifebeatInterval = (Integer)aDict.valueForKey( "lifebeatInterval" );
+		_additionalArgs = (String)aDict.valueForKey( "additionalArgs" );
+		_schedulingEnabled = (Boolean)aDict.valueForKey( "schedulingEnabled" );
+		_schedulingType = (String)aDict.valueForKey( "schedulingType" );
+		_schedulingHourlyStartTime = (Integer)aDict.valueForKey( "schedulingHourlyStartTime" );
+		_schedulingDailyStartTime = (Integer)aDict.valueForKey( "schedulingDailyStartTime" );
+		_schedulingWeeklyStartTime = (Integer)aDict.valueForKey( "schedulingWeeklyStartTime" );
+		_schedulingStartDay = (Integer)aDict.valueForKey( "schedulingStartDay" );
+		_schedulingInterval = (Integer)aDict.valueForKey( "schedulingInterval" );
+		_gracefulScheduling = (Boolean)aDict.valueForKey( "gracefulScheduling" );
+		_sendTimeout = (Integer)aDict.valueForKey( "sendTimeout" );
+		_recvTimeout = (Integer)aDict.valueForKey( "recvTimeout" );
+		_cnctTimeout = (Integer)aDict.valueForKey( "cnctTimeout" );
+		_sendBufSize = (Integer)aDict.valueForKey( "sendBufSize" );
+		_recvBufSize = (Integer)aDict.valueForKey( "recvBufSize" );
+		_oldport = (Integer)aDict.valueForKey( "oldport" );
+	}
+
 	public String hostName() {
-		return (String)values.valueForKey( "hostName" );
+		return _hostName;
 	}
 
 	public void setHostName( String value ) {
-		values.takeValueForKey( value, "hostName" );
+		_hostName = value;
 		dataChanged();
 	}
 
 	public Integer id() {
-		return (Integer)values.valueForKey( "id" );
+		return _id;
 	}
 
 	public void setId( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "id" );
+		_id = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer port() {
-		return (Integer)values.valueForKey( "port" );
+		return _port;
 	}
 
 	public void setPort( Integer value ) {
 		Integer valVal = MUtil.validatedInteger( value );
 		if( !valVal.equals( port() ) ) {
 			setOldport( port() );
-			values.takeValueForKey( valVal, "port" );
+			_port = valVal;
 			dataChanged();
 		}
 	}
 
 	public String applicationName() {
-		return (String)values.valueForKey( "applicationName" );
+		return _applicationName;
 	}
 
 	private void setApplicationName( String value ) {
-		values.takeValueForKey( value, "applicationName" );
+		_applicationName = value;
 		dataChanged();
 	}
 
 	public Boolean autoRecover() {
-		return (Boolean)values.valueForKey( "autoRecover" );
+		return _autoRecover;
 	}
 
 	public void setAutoRecover( Boolean value ) {
-		values.takeValueForKey( value, "autoRecover" );
+		_autoRecover = value;
 		dataChanged();
 	}
 
 	public Integer minimumActiveSessionsCount() {
-		return (Integer)values.valueForKey( "minimumActiveSessionsCount" );
+		return _minimumActiveSessionsCount;
 	}
 
 	public void setMinimumActiveSessionsCount( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "minimumActiveSessionsCount" );
+		_minimumActiveSessionsCount = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public String path() {
-		return (String)values.valueForKey( "path" );
+		return _path;
 	}
 
 	public void setPath( String value ) {
-		values.takeValueForKey( value, "path" );
+		_path = value;
 		dataChanged();
 	}
 
 	public Boolean cachingEnabled() {
-		return (Boolean)values.valueForKey( "cachingEnabled" );
+		return _cachingEnabled;
 	}
 
 	public void setCachingEnabled( Boolean value ) {
-		values.takeValueForKey( value, "cachingEnabled" );
+		_cachingEnabled = value;
 		dataChanged();
 	}
 
 	public Boolean debuggingEnabled() {
-		return (Boolean)values.valueForKey( "debuggingEnabled" );
+		return _debuggingEnabled;
 	}
 
 	public void setDebuggingEnabled( Boolean value ) {
-		values.takeValueForKey( value, "debuggingEnabled" );
+		_debuggingEnabled = value;
 		dataChanged();
 	}
 
 	public String outputPath() {
-		return (String)values.valueForKey( "outputPath" );
+		return _outputPath;
 	}
 
 	public void setOutputPath( String value ) {
-		values.takeValueForKey( MUtil.validatedOutputPath( value ), "outputPath" );
+		_outputPath = MUtil.validatedOutputPath( value );
 		dataChanged();
 	}
 
 	public Boolean autoOpenInBrowser() {
-		return (Boolean)values.valueForKey( "autoOpenInBrowser" );
+		return _autoOpenInBrowser;
 	}
 
 	public void setAutoOpenInBrowser( Boolean value ) {
-		values.takeValueForKey( value, "autoOpenInBrowser" );
+		_autoOpenInBrowser = value;
 		dataChanged();
 	}
 
 	public Integer lifebeatInterval() {
-		return (Integer)values.valueForKey( "lifebeatInterval" );
+		return _lifebeatInterval;
 	}
 
 	public void setLifebeatInterval( Integer value ) {
-		values.takeValueForKey( MUtil.validatedLifebeatInterval( value ), "lifebeatInterval" );
+		_lifebeatInterval = MUtil.validatedLifebeatInterval( value );
 		dataChanged();
 	}
 
 	public String additionalArgs() {
-		return (String)values.valueForKey( "additionalArgs" );
+		return _additionalArgs;
 	}
 
 	public void setAdditionalArgs( String value ) {
-		values.takeValueForKey( value, "additionalArgs" );
+		_additionalArgs = value;
 		dataChanged();
 	}
 
 	public Boolean schedulingEnabled() {
-		return (Boolean)values.valueForKey( "schedulingEnabled" );
+		return _schedulingEnabled;
 	}
 
 	public void setSchedulingEnabled( Boolean value ) {
-		values.takeValueForKey( value, "schedulingEnabled" );
+		_schedulingEnabled = value;
 		dataChanged();
 	}
 
 	public String schedulingType() {
-		return (String)values.valueForKey( "schedulingType" );
+		return _schedulingType;
 	}
 
 	public void setSchedulingType( String value ) {
-		values.takeValueForKey( MUtil.validatedSchedulingType( value ), "schedulingType" );
+		_schedulingType = MUtil.validatedSchedulingType( value );
 		dataChanged();
 	}
 
 	public Integer schedulingHourlyStartTime() {
-		return (Integer)values.valueForKey( "schedulingHourlyStartTime" );
+		return _schedulingHourlyStartTime;
 	}
 
 	public void setSchedulingHourlyStartTime( Integer value ) {
-		values.takeValueForKey( MUtil.validatedSchedulingStartTime( value ), "schedulingHourlyStartTime" );
+		_schedulingHourlyStartTime = MUtil.validatedSchedulingStartTime( value );
 		dataChanged();
 	}
 
 	public Integer schedulingDailyStartTime() {
-		return (Integer)values.valueForKey( "schedulingDailyStartTime" );
+		return _schedulingDailyStartTime;
 	}
 
 	public void setSchedulingDailyStartTime( Integer value ) {
-		values.takeValueForKey( MUtil.validatedSchedulingStartTime( value ), "schedulingDailyStartTime" );
+		_schedulingDailyStartTime = MUtil.validatedSchedulingStartTime( value );
 		dataChanged();
 	}
 
 	public Integer schedulingWeeklyStartTime() {
-		return (Integer)values.valueForKey( "schedulingWeeklyStartTime" );
+		return _schedulingWeeklyStartTime;
 	}
 
 	public void setSchedulingWeeklyStartTime( Integer value ) {
-		values.takeValueForKey( MUtil.validatedSchedulingStartTime( value ), "schedulingWeeklyStartTime" );
+		_schedulingWeeklyStartTime = MUtil.validatedSchedulingStartTime( value );
 		dataChanged();
 	}
 
 	public Integer schedulingStartDay() {
-		return (Integer)values.valueForKey( "schedulingStartDay" );
+		return _schedulingStartDay;
 	}
 
 	public void setSchedulingStartDay( Integer value ) {
-		values.takeValueForKey( MUtil.validatedSchedulingStartDay( value ), "schedulingStartDay" );
+		_schedulingStartDay = MUtil.validatedSchedulingStartDay( value );
 		dataChanged();
 	}
 
 	public Integer schedulingInterval() {
-		return (Integer)values.valueForKey( "schedulingInterval" );
+		return _schedulingInterval;
 	}
 
 	public void setSchedulingInterval( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "schedulingInterval" );
+		_schedulingInterval = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Boolean gracefulScheduling() {
-		return (Boolean)values.valueForKey( "gracefulScheduling" );
+		return _gracefulScheduling;
 	}
 
 	public void setGracefulScheduling( Boolean value ) {
-		values.takeValueForKey( value, "gracefulScheduling" );
+		_gracefulScheduling = value;
 		dataChanged();
 	}
 
 	public Integer sendTimeout() {
-		return (Integer)values.valueForKey( "sendTimeout" );
+		return _sendTimeout;
 	}
 
 	public void setSendTimeout( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "sendTimeout" );
+		_sendTimeout = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer recvTimeout() {
-		return (Integer)values.valueForKey( "recvTimeout" );
+		return _recvTimeout;
 	}
 
 	public void setRecvTimeout( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "recvTimeout" );
+		_recvTimeout = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer cnctTimeout() {
-		return (Integer)values.valueForKey( "cnctTimeout" );
+		return _cnctTimeout;
 	}
 
 	public void setCnctTimeout( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "cnctTimeout" );
+		_cnctTimeout = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer sendBufSize() {
-		return (Integer)values.valueForKey( "sendBufSize" );
+		return _sendBufSize;
 	}
 
 	public void setSendBufSize( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "sendBufSize" );
+		_sendBufSize = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
 	public Integer recvBufSize() {
-		return (Integer)values.valueForKey( "recvBufSize" );
+		return _recvBufSize;
 	}
 
 	public void setRecvBufSize( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "recvBufSize" );
+		_recvBufSize = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
@@ -372,7 +485,7 @@ public class MInstance extends MObject {
 	 */
 	@Deprecated
 	public Integer oldport() {
-		return (Integer)values.valueForKey( "oldport" );
+		return _oldport;
 	}
 
 	/**
@@ -380,7 +493,7 @@ public class MInstance extends MObject {
 	 */
 	@Deprecated
 	public void setOldport( Integer value ) {
-		values.takeValueForKey( MUtil.validatedInteger( value ), "oldport" );
+		_oldport = MUtil.validatedInteger( value );
 		dataChanged();
 	}
 
@@ -618,8 +731,6 @@ public class MInstance extends MObject {
 		return host() == _siteConfig.localHost();
 	}
 
-	private boolean _shouldDie = false;
-
 	public void setShouldDie( boolean b ) {
 		_shouldDie = b;
 	}
@@ -815,18 +926,6 @@ public class MInstance extends MObject {
 
 	public String commandLineArguments() {
 		return String.join( " ", commandLineArgumentsAsArray() ).replace( '\n', ' ' ).replace( '\r', ' ' );
-	}
-
-	/**
-	 * Overridden for Scheduling
-	 */
-	public void updateValues( NSDictionary aDict ) {
-		values = new NSMutableDictionary<>( aDict );
-		dataChanged();
-
-		if( isScheduled() ) {
-			calculateNextScheduledShutdown();
-		}
 	}
 
 	public boolean isScheduled() {
