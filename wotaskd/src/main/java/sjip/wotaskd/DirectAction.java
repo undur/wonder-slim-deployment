@@ -37,6 +37,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 import sjip.core.MUtil;
 import sjip.core.SjipException;
 import sjip.core.model.MApplication;
+import sjip.core.model.MApplicationDto;
 import sjip.core.model.MHost;
 import sjip.core.model.MHostDto;
 import sjip.core.model.MInstance;
@@ -265,7 +266,9 @@ public class DirectAction extends WODirectAction {
 							// update-add - for each application listed - addApplication_W
 							for( Enumeration e = applicationArray.objectEnumerator(); e.hasMoreElements(); ) {
 								NSDictionary anApp = (NSDictionary)e.nextElement();
-								aConfig.addApplication_W( new MApplication( anApp, aConfig ) );
+								@SuppressWarnings("unchecked")
+								final MApplicationDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)anApp, MApplicationDto.class );
+								aConfig.addApplication_W( new MApplication( dto, aConfig ) );
 								applicationArrayResponse.addObject( SUCCESS_ELEMENT );
 							}
 							addResponse.takeValueForKey( applicationArrayResponse, "applicationArray" );
@@ -325,11 +328,13 @@ public class DirectAction extends WODirectAction {
 							// update-configure - for each application listed - applicationWithName + updateValues
 							for( Enumeration e = applicationArray.objectEnumerator(); e.hasMoreElements(); ) {
 								NSDictionary anApp = (NSDictionary)e.nextElement();
-								String name = (String)anApp.valueForKey( "name" );
+								@SuppressWarnings("unchecked")
+								final MApplicationDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)anApp, MApplicationDto.class );
+								String name = dto.name();
 								MApplication anMApplication = aConfig.applicationWithName( name );
 								// if I can't find the application, I might be updating the name - in that case, look under the oldname.
 								if( anMApplication == null ) {
-									name = (String)anApp.valueForKey( "oldname" );
+									name = dto.oldname();
 									anMApplication = aConfig.applicationWithName( name );
 								}
 
@@ -338,7 +343,7 @@ public class DirectAction extends WODirectAction {
 									applicationArrayResponse.addObject( element );
 								}
 								else {
-									anMApplication.updateValues( anApp );
+									anMApplication.updateValues( dto );
 									applicationArrayResponse.addObject( SUCCESS_ELEMENT );
 								}
 							}
@@ -783,22 +788,25 @@ public class DirectAction extends WODirectAction {
 		// Look through the array of applications, and see if we need to add/remove any - configure the rest
 		NSMutableArray currentApplications = new NSMutableArray( aConfig.applicationArray() );
 		if( applicationArray != null ) {
+			final FoundationCoder coder = new FoundationCoder();
 			for( Enumeration e = applicationArray.objectEnumerator(); e.hasMoreElements(); ) {
 				NSDictionary anApp = (NSDictionary)e.nextElement();
-				String name = (String)anApp.valueForKey( "name" );
+				@SuppressWarnings("unchecked")
+				final MApplicationDto dto = coder.decodeRecord( (Map<String, Object>)anApp, MApplicationDto.class );
+				String name = dto.name();
 				MApplication anMApplication = aConfig.applicationWithName( name );
 				// if I can't find the application, I might be updating the name - in that case, look under the oldname.
 				if( anMApplication == null ) {
-					name = (String)anApp.valueForKey( "oldname" );
+					name = dto.oldname();
 					anMApplication = aConfig.applicationWithName( name );
 				}
 				if( anMApplication == null ) {
 					// we have to add it
-					aConfig.addApplication_W( new MApplication( anApp, aConfig ) );
+					aConfig.addApplication_W( new MApplication( dto, aConfig ) );
 				}
 				else {
 					// configure and remove from currentHosts
-					anMApplication.updateValues( anApp );
+					anMApplication.updateValues( dto );
 					currentApplications.removeObject( anMApplication );
 				}
 			}

@@ -15,9 +15,7 @@ package sjip.core.model;
 import java.util.Enumeration;
 
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.MUtil;
 
@@ -27,7 +25,7 @@ public class MApplication extends MObject {
 	// Persistence state
 	// --------------------------------------------------------------------
 	// Fields below are the canonical persisted state of this object — they
-	// round-trip through dictionaryForArchive()/updateValues() to and from
+	// round-trip through toDto()/updateValues(MApplicationDto) to and from
 	// the wire and SiteConfig.xml. Renaming or restructuring any of these
 	// changes the on-disk and on-wire shape; the system-tests snapshot
 	// suite will catch the drift.
@@ -95,139 +93,132 @@ public class MApplication extends MObject {
 		dataChanged();
 	}
 
-	// For Unarchiving
-	public MApplication( NSDictionary aDict, MSiteConfig aConfig ) {
-		_siteConfig = aConfig;
-		updateValues( aDict );
-	}
-
 	/**
-	 * For Cheating on the AppConfigurePage — populates the application from a dict
-	 * without notifying {@link #dataChanged()}. Used to construct a transient
-	 * "preview" copy that mustn't trigger a SiteConfig save just because the user
-	 * is mid-edit. The unused {@code Object o} parameter exists purely as a
-	 * disambiguator from the unarchive constructor.
+	 * Reconstructs an MApplication from its wire DTO. Used by the unarchive path
+	 * ({@code MSiteConfig._initApplicationsWithArray}) and by wotaskd's add-application
+	 * receive path.
 	 */
-	public MApplication( NSDictionary<String, Object> aDict, MSiteConfig aConfig, Object o ) {
+	public MApplication( final MApplicationDto dto, final MSiteConfig aConfig ) {
 		_siteConfig = aConfig;
-		// NB: pre-refactor, the dict-taking constructors stored values raw — no
-		// validators were applied at dict-read time (validation only happens via
-		// individual setters). Preserving that exactly so snapshots don't drift.
-		readFromDictRaw( aDict );
-	}
-
-	/**
-	 * Replaces this application's persisted state from a wire/disk dict. Called on
-	 * the wotaskd receive side during {@code updateWotaskd/configure} (see
-	 * {@code DirectAction.monitorRequestAction}) and from the unarchive constructor.
-	 */
-	public void updateValues( NSDictionary<String, Object> aDict ) {
-		readFromDictRaw( aDict );
+		readFromDto( dto );
 		dataChanged();
 	}
 
 	/**
-	 * Snapshot of this application's persisted state, in the shape that goes onto
-	 * the wire and into {@code SiteConfig.xml}. Only non-null fields are included
-	 * — matches the legacy behaviour where the dict only contained keys that had
-	 * been explicitly set.
+	 * Populates the application from a DTO without notifying {@link #dataChanged()}.
+	 * Used to construct a transient "preview" copy that mustn't trigger a SiteConfig
+	 * save just because the user is mid-edit on the AppConfigurePage. The unused
+	 * {@code Object o} parameter exists purely as a disambiguator from the unarchive
+	 * constructor.
 	 */
-	public NSDictionary<String, Object> dictionaryForArchive() {
-		final NSMutableDictionary<String, Object> dict = new NSMutableDictionary<>();
-		putIfNotNull( dict, "name", _name );
-		putIfNotNull( dict, "startingPort", _startingPort );
-		putIfNotNull( dict, "timeForStartup", _timeForStartup );
-		putIfNotNull( dict, "phasedStartup", _phasedStartup );
-		putIfNotNull( dict, "autoRecover", _autoRecover );
-		putIfNotNull( dict, "minimumActiveSessionsCount", _minimumActiveSessionsCount );
-		putIfNotNull( dict, "unixPath", _unixPath );
-		putIfNotNull( dict, "winPath", _winPath );
-		putIfNotNull( dict, "macPath", _macPath );
-		putIfNotNull( dict, "cachingEnabled", _cachingEnabled );
-		putIfNotNull( dict, "adaptor", _adaptor );
-		putIfNotNull( dict, "adaptorThreads", _adaptorThreads );
-		putIfNotNull( dict, "listenQueueSize", _listenQueueSize );
-		putIfNotNull( dict, "adaptorThreadsMin", _adaptorThreadsMin );
-		putIfNotNull( dict, "adaptorThreadsMax", _adaptorThreadsMax );
-		putIfNotNull( dict, "projectSearchPath", _projectSearchPath );
-		putIfNotNull( dict, "sessionTimeOut", _sessionTimeOut );
-		putIfNotNull( dict, "statisticsPassword", _statisticsPassword );
-		putIfNotNull( dict, "debuggingEnabled", _debuggingEnabled );
-		putIfNotNull( dict, "unixOutputPath", _unixOutputPath );
-		putIfNotNull( dict, "winOutputPath", _winOutputPath );
-		putIfNotNull( dict, "macOutputPath", _macOutputPath );
-		putIfNotNull( dict, "autoOpenInBrowser", _autoOpenInBrowser );
-		putIfNotNull( dict, "lifebeatInterval", _lifebeatInterval );
-		putIfNotNull( dict, "additionalArgs", _additionalArgs );
-		putIfNotNull( dict, "notificationEmailEnabled", _notificationEmailEnabled );
-		putIfNotNull( dict, "notificationEmailAddr", _notificationEmailAddr );
-		putIfNotNull( dict, "retries", _retries );
-		putIfNotNull( dict, "scheduler", _scheduler );
-		putIfNotNull( dict, "dormant", _dormant );
-		putIfNotNull( dict, "redir", _redir );
-		putIfNotNull( dict, "sendTimeout", _sendTimeout );
-		putIfNotNull( dict, "recvTimeout", _recvTimeout );
-		putIfNotNull( dict, "cnctTimeout", _cnctTimeout );
-		putIfNotNull( dict, "sendBufSize", _sendBufSize );
-		putIfNotNull( dict, "recvBufSize", _recvBufSize );
-		putIfNotNull( dict, "poolsize", _poolsize );
-		putIfNotNull( dict, "urlVersion", _urlVersion );
-		putIfNotNull( dict, "oldname", _oldname );
-		return dict;
-	}
-
-	private static void putIfNotNull( final NSMutableDictionary<String, Object> dict, final String key, final Object value ) {
-		if( value != null ) {
-			dict.takeValueForKey( value, key );
-		}
+	public MApplication( final MApplicationDto dto, final MSiteConfig aConfig, final Object o ) {
+		_siteConfig = aConfig;
+		readFromDto( dto );
 	}
 
 	/**
-	 * Reads every persistence field from the given dict without applying any
-	 * validators — matches the original wholesale-replacement semantics of
-	 * {@code values = new NSMutableDictionary(aDict)}. Keys absent from the
-	 * dict come through as null fields.
+	 * Replaces this application's persisted state from a wire DTO. Called on the
+	 * wotaskd receive side during {@code updateWotaskd/configure} (see
+	 * {@code DirectAction.monitorRequestAction}).
 	 */
-	private void readFromDictRaw( final NSDictionary<String, Object> aDict ) {
-		_name = (String)aDict.valueForKey( "name" );
-		_startingPort = (Integer)aDict.valueForKey( "startingPort" );
-		_timeForStartup = (Integer)aDict.valueForKey( "timeForStartup" );
-		_phasedStartup = (Boolean)aDict.valueForKey( "phasedStartup" );
-		_autoRecover = (Boolean)aDict.valueForKey( "autoRecover" );
-		_minimumActiveSessionsCount = (Integer)aDict.valueForKey( "minimumActiveSessionsCount" );
-		_unixPath = (String)aDict.valueForKey( "unixPath" );
-		_winPath = (String)aDict.valueForKey( "winPath" );
-		_macPath = (String)aDict.valueForKey( "macPath" );
-		_cachingEnabled = (Boolean)aDict.valueForKey( "cachingEnabled" );
-		_adaptor = (String)aDict.valueForKey( "adaptor" );
-		_adaptorThreads = (Integer)aDict.valueForKey( "adaptorThreads" );
-		_listenQueueSize = (Integer)aDict.valueForKey( "listenQueueSize" );
-		_adaptorThreadsMin = (Integer)aDict.valueForKey( "adaptorThreadsMin" );
-		_adaptorThreadsMax = (Integer)aDict.valueForKey( "adaptorThreadsMax" );
-		_projectSearchPath = (String)aDict.valueForKey( "projectSearchPath" );
-		_sessionTimeOut = (Integer)aDict.valueForKey( "sessionTimeOut" );
-		_statisticsPassword = (String)aDict.valueForKey( "statisticsPassword" );
-		_debuggingEnabled = (Boolean)aDict.valueForKey( "debuggingEnabled" );
-		_unixOutputPath = (String)aDict.valueForKey( "unixOutputPath" );
-		_winOutputPath = (String)aDict.valueForKey( "winOutputPath" );
-		_macOutputPath = (String)aDict.valueForKey( "macOutputPath" );
-		_autoOpenInBrowser = (Boolean)aDict.valueForKey( "autoOpenInBrowser" );
-		_lifebeatInterval = (Integer)aDict.valueForKey( "lifebeatInterval" );
-		_additionalArgs = (String)aDict.valueForKey( "additionalArgs" );
-		_notificationEmailEnabled = (Boolean)aDict.valueForKey( "notificationEmailEnabled" );
-		_notificationEmailAddr = (String)aDict.valueForKey( "notificationEmailAddr" );
-		_retries = (Integer)aDict.valueForKey( "retries" );
-		_scheduler = (String)aDict.valueForKey( "scheduler" );
-		_dormant = (Integer)aDict.valueForKey( "dormant" );
-		_redir = (String)aDict.valueForKey( "redir" );
-		_sendTimeout = (Integer)aDict.valueForKey( "sendTimeout" );
-		_recvTimeout = (Integer)aDict.valueForKey( "recvTimeout" );
-		_cnctTimeout = (Integer)aDict.valueForKey( "cnctTimeout" );
-		_sendBufSize = (Integer)aDict.valueForKey( "sendBufSize" );
-		_recvBufSize = (Integer)aDict.valueForKey( "recvBufSize" );
-		_poolsize = (Integer)aDict.valueForKey( "poolsize" );
-		_urlVersion = (Integer)aDict.valueForKey( "urlVersion" );
-		_oldname = (String)aDict.valueForKey( "oldname" );
+	public void updateValues( final MApplicationDto dto ) {
+		readFromDto( dto );
+		dataChanged();
+	}
+
+	/**
+	 * Snapshot of this application's persisted state as a typed DTO. The codec
+	 * encodes this directly to the wire — no dictionary in between.
+	 */
+	public MApplicationDto toDto() {
+		return new MApplicationDto(
+				_name,
+				_startingPort,
+				_timeForStartup,
+				_phasedStartup,
+				_autoRecover,
+				_minimumActiveSessionsCount,
+				_unixPath,
+				_winPath,
+				_macPath,
+				_cachingEnabled,
+				_adaptor,
+				_adaptorThreads,
+				_listenQueueSize,
+				_adaptorThreadsMin,
+				_adaptorThreadsMax,
+				_projectSearchPath,
+				_sessionTimeOut,
+				_statisticsPassword,
+				_debuggingEnabled,
+				_unixOutputPath,
+				_winOutputPath,
+				_macOutputPath,
+				_autoOpenInBrowser,
+				_lifebeatInterval,
+				_additionalArgs,
+				_notificationEmailEnabled,
+				_notificationEmailAddr,
+				_retries,
+				_scheduler,
+				_dormant,
+				_redir,
+				_sendTimeout,
+				_recvTimeout,
+				_cnctTimeout,
+				_sendBufSize,
+				_recvBufSize,
+				_poolsize,
+				_urlVersion,
+				_oldname );
+	}
+
+	/**
+	 * Reads every persistence field from the given DTO. Matches the legacy
+	 * wholesale-replacement semantics — components null in the DTO produce null
+	 * fields on the application. No validators applied at this layer; validation
+	 * happens via individual setters when used through the UI path.
+	 */
+	private void readFromDto( final MApplicationDto dto ) {
+		_name = dto.name();
+		_startingPort = dto.startingPort();
+		_timeForStartup = dto.timeForStartup();
+		_phasedStartup = dto.phasedStartup();
+		_autoRecover = dto.autoRecover();
+		_minimumActiveSessionsCount = dto.minimumActiveSessionsCount();
+		_unixPath = dto.unixPath();
+		_winPath = dto.winPath();
+		_macPath = dto.macPath();
+		_cachingEnabled = dto.cachingEnabled();
+		_adaptor = dto.adaptor();
+		_adaptorThreads = dto.adaptorThreads();
+		_listenQueueSize = dto.listenQueueSize();
+		_adaptorThreadsMin = dto.adaptorThreadsMin();
+		_adaptorThreadsMax = dto.adaptorThreadsMax();
+		_projectSearchPath = dto.projectSearchPath();
+		_sessionTimeOut = dto.sessionTimeOut();
+		_statisticsPassword = dto.statisticsPassword();
+		_debuggingEnabled = dto.debuggingEnabled();
+		_unixOutputPath = dto.unixOutputPath();
+		_winOutputPath = dto.winOutputPath();
+		_macOutputPath = dto.macOutputPath();
+		_autoOpenInBrowser = dto.autoOpenInBrowser();
+		_lifebeatInterval = dto.lifebeatInterval();
+		_additionalArgs = dto.additionalArgs();
+		_notificationEmailEnabled = dto.notificationEmailEnabled();
+		_notificationEmailAddr = dto.notificationEmailAddr();
+		_retries = dto.retries();
+		_scheduler = dto.scheduler();
+		_dormant = dto.dormant();
+		_redir = dto.redir();
+		_sendTimeout = dto.sendTimeout();
+		_recvTimeout = dto.recvTimeout();
+		_cnctTimeout = dto.cnctTimeout();
+		_sendBufSize = dto.sendBufSize();
+		_recvBufSize = dto.recvBufSize();
+		_poolsize = dto.poolsize();
+		_urlVersion = dto.urlVersion();
+		_oldname = dto.oldname();
 	}
 
 	public String name() {

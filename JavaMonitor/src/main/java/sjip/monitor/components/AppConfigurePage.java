@@ -56,7 +56,7 @@ public class AppConfigurePage extends AppComponent {
 	public WOComponent defaultsUpdateClicked() {
 
 		handler().whileReading( () -> {
-			myApplication().updateValues( appDefaults.dictionaryForArchive() );
+			myApplication().updateValues( appDefaults.toDto() );
 			handler().sendUpdateApplicationToWotaskds( myApplication(), allHosts() );
 		});
 
@@ -130,7 +130,7 @@ public class AppConfigurePage extends AppComponent {
 	public WOComponent defaultsPushClicked() {
 
 		handler().whileReading( () -> {
-			myApplication().updateValues( appDefaults.dictionaryForArchive() );
+			myApplication().updateValues( appDefaults.toDto() );
 			myApplication().pushValuesToInstances();
 			_defaultsPush();
 		});
@@ -469,7 +469,7 @@ public class AppConfigurePage extends AppComponent {
 	public static AppConfigurePage create( WOContext context, MApplication application ) {
 		AppConfigurePage page = (AppConfigurePage)context.page().pageWithName( AppConfigurePage.class.getName() );
 		page.setMyApplication( application );
-		page.appDefaults = new MApplication( application.dictionaryForArchive(), _sc, null );
+		page.appDefaults = new MApplication( application.toDto(), _sc, null );
 		return page;
 	}
 }

@@ -17,6 +17,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.MUtil;
 import sjip.core.model.MApplication;
+import sjip.core.model.MApplicationDto;
 import sjip.core.model.MHost;
 import sjip.core.model.MHostDto;
 import sjip.core.model.MInstance;
@@ -176,7 +177,7 @@ public class WOTaskdHandler {
 		}
 
 		if( _Application != null ) {
-			final List<MApplication> applicationArray = new NSArray( _Application.dictionaryForArchive() );
+			final List<MApplicationDto> applicationArray = new NSArray( _Application.toDto() );
 			requestTypeDict.takeValueForKey( applicationArray, "applicationArray" );
 		}
 
