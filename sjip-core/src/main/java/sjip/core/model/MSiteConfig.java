@@ -37,9 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSMutableArray;
 
 import sjip.core.IInstanceController;
 import sjip.core.MUtil;
@@ -93,9 +91,9 @@ public class MSiteConfig extends MObject {
 	// host/app/instance.
 	// ====================================================================
 
-	private final NSMutableArray<MHost> _hostArray = new NSMutableArray<>();
-	private final NSMutableArray<MInstance> _instanceArray = new NSMutableArray<>();
-	private final NSMutableArray<MApplication> _applicationArray = new NSMutableArray<>();
+	private final List<MHost> _hostArray = new ArrayList<>();
+	private final List<MInstance> _instanceArray = new ArrayList<>();
+	private final List<MApplication> _applicationArray = new ArrayList<>();
 
 	// ====================================================================
 	// Runtime state (not persisted)
@@ -399,15 +397,15 @@ public class MSiteConfig extends MObject {
 		dataChanged();
 	}
 
-	public NSMutableArray<MHost> hostArray() {
+	public List<MHost> hostArray() {
 		return _hostArray;
 	}
 
-	public NSMutableArray<MInstance> instanceArray() {
+	public List<MInstance> instanceArray() {
 		return _instanceArray;
 	}
 
-	public NSMutableArray<MApplication> applicationArray() {
+	public List<MApplication> applicationArray() {
 		return _applicationArray;
 	}
 
@@ -433,7 +431,7 @@ public class MSiteConfig extends MObject {
 		if( FHosts.isConfiguredHostAddress( newHost.address(), true ) ) {
 			_localHost = newHost;
 		}
-		_hostArray.addObject( newHost );
+		_hostArray.add( newHost );
 		dataHasChanged();
 	}
 
@@ -447,7 +445,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	private void _removeHost( MHost aHost ) {
-		_hostArray.removeObject( aHost );
+		_hostArray.remove( aHost );
 		if( aHost == _localHost ) {
 			_localHost = null;
 		}
@@ -458,27 +456,24 @@ public class MSiteConfig extends MObject {
 
 		backup( "removeHost-" + aHost.name() );
 
-		final NSArray<MInstance> tempArray = new NSArray<>( aHost.instanceArray() );
-
-		for( int i = 0; i < tempArray.count(); i++ ) {
-			removeInstance_M( tempArray.objectAtIndex( i ), false );
+		// Iterate a defensive copy — removeInstance_M mutates aHost.instanceArray().
+		for( final MInstance instance : new ArrayList<>( aHost.instanceArray() ) ) {
+			removeInstance_M( instance, false );
 		}
 
 		_removeHost( aHost );
 	}
 
 	public void removeHost_W( MHost aHost ) {
-		final NSArray<MInstance> tempArray = new NSArray<>( aHost.instanceArray() );
-
-		for( int i = 0; i < tempArray.count(); i++ ) {
-			removeInstance_W( tempArray.objectAtIndex( i ) );
+		for( final MInstance instance : new ArrayList<>( aHost.instanceArray() ) ) {
+			removeInstance_W( instance );
 		}
 
 		_removeHost( aHost );
 	}
 
 	private void _addApplication( MApplication newApplication ) {
-		_applicationArray.addObject( newApplication );
+		_applicationArray.add( newApplication );
 		dataHasChanged();
 	}
 
@@ -492,7 +487,7 @@ public class MSiteConfig extends MObject {
 	}
 
 	private void _removeApplication( MApplication anApplication ) {
-		_applicationArray.removeObject( anApplication );
+		_applicationArray.remove( anApplication );
 		dataHasChanged();
 	}
 
@@ -500,10 +495,9 @@ public class MSiteConfig extends MObject {
 
 		backup( "removeApplication-" + anApplication.name() );
 
-		final NSArray<MInstance> tempArray = new NSArray<>( anApplication.instanceArray() );
-
-		for( int i = 0; i < tempArray.count(); i++ ) {
-			removeInstance_M( tempArray.objectAtIndex( i ), false );
+		// Defensive copy — removeInstance_M mutates anApplication.instanceArray().
+		for( final MInstance instance : new ArrayList<>( anApplication.instanceArray() ) ) {
+			removeInstance_M( instance, false );
 		}
 
 		_removeApplication( anApplication );
@@ -511,33 +505,31 @@ public class MSiteConfig extends MObject {
 
 	public void removeApplication_W( MApplication anApplication ) {
 
-		final NSArray<MInstance> tempArray = new NSArray<>( anApplication.instanceArray() );
-
-		for( int i = 0; i < tempArray.count(); i++ ) {
-			removeInstance_W( tempArray.objectAtIndex( i ) );
+		for( final MInstance instance : new ArrayList<>( anApplication.instanceArray() ) ) {
+			removeInstance_W( instance );
 		}
 
 		_removeApplication( anApplication );
 	}
 
 	private void _addInstance( MInstance newInstance ) {
-		_instanceArray.addObject( newInstance );
+		_instanceArray.add( newInstance );
 		newInstance.host()._addInstancePrimitive( newInstance );
 		newInstance.application()._addInstancePrimitive( newInstance );
 		dataHasChanged();
 	}
 
-	public NSMutableArray<MInstance> addInstances_M( MHost selectedHost, MApplication anApplication, int numberToAdd ) {
+	public List<MInstance> addInstances_M( MHost selectedHost, MApplication anApplication, int numberToAdd ) {
 
 		backup( "addInstances-" + anApplication.name() + "-" + selectedHost.name() + "-" + numberToAdd );
 
-		final NSMutableArray<MInstance> newInstanceArray = new NSMutableArray<>( numberToAdd );
+		final List<MInstance> newInstanceArray = new ArrayList<>( numberToAdd );
 
 		for( int i = 0; i < numberToAdd; i++ ) {
 			final Integer aUniqueID = anApplication.nextID();
 			final MInstance newInstance = new MInstance( selectedHost, anApplication, aUniqueID, this );
 			addInstance_M( newInstance );
-			newInstanceArray.addObject( newInstance );
+			newInstanceArray.add( newInstance );
 		}
 
 		return newInstanceArray;
@@ -556,7 +548,7 @@ public class MSiteConfig extends MObject {
 		anInstance.cancelForceQuitTask();
 		anInstance.host()._removeInstancePrimitive( anInstance );
 		anInstance.application()._removeInstancePrimitive( anInstance );
-		_instanceArray.removeObject( anInstance );
+		_instanceArray.remove( anInstance );
 		dataHasChanged();
 	}
 
@@ -957,10 +949,8 @@ public class MSiteConfig extends MObject {
 
 	// KH - all these should be cached!
 	public long autoRecoverInterval() {
-		final int instanceArrayCount = _instanceArray.count();
 		int smallestInterval = 0;
-		for( int i = 0; i < instanceArrayCount; i++ ) {
-			final MInstance anInst = _instanceArray.objectAtIndex( i );
+		for( final MInstance anInst : _instanceArray ) {
 			final Integer Interval = anInst.lifebeatInterval();
 			if( Interval != null ) {
 				final int interval = Interval.intValue();

@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.foundation.NSMutableArray;
 
 import sjip.core.MUtil;
 import sjip.x.FNotifications;
@@ -94,7 +93,7 @@ public class MInstance extends MObject {
 	private final MHost _host;
 	private final MApplication _application;
 	private Instant _lastRegistration = Instant.EPOCH;
-	private NSMutableArray<String> _deaths = new NSMutableArray<>();
+	private List<String> _deaths = new ArrayList<>();
 	private boolean isRefusingNewSessions = false;
 	public int state = MUtil.DEAD;
 	private InstanceStatistics _statistics = new InstanceStatistics();
@@ -789,24 +788,24 @@ public class MInstance extends MObject {
 	}
 
 	/** ******** Deaths ********* */
-	public NSMutableArray<String> deaths() {
+	public List<String> deaths() {
 		return _deaths;
 	}
 
-	public void setDeaths( NSMutableArray<String> values ) {
+	public void setDeaths( List<String> values ) {
 		_deaths = values;
 	}
 
 	public int deathCount() {
-		return _deaths.count();
+		return _deaths.size();
 	}
 
 	private void addDeath() {
-		_deaths.addObject( DATE_FORMATTER.format( ZonedDateTime.now() ) );
+		_deaths.add( DATE_FORMATTER.format( ZonedDateTime.now() ) );
 	}
 
 	public void removeAllDeaths() {
-		_deaths = new NSMutableArray<>();
+		_deaths = new ArrayList<>();
 	}
 
 	/** ******** Command Line Arguments ********* */

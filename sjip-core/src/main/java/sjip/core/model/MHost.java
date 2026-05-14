@@ -21,12 +21,13 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.foundation.NSMutableArray;
 
 import sjip.core.MUtil;
 import sjip.x.ResponseWrapper;
@@ -57,7 +58,7 @@ public class MHost extends MObject {
 	// later cleanup round.
 	// ====================================================================
 
-	private final NSMutableArray<MInstance> _instanceArray = new NSMutableArray<>();
+	private final List<MInstance> _instanceArray = new ArrayList<>();
 
 	private InetAddress _address = null;
 
@@ -146,16 +147,16 @@ public class MHost extends MObject {
 		dataChanged();
 	}
 
-	public NSMutableArray<MInstance> instanceArray() {
+	public List<MInstance> instanceArray() {
 		return _instanceArray;
 	}
 
 	public void _addInstancePrimitive( MInstance anInstance ) {
-		_instanceArray.addObject( anInstance );
+		_instanceArray.add( anInstance );
 	}
 
 	public void _removeInstancePrimitive( MInstance anInstance ) {
-		_instanceArray.removeObject( anInstance );
+		_instanceArray.remove( anInstance );
 	}
 
 	public InetAddress address() {

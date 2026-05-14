@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -522,8 +523,8 @@ public class DirectAction extends WODirectAction {
 				NSMutableArray applicationResponse = null;
 				theApplication.appTaskd().lock().readLock().lock();
 				try {
-					NSArray appArray = aConfig.applicationArray();
-					int appArrayCount = appArray.count();
+					List<MApplication> appArray = aConfig.applicationArray();
+					int appArrayCount = appArray.size();
 					MApplication anApp;
 					String name;
 					Integer runningInstances;
@@ -533,7 +534,7 @@ public class DirectAction extends WODirectAction {
 
 					// query - for each application - runningInstancesCount_W();
 					for( int i = 0; i < appArrayCount; i++ ) {
-						anApp = (MApplication)appArray.objectAtIndex( i );
+						anApp = appArray.get( i );
 						name = anApp.name();
 						runningInstances = anApp.runningInstancesCount_W();
 						elementApp = new NSDictionary( new Object[] { name, runningInstances }, APP_QUERY_KEYS );
@@ -550,8 +551,8 @@ public class DirectAction extends WODirectAction {
 				NSMutableArray instanceResponse = null;
 				theApplication.appTaskd().lock().readLock().lock();
 				try {
-					NSArray instanceArray = (aConfig.localHost() != null) ? aConfig.localHost().instanceArray() : NSArray.EmptyArray;
-					int instanceArrayCount = instanceArray.count();
+					List<MInstance> instanceArray = (aConfig.localHost() != null) ? aConfig.localHost().instanceArray() : Collections.emptyList();
+					int instanceArrayCount = instanceArray.size();
 
 					MInstance anInstance;
 					String applicationName;
@@ -561,23 +562,22 @@ public class DirectAction extends WODirectAction {
 					String runningState;
 					Boolean refusingNewSessions;
 					NSDictionary statistics;
-					NSArray deaths;
+					List<String> deaths;
 					String nextShutdown;
 					NSDictionary elementInst;
 
 					instanceResponse = new NSMutableArray( instanceArrayCount );
 
-					NSMutableArray runningInstanceArray = new NSMutableArray();
-					for( Enumeration e = instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
-						MInstance anInst = (MInstance)e.nextElement();
+					final List<MInstance> runningInstanceArray = new ArrayList<>();
+					for( final MInstance anInst : instanceArray ) {
 						if( anInst.isRunning_W() ) {
-							runningInstanceArray.addObject( anInst );
+							runningInstanceArray.add( anInst );
 						}
 					}
 					getStatisticsForInstanceArray( runningInstanceArray, errorResponse );
 
 					for( int i = 0; i < instanceArrayCount; i++ ) {
-						anInstance = (MInstance)instanceArray.objectAtIndex( i );
+						anInstance = instanceArray.get( i );
 
 						String error = anInstance.statisticsError();
 						if( error != null ) {
@@ -632,11 +632,11 @@ public class DirectAction extends WODirectAction {
 		return aResponse;
 	}
 
-	private void getStatisticsForInstanceArray( NSArray instArray, NSMutableArray errorResponse ) {
+	private void getStatisticsForInstanceArray( final List<MInstance> instArray, NSMutableArray errorResponse ) {
 		final InstanceController instanceController = ((Application)WOApplication.application()).instanceController();
 
-		final NSArray instanceArray = instArray;
-		int theCount = instanceArray.count();
+		final List<MInstance> instanceArray = instArray;
+		int theCount = instanceArray.size();
 
 		if( theCount == 0 )
 			return;
@@ -649,15 +649,15 @@ public class DirectAction extends WODirectAction {
 			Runnable work = new Runnable() {
 				public void run() {
 					try {
-						responses[j] = instanceController.queryInstance( (MInstance)instanceArray.objectAtIndex( j ) );
+						responses[j] = instanceController.queryInstance( instanceArray.get( j ) );
 					}
 					catch( SjipException me ) {
-						MInstance badInstance = ((MInstance)instanceArray.objectAtIndex( j ));
+						MInstance badInstance = instanceArray.get( j );
 						if( !badInstance.isRunning_W() ) {
-							logger.debug( "Exception getting Statistics for instance: " + ((MInstance)instanceArray.objectAtIndex( j )).displayName() );
+							logger.debug( "Exception getting Statistics for instance: " + instanceArray.get( j ).displayName() );
 						}
-						//if we get an exception and the instance state is running, that could mean the app may have been too 
-						//busy to respond of may have locked up in either case, we need to notify 
+						//if we get an exception and the instance state is running, that could mean the app may have been too
+						//busy to respond of may have locked up in either case, we need to notify
 						//java monitor which instance its having problems with
 						if( badInstance.isRunning_W() )
 							badInstance.setStatisticsError( me.getMessage() );
@@ -679,7 +679,7 @@ public class DirectAction extends WODirectAction {
 
 		for( int i = 0; i < theCount; i++ ) {
 			ResponseWrapper aResponse = responses[i];
-			MInstance anInstance = (MInstance)instArray.objectAtIndex( i );
+			MInstance anInstance = instArray.get( i );
 			if( aResponse != null ) {
 				anInstance.updateRegistration();
 				if( aResponse.headerForKey( "x-webobjects-refusenewsessions" ) != null ) {
@@ -765,7 +765,7 @@ public class DirectAction extends WODirectAction {
 		}
 
 		// Look through the array of hosts, and see if we need to add/remove any - configure the rest
-		NSMutableArray currentHosts = new NSMutableArray( aConfig.hostArray() );
+		final List<MHost> currentHosts = new ArrayList<>( aConfig.hostArray() );
 		if( hostArray != null ) {
 			final FoundationCoder coder = new FoundationCoder();
 			for( Enumeration e = hostArray.objectEnumerator(); e.hasMoreElements(); ) {
@@ -780,13 +780,12 @@ public class DirectAction extends WODirectAction {
 				else {
 					// configure and remove from currentHosts
 					anMHost.updateValues( dto );
-					currentHosts.removeObject( anMHost );
+					currentHosts.remove( anMHost );
 				}
 			}
 		}
 		// remove all hosts remaining in currentHosts
-		for( Enumeration e = currentHosts.objectEnumerator(); e.hasMoreElements(); ) {
-			MHost anMHost = (MHost)e.nextElement();
+		for( final MHost anMHost : currentHosts ) {
 			if( anMHost == aConfig.localHost() ) {
 				stopAllInstances();
 				((Application)WOApplication.application()).setSiteConfig( new MSiteConfig( null ) );
@@ -796,7 +795,7 @@ public class DirectAction extends WODirectAction {
 		}
 
 		// Look through the array of applications, and see if we need to add/remove any - configure the rest
-		NSMutableArray currentApplications = new NSMutableArray( aConfig.applicationArray() );
+		final List<MApplication> currentApplications = new ArrayList<>( aConfig.applicationArray() );
 		if( applicationArray != null ) {
 			final FoundationCoder coder = new FoundationCoder();
 			for( Enumeration e = applicationArray.objectEnumerator(); e.hasMoreElements(); ) {
@@ -817,17 +816,17 @@ public class DirectAction extends WODirectAction {
 				else {
 					// configure and remove from currentHosts
 					anMApplication.updateValues( dto );
-					currentApplications.removeObject( anMApplication );
+					currentApplications.remove( anMApplication );
 				}
 			}
 		}
 		// remove all hosts remaining in currentHosts
-		for( Enumeration e = currentApplications.objectEnumerator(); e.hasMoreElements(); ) {
-			aConfig.removeApplication_W( (MApplication)e.nextElement() );
+		for( final MApplication app : currentApplications ) {
+			aConfig.removeApplication_W( app );
 		}
 
 		// Look through the array of instances, and see if we need to add/remove any - configure the rest
-		NSMutableArray currentInstances = new NSMutableArray( aConfig.instanceArray() );
+		final List<MInstance> currentInstances = new ArrayList<>( aConfig.instanceArray() );
 		if( instanceArray != null ) {
 			final FoundationCoder coder = new FoundationCoder();
 			for( Enumeration e = instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
@@ -848,13 +847,13 @@ public class DirectAction extends WODirectAction {
 				else {
 					// configure and remove from currentHosts
 					anMInstance.updateValues( dto );
-					currentInstances.removeObject( anMInstance );
+					currentInstances.remove( anMInstance );
 				}
 			}
 		}
 		// remove all hosts remaining in currentHosts
-		for( Enumeration e = currentInstances.objectEnumerator(); e.hasMoreElements(); ) {
-			aConfig.removeInstance_W( (MInstance)e.nextElement() );
+		for( final MInstance inst : currentInstances ) {
+			aConfig.removeInstance_W( inst );
 		}
 	}
 
@@ -862,8 +861,8 @@ public class DirectAction extends WODirectAction {
 	private void stopAllInstances() {
 		final InstanceController instanceController = ((Application)WOApplication.application()).instanceController();
 
-		final NSArray instanceArray = ((Application)WOApplication.application()).siteConfig().instanceArray();
-		int theCount = instanceArray.count();
+		final List<MInstance> instanceArray = ((Application)WOApplication.application()).siteConfig().instanceArray();
+		int theCount = instanceArray.size();
 
 		if( theCount == 0 )
 			return;
@@ -875,7 +874,7 @@ public class DirectAction extends WODirectAction {
 			Runnable work = new Runnable() {
 				public void run() {
 					try {
-						instanceController.stopInstance( (MInstance)instanceArray.objectAtIndex( j ) );
+						instanceController.stopInstance( instanceArray.get( j ) );
 					}
 					catch( SjipException me ) {
 					}

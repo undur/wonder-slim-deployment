@@ -381,7 +381,7 @@ public class AppConfigurePage extends AppComponent {
 	public WOComponent schedulingUpdateClicked() {
 		
 		handler().whileReading( () -> {
-			if( (myApplication().instanceArray().count() != 0) && (allHosts().size() != 0) ) {
+			if( (myApplication().instanceArray().size() != 0) && (allHosts().size() != 0) ) {
 				handler().sendUpdateInstancesToWotaskds( myApplication().instanceArray(), allHosts() );
 			}
 		});

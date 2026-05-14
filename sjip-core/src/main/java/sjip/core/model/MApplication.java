@@ -12,10 +12,8 @@ SUCH DAMAGE.
  */
 package sjip.core.model;
 
-import java.util.Enumeration;
-
-import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSMutableArray;
+import java.util.ArrayList;
+import java.util.List;
 
 import sjip.core.MUtil;
 
@@ -79,8 +77,8 @@ public class MApplication extends MObject {
 	// in a later cleanup round.
 	// ====================================================================
 
-	private final NSMutableArray<MInstance> _instanceArray = new NSMutableArray<>();
-	private final NSMutableArray<MHost> _hostArray = new NSMutableArray<>();
+	private final List<MInstance> _instanceArray = new ArrayList<>();
+	private final List<MHost> _hostArray = new ArrayList<>();
 
 	// Used for the ApplicationsPage
 	private Integer runningInstancesCount = 0;
@@ -584,20 +582,19 @@ public class MApplication extends MObject {
 	/********** Adding and Removing Instance primitives **********/
 	public void _addInstancePrimitive( MInstance anInstance ) {
 
-		_instanceArray.addObject( anInstance );
+		_instanceArray.add( anInstance );
 
-		if( !_hostArray.containsObject( anInstance.host() ) ) {
-			_hostArray.addObject( anInstance.host() );
+		if( !_hostArray.contains( anInstance.host() ) ) {
+			_hostArray.add( anInstance.host() );
 		}
 	}
 
 	public void _removeInstancePrimitive( MInstance anInstance ) {
 
-		_instanceArray.removeObject( anInstance );
+		_instanceArray.remove( anInstance );
 		boolean uniqueHost = true;
 
-		for( final Enumeration<MInstance> e = _instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
-			MInstance anInst = e.nextElement();
+		for( final MInstance anInst : _instanceArray ) {
 			if( anInstance.host() == anInst.host() ) {
 				uniqueHost = false;
 				break;
@@ -605,15 +602,15 @@ public class MApplication extends MObject {
 		}
 
 		if( uniqueHost ) {
-			_hostArray.removeObject( anInstance.host() );
+			_hostArray.remove( anInstance.host() );
 		}
 	}
 
-	public NSArray<MInstance> instanceArray() {
+	public List<MInstance> instanceArray() {
 		return _instanceArray;
 	}
 
-	public NSArray<MHost> hostArray() {
+	public List<MHost> hostArray() {
 		return _hostArray;
 	}
 
@@ -701,16 +698,16 @@ public class MApplication extends MObject {
 
 	// Used for the AppDetailPage
 	private Integer runningInstancesCount_M() {
-		runningInstancesCount = runningInstances_M().count();
+		runningInstancesCount = runningInstances_M().size();
 		return runningInstancesCount;
 	}
 
-	public NSArray<MInstance> runningInstances_M() {
-		final NSMutableArray<MInstance> instances = new NSMutableArray<>();
+	public List<MInstance> runningInstances_M() {
+		final List<MInstance> instances = new ArrayList<>();
 
 		for( final MInstance instance : _instanceArray ) {
 			if( instance.isRunning_M() ) {
-				instances.addObject( instance );
+				instances.add( instance );
 			}
 		}
 

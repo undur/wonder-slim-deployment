@@ -40,7 +40,7 @@ public class HostsPage extends MonitorComponent {
 
 					if( newHostName.equalsIgnoreCase( "localhost" ) || newHostName.equals( "127.0.0.1" ) ) {
 						// only allow this to happen if we have no other hosts!
-						if( !((siteConfig().hostArray() != null) && (siteConfig().hostArray().count() == 0)) ) {
+						if( !((siteConfig().hostArray() != null) && (siteConfig().hostArray().size() == 0)) ) {
 							// we're OK to add localhost.
 							nullOrError = "Hosts named localhost or 127.0.0.1 may not be added while other hosts are configured.";
 						}

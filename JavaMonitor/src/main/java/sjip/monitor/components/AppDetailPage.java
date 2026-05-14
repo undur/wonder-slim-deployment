@@ -285,7 +285,7 @@ public class AppDetailPage extends AppComponent {
 	public WOComponent clearAllDeathsClicked() {
 		handler().startReading();
 		try {
-			if( myApplication().hostArray().count() != 0 ) {
+			if( myApplication().hostArray().size() != 0 ) {
 				handler().sendClearDeathsToWotaskds( myApplication().instanceArray(), myApplication().hostArray() );
 			}
 		}

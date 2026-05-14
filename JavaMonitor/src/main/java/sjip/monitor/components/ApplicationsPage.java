@@ -78,7 +78,7 @@ public class ApplicationsPage extends MonitorComponent {
 					MApplication newApplication = new MApplication( newApplicationName, siteConfig() );
 					siteConfig().addApplication_M( newApplication );
 
-					if( siteConfig().hostArray().count() != 0 ) {
+					if( siteConfig().hostArray().size() != 0 ) {
 						handler().sendAddApplicationToWotaskds( newApplication, siteConfig().hostArray() );
 					}
 
@@ -110,7 +110,7 @@ public class ApplicationsPage extends MonitorComponent {
 			handler().whileWriting( () -> {
 				siteConfig().removeApplication_M( application );
 
-				if( siteConfig().hostArray().count() != 0 ) {
+				if( siteConfig().hostArray().size() != 0 ) {
 					handler().sendRemoveApplicationToWotaskds( application, siteConfig().hostArray() );
 				}
 			});

@@ -35,7 +35,7 @@ public class GracefulBouncer extends ApplicationStarter {
 	@Override
 	protected void bounce() throws InterruptedException {
 
-		List<MInstance> instances = application().instanceArray().immutableClone();
+		List<MInstance> instances = List.copyOf( application().instanceArray() );
 		List<MInstance> runningInstances = new ArrayList<>();
 		Set<MHost> activeHosts = new HashSet<>();
 		Map<MHost, List<MInstance>> inactiveInstancesByHost = new HashMap<MHost, List<MInstance>>();

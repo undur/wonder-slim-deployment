@@ -280,7 +280,7 @@ public class WOTaskdHandler {
 	public void sendUpdateSiteToWotaskds() {
 		startReading();
 		try {
-			final NSMutableArray hostArray = siteConfig().hostArray();
+			final List<MHost> hostArray = siteConfig().hostArray();
 
 			if( hostArray.size() != 0 ) {
 				final NSMutableDictionary updateRequestDictionary = createUpdateRequestDictionary( siteConfig(), null, null, null, "configure" );
