@@ -171,7 +171,7 @@ public class FoundationCoder {
 	 * — boxed {@code Integer}, {@code Boolean}, {@code String}, etc., not primitives).
 	 *
 	 * <p>List-of-record components are decoded element-by-element: a component of type
-	 * {@code List<MHostDto>} pulls each element of the dict's {@code NSArray} through
+	 * {@code List<MHostDto>} pulls each element of the dict's inner list through
 	 * {@code MHostDto}'s decoder.
 	 *
 	 * @param dict        decoded dict (as produced by {@code decodeRootObject*}). Must be a

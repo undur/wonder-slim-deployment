@@ -335,12 +335,11 @@ class FoundationCoderTest {
 			assertEquals( List.of( "first", "second" ), decoded );
 		}
 
-		@org.junit.jupiter.api.Disabled(
-				"Disabled while the decoder returns NSMutableDictionary (hash-ordered) "
-				+ "for drop-in compatibility with the reference. Re-enable once the M* "
-				+ "data model migration is complete and the decoder switches to LinkedHashMap." )
 		@Test
-		void preservesInsertionOrderFromOurOwnOutput() {
+		void decodedMapPreservesDocumentOrder() {
+			// The encoder emits dict keys alphabetically, and the decoder preserves
+			// document order, so a round trip lands in alphabetical order regardless
+			// of the input's insertion order.
 			final Map<String,Object> mine = new LinkedHashMap<>();
 			mine.put( "z", 1 );
 			mine.put( "m", 2 );
@@ -348,9 +347,9 @@ class FoundationCoderTest {
 			final String xml = coder.encodeRootObjectForKey( mine, "d" );
 			final Map<?,?> decoded = (Map<?,?>)decode( xml );
 			final Iterator<?> it = decoded.keySet().iterator();
-			assertEquals( "z", it.next() );
-			assertEquals( "m", it.next() );
 			assertEquals( "a", it.next() );
+			assertEquals( "m", it.next() );
+			assertEquals( "z", it.next() );
 		}
 	}
 

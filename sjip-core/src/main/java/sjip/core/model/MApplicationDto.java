@@ -2,8 +2,8 @@ package sjip.core.model;
 
 /**
  * Wire-shape representation of an {@link MApplication}: a plain data record whose
- * component names map 1:1 to the {@code NSDictionary} keys carried on the deployment
- * wire protocol and persisted in {@code SiteConfig.xml}.
+ * component names map 1:1 to the dictionary keys carried on the deployment wire
+ * protocol and persisted in {@code SiteConfig.xml}.
  *
  * <p>All components are nullable. A given envelope may carry only a small subset
  * (e.g. an {@code addApplication} request typically just sets {@code name}); the
