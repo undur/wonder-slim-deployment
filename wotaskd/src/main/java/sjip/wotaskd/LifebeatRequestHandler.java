@@ -24,7 +24,6 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.foundation.NSArray;
 
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
@@ -78,7 +77,8 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// http://localhost:1085/cgi-bin/WebObjects/wotaskd.woa/wlb?<notification name>&<instance name>&<hostname>&<port>
 		// <notification name> = "hasStarted", "lifebeat", "willStop", "willCrash"
 
-		final List<String> values = NSArray.componentsSeparatedByString( aRequest.queryString(), "&" );
+		final String queryString = aRequest.queryString();
+		final List<String> values = queryString == null ? null : List.of( queryString.split( "&", -1 ) );
 
 		if( (values == null) || (values.size() != 4) ) {
 			appSiteConfig().globalErrorDictionary.put( aRequest.queryString(), (_hostName + ": Received bad lifebeat: " + aRequest.queryString()) );

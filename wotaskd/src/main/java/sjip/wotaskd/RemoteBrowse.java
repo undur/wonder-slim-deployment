@@ -23,16 +23,12 @@ import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSMutableArray;
 
 import sjip.core.MUtil;
 import sjip.x.FHosts;
 import sjip.x.FoundationCoder;
 
 public class RemoteBrowse extends WODirectAction {
-
-	private static final Object[] FILE_KEYS = new Object[] { "file", "fileType", "fileSize" };
 
 	private final String[] rootStrings;
 	private final boolean singleRoot;
@@ -50,11 +46,10 @@ public class RemoteBrowse extends WODirectAction {
 			rootStrings[i] = Path.of( roots[i].getAbsolutePath() ).normalize().toString();
 		}
 
-		final NSMutableArray rootArray = new NSMutableArray( rootStrings.length );
+		final List<Map<String, Object>> rootArray = new ArrayList<>( rootStrings.length );
 
 		for( int i = 0; i < rootStrings.length; i++ ) {
-			final NSDictionary aFileDict = new NSDictionary( new Object[] { rootStrings[i], MUtil.FILE_TYPE_DIRECTORY, Long.valueOf( 0 ) }, FILE_KEYS );
-			rootArray.addObject( aFileDict );
+			rootArray.add( Map.of( "file", rootStrings[i], "fileType", MUtil.FILE_TYPE_DIRECTORY, "fileSize", Long.valueOf( 0 ) ) );
 		}
 
 		xmlRoots = new FoundationCoder().encodeRootObjectForKey( rootArray, "pathArray" ) + " \r\n";

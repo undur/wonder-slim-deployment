@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +23,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 
 /**
  * Reads and writes the WebObjects-flavoured XML format used by the deployment wire protocol
@@ -37,9 +36,9 @@ import com.webobjects.foundation.NSMutableDictionary;
  * <h2>Supported values</h2>
  * <p>On encode the input tree must consist of:
  * <ul>
- *   <li>{@link Map} → emitted as {@code <key type="NSDictionary">…}. Iteration order
- *       on the wire is the {@code Map}'s own iteration order, so a {@link java.util.LinkedHashMap}
- *       (or an {@code NSMutableDictionary}, see below) is the recommended carrier.</li>
+ *   <li>{@link Map} → emitted as {@code <key type="NSDictionary">…}. Wire order is the
+ *       {@code Map}'s own iteration order, so a {@link java.util.LinkedHashMap} is the
+ *       recommended carrier.</li>
  *   <li>{@link List} → emitted as {@code <key type="NSArray">…}.</li>
  *   <li>{@link String} → emitted as {@code <key type="NSString">…} with XML-escaped content.</li>
  *   <li>{@link Number} subclasses ({@link Integer}, {@link Long}, {@link Short}, {@link Byte},
@@ -50,13 +49,9 @@ import com.webobjects.foundation.NSMutableDictionary;
  *   <li>{@code null} → emitted as {@code <key type="?">null</key>}.</li>
  * </ul>
  *
- * <h2>Decode return types — temporary regression</h2>
- * <p>The decoder presently returns {@code NSMutableDictionary} for dictionaries and
- * {@code NSMutableArray} for arrays so it can act as a true drop-in replacement for the
- * reference decoder while existing callers still cast to those Foundation types. The intent
- * is to flip the return types to {@link java.util.LinkedHashMap} and {@link java.util.ArrayList}
- * once the {@code M*} data-model migration off Foundation is done — see the {@code FIXME}
- * markers in {@link #decodeDictionary} and {@link #decodeArray}.
+ * <h2>Decode return types</h2>
+ * <p>Dictionaries decode to {@link java.util.LinkedHashMap}, arrays to
+ * {@link java.util.ArrayList}. Insertion order matches document order.
  *
  * <h2>Lossy round-tripping you should know about</h2>
  * <ul>
@@ -424,12 +419,7 @@ public class FoundationCoder {
 	}
 
 	private Map<String, Object> decodeDictionary( Element element ) {
-		// FIXME: The decoder should return a plain LinkedHashMap once the M* data model
-		// no longer relies on NSMutableDictionary. Until that migration is done we hand
-		// back an NSMutableDictionary so existing (NSDictionary) casts on decoded values
-		// continue to work as a drop-in replacement for _JavaMonitorDecoder.
-		// final Map<String,Object> map = new LinkedHashMap<>();
-		final Map<String, Object> map = new NSMutableDictionary<>();
+		final Map<String, Object> map = new LinkedHashMap<>();
 		final NodeList children = element.getChildNodes();
 		for( int i = 0; i < children.getLength(); i++ ) {
 			final Node child = children.item( i );
@@ -443,10 +433,7 @@ public class FoundationCoder {
 	}
 
 	private List<Object> decodeArray( Element element ) {
-		// FIXME: The decoder should return a plain ArrayList once the M* data model
-		// no longer relies on NSMutableArray. See the matching note on decodeDictionary.
-		// final List<Object> list = new ArrayList<>();
-		final List<Object> list = new NSMutableArray<>();
+		final List<Object> list = new ArrayList<>();
 		final NodeList children = element.getChildNodes();
 		for( int i = 0; i < children.getLength(); i++ ) {
 			final Node child = children.item( i );

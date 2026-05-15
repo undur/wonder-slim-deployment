@@ -255,17 +255,15 @@ class FoundationPropertyListSerializationTest {
 		}
 
 		@Test
-		void decoderReturnsNSMutableDictionaryForCompat() {
-			// Drop-in compatibility: existing call sites cast to NSDictionary, so the
-			// parser must hand back NSMutableDictionary while the M* migration is ongoing.
+		void decoderReturnsLinkedHashMap() {
 			final Object parsed = FoundationPropertyListSerialization.propertyListFromString( "{ k = v; }" );
-			assertInstanceOf( NSDictionary.class, parsed );
+			assertInstanceOf( LinkedHashMap.class, parsed );
 		}
 
 		@Test
-		void decoderReturnsNSMutableArrayForCompat() {
+		void decoderReturnsArrayList() {
 			final Object parsed = FoundationPropertyListSerialization.propertyListFromString( "( a, b )" );
-			assertInstanceOf( NSArray.class, parsed );
+			assertInstanceOf( ArrayList.class, parsed );
 		}
 
 		@Test
@@ -347,13 +345,12 @@ class FoundationPropertyListSerializationTest {
 		}
 
 		@Test
-		void roundTripThroughOursIsStableUnderReference() {
-			// Parse with ours, re-encode with the reference, parse with the reference.
-			// Should land at an equivalent tree — confirms our parser produces output
-			// the reference encoder accepts as its own.
+		void ourParserOutputRoundTripsThroughOurEncoder() {
+			// Parse, re-encode, re-parse — all with ours. Confirms the tree shape we
+			// produce is one our encoder accepts and that the round-trip is lossless.
 			final Object parsed = FoundationPropertyListSerialization.propertyListFromString( statisticsPlist );
-			final String reEncoded = NSPropertyListSerialization.stringFromPropertyList( parsed );
-			final Object reParsed = NSPropertyListSerialization.propertyListFromString( reEncoded );
+			final String reEncoded = FoundationPropertyListSerialization.stringFromPropertyList( parsed );
+			final Object reParsed = FoundationPropertyListSerialization.propertyListFromString( reEncoded );
 			assertEquals( asJavaMaps( reParsed ), asJavaMaps( parsed ) );
 		}
 

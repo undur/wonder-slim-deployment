@@ -1,10 +1,9 @@
 package sjip.monitor.util;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-
-import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSMutableDictionary;
+import java.util.Map;
 
 import sjip.core.model.MHost;
 import sjip.core.model.MSiteConfig;
@@ -97,10 +96,12 @@ public class WOTaskdComms {
 	}
 
 	private static String syncRequestContent( final MSiteConfig siteConfig ) {
-		final NSMutableDictionary<String, MSiteConfigDto> data = new NSMutableDictionary<>( siteConfig.toDto(), "SiteConfig" );
-		final NSMutableDictionary<String, NSMutableDictionary<String, MSiteConfigDto>> updateWotaskd = new NSMutableDictionary<>( data, "sync" );
-		final NSMutableDictionary<String, NSMutableDictionary<String, NSMutableDictionary<String, MSiteConfigDto>>> monitorRequest = new NSMutableDictionary<>( updateWotaskd, "updateWotaskd" );
-		final String syncRequestString = new FoundationCoder().encodeRootObjectForKey( monitorRequest, "monitorRequest" );
-		return syncRequestString;
+		final Map<String, Object> data = new LinkedHashMap<>();
+		data.put( "SiteConfig", siteConfig.toDto() );
+		final Map<String, Object> updateWotaskd = new LinkedHashMap<>();
+		updateWotaskd.put( "sync", data );
+		final Map<String, Object> monitorRequest = new LinkedHashMap<>();
+		monitorRequest.put( "updateWotaskd", updateWotaskd );
+		return new FoundationCoder().encodeRootObjectForKey( monitorRequest, "monitorRequest" );
 	}
 }

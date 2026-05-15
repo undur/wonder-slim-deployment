@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 
 /**
  * Reads and writes the OpenStep ASCII property-list format used by the WebObjects deployment
@@ -37,10 +35,8 @@ import com.webobjects.foundation.NSMutableDictionary;
  * <p>{@code null} is rejected — OpenStep plists have no null type.
  *
  * <h2>Decode return types</h2>
- * <p>The parser returns {@link NSMutableDictionary} / {@link NSMutableArray} for dictionaries
- * and arrays so existing call sites that cast to those Foundation types keep working. The
- * intent is to flip these to {@link LinkedHashMap} / {@link ArrayList} once the data-model
- * migration off Foundation is complete — same plan as {@link FoundationCoder}.
+ * <p>The parser returns {@link LinkedHashMap} for dictionaries and {@link ArrayList} for
+ * arrays. Strings (quoted or bare) come back as {@link String}.
  *
  * <h2>Parser permissiveness</h2>
  * <p>Although the writer always quotes, the parser accepts both quoted strings and bare
@@ -172,8 +168,8 @@ public class FoundationPropertyListSerialization {
 
 	/**
 	 * Parses an OpenStep ASCII property list and returns the resulting tree. Dictionaries
-	 * and arrays come back as {@link NSMutableDictionary} / {@link NSMutableArray} (see the
-	 * note on the class), strings (quoted or bare) come back as {@link String}.
+	 * come back as {@link LinkedHashMap}, arrays as {@link ArrayList}, strings (quoted or
+	 * bare) as {@link String}.
 	 *
 	 * @throws IllegalArgumentException if {@code text} is not a well-formed plist.
 	 */
@@ -226,7 +222,7 @@ public class FoundationPropertyListSerialization {
 
 		Map<String, Object> parseDictionary() {
 			expect( '{' );
-			final Map<String, Object> map = new NSMutableDictionary<>();
+			final Map<String, Object> map = new LinkedHashMap<>();
 			skipWhitespaceAndComments();
 			while( !atEnd() && src.charAt( pos ) != '}' ) {
 				final Object keyObj = parseValue();
@@ -256,7 +252,7 @@ public class FoundationPropertyListSerialization {
 
 		List<Object> parseArray() {
 			expect( '(' );
-			final List<Object> list = new NSMutableArray<>();
+			final List<Object> list = new ArrayList<>();
 			skipWhitespaceAndComments();
 			while( !atEnd() && src.charAt( pos ) != ')' ) {
 				list.add( parseValue() );

@@ -12,8 +12,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.webobjects.foundation.NSDictionary;
-
 import sjip.x.FoundationCoder;
 
 /**
@@ -84,10 +82,12 @@ public final class WotaskdClient {
 			_report.wireReceive( "wotaskd → test (HTTP " + response.statusCode() + ")", responseXml != null ? responseXml : "(empty body)" );
 		}
 
-		final NSDictionary responseDict;
+		final Map<String, Object> responseDict;
 		if( responseXml != null && !responseXml.isEmpty() ) {
 			try {
-				responseDict = (NSDictionary) new FoundationCoder().decodeRootObjectFromString( responseXml );
+				@SuppressWarnings("unchecked")
+				final Map<String, Object> decoded = (Map<String, Object>) new FoundationCoder().decodeRootObjectFromString( responseXml );
+				responseDict = decoded;
 			}
 			catch( final Exception e ) {
 				throw new IOException( "Failed to decode wotaskd response: " + e + "\nBody was: " + responseXml, e );
@@ -122,5 +122,5 @@ public final class WotaskdClient {
 			String requestXml,
 			int statusCode,
 			String responseXml,
-			NSDictionary responseDict ) {}
+			Map<String, Object> responseDict ) {}
 }

@@ -5,9 +5,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-
-import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSDictionary;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Catch-all utility holder for cross-cutting framework-side helpers that don't yet have
@@ -54,10 +53,9 @@ public class XUtil {
 	 * not be parsed and downstream code expects an already-parsed dict it can treat as if
 	 * parsing had succeeded.
 	 */
-	public static NSDictionary<String, Object> errorResponseDict( final String rootKey, final String message ) {
-		final NSArray<Object> messages = new NSArray<>( message );
-		final NSDictionary<String, Object> inner = new NSDictionary<>( messages, "errorResponse" );
-		return new NSDictionary<>( inner, rootKey );
+	public static Map<String, Object> errorResponseDict( final String rootKey, final String message ) {
+		final Map<String, Object> inner = Map.of( "errorResponse", List.of( message ) );
+		return Map.of( rootKey, inner );
 	}
 
 	/**
@@ -73,8 +71,7 @@ public class XUtil {
 	 * }
 	 */
 	public static String errorResponseXML( final String rootKey, final String message ) {
-		final NSArray<Object> messages = new NSArray<>( message );
-		final NSDictionary<String, Object> inner = new NSDictionary<>( messages, "errorResponse" );
+		final Map<String, Object> inner = Map.of( "errorResponse", List.of( message ) );
 		return new FoundationCoder().encodeRootObjectForKey( inner, rootKey );
 	}
 

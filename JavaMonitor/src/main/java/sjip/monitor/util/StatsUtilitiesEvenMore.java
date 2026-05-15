@@ -1,11 +1,9 @@
 package sjip.monitor.util;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-
-import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
+import java.util.Map;
 
 import sjip.core.model.MApplication;
 import sjip.core.model.MInstance;
@@ -21,25 +19,25 @@ public class StatsUtilitiesEvenMore {
 		return FoundationPropertyListSerialization.stringFromPropertyList( StatsUtilitiesEvenMore.statistics() );
 	}
 
-	private static NSArray statistics() {
+	private static List<Map<String, Object>> statistics() {
 		final WOTaskdHandler handler = new WOTaskdHandler();
 
-		final NSMutableArray stats = new NSMutableArray();
+		final List<Map<String, Object>> stats = new ArrayList<>();
 
 		handler.whileReading( () -> {
 			for( final MApplication app : WOTaskdHandler.siteConfig().applicationArray() ) {
-				// FIXME: Aren't we redundantly fetching the same info multiple times here? // Hugi 2024-11-08 
+				// FIXME: Aren't we redundantly fetching the same info multiple times here? // Hugi 2024-11-08
 				handler.getInstanceStatusForHosts( app.hostArray() );
-				stats.addObject( statistics( app ) );
+				stats.add( statistics( app ) );
 			}
 		} );
 
 		return stats;
 	}
 
-	private static NSDictionary statistics( final MApplication app ) {
+	private static Map<String, Object> statistics( final MApplication app ) {
 
-		final NSDictionary<String, Object> result = new NSMutableDictionary<>();
+		final Map<String, Object> result = new LinkedHashMap<>();
 		result.put( "applicationName", app.name() );
 
 		final List<MInstance> allInstances = app.instanceArray();

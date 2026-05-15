@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.foundation.NSDictionary;
 
 import sjip.core.IInstanceController;
 import sjip.core.MUtil;
@@ -769,7 +768,7 @@ public class MSiteConfig extends MObject {
 		// rethrow as RuntimeException — same effective behaviour as before, with a
 		// proper cause chain.
 		if( !fileForSiteConfig().exists() ) {
-			final String emptySiteConfig = new FoundationCoder().encodeRootObjectForKey( NSDictionary.EmptyDictionary, "SiteConfig" );
+			final String emptySiteConfig = new FoundationCoder().encodeRootObjectForKey( Map.of(), "SiteConfig" );
 			try {
 				Files.writeString( fileForSiteConfig().toPath(), emptySiteConfig, StandardCharsets.UTF_8 );
 			}

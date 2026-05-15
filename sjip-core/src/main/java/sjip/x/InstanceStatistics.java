@@ -1,9 +1,7 @@
 package sjip.x;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSMutableDictionary;
 
 /**
  * FIXME: We need to change this to use the actual types we use rather than Strings // Hugi 2026-05-04
@@ -19,8 +17,8 @@ public class InstanceStatistics {
 	/**
 	 * FIXME: Purely here to perform serialization for sending the data over the wire // Hugi 2026-05-04
 	 */
-	public NSDictionary<String, String> toDictionary() {
-		final NSMutableDictionary<String, String> m = new NSMutableDictionary<>();
+	public Map<String, String> toDictionary() {
+		final Map<String, String> m = new LinkedHashMap<>();
 		put( m, "transactions", transactions );
 		put( m, "activeSessions", activeSessions );
 		put( m, "avgTransactionTime", avgTransactionTime );
@@ -32,7 +30,7 @@ public class InstanceStatistics {
 	/**
 	 * Only for adding data to the dictionary in a null-safe way
 	 */
-	private static void put( Map map, String key, String value ) {
+	private static void put( Map<String, String> map, String key, String value ) {
 		if( value != null ) {
 			map.put( key, value );
 		}

@@ -26,8 +26,9 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -38,7 +39,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.IInstanceController;
 import sjip.core.MUtil;
@@ -130,7 +130,7 @@ public class InstanceController implements IInstanceController {
 	 * this whole subsystem is dead weight. It only matters when something runs a WO app
 	 * outside wotaskd's control.
 	 */
-	private final NSMutableDictionary _unknownApplications = new NSMutableDictionary();
+	private final Map<String, Map<String, Instant>> _unknownApplications = new LinkedHashMap<>();
 	private final ReentrantReadWriteLock _unknownAppLock = new ReentrantReadWriteLock();
 
 	/**
@@ -196,12 +196,14 @@ public class InstanceController implements IInstanceController {
 			Instant currentTime = Instant.now();
 			// Don't regenerate the localhost list for random applications
 			if( FHosts.isConfiguredHostAddress( InetAddress.getByName( host ), false ) ) {
-				NSMutableDictionary appDict = (NSMutableDictionary)_unknownApplications.valueForKey( name );
+				Map<String, Instant> appDict = _unknownApplications.get( name );
 				if( appDict != null ) {
-					appDict.takeValueForKey( currentTime, port );
+					appDict.put( port, currentTime );
 				}
 				else {
-					_unknownApplications.takeValueForKey( new NSMutableDictionary( currentTime, port ), name );
+					final Map<String, Instant> created = new LinkedHashMap<>();
+					created.put( port, currentTime );
+					_unknownApplications.put( name, created );
 				}
 			}
 		}
@@ -226,26 +228,26 @@ public class InstanceController implements IInstanceController {
 		_unknownAppLock.writeLock().lock();
 
 		try {
-			NSMutableDictionary unknownApps = _unknownApplications;
+			final Map<String, Map<String, Instant>> unknownApps = _unknownApplications;
 			// Should make this configurable?
 			Instant cutOffDate = Instant.now().minusSeconds( 45 );
 
-			List<String> unknownAppKeys = unknownApps.allKeys();
+			final List<String> unknownAppKeys = new ArrayList<>( unknownApps.keySet() );
 
 			for( String unknownAppKey : unknownAppKeys ) {
-				NSMutableDictionary appDict = (NSMutableDictionary)unknownApps.valueForKey( unknownAppKey );
+				Map<String, Instant> appDict = unknownApps.get( unknownAppKey );
 
 				if( appDict != null ) {
-					List<String> appDictKeys = appDict.allKeys();
+					final List<String> appDictKeys = new ArrayList<>( appDict.keySet() );
 
 					for( String appDictKey : appDictKeys ) {
-						Instant lastLifebeat = (Instant)appDict.valueForKey( appDictKey );
+						Instant lastLifebeat = appDict.get( appDictKey );
 						if( (lastLifebeat != null) && (lastLifebeat.isBefore( cutOffDate )) ) {
-							appDict.removeObjectForKey( appDictKey );
+							appDict.remove( appDictKey );
 						}
 					}
-					if( appDict.count() == 0 ) {
-						unknownApps.removeObjectForKey( unknownAppKey );
+					if( appDict.isEmpty() ) {
+						unknownApps.remove( unknownAppKey );
 					}
 				}
 			}
@@ -276,23 +278,22 @@ public class InstanceController implements IInstanceController {
 		_unknownAppLock.readLock().lock();
 
 		try {
-			NSMutableDictionary unknownApps = _unknownApplications;
+			final Map<String, Map<String, Instant>> unknownApps = _unknownApplications;
 			sb = new StringBuilder();
 
-			if( (unknownApps.count() == 0) ) {
+			if( unknownApps.isEmpty() ) {
 				return sb.toString();
 			}
 
-			for( Enumeration e = unknownApps.keyEnumerator(); e.hasMoreElements(); ) {
-				String appName = (String)e.nextElement();
-				NSMutableDictionary appDict = (NSMutableDictionary)unknownApps.valueForKey( appName );
+			for( Map.Entry<String, Map<String, Instant>> appEntry : unknownApps.entrySet() ) {
+				final String appName = appEntry.getKey();
+				final Map<String, Instant> appDict = appEntry.getValue();
 
 				sb.append( "  <application name=\"" );
 				sb.append( appName );
 				sb.append( "\">\n" );
 
-				for( Enumeration e2 = appDict.keyEnumerator(); e2.hasMoreElements(); ) {
-					String port = (String)e2.nextElement();
+				for( String port : appDict.keySet() ) {
 					sb.append( "    <instance" );
 
 					sb.append( " id=\"-" );
