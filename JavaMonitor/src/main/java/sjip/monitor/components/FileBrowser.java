@@ -34,13 +34,13 @@ import com.webobjects.appserver.WOResponse;
 import sjip.core.MUtil;
 import sjip.core.SjipException;
 import sjip.core.model.MHost;
+import sjip.core.x.FoundationCoder;
+import sjip.core.x.ResponseWrapper;
+import sjip.core.x.XUtil;
 import sjip.monitor.MonitorComponent;
 import sjip.monitor.components.FileBrowser.RemoteBrowseClient.RemoteFile;
 import sjip.monitor.components.FileBrowser.RemoteBrowseClient.RemoteResult;
 import sjip.monitor.util.WOTaskdHandler;
-import sjip.x.FoundationCoder;
-import sjip.x.ResponseWrapper;
-import sjip.x.XUtil;
 
 public class FileBrowser extends MonitorComponent {
 

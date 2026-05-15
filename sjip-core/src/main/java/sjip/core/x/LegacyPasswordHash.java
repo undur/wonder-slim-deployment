@@ -1,4 +1,4 @@
-package sjip.x;
+package sjip.core.x;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

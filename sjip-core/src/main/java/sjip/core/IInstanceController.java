@@ -13,7 +13,7 @@ SUCH DAMAGE.
 package sjip.core;
 
 import sjip.core.model.MInstance;
-import sjip.x.ResponseWrapper;
+import sjip.core.x.ResponseWrapper;
 
 public interface IInstanceController {
 

@@ -29,6 +29,8 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import sjip.core.x.FoundationCoder;
+
 
 /**
  * Cross-checks {@link FoundationCoder} against Apple's reference

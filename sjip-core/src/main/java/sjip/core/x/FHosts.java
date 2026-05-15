@@ -1,4 +1,4 @@
-package sjip.x;
+package sjip.core.x;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;

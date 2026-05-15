@@ -1,4 +1,4 @@
-package sjip.x;
+package sjip.core.x;
 
 import java.lang.reflect.Field;
 import java.net.InetAddress;

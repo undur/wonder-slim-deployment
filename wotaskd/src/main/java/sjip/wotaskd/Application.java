@@ -8,7 +8,7 @@ import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.routes.RouteTable;
 import sjip.core.model.MSiteConfig;
-import sjip.x.FProperties;
+import sjip.core.x.FProperties;
 
 public class Application extends ERXApplication {
 

@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.util.List;
 
 import sjip.core.model.MInstance;
-import sjip.x.XUtil;
+import sjip.core.x.XUtil;
 
 /**
  * Home for some experimental functionality (that will probably get a different home later

@@ -20,8 +20,8 @@ import com.webobjects.appserver.WOContext;
 
 import er.extensions.appserver.ERXRedirect;
 import sjip.core.MUtil;
+import sjip.core.x.XUtil;
 import sjip.monitor.MonitorComponent;
-import sjip.x.XUtil;
 
 public class ConfigurePage extends MonitorComponent {
 

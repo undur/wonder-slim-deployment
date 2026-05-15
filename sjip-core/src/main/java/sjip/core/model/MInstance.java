@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
 
 
 import sjip.core.MUtil;
-import sjip.x.FApplication;
-import sjip.x.FNotifications;
-import sjip.x.InstanceStatistics;
+import sjip.core.x.FApplication;
+import sjip.core.x.FNotifications;
+import sjip.core.x.InstanceStatistics;
 
 public class MInstance extends MObject {
 

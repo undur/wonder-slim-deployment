@@ -25,6 +25,8 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
 
+import sjip.core.x.FoundationPropertyListSerialization;
+
 
 /**
  * Cross-checks {@link FoundationPropertyListSerialization} against Apple's reference

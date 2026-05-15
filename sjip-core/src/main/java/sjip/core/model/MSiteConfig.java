@@ -40,12 +40,12 @@ import org.slf4j.LoggerFactory;
 import sjip.core.IInstanceController;
 import sjip.core.MUtil;
 import sjip.core.SjipException;
-import sjip.x.AdaptorConfigSerialization;
-import sjip.x.FApplication;
-import sjip.x.FHosts;
-import sjip.x.FProperties;
-import sjip.x.FoundationCoder;
-import sjip.x.LegacyPasswordHash;
+import sjip.core.x.AdaptorConfigSerialization;
+import sjip.core.x.FApplication;
+import sjip.core.x.FHosts;
+import sjip.core.x.FProperties;
+import sjip.core.x.FoundationCoder;
+import sjip.core.x.LegacyPasswordHash;
 
 public class MSiteConfig extends MObject {
 

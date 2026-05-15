@@ -21,10 +21,10 @@ import com.webobjects.foundation.NSArray;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.routes.RouteTable;
+import sjip.core.x.FProperties;
 import sjip.monitor.admin.AdminAction;
 import sjip.monitor.test.TestDirectAction;
 import sjip.monitor.util.WOTaskdHandler;
-import sjip.x.FProperties;
 
 public class Application extends ERXApplication {
 

@@ -25,8 +25,8 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
 import sjip.core.MUtil;
-import sjip.x.FHosts;
-import sjip.x.FoundationCoder;
+import sjip.core.x.FHosts;
+import sjip.core.x.FoundationCoder;
 
 public class RemoteBrowse extends WODirectAction {
 

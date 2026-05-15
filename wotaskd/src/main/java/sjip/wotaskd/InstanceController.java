@@ -47,11 +47,11 @@ import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
-import sjip.x.FHosts;
-import sjip.x.FProperties;
-import sjip.x.FoundationCoder;
-import sjip.x.ResponseWrapper;
-import sjip.x.XUtil;
+import sjip.core.x.FHosts;
+import sjip.core.x.FProperties;
+import sjip.core.x.FoundationCoder;
+import sjip.core.x.ResponseWrapper;
+import sjip.core.x.XUtil;
 
 public class InstanceController implements IInstanceController {
 

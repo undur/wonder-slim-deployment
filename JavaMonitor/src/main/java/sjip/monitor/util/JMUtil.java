@@ -13,7 +13,7 @@ import java.time.Duration;
 
 import com.webobjects.appserver.WOApplication;
 
-import sjip.x.XUtil;
+import sjip.core.x.XUtil;
 
 /**
  * FIXME: Yet another class to serve as a temporary repository while we pull functionality from the UI // Hugi 2024-10-31

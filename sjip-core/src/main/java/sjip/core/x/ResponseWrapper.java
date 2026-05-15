@@ -1,4 +1,4 @@
-package sjip.x;
+package sjip.core.x;
 
 import java.net.http.HttpHeaders;
 import java.util.Optional;

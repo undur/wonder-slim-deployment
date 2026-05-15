@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sjip.core.model.MSiteConfig;
-import sjip.x.FProperties;
+import sjip.core.x.FProperties;
 
 public class AppTaskd {
 

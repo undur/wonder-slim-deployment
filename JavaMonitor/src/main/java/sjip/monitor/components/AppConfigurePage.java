@@ -21,8 +21,8 @@ import sjip.core.MUtil;
 import sjip.core.model.MApplication;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
+import sjip.core.x.XUtil;
 import sjip.monitor.MonitorComponent.AppComponent;
-import sjip.x.XUtil;
 
 public class AppConfigurePage extends AppComponent {
 

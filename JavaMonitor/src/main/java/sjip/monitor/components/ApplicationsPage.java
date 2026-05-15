@@ -23,9 +23,9 @@ import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 
 import sjip.core.model.MApplication;
+import sjip.core.x.XUtil;
 import sjip.monitor.MonitorComponent;
 import sjip.monitor.components.ConfirmationPage.ConfirmationDelegate;
-import sjip.x.XUtil;
 
 public class ApplicationsPage extends MonitorComponent {
 

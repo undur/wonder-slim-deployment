@@ -27,7 +27,7 @@ import com.webobjects.appserver.WOResponse;
 
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
-import sjip.x.FHosts;
+import sjip.core.x.FHosts;
 
 public class LifebeatRequestHandler extends WORequestHandler {
 

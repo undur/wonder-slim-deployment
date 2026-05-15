@@ -1,4 +1,4 @@
-package sjip.x;
+package sjip.core.x;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import org.simplejavamail.mailer.internal.MailerRegularBuilderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sjip.x.Emailer.EmailMessage.EmailAttachment;
+import sjip.core.x.Emailer.EmailMessage.EmailAttachment;
 
 /**
  * A mailer that uses the SimpleJavaMail library to deliver emails.

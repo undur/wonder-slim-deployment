@@ -12,10 +12,10 @@ import com.webobjects.appserver.WOResponse;
 
 import sjip.core.MUtil;
 import sjip.core.model.MHost;
+import sjip.core.x.XUtil;
 import sjip.monitor.MonitorComponent;
 import sjip.monitor.components.ConfirmationPage.ConfirmationDelegate;
 import sjip.monitor.util.JMUtil;
-import sjip.x.XUtil;
 
 public class HostsPage extends MonitorComponent {
 

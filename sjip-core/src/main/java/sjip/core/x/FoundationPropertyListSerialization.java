@@ -1,4 +1,4 @@
-package sjip.x;
+package sjip.core.x;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

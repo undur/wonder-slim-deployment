@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
 
 
 import sjip.core.MUtil;
-import sjip.x.ResponseWrapper;
-import sjip.x.XUtil;
+import sjip.core.x.ResponseWrapper;
+import sjip.core.x.XUtil;
 
 public class MHost extends MObject {
 

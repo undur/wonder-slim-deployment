@@ -7,7 +7,7 @@ import java.util.Map;
 
 import sjip.core.model.MApplication;
 import sjip.core.model.MInstance;
-import sjip.x.FoundationPropertyListSerialization;
+import sjip.core.x.FoundationPropertyListSerialization;
 
 /**
  * FIXME: Temporary holder class for some statistics functionality we're moving out of the front end // Hugi 2024-10-26 
