@@ -17,7 +17,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,10 +30,6 @@ import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 
 import sjip.core.MUtil;
 import sjip.core.SjipException;
@@ -60,15 +56,18 @@ public class DirectAction extends WODirectAction {
 
 	private static final String _hostName = WOApplication.application().host();
 
-	private static final Object[] HOST_QUERY_KEYS = { "runningInstances", "processorType", "operatingSystem" };
-	private static final Object[] APP_QUERY_KEYS = { "name", "runningInstances" };
-	private static final Object[] INSTANCE_QUERY_KEYS = { "applicationName", "id", "host", "port", "runningState", "refusingNewSessions", "statistics", "deaths", "nextShutdown" };
-	private static final NSDictionary SUCCESS_ELEMENT = new NSDictionary( new Object[] { Boolean.TRUE }, new Object[] { "success" } );
-	private static final Object[] ERROR_KEYS = { "success", "errorMessage" };
+	private static final Map<String, Object> SUCCESS_ELEMENT = Map.of( "success", Boolean.TRUE );
 	private static final String XML_ACCESS_DENIED = XUtil.errorResponseXML( "monitorResponse", _hostName + ": wotaskd may not be accessed through a Web server - Access Denied" );
 	private static final String XML_INVALID_PASSWORD = XUtil.errorResponseXML( "monitorResponse", _hostName + ": Invalid Password - Access Denied" );
 	private static final String XML_INVALID_XML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" );
-	private static final NSDictionary ARGUMENT_NUMBER_COMMAND_ERROR = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" }, ERROR_KEYS );
+	private static final Map<String, Object> ARGUMENT_NUMBER_COMMAND_ERROR = errorElement( _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" );
+
+	private static Map<String, Object> errorElement( String message ) {
+		final Map<String, Object> m = new LinkedHashMap<>();
+		m.put( "success", Boolean.FALSE );
+		m.put( "errorMessage", message );
+		return m;
+	}
 	private static final DateTimeFormatter HTTP_DATE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME.withZone( ZoneOffset.UTC );
 
 	public DirectAction( WORequest aRequest ) {
@@ -109,9 +108,11 @@ public class DirectAction extends WODirectAction {
 			appTaskd.lock().readLock().unlock();
 		}
 
-		NSDictionary requestDict;
+		Map<String, Object> requestDict;
 		try {
-			requestDict = (NSDictionary)new FoundationCoder().decodeRootObject( request().content().bytes() );
+			@SuppressWarnings("unchecked")
+			final Map<String, Object> decoded = (Map<String, Object>)new FoundationCoder().decodeRootObject( request().content().bytes() );
+			requestDict = decoded;
 		}
 		catch( Exception e ) {
 			logger.error( "Wotaskd monitorRequestAction: Error parsing request" );
@@ -125,25 +126,32 @@ public class DirectAction extends WODirectAction {
 		logger.debug( "@@@@@ monitorRequestAction requestDict: " + requestDict + "\n" );
 
 		// These 2 get used for everything else - the global response object and the global error object.
-		NSMutableDictionary monitorResponse = new NSMutableDictionary();
-		NSMutableArray errorResponse = new NSMutableArray();
+		final Map<String, Object> monitorResponse = new LinkedHashMap<>();
+		final List<String> errorResponse = new ArrayList<>();
 
-		NSDictionary updateWotaskdDict = (NSDictionary)requestDict.valueForKey( "updateWotaskd" );
-		NSArray commandWotaskdArray = (NSArray)requestDict.valueForKey( "commandWotaskd" );
-		String queryWotaskdString = (String)requestDict.valueForKey( "queryWotaskd" );
+		@SuppressWarnings("unchecked")
+		final Map<String, Object> updateWotaskdDict = (Map<String, Object>)requestDict.get( "updateWotaskd" );
+		@SuppressWarnings("unchecked")
+		final List<Object> commandWotaskdArray = (List<Object>)requestDict.get( "commandWotaskd" );
+		final String queryWotaskdString = (String)requestDict.get( "queryWotaskd" );
 
 		// Checking for Updates
 		if( updateWotaskdDict != null ) {
 			appTaskd.lock().writeLock().lock();
 			try {
-				NSMutableDictionary updateWotaskdResponse = new NSMutableDictionary( 2 );
+				final Map<String, Object> updateWotaskdResponse = new LinkedHashMap<>();
 
-				String clearString = (String)updateWotaskdDict.valueForKey( "clear" );
-				NSDictionary overwriteDict = (NSDictionary)updateWotaskdDict.valueForKey( "overwrite" );
-				NSDictionary syncDict = (NSDictionary)updateWotaskdDict.valueForKey( "sync" );
-				NSDictionary removeDict = (NSDictionary)updateWotaskdDict.valueForKey( "remove" );
-				NSDictionary addDict = (NSDictionary)updateWotaskdDict.valueForKey( "add" );
-				NSDictionary configureDict = (NSDictionary)updateWotaskdDict.valueForKey( "configure" );
+				final String clearString = (String)updateWotaskdDict.get( "clear" );
+				@SuppressWarnings("unchecked")
+				final Map<String, Object> overwriteDict = (Map<String, Object>)updateWotaskdDict.get( "overwrite" );
+				@SuppressWarnings("unchecked")
+				final Map<String, Object> syncDict = (Map<String, Object>)updateWotaskdDict.get( "sync" );
+				@SuppressWarnings("unchecked")
+				final Map<String, Object> removeDict = (Map<String, Object>)updateWotaskdDict.get( "remove" );
+				@SuppressWarnings("unchecked")
+				final Map<String, Object> addDict = (Map<String, Object>)updateWotaskdDict.get( "add" );
+				@SuppressWarnings("unchecked")
+				final Map<String, Object> configureDict = (Map<String, Object>)updateWotaskdDict.get( "configure" );
 
 				// FIXME: Dead branch — no client in our codebase sends the "clear" command. The
 				// corresponding send-side (WOTaskdHandler.sendClearToWotaskd) is itself unused.
@@ -152,38 +160,41 @@ public class DirectAction extends WODirectAction {
 				if( clearString != null ) {
 					stopAllInstances();
 					((Application)WOApplication.application()).setSiteConfig( new MSiteConfig( null ) );
-					updateWotaskdResponse.takeValueForKey( SUCCESS_ELEMENT, "clear" );
+					updateWotaskdResponse.put( "clear", SUCCESS_ELEMENT );
 				}
 				else if( overwriteDict != null ) {
 					stopAllInstances();
 					@SuppressWarnings("unchecked")
-					final Map<String, Object> siteConfigDict = (Map<String, Object>)overwriteDict.valueForKey( "SiteConfig" );
+					final Map<String, Object> siteConfigDict = (Map<String, Object>)overwriteDict.get( "SiteConfig" );
 					final MSiteConfigDto dto = new FoundationCoder().decodeRecord( siteConfigDict, MSiteConfigDto.class );
 					((Application)WOApplication.application()).setSiteConfig( new MSiteConfig( dto ) );
-					updateWotaskdResponse.takeValueForKey( SUCCESS_ELEMENT, "overwrite" );
+					updateWotaskdResponse.put( "overwrite", SUCCESS_ELEMENT );
 				}
 				else if( syncDict != null ) {
-					NSDictionary newConfig = (NSDictionary)syncDict.valueForKey( "SiteConfig" );
+					@SuppressWarnings("unchecked")
+					final Map<String, Object> newConfig = (Map<String, Object>)syncDict.get( "SiteConfig" );
 					syncSiteConfig( newConfig );
 				}
 				else {
 					if( removeDict != null ) {
-						NSMutableDictionary removeResponse = new NSMutableDictionary( 1 );
+						final Map<String, Object> removeResponse = new LinkedHashMap<>();
 
-						NSArray hostArray = (NSArray)removeDict.valueForKey( "hostArray" );
-						NSArray applicationArray = (NSArray)removeDict.valueForKey( "applicationArray" );
-						NSArray instanceArray = (NSArray)removeDict.valueForKey( "instanceArray" );
+						@SuppressWarnings("unchecked")
+						final List<Map<String, Object>> hostArray = (List<Map<String, Object>>)removeDict.get( "hostArray" );
+						@SuppressWarnings("unchecked")
+						final List<Map<String, Object>> applicationArray = (List<Map<String, Object>>)removeDict.get( "applicationArray" );
+						@SuppressWarnings("unchecked")
+						final List<Map<String, Object>> instanceArray = (List<Map<String, Object>>)removeDict.get( "instanceArray" );
 
 						if( hostArray != null ) {
-							NSMutableArray hostArrayResponse = new NSMutableArray( hostArray.count() );
+							final List<Object> hostArrayResponse = new ArrayList<>( hostArray.size() );
 
 							// update-remove - for each host listed - hostWithName + (stopAllInstances/new siteConfig) | removeHost_W
-							for( Enumeration e = hostArray.objectEnumerator(); e.hasMoreElements(); ) {
-								NSDictionary aHost = (NSDictionary)e.nextElement();
-								String name = (String)aHost.valueForKey( "name" );
+							for( Map<String, Object> aHost : hostArray ) {
+								String name = (String)aHost.get( "name" );
 								MHost anMHost = aConfig.hostWithName( name );
 								if( anMHost == null ) {
-									hostArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + name + " not found; REMOVE failed" }, ERROR_KEYS ) );
+									hostArrayResponse.add( errorElement( _hostName + ": Host " + name + " not found; REMOVE failed" ) );
 								}
 								else {
 									if( anMHost == aConfig.localHost() ) {
@@ -193,142 +204,136 @@ public class DirectAction extends WODirectAction {
 									else {
 										aConfig.removeHost_W( anMHost );
 									}
-									hostArrayResponse.addObject( SUCCESS_ELEMENT );
+									hostArrayResponse.add( SUCCESS_ELEMENT );
 								}
 							}
-							removeResponse.takeValueForKey( hostArrayResponse, "hostArray" );
+							removeResponse.put( "hostArray", hostArrayResponse );
 						}
 						if( applicationArray != null ) {
-							NSMutableArray applicationArrayResponse = new NSMutableArray( applicationArray.count() );
+							final List<Object> applicationArrayResponse = new ArrayList<>( applicationArray.size() );
 
 							// update-remove - for each application listed - applicationWithName + removeApplication_W
-							for( Enumeration e = applicationArray.objectEnumerator(); e.hasMoreElements(); ) {
-								NSDictionary anApp = (NSDictionary)e.nextElement();
-								String name = (String)anApp.valueForKey( "name" );
+							for( Map<String, Object> anApp : applicationArray ) {
+								String name = (String)anApp.get( "name" );
 								MApplication anMApplication = aConfig.applicationWithName( name );
 								if( anMApplication == null ) {
-									applicationArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Application " + name + " not found; REMOVE failed" }, ERROR_KEYS ) );
+									applicationArrayResponse.add( errorElement( _hostName + ": Application " + name + " not found; REMOVE failed" ) );
 								}
 								else {
 									aConfig.removeApplication_W( aConfig.applicationWithName( name ) );
-									applicationArrayResponse.addObject( SUCCESS_ELEMENT );
+									applicationArrayResponse.add( SUCCESS_ELEMENT );
 								}
 							}
-							removeResponse.takeValueForKey( applicationArrayResponse, "applicationArray" );
+							removeResponse.put( "applicationArray", applicationArrayResponse );
 						}
 						if( instanceArray != null ) {
-							NSMutableArray instanceArrayResponse = new NSMutableArray( instanceArray.count() );
+							final List<Object> instanceArrayResponse = new ArrayList<>( instanceArray.size() );
 
 							// update-remove - for each instance listed - instanceWithHostnameAndPort + removeInstance_W
-							for( Enumeration e = instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
-								NSDictionary anInst = (NSDictionary)e.nextElement();
-								String hostName = (String)anInst.valueForKey( "hostName" );
-								Integer port = (Integer)anInst.valueForKey( "port" );
+							for( Map<String, Object> anInst : instanceArray ) {
+								String hostName = (String)anInst.get( "hostName" );
+								Integer port = (Integer)anInst.get( "port" );
 								MInstance anMInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
 								if( anMInstance == null ) {
-									instanceArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + hostName + "-" + port + " not found; REMOVE failed" }, ERROR_KEYS ) );
+									instanceArrayResponse.add( errorElement( _hostName + ": Instance " + hostName + "-" + port + " not found; REMOVE failed" ) );
 								}
 								else {
 									aConfig.removeInstance_W( anMInstance );
-									instanceArrayResponse.addObject( SUCCESS_ELEMENT );
+									instanceArrayResponse.add( SUCCESS_ELEMENT );
 								}
 							}
-							removeResponse.takeValueForKey( instanceArrayResponse, "instanceArray" );
+							removeResponse.put( "instanceArray", instanceArrayResponse );
 						}
-						updateWotaskdResponse.takeValueForKey( removeResponse, "remove" );
+						updateWotaskdResponse.put( "remove", removeResponse );
 					}
 
 					if( addDict != null ) {
-						NSMutableDictionary addResponse = new NSMutableDictionary( 1 );
+						final Map<String, Object> addResponse = new LinkedHashMap<>();
 
-						NSArray hostArray = (NSArray)addDict.valueForKey( "hostArray" );
-						NSArray applicationArray = (NSArray)addDict.valueForKey( "applicationArray" );
-						NSArray instanceArray = (NSArray)addDict.valueForKey( "instanceArray" );
+						@SuppressWarnings("unchecked")
+						final List<Map<String, Object>> hostArray = (List<Map<String, Object>>)addDict.get( "hostArray" );
+						@SuppressWarnings("unchecked")
+						final List<Map<String, Object>> applicationArray = (List<Map<String, Object>>)addDict.get( "applicationArray" );
+						@SuppressWarnings("unchecked")
+						final List<Map<String, Object>> instanceArray = (List<Map<String, Object>>)addDict.get( "instanceArray" );
 
 						if( hostArray != null ) {
-							NSMutableArray hostArrayResponse = new NSMutableArray( hostArray.count() );
+							final List<Object> hostArrayResponse = new ArrayList<>( hostArray.size() );
 
 							// update-add - for each host listed - addHost_W
-							for( Enumeration e = hostArray.objectEnumerator(); e.hasMoreElements(); ) {
-								NSDictionary aHost = (NSDictionary)e.nextElement();
-								@SuppressWarnings("unchecked")
-								final MHostDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)aHost, MHostDto.class );
+							for( Map<String, Object> aHost : hostArray ) {
+								final MHostDto dto = new FoundationCoder().decodeRecord( aHost, MHostDto.class );
 								aConfig.addHost_W( new MHost( dto, aConfig ) );
-								hostArrayResponse.addObject( SUCCESS_ELEMENT );
+								hostArrayResponse.add( SUCCESS_ELEMENT );
 							}
-							addResponse.takeValueForKey( hostArrayResponse, "hostArray" );
+							addResponse.put( "hostArray", hostArrayResponse );
 						}
 						if( applicationArray != null ) {
-							NSMutableArray applicationArrayResponse = new NSMutableArray( applicationArray.count() );
+							final List<Object> applicationArrayResponse = new ArrayList<>( applicationArray.size() );
 
 							// update-add - for each application listed - addApplication_W
-							for( Enumeration e = applicationArray.objectEnumerator(); e.hasMoreElements(); ) {
-								NSDictionary anApp = (NSDictionary)e.nextElement();
-								@SuppressWarnings("unchecked")
-								final MApplicationDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)anApp, MApplicationDto.class );
+							for( Map<String, Object> anApp : applicationArray ) {
+								final MApplicationDto dto = new FoundationCoder().decodeRecord( anApp, MApplicationDto.class );
 								aConfig.addApplication_W( new MApplication( dto, aConfig ) );
-								applicationArrayResponse.addObject( SUCCESS_ELEMENT );
+								applicationArrayResponse.add( SUCCESS_ELEMENT );
 							}
-							addResponse.takeValueForKey( applicationArrayResponse, "applicationArray" );
+							addResponse.put( "applicationArray", applicationArrayResponse );
 						}
 						if( instanceArray != null ) {
-							NSMutableArray instanceArrayResponse = new NSMutableArray( instanceArray.count() );
+							final List<Object> instanceArrayResponse = new ArrayList<>( instanceArray.size() );
 
 							//  update-add - for each instance listed - addInstance_W
-							for( Enumeration e = instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
-								NSDictionary anInst = (NSDictionary)e.nextElement();
-								@SuppressWarnings("unchecked")
-								final MInstanceDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)anInst, MInstanceDto.class );
+							for( Map<String, Object> anInst : instanceArray ) {
+								final MInstanceDto dto = new FoundationCoder().decodeRecord( anInst, MInstanceDto.class );
 								aConfig.addInstance_W( new MInstance( dto, aConfig ) );
-								instanceArrayResponse.addObject( SUCCESS_ELEMENT );
+								instanceArrayResponse.add( SUCCESS_ELEMENT );
 							}
-							addResponse.takeValueForKey( instanceArrayResponse, "instanceArray" );
+							addResponse.put( "instanceArray", instanceArrayResponse );
 						}
-						updateWotaskdResponse.takeValueForKey( addResponse, "add" );
+						updateWotaskdResponse.put( "add", addResponse );
 					}
 
 					if( configureDict != null ) {
-						NSMutableDictionary configureResponse = new NSMutableDictionary( 2 );
+						final Map<String, Object> configureResponse = new LinkedHashMap<>();
 
-						NSDictionary siteDict = (NSDictionary)configureDict.valueForKey( "site" );
-						NSArray hostArray = (NSArray)configureDict.valueForKey( "hostArray" );
-						NSArray applicationArray = (NSArray)configureDict.valueForKey( "applicationArray" );
-						NSArray instanceArray = (NSArray)configureDict.valueForKey( "instanceArray" );
+						@SuppressWarnings("unchecked")
+						final Map<String, Object> siteDict = (Map<String, Object>)configureDict.get( "site" );
+						@SuppressWarnings("unchecked")
+						final List<Map<String, Object>> hostArray = (List<Map<String, Object>>)configureDict.get( "hostArray" );
+						@SuppressWarnings("unchecked")
+						final List<Map<String, Object>> applicationArray = (List<Map<String, Object>>)configureDict.get( "applicationArray" );
+						@SuppressWarnings("unchecked")
+						final List<Map<String, Object>> instanceArray = (List<Map<String, Object>>)configureDict.get( "instanceArray" );
 
 						if( siteDict != null ) {
 							// update-configure - siteConfig.updateValues
-							@SuppressWarnings("unchecked")
-							final MSiteConfigSiteDto siteDto = new FoundationCoder().decodeRecord( (Map<String, Object>)siteDict, MSiteConfigSiteDto.class );
+							final MSiteConfigSiteDto siteDto = new FoundationCoder().decodeRecord( siteDict, MSiteConfigSiteDto.class );
 							aConfig.updateValues( siteDto );
-							configureResponse.takeValueForKey( SUCCESS_ELEMENT, "site" );
+							configureResponse.put( "site", SUCCESS_ELEMENT );
 						}
 						if( hostArray != null ) {
-							NSMutableArray hostArrayResponse = new NSMutableArray( hostArray.count() );
+							final List<Object> hostArrayResponse = new ArrayList<>( hostArray.size() );
 
 							// update-configure - for each host listed - hostWithName + updateValues
-							for( Enumeration e = hostArray.objectEnumerator(); e.hasMoreElements(); ) {
-								NSDictionary aHost = (NSDictionary)e.nextElement();
-								@SuppressWarnings("unchecked")
-								final MHostDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)aHost, MHostDto.class );
+							for( Map<String, Object> aHost : hostArray ) {
+								final MHostDto dto = new FoundationCoder().decodeRecord( aHost, MHostDto.class );
 								MHost anMHost = aConfig.hostWithName( dto.name() );
 								if( anMHost == null ) {
-									hostArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + dto.name() + " not found; UPDATE failed" }, ERROR_KEYS ) );
+									hostArrayResponse.add( errorElement( _hostName + ": Host " + dto.name() + " not found; UPDATE failed" ) );
 								}
 								else {
 									anMHost.updateValues( dto );
-									hostArrayResponse.addObject( SUCCESS_ELEMENT );
+									hostArrayResponse.add( SUCCESS_ELEMENT );
 								}
 							}
-							configureResponse.takeValueForKey( hostArrayResponse, "hostArray" );
+							configureResponse.put( "hostArray", hostArrayResponse );
 						}
 						if( applicationArray != null ) {
-							NSMutableArray applicationArrayResponse = new NSMutableArray( applicationArray.count() );
+							final List<Object> applicationArrayResponse = new ArrayList<>( applicationArray.size() );
 
 							// update-configure - for each application listed - applicationWithName + updateValues
-							for( Enumeration e = applicationArray.objectEnumerator(); e.hasMoreElements(); ) {
-								NSDictionary anApp = (NSDictionary)e.nextElement();
-								@SuppressWarnings("unchecked")
-								final MApplicationDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)anApp, MApplicationDto.class );
+							for( Map<String, Object> anApp : applicationArray ) {
+								final MApplicationDto dto = new FoundationCoder().decodeRecord( anApp, MApplicationDto.class );
 								String name = dto.name();
 								MApplication anMApplication = aConfig.applicationWithName( name );
 								// if I can't find the application, I might be updating the name - in that case, look under the oldname.
@@ -338,23 +343,21 @@ public class DirectAction extends WODirectAction {
 								}
 
 								if( anMApplication == null ) {
-									applicationArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Application " + name + " not found; UPDATE failed" }, ERROR_KEYS ) );
+									applicationArrayResponse.add( errorElement( _hostName + ": Application " + name + " not found; UPDATE failed" ) );
 								}
 								else {
 									anMApplication.updateValues( dto );
-									applicationArrayResponse.addObject( SUCCESS_ELEMENT );
+									applicationArrayResponse.add( SUCCESS_ELEMENT );
 								}
 							}
-							configureResponse.takeValueForKey( applicationArrayResponse, "applicationArray" );
+							configureResponse.put( "applicationArray", applicationArrayResponse );
 						}
 						if( instanceArray != null ) {
-							NSMutableArray instanceArrayResponse = new NSMutableArray( instanceArray.count() );
+							final List<Object> instanceArrayResponse = new ArrayList<>( instanceArray.size() );
 
 							// update-configure - for each instance listed - instanceWithHostnameAndPort + updateValues
-							for( Enumeration e = instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
-								NSDictionary anInst = (NSDictionary)e.nextElement();
-								@SuppressWarnings("unchecked")
-								final MInstanceDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)anInst, MInstanceDto.class );
+							for( Map<String, Object> anInst : instanceArray ) {
+								final MInstanceDto dto = new FoundationCoder().decodeRecord( anInst, MInstanceDto.class );
 								Integer port = dto.port();
 								MInstance anMInstance = aConfig.instanceWithHostnameAndPort( dto.hostName(), port );
 								// if I can't find the instance, I might be updating the port - in that case, look under the oldport number.
@@ -363,19 +366,19 @@ public class DirectAction extends WODirectAction {
 									anMInstance = aConfig.instanceWithHostnameAndPort( dto.hostName(), port );
 								}
 								if( anMInstance == null ) {
-									instanceArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + dto.hostName() + "-" + port + " not found; UPDATE failed" }, ERROR_KEYS ) );
+									instanceArrayResponse.add( errorElement( _hostName + ": Instance " + dto.hostName() + "-" + port + " not found; UPDATE failed" ) );
 								}
 								else {
 									anMInstance.updateValues( dto );
-									instanceArrayResponse.addObject( SUCCESS_ELEMENT );
+									instanceArrayResponse.add( SUCCESS_ELEMENT );
 								}
 							}
-							configureResponse.takeValueForKey( instanceArrayResponse, "instanceArray" );
+							configureResponse.put( "instanceArray", instanceArrayResponse );
 						}
-						updateWotaskdResponse.takeValueForKey( configureResponse, "configure" );
+						updateWotaskdResponse.put( "configure", configureResponse );
 					}
 				}
-				monitorResponse.takeValueForKey( updateWotaskdResponse, "updateWotaskdResponse" );
+				monitorResponse.put( "updateWotaskdResponse", updateWotaskdResponse );
 			}
 			finally {
 				appTaskd.lock().writeLock().unlock();
@@ -384,29 +387,30 @@ public class DirectAction extends WODirectAction {
 
 		// Checking for Commands
 		if( commandWotaskdArray != null ) {
-			int instArrayCount = commandWotaskdArray.count();
-			NSMutableArray commandWotaskdResponse = new NSMutableArray( instArrayCount );
+			int instArrayCount = commandWotaskdArray.size();
+			final List<Object> commandWotaskdResponse = new ArrayList<>( instArrayCount );
 
 			if( instArrayCount < 2 ) {
-				commandWotaskdResponse.addObject( ARGUMENT_NUMBER_COMMAND_ERROR );
+				commandWotaskdResponse.add( ARGUMENT_NUMBER_COMMAND_ERROR );
 			}
 			else {
-				String command = (String)commandWotaskdArray.objectAtIndex( 0 );
+				String command = (String)commandWotaskdArray.get( 0 );
 
 				if( (command.equals( "START" )) || (command.equals( "CLEAR" )) ||
 						(command.equals( "STOP" )) || (command.equals( "REFUSE" )) ||
 						(command.equals( "ACCEPT" )) || (command.equals( "QUIT" )) ) {
-					commandWotaskdResponse.addObject( SUCCESS_ELEMENT );
+					commandWotaskdResponse.add( SUCCESS_ELEMENT );
 				}
 				else {
-					commandWotaskdResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Invalid Command " + command }, ERROR_KEYS ) );
+					commandWotaskdResponse.add( errorElement( _hostName + " - INTERNAL ERROR: Invalid Command " + command ) );
 				}
 
 				// Go through each instance and do whatever it is that we do
 				for( int i = 1; i < instArrayCount; i++ ) {
-					NSDictionary instDict = (NSDictionary)commandWotaskdArray.objectAtIndex( i );
-					String hostName = (String)instDict.valueForKey( "hostName" );
-					Integer port = (Integer)instDict.valueForKey( "port" );
+					@SuppressWarnings("unchecked")
+					final Map<String, Object> instDict = (Map<String, Object>)commandWotaskdArray.get( i );
+					String hostName = (String)instDict.get( "hostName" );
+					Integer port = (Integer)instDict.get( "port" );
 					appTaskd.lock().readLock().lock();
 					try {
 						MInstance anInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
@@ -415,12 +419,12 @@ public class DirectAction extends WODirectAction {
 								if( command.equals( "START" ) ) {
 									String errorMsg = appTaskd.instanceController().startInstance( anInstance );
 									if( errorMsg != null ) {
-										commandWotaskdResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, errorMsg }, ERROR_KEYS ) );
+										commandWotaskdResponse.add( errorElement( errorMsg ) );
 									}
 								}
 								else if( command.equals( "CLEAR" ) ) {
 									anInstance.removeAllDeaths();
-									commandWotaskdResponse.addObject( SUCCESS_ELEMENT );
+									commandWotaskdResponse.add( SUCCESS_ELEMENT );
 								}
 								else {
 									try {
@@ -443,19 +447,19 @@ public class DirectAction extends WODirectAction {
 										else if( command.equals( "QUIT" ) ) {
 											anInstance.setShouldDie( true );
 										}
-										commandWotaskdResponse.addObject( SUCCESS_ELEMENT );
+										commandWotaskdResponse.add( SUCCESS_ELEMENT );
 									}
 									catch( SjipException me ) {
-										commandWotaskdResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, me.getMessage() }, ERROR_KEYS ) );
+										commandWotaskdResponse.add( errorElement( me.getMessage() ) );
 									}
 								}
 							}
 							else {
-								commandWotaskdResponse.addObject( SUCCESS_ELEMENT );
+								commandWotaskdResponse.add( SUCCESS_ELEMENT );
 							}
 						}
 						else {
-							commandWotaskdResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": No instance found for Host " + hostName + " and Port: " + port + "; " + command + " failed" }, ERROR_KEYS ) );
+							commandWotaskdResponse.add( errorElement( _hostName + ": No instance found for Host " + hostName + " and Port: " + port + "; " + command + " failed" ) );
 						}
 					}
 					finally {
@@ -463,17 +467,17 @@ public class DirectAction extends WODirectAction {
 					}
 				}
 			}
-			monitorResponse.takeValueForKey( commandWotaskdResponse, "commandWotaskdResponse" );
+			monitorResponse.put( "commandWotaskdResponse", commandWotaskdResponse );
 		}
 
 		// Checking for a Query
 		if( queryWotaskdString != null ) {
-			NSMutableDictionary queryWotaskdResponse = new NSMutableDictionary( 1 );
+			final Map<String, Object> queryWotaskdResponse = new LinkedHashMap<>();
 
 			if( queryWotaskdString.equals( "SITE" ) ) {
 				appTaskd.lock().readLock().lock();
 				try {
-					queryWotaskdResponse.takeValueForKey( aConfig.toDto(), "SiteConfig" );
+					queryWotaskdResponse.put( "SiteConfig", aConfig.toDto() );
 				}
 				finally {
 					appTaskd.lock().readLock().unlock();
@@ -481,57 +485,59 @@ public class DirectAction extends WODirectAction {
 			}
 			else if( queryWotaskdString.equals( "HOST" ) ) {
 				// query - host.runningInstancesCount_W
-				final Integer runningInstances = Integer.valueOf( 0 );
 				final String processorType = FProperties.sysProp( "os.arch" );
 				final String operatingSystem = FProperties.sysProp( "os.name" ) + " " + FProperties.sysProp( "os.version" );
 
-				final NSMutableDictionary hostResponse = new NSMutableDictionary( new Object[] { runningInstances, processorType, operatingSystem }, HOST_QUERY_KEYS );
+				final Map<String, Object> hostResponse = new LinkedHashMap<>();
+				hostResponse.put( "processorType", processorType );
+				hostResponse.put( "operatingSystem", operatingSystem );
 
 				appTaskd.lock().readLock().lock();
 				try {
 					if( aConfig.localHost() != null ) {
-						hostResponse.takeValueForKey( aConfig.localHost().runningInstancesCount_W(), "runningInstances" );
+						hostResponse.put( "runningInstances", aConfig.localHost().runningInstancesCount_W() );
 					}
 					else {
-						hostResponse.takeValueForKey( Integer.valueOf( 0 ), "runningInstances" );
+						hostResponse.put( "runningInstances", Integer.valueOf( 0 ) );
 					}
 				}
 				finally {
 					appTaskd.lock().readLock().unlock();
 				}
-				queryWotaskdResponse.takeValueForKey( hostResponse, "hostResponse" );
+				queryWotaskdResponse.put( "hostResponse", hostResponse );
 			}
 			else if( queryWotaskdString.equals( "APPLICATION" ) ) {
-				NSMutableArray applicationResponse = null;
+				List<Object> applicationResponse = null;
 				appTaskd.lock().readLock().lock();
 				try {
 					List<MApplication> appArray = aConfig.applicationArray();
 					int appArrayCount = appArray.size();
 
-					applicationResponse = new NSMutableArray( appArrayCount );
+					applicationResponse = new ArrayList<>( appArrayCount );
 
 					// query - for each application - runningInstancesCount_W();
 					for( int i = 0; i < appArrayCount; i++ ) {
 						MApplication anApp = appArray.get( i );
-						String name = anApp.name();
-						Integer runningInstances = anApp.runningInstancesCount_W();
-						applicationResponse.addObject( new NSDictionary( new Object[] { name, runningInstances }, APP_QUERY_KEYS ) );
+						final Map<String, Object> appDict = new LinkedHashMap<>();
+						appDict.put( "name", anApp.name() );
+						appDict.put( "runningInstances", anApp.runningInstancesCount_W() );
+						applicationResponse.add( appDict );
 					}
 				}
 				finally {
 					appTaskd.lock().readLock().unlock();
 				}
 
-				queryWotaskdResponse.takeValueForKey( applicationResponse, "applicationResponse" );
+				queryWotaskdResponse.put( "applicationResponse", applicationResponse );
 			}
 			else if( queryWotaskdString.equals( "INSTANCE" ) ) {
-				NSMutableArray instanceResponse = null;
+				List<Object> instanceResponse = null;
 				appTaskd.lock().readLock().lock();
 				try {
 					List<MInstance> instanceArray = (aConfig.localHost() != null) ? aConfig.localHost().instanceArray() : Collections.emptyList();
 					int instanceArrayCount = instanceArray.size();
 
-					instanceResponse = new NSMutableArray( instanceArrayCount );
+					instanceResponse = new ArrayList<>( instanceArrayCount );
 
 					final List<MInstance> runningInstanceArray = new ArrayList<>();
 					for( final MInstance anInst : instanceArray ) {
@@ -546,35 +552,36 @@ public class DirectAction extends WODirectAction {
 
 						String error = anInstance.statisticsError();
 						if( error != null ) {
-							errorResponse.addObject( error );
+							errorResponse.add( error );
 							//reset the error
 							anInstance.resetStatisticsError();
 						}
 						// Continue, because wotaskd is expecting a response here.
 
-						String applicationName = anInstance.applicationName();
-						Integer id = anInstance.id();
-						String host = anInstance.hostName();
-						Integer port = anInstance.port();
-						String runningState = MUtil.INSTANCE_STATES[anInstance.state];
-						NSDictionary statistics = anInstance.statistics().toDictionary();
-						Boolean refusingNewSessions = (anInstance.isRefusingNewSessions()) ? Boolean.TRUE : Boolean.FALSE;
-						List<String> deaths = anInstance.deaths();
-						String nextShutdown = anInstance.nextScheduledShutdownString();
+						final Map<String, Object> instanceDict = new LinkedHashMap<>();
+						instanceDict.put( "applicationName", anInstance.applicationName() );
+						instanceDict.put( "id", anInstance.id() );
+						instanceDict.put( "host", anInstance.hostName() );
+						instanceDict.put( "port", anInstance.port() );
+						instanceDict.put( "runningState", MUtil.INSTANCE_STATES[anInstance.state] );
+						instanceDict.put( "refusingNewSessions", anInstance.isRefusingNewSessions() ? Boolean.TRUE : Boolean.FALSE );
+						instanceDict.put( "statistics", anInstance.statistics().toDictionary() );
+						instanceDict.put( "deaths", anInstance.deaths() );
+						instanceDict.put( "nextShutdown", anInstance.nextScheduledShutdownString() );
 
-						instanceResponse.addObject( new NSDictionary( new Object[] { applicationName, id, host, port, runningState, refusingNewSessions, statistics, deaths, nextShutdown }, INSTANCE_QUERY_KEYS ) );
+						instanceResponse.add( instanceDict );
 					}
 				}
 				finally {
 					appTaskd.lock().readLock().unlock();
 				}
 
-				queryWotaskdResponse.takeValueForKey( instanceResponse, "instanceResponse" );
+				queryWotaskdResponse.put( "instanceResponse", instanceResponse );
 			}
 			else {
-				errorResponse.addObject( _hostName + ": Unrecognized Query: " + queryWotaskdString );
+				errorResponse.add( _hostName + ": Unrecognized Query: " + queryWotaskdString );
 			}
-			monitorResponse.takeValueForKey( queryWotaskdResponse, "queryWotaskdResponse" );
+			monitorResponse.put( "queryWotaskdResponse", queryWotaskdResponse );
 		}
 
 		// getting the errors
@@ -584,10 +591,10 @@ public class DirectAction extends WODirectAction {
 			theApplication.siteConfig().globalErrorDictionary.clear();
 		}
 		if( !globalErrors.isEmpty() ) {
-			errorResponse.addObjectsFromArray( new NSArray( globalErrors.toArray() ) );
+			errorResponse.addAll( globalErrors );
 		}
-		if( errorResponse.count() != 0 ) {
-			monitorResponse.takeValueForKey( errorResponse, "errorResponse" );
+		if( !errorResponse.isEmpty() ) {
+			monitorResponse.put( "errorResponse", errorResponse );
 		}
 
 		logger.debug( "@@@@@ monitorRequestAction returning response to Monitor" );
@@ -597,7 +604,7 @@ public class DirectAction extends WODirectAction {
 		return aResponse;
 	}
 
-	private void getStatisticsForInstanceArray( final List<MInstance> instArray, NSMutableArray errorResponse ) {
+	private void getStatisticsForInstanceArray( final List<MInstance> instArray, List<String> errorResponse ) {
 		final InstanceController instanceController = ((Application)WOApplication.application()).instanceController();
 
 		final List<MInstance> instanceArray = instArray;
@@ -654,9 +661,11 @@ public class DirectAction extends WODirectAction {
 					anInstance.setRefusingNewSessions( false );
 				}
 
-				NSDictionary instanceResponse = null;
+				Map<String, Object> instanceResponse = null;
 				try {
-					instanceResponse = (NSDictionary)new FoundationCoder().decodeRootObjectFromString( aResponse.contentString() );
+					@SuppressWarnings("unchecked")
+					final Map<String, Object> decoded = (Map<String, Object>)new FoundationCoder().decodeRootObjectFromString( aResponse.contentString() );
+					instanceResponse = decoded;
 				}
 				catch( NullPointerException npe ) {
 					logger.error( "Wotaskd getStatisticsForInstanceArray: No content returned from " + anInstance.displayName() );
@@ -665,7 +674,7 @@ public class DirectAction extends WODirectAction {
 				catch( Exception e ) {
 					try {
 						Object o = FoundationPropertyListSerialization.propertyListFromString( aResponse.contentString() );
-						errorResponse.addObject( anInstance.displayName() + " is probably an older application that doesn't conform to the current Monitor Protocol. Please update and restart the instance." );
+						errorResponse.add( anInstance.displayName() + " is probably an older application that doesn't conform to the current Monitor Protocol. Please update and restart the instance." );
 						logger.error( "Got old-style response from instance: " + anInstance.displayName() );
 					}
 					catch( Throwable t ) {
@@ -674,30 +683,34 @@ public class DirectAction extends WODirectAction {
 					continue;
 				}
 
-				NSArray queryInstanceError = (NSArray)instanceResponse.valueForKey( "errorResponse" );
+				@SuppressWarnings("unchecked")
+				final List<String> queryInstanceError = (List<String>)instanceResponse.get( "errorResponse" );
 				if( queryInstanceError != null ) {
-					anInstance.setStatisticsError( queryInstanceError.componentsJoinedByString( ", " ) );
+					anInstance.setStatisticsError( String.join( ", ", queryInstanceError ) );
 					continue;
 				}
 
-				String queryInstanceResponse = (String)instanceResponse.valueForKey( "queryInstanceResponse" );
+				String queryInstanceResponse = (String)instanceResponse.get( "queryInstanceResponse" );
 				if( queryInstanceResponse == null )
 					continue;
 
 				try {
-					NSDictionary statistics = (NSDictionary)FoundationPropertyListSerialization.propertyListFromString( queryInstanceResponse );
+					@SuppressWarnings("unchecked")
+					final Map<String, Object> statistics = (Map<String, Object>)FoundationPropertyListSerialization.propertyListFromString( queryInstanceResponse );
 
-					NSMutableDictionary newStats = new NSMutableDictionary( 5 );
+					final Map<String, String> newStats = new LinkedHashMap<>();
 
-					newStats.takeValueForKey( statistics.valueForKey( "StartedAt" ), "startedAt" );
+					newStats.put( "startedAt", (String)statistics.get( "StartedAt" ) );
 
-					NSDictionary tempDict = (NSDictionary)statistics.valueForKey( "Transactions" );
-					newStats.takeValueForKey( tempDict.valueForKey( "Transactions" ), "transactions" );
-					newStats.takeValueForKey( tempDict.valueForKey( "Avg. Transaction Time" ), "avgTransactionTime" );
-					newStats.takeValueForKey( tempDict.valueForKey( "Avg. Idle Time" ), "averageIdlePeriod" );
+					@SuppressWarnings("unchecked")
+					Map<String, Object> tempDict = (Map<String, Object>)statistics.get( "Transactions" );
+					newStats.put( "transactions", (String)tempDict.get( "Transactions" ) );
+					newStats.put( "avgTransactionTime", (String)tempDict.get( "Avg. Transaction Time" ) );
+					newStats.put( "averageIdlePeriod", (String)tempDict.get( "Avg. Idle Time" ) );
 
-					tempDict = (NSDictionary)statistics.valueForKey( "Sessions" );
-					newStats.takeValueForKey( tempDict.valueForKey( "Current Active Sessions" ), "activeSessions" );
+					@SuppressWarnings("unchecked")
+					Map<String, Object> sessionsDict = (Map<String, Object>)statistics.get( "Sessions" );
+					newStats.put( "activeSessions", (String)sessionsDict.get( "Current Active Sessions" ) );
 
 					anInstance.setStatistics( newStats );
 				}
@@ -713,19 +726,22 @@ public class DirectAction extends WODirectAction {
 		}
 	}
 
-	private void syncSiteConfig( NSDictionary config ) {
+	private void syncSiteConfig( Map<String, Object> config ) {
 		Application theApplication = (Application)WOApplication.application();
 		MSiteConfig aConfig = theApplication.siteConfig();
 
-		NSDictionary siteDict = (NSDictionary)config.valueForKey( "site" );
-		NSArray hostArray = (NSArray)config.valueForKey( "hostArray" );
-		NSArray applicationArray = (NSArray)config.valueForKey( "applicationArray" );
-		NSArray instanceArray = (NSArray)config.valueForKey( "instanceArray" );
+		@SuppressWarnings("unchecked")
+		final Map<String, Object> siteDict = (Map<String, Object>)config.get( "site" );
+		@SuppressWarnings("unchecked")
+		final List<Map<String, Object>> hostArray = (List<Map<String, Object>>)config.get( "hostArray" );
+		@SuppressWarnings("unchecked")
+		final List<Map<String, Object>> applicationArray = (List<Map<String, Object>>)config.get( "applicationArray" );
+		@SuppressWarnings("unchecked")
+		final List<Map<String, Object>> instanceArray = (List<Map<String, Object>>)config.get( "instanceArray" );
 
 		// Configure the site
 		if( siteDict != null ) {
-			@SuppressWarnings("unchecked")
-			final MSiteConfigSiteDto siteDto = new FoundationCoder().decodeRecord( (Map<String, Object>)siteDict, MSiteConfigSiteDto.class );
+			final MSiteConfigSiteDto siteDto = new FoundationCoder().decodeRecord( siteDict, MSiteConfigSiteDto.class );
 			aConfig.updateValues( siteDto );
 		}
 
@@ -733,10 +749,8 @@ public class DirectAction extends WODirectAction {
 		final List<MHost> currentHosts = new ArrayList<>( aConfig.hostArray() );
 		if( hostArray != null ) {
 			final FoundationCoder coder = new FoundationCoder();
-			for( Enumeration e = hostArray.objectEnumerator(); e.hasMoreElements(); ) {
-				NSDictionary aHost = (NSDictionary)e.nextElement();
-				@SuppressWarnings("unchecked")
-				final MHostDto dto = coder.decodeRecord( (Map<String, Object>)aHost, MHostDto.class );
+			for( Map<String, Object> aHost : hostArray ) {
+				final MHostDto dto = coder.decodeRecord( aHost, MHostDto.class );
 				MHost anMHost = aConfig.hostWithName( dto.name() );
 				if( anMHost == null ) {
 					// we have to add it
@@ -763,10 +777,8 @@ public class DirectAction extends WODirectAction {
 		final List<MApplication> currentApplications = new ArrayList<>( aConfig.applicationArray() );
 		if( applicationArray != null ) {
 			final FoundationCoder coder = new FoundationCoder();
-			for( Enumeration e = applicationArray.objectEnumerator(); e.hasMoreElements(); ) {
-				NSDictionary anApp = (NSDictionary)e.nextElement();
-				@SuppressWarnings("unchecked")
-				final MApplicationDto dto = coder.decodeRecord( (Map<String, Object>)anApp, MApplicationDto.class );
+			for( Map<String, Object> anApp : applicationArray ) {
+				final MApplicationDto dto = coder.decodeRecord( anApp, MApplicationDto.class );
 				String name = dto.name();
 				MApplication anMApplication = aConfig.applicationWithName( name );
 				// if I can't find the application, I might be updating the name - in that case, look under the oldname.
@@ -794,10 +806,8 @@ public class DirectAction extends WODirectAction {
 		final List<MInstance> currentInstances = new ArrayList<>( aConfig.instanceArray() );
 		if( instanceArray != null ) {
 			final FoundationCoder coder = new FoundationCoder();
-			for( Enumeration e = instanceArray.objectEnumerator(); e.hasMoreElements(); ) {
-				NSDictionary anInst = (NSDictionary)e.nextElement();
-				@SuppressWarnings("unchecked")
-				final MInstanceDto dto = coder.decodeRecord( (Map<String, Object>)anInst, MInstanceDto.class );
+			for( Map<String, Object> anInst : instanceArray ) {
+				final MInstanceDto dto = coder.decodeRecord( anInst, MInstanceDto.class );
 				Integer port = dto.port();
 				MInstance anMInstance = aConfig.instanceWithHostnameAndPort( dto.hostName(), port );
 				// if I can't find the instance, I might be updating the port - in that case, look under the oldport number.
