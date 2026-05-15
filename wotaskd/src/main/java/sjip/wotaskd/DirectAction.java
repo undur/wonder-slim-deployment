@@ -860,22 +860,20 @@ public class DirectAction extends WODirectAction {
 
 	@Override
 	public WOActionResults defaultAction() {
-		// KH - make this faster as well :)
-		Application theApplication = (Application)WOApplication.application();
-		WOResponse aResponse = theApplication.createResponseInContext( null );
-		WORequest aRequest = request();
-		MSiteConfig aConfig = theApplication.siteConfig();
+		final Application theApplication = (Application)WOApplication.application();
+		final WOResponse aResponse = new WOResponse();
+		final WORequest aRequest = request();
+		final MSiteConfig aConfig = theApplication.siteConfig();
 
 		theApplication.appTaskd().lock().readLock().lock();
-		try {
 
-			// Check for correct password
-			String passwordHeader = aRequest.headerForKey( "password" );
+		try {
+			final String passwordHeader = aRequest.headerForKey( "password" );
+
 			if( !aConfig.checkPasswordEncrypted( passwordHeader ) ) {
 				logger.debug( "Attempt to call Direct Action: defaultAction with incorrect password." );
 				aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 				aResponse.appendContentString( "Attempt to call Direct Action: defaultAction on wotaskd with incorrect password." );
-				// the read lock is released in the finally block
 				return aResponse;
 			}
 
@@ -926,8 +924,8 @@ public class DirectAction extends WODirectAction {
 
 	// Adaptor Config Response
 	public WOResponse woconfigAction() {
-		Application theApplication = (Application)WOApplication.application();
-		WORequest aRequest = request();
+		final Application theApplication = (Application)WOApplication.application();
+		final WORequest aRequest = request();
 
 		// FIXME: WO-era cargo with a weak rationale — same-host adaptors get to see manually-started
 		// instances; remote adaptors don't. The privacy boundary is asymmetric (registered instances
