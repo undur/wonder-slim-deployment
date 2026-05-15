@@ -83,15 +83,15 @@ public class DirectAction extends WODirectAction {
 		final MSiteConfig aConfig = appTaskd.siteConfig();
 
 		final WORequest aRequest = request();
-		final WOResponse aResponse = theApplication.createResponseInContext( null );
 
 		// Aren't allowed to call this through the Web server.
 		if( FHosts.isUsingWebServer( aRequest.headers() ) ) {
 			logger.debug( "Attempt to call DirectAction: monitorRequestAction through Web server" );
 			logger.debug( aRequest.contentString() );
-			aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
-			aResponse.appendContentString( XML_ACCESS_DENIED );
-			return aResponse;
+			final WOResponse forbiddenResponse = new WOResponse();
+			forbiddenResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
+			forbiddenResponse.appendContentString( XML_ACCESS_DENIED );
+			return forbiddenResponse;
 		}
 
 		// Checking to see if the password was corrent
@@ -100,10 +100,11 @@ public class DirectAction extends WODirectAction {
 			String passwordHeader = aRequest.headerForKey( "password" );
 			if( !aConfig.checkPasswordEncrypted( passwordHeader ) ) {
 				logger.debug( "Attempt to call DirectAction: monitorRequestAction with incorrect password." );
-				aResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
-				aResponse.appendContentString( XML_INVALID_PASSWORD );
+				final WOResponse forbiddenResponse = new WOResponse();
+				forbiddenResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
+				forbiddenResponse.appendContentString( XML_INVALID_PASSWORD );
 				// the read lock is released in the finally block
-				return aResponse;
+				return forbiddenResponse;
 			}
 		}
 		finally {
@@ -117,8 +118,9 @@ public class DirectAction extends WODirectAction {
 		catch( Exception e ) {
 			logger.error( "Wotaskd monitorRequestAction: Error parsing request" );
 			logger.debug( "Wotaskd monitorRequestAction: " + aRequest.contentString() );
-			aResponse.appendContentString( XML_INVALID_XML );
-			return aResponse;
+			final WOResponse invalidXMLResponse = new WOResponse();
+			invalidXMLResponse.appendContentString( XML_INVALID_XML );
+			return invalidXMLResponse;
 		}
 
 		logger.debug( "\n@@@@@ monitorRequestAction received request from Monitor" );
@@ -592,6 +594,7 @@ public class DirectAction extends WODirectAction {
 
 		logger.debug( "@@@@@ monitorRequestAction returning response to Monitor" );
 		logger.debug( "@@@@@ monitorRequestAction responseDict: " + monitorResponse + "\n" );
+		final WOResponse aResponse = new WOResponse();
 		aResponse.appendContentString( (new FoundationCoder()).encodeRootObjectForKey( monitorResponse, "monitorResponse" ) );
 		return aResponse;
 	}
