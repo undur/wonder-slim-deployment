@@ -12,7 +12,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-import sjip.x.FoundationCoder;
+import sjip.core.x.FoundationCoder;
 
 /**
  * Wire-protocol client for talking to a running wotaskd. Constructs the XML
