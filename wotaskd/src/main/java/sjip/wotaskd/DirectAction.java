@@ -82,12 +82,10 @@ public class DirectAction extends WODirectAction {
 		final AppTaskd appTaskd = theApplication.appTaskd();
 		final MSiteConfig aConfig = appTaskd.siteConfig();
 
-		final WORequest aRequest = request();
-
 		// Aren't allowed to call this through the Web server.
-		if( FHosts.isUsingWebServer( aRequest.headers() ) ) {
+		if( FHosts.isUsingWebServer( request().headers() ) ) {
 			logger.debug( "Attempt to call DirectAction: monitorRequestAction through Web server" );
-			logger.debug( aRequest.contentString() );
+			logger.debug( request().contentString() );
 			final WOResponse forbiddenResponse = new WOResponse();
 			forbiddenResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 			forbiddenResponse.appendContentString( XML_ACCESS_DENIED );
@@ -97,7 +95,7 @@ public class DirectAction extends WODirectAction {
 		// Checking to see if the password was corrent
 		appTaskd.lock().readLock().lock();
 		try {
-			String passwordHeader = aRequest.headerForKey( "password" );
+			String passwordHeader = request().headerForKey( "password" );
 			if( !aConfig.checkPasswordEncrypted( passwordHeader ) ) {
 				logger.debug( "Attempt to call DirectAction: monitorRequestAction with incorrect password." );
 				final WOResponse forbiddenResponse = new WOResponse();
@@ -113,11 +111,11 @@ public class DirectAction extends WODirectAction {
 
 		NSDictionary requestDict;
 		try {
-			requestDict = (NSDictionary)new FoundationCoder().decodeRootObject( aRequest.content().bytes() );
+			requestDict = (NSDictionary)new FoundationCoder().decodeRootObject( request().content().bytes() );
 		}
 		catch( Exception e ) {
 			logger.error( "Wotaskd monitorRequestAction: Error parsing request" );
-			logger.debug( "Wotaskd monitorRequestAction: " + aRequest.contentString() );
+			logger.debug( "Wotaskd monitorRequestAction: " + request().contentString() );
 			final WOResponse invalidXMLResponse = new WOResponse();
 			invalidXMLResponse.appendContentString( XML_INVALID_XML );
 			return invalidXMLResponse;
