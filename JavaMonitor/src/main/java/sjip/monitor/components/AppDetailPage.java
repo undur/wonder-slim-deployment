@@ -31,7 +31,6 @@ import sjip.monitor.util.StatsUtilities;
 public class AppDetailPage extends AppComponent {
 
 	public MInstance currentInstance;
-	public boolean isClearDeathSectionVisible;
 	public boolean showDetailStatistics;
 
 	public MHost currentHost;
@@ -160,7 +159,7 @@ public class AppDetailPage extends AppComponent {
 		_setIsSelectedInstance( !isSelectedInstance() );
 	}
 
-	public void _setIsSelectedInstance( boolean selected ) {
+	private void _setIsSelectedInstance( boolean selected ) {
 		final List<MInstance> selectedObjects = new ArrayList<>( selectedInstances() );
 
 		if( selected && !selectedObjects.contains( currentInstance ) ) {
@@ -705,10 +704,6 @@ public class AppDetailPage extends AppComponent {
 
 	public Float totalAverageIdleTime() {
 		return StatsUtilities.totalAverageIdleTime( myApplication() );
-	}
-
-	public Float actualRatePerSecond() {
-		return StatsUtilities.actualTransactionsPerSecond( myApplication() );
 	}
 
 	public Float actualRatePerMinute() {

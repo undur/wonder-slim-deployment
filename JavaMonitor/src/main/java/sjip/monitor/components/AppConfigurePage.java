@@ -342,8 +342,6 @@ public class AppConfigurePage extends AppComponent {
 
 	public List<String> timeOfDayList = MUtil.TIMES_OF_DAY;
 
-	public List<String> schedulingTypeList = MUtil.SCHEDULING_TYPES;
-
 	public List<Integer> schedulingIntervalList = MUtil.SCHEDULING_INTERVALS;
 
 	public String weekSelection() {

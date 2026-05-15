@@ -79,23 +79,6 @@ public class XUtil {
 	 * FIXME: Eliminate. Each call site of this method needs to be checked beforehand // Hugi 2024-11-02
 	 */
 	@Deprecated
-	public static boolean boolValue( final String s ) {
-
-		if( s == null ) {
-			return false;
-		}
-
-		return s.equalsIgnoreCase( "_YES" ) ||
-				s.equalsIgnoreCase( "Y" ) ||
-				s.equalsIgnoreCase( "YES" ) ||
-				s.equalsIgnoreCase( "true" ) ||
-				s.equalsIgnoreCase( "1" );
-	}
-
-	/**
-	 * FIXME: Eliminate. Each call site of this method needs to be checked beforehand // Hugi 2024-11-02
-	 */
-	@Deprecated
 	public static boolean isValidXMLString( final String s ) {
 
 		if( s == null || s.isEmpty() ) {
