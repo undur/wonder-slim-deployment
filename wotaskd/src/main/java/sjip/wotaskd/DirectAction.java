@@ -78,9 +78,7 @@ public class DirectAction extends WODirectAction {
 
 	// This is the biggie - this processes all requests from Monitor
 	public WOActionResults monitorRequestAction() {
-		
-		
-		NSMutableDictionary hostResponse = null; // CHECKME: Used to be a field and thus had a default of null. null assignment here as well to keep behaviour consistent, but this still smells // Hugi 2026-05-07
+
 		NSDictionary element;
 
 		final Application theApplication = (Application)WOApplication.application();
@@ -498,13 +496,12 @@ public class DirectAction extends WODirectAction {
 			}
 			else if( queryWotaskdString.equals( "HOST" ) ) {
 				// query - host.runningInstancesCount_W
-				if( hostResponse == null ) {
-					Integer runningInstances = Integer.valueOf( 0 );
-					String processorType = FProperties.sysProp( "os.arch" );
-					String operatingSystem = FProperties.sysProp( "os.name" ) + " " + FProperties.sysProp( "os.version" );
+				final Integer runningInstances = Integer.valueOf( 0 );
+				final String processorType = FProperties.sysProp( "os.arch" );
+				final String operatingSystem = FProperties.sysProp( "os.name" ) + " " + FProperties.sysProp( "os.version" );
 
-					hostResponse = new NSMutableDictionary( new Object[] { runningInstances, processorType, operatingSystem }, HOST_QUERY_KEYS );
-				}
+				final NSMutableDictionary hostResponse = new NSMutableDictionary( new Object[] { runningInstances, processorType, operatingSystem }, HOST_QUERY_KEYS );
+
 				appTaskd.lock().readLock().lock();
 				try {
 					if( aConfig.localHost() != null ) {
