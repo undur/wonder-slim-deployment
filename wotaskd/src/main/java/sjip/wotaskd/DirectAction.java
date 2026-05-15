@@ -508,20 +508,15 @@ public class DirectAction extends WODirectAction {
 				try {
 					List<MApplication> appArray = aConfig.applicationArray();
 					int appArrayCount = appArray.size();
-					MApplication anApp;
-					String name;
-					Integer runningInstances;
-					NSDictionary elementApp;
 
 					applicationResponse = new NSMutableArray( appArrayCount );
 
 					// query - for each application - runningInstancesCount_W();
 					for( int i = 0; i < appArrayCount; i++ ) {
-						anApp = appArray.get( i );
-						name = anApp.name();
-						runningInstances = anApp.runningInstancesCount_W();
-						elementApp = new NSDictionary( new Object[] { name, runningInstances }, APP_QUERY_KEYS );
-						applicationResponse.addObject( elementApp );
+						MApplication anApp = appArray.get( i );
+						String name = anApp.name();
+						Integer runningInstances = anApp.runningInstancesCount_W();
+						applicationResponse.addObject( new NSDictionary( new Object[] { name, runningInstances }, APP_QUERY_KEYS ) );
 					}
 				}
 				finally {
@@ -537,18 +532,6 @@ public class DirectAction extends WODirectAction {
 					List<MInstance> instanceArray = (aConfig.localHost() != null) ? aConfig.localHost().instanceArray() : Collections.emptyList();
 					int instanceArrayCount = instanceArray.size();
 
-					MInstance anInstance;
-					String applicationName;
-					Integer id;
-					String host;
-					Integer port;
-					String runningState;
-					Boolean refusingNewSessions;
-					NSDictionary statistics;
-					List<String> deaths;
-					String nextShutdown;
-					NSDictionary elementInst;
-
 					instanceResponse = new NSMutableArray( instanceArrayCount );
 
 					final List<MInstance> runningInstanceArray = new ArrayList<>();
@@ -560,7 +543,7 @@ public class DirectAction extends WODirectAction {
 					getStatisticsForInstanceArray( runningInstanceArray, errorResponse );
 
 					for( int i = 0; i < instanceArrayCount; i++ ) {
-						anInstance = instanceArray.get( i );
+						MInstance anInstance = instanceArray.get( i );
 
 						String error = anInstance.statisticsError();
 						if( error != null ) {
@@ -570,18 +553,17 @@ public class DirectAction extends WODirectAction {
 						}
 						// Continue, because wotaskd is expecting a response here.
 
-						applicationName = anInstance.applicationName();
-						id = anInstance.id();
-						host = anInstance.hostName();
-						port = anInstance.port();
-						runningState = MUtil.INSTANCE_STATES[anInstance.state];
-						statistics = anInstance.statistics().toDictionary();
-						refusingNewSessions = (anInstance.isRefusingNewSessions()) ? Boolean.TRUE : Boolean.FALSE;
-						deaths = anInstance.deaths();
-						nextShutdown = anInstance.nextScheduledShutdownString();
+						String applicationName = anInstance.applicationName();
+						Integer id = anInstance.id();
+						String host = anInstance.hostName();
+						Integer port = anInstance.port();
+						String runningState = MUtil.INSTANCE_STATES[anInstance.state];
+						NSDictionary statistics = anInstance.statistics().toDictionary();
+						Boolean refusingNewSessions = (anInstance.isRefusingNewSessions()) ? Boolean.TRUE : Boolean.FALSE;
+						List<String> deaths = anInstance.deaths();
+						String nextShutdown = anInstance.nextScheduledShutdownString();
 
-						elementInst = new NSDictionary( new Object[] { applicationName, id, host, port, runningState, refusingNewSessions, statistics, deaths, nextShutdown }, INSTANCE_QUERY_KEYS );
-						instanceResponse.addObject( elementInst );
+						instanceResponse.addObject( new NSDictionary( new Object[] { applicationName, id, host, port, runningState, refusingNewSessions, statistics, deaths, nextShutdown }, INSTANCE_QUERY_KEYS ) );
 					}
 				}
 				finally {
