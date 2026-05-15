@@ -1,6 +1,5 @@
 package sjip.x;
 
-import com.webobjects.appserver.WOApplication;
 
 import sjip.core.IInstanceController;
 import sjip.core.model.MApplication;
@@ -119,7 +118,7 @@ public class AdaptorConfigSerialization {
 		}
 
 		if( shouldIncludeUnregisteredInstances ) {
-			final IInstanceController instanceController = (IInstanceController)WOApplication.application().valueForKey( "instanceController" );
+			final IInstanceController instanceController = FApplication.instanceController();
 			if( instanceController != null ) {
 				final String unknownSB = instanceController.generateAdaptorConfigXML();
 				if( unknownSB.length() > 0 ) {

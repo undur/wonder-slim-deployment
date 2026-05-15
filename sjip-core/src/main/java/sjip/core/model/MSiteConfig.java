@@ -36,12 +36,12 @@ import java.util.zip.GZIPOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.appserver.WOApplication;
 
 import sjip.core.IInstanceController;
 import sjip.core.MUtil;
 import sjip.core.SjipException;
 import sjip.x.AdaptorConfigSerialization;
+import sjip.x.FApplication;
 import sjip.x.FHosts;
 import sjip.x.FProperties;
 import sjip.x.FoundationCoder;
@@ -576,7 +576,7 @@ public class MSiteConfig extends MObject {
 	public void removeInstance_W( MInstance anInstance ) {
 
 		if( (anInstance.host() == _localHost) && anInstance.isRunning_W() ) {
-			final IInstanceController instanceController = (IInstanceController)WOApplication.application().valueForKey( "instanceController" );
+			final IInstanceController instanceController = FApplication.instanceController();
 
 			try {
 				instanceController.stopInstance( anInstance );
@@ -718,10 +718,10 @@ public class MSiteConfig extends MObject {
 					System.exit( 1 );
 				}
 				if( !configDir.canRead() ) {
-					logger.error( "Don't have permission to read from Configuration Directory {} as this user, please change the permissions or restart {} as another user.", _configDirectoryPath, WOApplication.application().name() );
+					logger.error( "Don't have permission to read from Configuration Directory {} as this user, please change the permissions or restart {} as another user.", _configDirectoryPath, FApplication.name() );
 					System.exit( 1 );
 				}
-				if( (WOApplication.application().name().equals( "wotaskd" )) && (!configDir.canWrite()) ) {
+				if( (FApplication.name().equals( "wotaskd" )) && (!configDir.canWrite()) ) {
 					logger.error( "Don't have permission to write to Configuration Directory {} as this user; please change the permissions.", _configDirectoryPath );
 					System.exit( 1 );
 				}
@@ -836,7 +836,7 @@ public class MSiteConfig extends MObject {
 		try {
 			if( siteConfigFile.exists() && !siteConfigFile.canWrite() ) {
 				logger.error( "Don't have permission to write to file {} as this user, please change the permissions.", siteConfigFile.getAbsolutePath() );
-				final String pre = WOApplication.application().name() + " - " + _localHostName;
+				final String pre = FApplication.name() + " - " + _localHostName;
 				globalErrorDictionary.put( "archiveSiteConfig", pre + " Don't have permission to write to file " + siteConfigFile.getAbsolutePath() + " as this user, please change the permissions." );
 				return;
 			}
@@ -854,7 +854,7 @@ public class MSiteConfig extends MObject {
 		catch( final IOException e ) {
 			final String message = "Cannot write to file " + siteConfigFile.getAbsolutePath() + ". IOException: " + e.getLocalizedMessage();
 			logger.error( message );
-			final String pre = WOApplication.application().name() + " - " + _localHostName;
+			final String pre = FApplication.name() + " - " + _localHostName;
 			globalErrorDictionary.put( "archiveSiteConfig", pre + message );
 		}
 	}
@@ -876,7 +876,7 @@ public class MSiteConfig extends MObject {
 			final File ac = fileForAdaptorConfig();
 			if( ac.exists() && !ac.canWrite() ) {
 				logger.error( "Don't have permission to write to file {} as this user, please change the permissions.", fileForAdaptorConfig() );
-				final String pre = WOApplication.application().name() + " - " + _localHostName;
+				final String pre = FApplication.name() + " - " + _localHostName;
 				globalErrorDictionary.put( "archiveSiteConfig", pre + " Don't have permission to write to file " + fileForAdaptorConfig() + "as this user, please change the permissions." );
 				return;
 			}
@@ -886,7 +886,7 @@ public class MSiteConfig extends MObject {
 		catch( final IOException e ) {
 			final String message = "Cannot write to file " + pathForAdaptorConfig() + ". IOException: " + e.getLocalizedMessage();
 			logger.error( message );
-			final String pre = WOApplication.application().name() + " - " + _localHostName;
+			final String pre = FApplication.name() + " - " + _localHostName;
 			globalErrorDictionary.put( "archiveAdaptorConfig", pre + " " + message );
 		}
 	}

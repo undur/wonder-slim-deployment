@@ -30,9 +30,9 @@ import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.appserver.WOApplication;
 
 import sjip.core.MUtil;
+import sjip.x.FApplication;
 import sjip.x.FNotifications;
 import sjip.x.InstanceStatistics;
 
@@ -824,9 +824,9 @@ public class MInstance extends MObject {
 		List<String> anArray = new ArrayList<>( 17 );
 
 		// Only if we were passed a WOHost argument
-		if( !WOApplication.application()._unsetHost ) {
+		if( !FApplication.hostIsUnset() ) {
 			anArray.add( "-WOHost" );
-			anArray.add( WOApplication.application().host() );
+			anArray.add( FApplication.host() );
 		}
 
 		// instance stuff
@@ -847,7 +847,7 @@ public class MInstance extends MObject {
 		anArray.add( "-WOLifebeatEnabled" );
 		anArray.add( "YES" );
 		anArray.add( "-WOLifebeatDestinationPort" );
-		anArray.add( String.valueOf( WOApplication.application().lifebeatDestinationPort() ) );
+		anArray.add( String.valueOf( FApplication.lifebeatDestinationPort() ) );
 
 		// application stuff
 		String adaptorString = toNullOrString( _application.adaptor() );
