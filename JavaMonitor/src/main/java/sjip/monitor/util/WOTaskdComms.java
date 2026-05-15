@@ -7,7 +7,6 @@ import java.util.Map;
 
 import sjip.core.model.MHost;
 import sjip.core.model.MSiteConfig;
-import sjip.core.model.MSiteConfigDto;
 import sjip.core.x.FoundationCoder;
 import sjip.core.x.ResponseWrapper;
 

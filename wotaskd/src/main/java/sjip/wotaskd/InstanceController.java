@@ -39,7 +39,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import sjip.core.IInstanceController;
 import sjip.core.MUtil;
 import sjip.core.SjipException;

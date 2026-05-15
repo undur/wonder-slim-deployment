@@ -10,8 +10,8 @@ import er.extensions.appserver.ERXApplication;
 import sjip.core.model.MInstance;
 import sjip.monitor.MonitorComponent.InstComponent;
 import sjip.monitor.util.ExperimentalUtilities;
-import sjip.monitor.util.JMLogViewerPage;
 import sjip.monitor.util.ExperimentalUtilities.WOMonitorServicePasswordNotSetException;
+import sjip.monitor.util.JMLogViewerPage;
 
 public class InstDetailPage extends InstComponent {
 
