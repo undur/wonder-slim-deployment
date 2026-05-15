@@ -52,11 +52,11 @@ public class FileBrowser extends MonitorComponent {
 	public MHost host; // passed in
 
 	public boolean showFiles = true;
-	public boolean isRoots = false;
+	private boolean isRoots = false;
 	public String errorMsg;
 
 	public RemoteFile aCurrentFile;
-	public List<RemoteFile> _fileList;
+	private List<RemoteFile> _fileList;
 
 	public FileBrowser( WOContext aWocontext ) {
 		super( aWocontext );

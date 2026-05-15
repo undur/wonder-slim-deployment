@@ -198,15 +198,15 @@ public class FoundationPropertyListSerialization {
 			this.pos = 0;
 		}
 
-		boolean atEnd() {
+		private boolean atEnd() {
 			return pos >= src.length();
 		}
 
-		int position() {
+		private int position() {
 			return pos;
 		}
 
-		Object parseValue() {
+		private Object parseValue() {
 			skipWhitespaceAndComments();
 			if( atEnd() ) {
 				throw new IllegalArgumentException( "Unexpected end of input" );
@@ -220,7 +220,7 @@ public class FoundationPropertyListSerialization {
 			};
 		}
 
-		Map<String, Object> parseDictionary() {
+		private Map<String, Object> parseDictionary() {
 			expect( '{' );
 			final Map<String, Object> map = new LinkedHashMap<>();
 			skipWhitespaceAndComments();
@@ -250,7 +250,7 @@ public class FoundationPropertyListSerialization {
 			return map;
 		}
 
-		List<Object> parseArray() {
+		private List<Object> parseArray() {
 			expect( '(' );
 			final List<Object> list = new ArrayList<>();
 			skipWhitespaceAndComments();
@@ -269,7 +269,7 @@ public class FoundationPropertyListSerialization {
 			return list;
 		}
 
-		String parseQuotedString() {
+		private String parseQuotedString() {
 			expect( '"' );
 			final StringBuilder out = new StringBuilder();
 			while( !atEnd() ) {
@@ -298,7 +298,7 @@ public class FoundationPropertyListSerialization {
 			throw new IllegalArgumentException( "Unterminated quoted string" );
 		}
 
-		String parseBareToken() {
+		private String parseBareToken() {
 			final int start = pos;
 			while( !atEnd() && isBareTokenChar( src.charAt( pos ) ) ) {
 				pos++;
@@ -317,7 +317,7 @@ public class FoundationPropertyListSerialization {
 					|| c == '_' || c == '.' || c == '$' || c == '/' || c == ':' || c == '-' || c == '+';
 		}
 
-		void expect( char c ) {
+		private void expect( char c ) {
 			if( atEnd() || src.charAt( pos ) != c ) {
 				throw new IllegalArgumentException(
 						"Expected '" + c + "' at offset " + pos
@@ -326,7 +326,7 @@ public class FoundationPropertyListSerialization {
 			pos++;
 		}
 
-		void skipWhitespaceAndComments() {
+		private void skipWhitespaceAndComments() {
 			while( !atEnd() ) {
 				final char c = src.charAt( pos );
 				if( Character.isWhitespace( c ) ) {

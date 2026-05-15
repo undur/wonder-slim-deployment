@@ -8,11 +8,11 @@ import java.util.Map;
  */
 
 public class InstanceStatistics {
-	public String transactions;
-	public String activeSessions;
-	public String avgTransactionTime;
-	public String averageIdlePeriod;
-	public String startedAt;
+	private String transactions;
+	private String activeSessions;
+	private String avgTransactionTime;
+	private String averageIdlePeriod;
+	private String startedAt;
 
 	/**
 	 * FIXME: Purely here to perform serialization for sending the data over the wire // Hugi 2026-05-04

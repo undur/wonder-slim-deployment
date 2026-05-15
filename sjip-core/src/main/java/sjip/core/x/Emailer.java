@@ -15,7 +15,6 @@ import org.simplejavamail.mailer.internal.MailerRegularBuilderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sjip.core.x.Emailer.EmailMessage.EmailAttachment;
 
 /**
  * A mailer that uses the SimpleJavaMail library to deliver emails.
@@ -134,7 +133,7 @@ public class Emailer {
 			}
 
 			if( emailWrapper.attachments != null ) {
-				for( EmailAttachment emailAttachment : emailWrapper.attachments ) {
+				for( EmailMessage.EmailAttachment emailAttachment : emailWrapper.attachments ) {
 					String mimeType = emailAttachment.mimeType;
 
 					if( mimeType == null ) {
@@ -155,36 +154,36 @@ public class Emailer {
 		}
 	}
 
-	public static class EmailMessage {
+	private static class EmailMessage {
 
-		public String fromName;
-		public String fromEmailAddress;
-		public String replyToEmailAddress;
-		public String bounceToEmailAddress;
-		public List<String> toAddresses = new ArrayList<>();
-		public List<String> ccAddresses = new ArrayList<>();
-		public List<String> bccAddresses = new ArrayList<>();
-		public String subject;
-		public String plainTextContent;
-		public String htmlContent;
-		public List<EmailAttachment> attachments = new ArrayList<>();
+		String fromName;
+		String fromEmailAddress;
+		String replyToEmailAddress;
+		String bounceToEmailAddress;
+		List<String> toAddresses = new ArrayList<>();
+		List<String> ccAddresses = new ArrayList<>();
+		List<String> bccAddresses = new ArrayList<>();
+		String subject;
+		String plainTextContent;
+		String htmlContent;
+		List<EmailAttachment> attachments = new ArrayList<>();
 
-		public static class EmailAttachment {
+		static class EmailAttachment {
 
 			/**
 			 * Name (including file extension, if applicable)
 			 */
-			public String name;
+			String name;
 
 			/**
 			 * Attachment data
 			 */
-			public byte[] data;
+			byte[] data;
 
 			/**
 			 * Attachment mimeType
 			 */
-			public String mimeType;
+			String mimeType;
 		}
 	}
 }

@@ -40,7 +40,7 @@ public class Session extends ERXSession implements ErrorCollector {
 	/**
 	 * Indicates that a user is currently logged in
 	 */
-	public boolean _isLoggedIn = false;
+	private boolean _isLoggedIn = false;
 
 	public Session() {
 		setStoresIDsInCookies( true );

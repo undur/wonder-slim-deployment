@@ -14,7 +14,7 @@ public abstract class MInstanceTask extends TimerTask {
 
 	private static final Logger logger = LoggerFactory.getLogger( MInstanceTask.class );
 
-	final MInstance _instance;
+	protected final MInstance _instance;
 
 	public MInstanceTask( MInstance instance ) {
 		_instance = instance;

@@ -29,7 +29,7 @@ public enum Icon {
 			""");
 
 	// SVG path for the icon
-	String _svg;
+	private final String _svg;
 
 	Icon( String svg ) {
 		_svg = svg;

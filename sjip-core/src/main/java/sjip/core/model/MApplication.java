@@ -571,10 +571,7 @@ public class MApplication extends MObject {
 		return _oldname;
 	}
 
-	/**
-	 * ??
-	 */
-	public void setOldname( String value ) {
+	private void setOldname( String value ) {
 		_oldname = value;
 		dataChanged();
 	}

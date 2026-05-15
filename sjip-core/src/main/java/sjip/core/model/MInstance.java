@@ -477,11 +477,7 @@ public class MInstance extends MObject {
 		return _oldport;
 	}
 
-	/**
-	 * FIXME: This was previously marked "don't use this". We whould trust whoever wrote that. Note that at the moment, this can be accessed through KVC in wotaskd's DirectAction class... // Hugi 2024-11-02
-	 */
-	@Deprecated
-	public void setOldport( Integer value ) {
+	private void setOldport( Integer value ) {
 		_oldport = MUtil.validatedInteger( value );
 		dataChanged();
 	}
