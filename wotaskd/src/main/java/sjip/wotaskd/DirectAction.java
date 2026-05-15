@@ -46,7 +46,6 @@ import sjip.core.model.MInstanceDto;
 import sjip.core.model.MSiteConfig;
 import sjip.core.model.MSiteConfigDto;
 import sjip.core.model.MSiteConfigSiteDto;
-import sjip.x.FoundationCoder;
 import sjip.x.AdaptorConfigSerialization;
 import sjip.x.FHosts;
 import sjip.x.FProperties;
@@ -84,11 +83,12 @@ public class DirectAction extends WODirectAction {
 		NSMutableDictionary hostResponse = null; // CHECKME: Used to be a field and thus had a default of null. null assignment here as well to keep behaviour consistent, but this still smells // Hugi 2026-05-07
 		NSDictionary element;
 
-		Application theApplication = (Application)WOApplication.application();
-		MSiteConfig aConfig = theApplication.siteConfig();
+		final Application theApplication = (Application)WOApplication.application();
+		final AppTaskd appTaskd = theApplication.appTaskd();
+		final MSiteConfig aConfig = appTaskd.siteConfig();
 
-		WORequest aRequest = request();
-		WOResponse aResponse = theApplication.createResponseInContext( null );
+		final WORequest aRequest = request();
+		final WOResponse aResponse = theApplication.createResponseInContext( null );
 
 		// Aren't allowed to call this through the Web server.
 		if( FHosts.isUsingWebServer( aRequest.headers() ) ) {
@@ -100,7 +100,7 @@ public class DirectAction extends WODirectAction {
 		}
 
 		// Checking to see if the password was corrent
-		theApplication.appTaskd().lock().readLock().lock();
+		appTaskd.lock().readLock().lock();
 		try {
 			String passwordHeader = aRequest.headerForKey( "password" );
 			if( !aConfig.checkPasswordEncrypted( passwordHeader ) ) {
@@ -112,7 +112,7 @@ public class DirectAction extends WODirectAction {
 			}
 		}
 		finally {
-			theApplication.appTaskd().lock().readLock().unlock();
+			appTaskd.lock().readLock().unlock();
 		}
 
 		NSDictionary requestDict;
@@ -139,7 +139,7 @@ public class DirectAction extends WODirectAction {
 
 		// Checking for Updates
 		if( updateWotaskdDict != null ) {
-			theApplication.appTaskd().lock().writeLock().lock();
+			appTaskd.lock().writeLock().lock();
 			try {
 				NSMutableDictionary updateWotaskdResponse = new NSMutableDictionary( 2 );
 
@@ -389,7 +389,7 @@ public class DirectAction extends WODirectAction {
 				monitorResponse.takeValueForKey( updateWotaskdResponse, "updateWotaskdResponse" );
 			}
 			finally {
-				theApplication.appTaskd().lock().writeLock().unlock();
+				appTaskd.lock().writeLock().unlock();
 			}
 		}
 
@@ -419,13 +419,13 @@ public class DirectAction extends WODirectAction {
 					NSDictionary instDict = (NSDictionary)commandWotaskdArray.objectAtIndex( i );
 					String hostName = (String)instDict.valueForKey( "hostName" );
 					Integer port = (Integer)instDict.valueForKey( "port" );
-					theApplication.appTaskd().lock().readLock().lock();
+					appTaskd.lock().readLock().lock();
 					try {
 						MInstance anInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
 						if( anInstance != null ) {
 							if( anInstance.isLocal_W() ) {
 								if( command.equals( "START" ) ) {
-									String errorMsg = theApplication.instanceController().startInstance( anInstance );
+									String errorMsg = appTaskd.instanceController().startInstance( anInstance );
 									if( errorMsg != null ) {
 										element = new NSDictionary( new Object[] { Boolean.FALSE, errorMsg }, ERROR_KEYS );
 										commandWotaskdResponse.addObject( element );
@@ -439,16 +439,16 @@ public class DirectAction extends WODirectAction {
 									try {
 										if( command.equals( "STOP" ) ) {
 											//we need to expect a response here
-											if( theApplication.instanceController().terminateInstance( anInstance ) == null )
+											if( appTaskd.instanceController().terminateInstance( anInstance ) == null )
 												throw new SjipException( "No response to STOP " + anInstance.displayName() );
 										}
 										else if( command.equals( "REFUSE" ) ) {
 											//we need to expect a response here
-											if( theApplication.instanceController().stopInstance( anInstance ) == null )
+											if( appTaskd.instanceController().stopInstance( anInstance ) == null )
 												throw new SjipException( "No response to REFUSE " + anInstance.displayName() );
 										}
 										else if( command.equals( "ACCEPT" ) ) {
-											if( theApplication.instanceController().setAcceptInstance( anInstance ) == null )
+											if( appTaskd.instanceController().setAcceptInstance( anInstance ) == null )
 												throw new SjipException( "No response to ACCEPT " + anInstance.displayName() );
 											//we got a response, cancel any force quit task
 											anInstance.cancelForceQuitTask();
@@ -476,7 +476,7 @@ public class DirectAction extends WODirectAction {
 						}
 					}
 					finally {
-						theApplication.appTaskd().lock().readLock().unlock();
+						appTaskd.lock().readLock().unlock();
 					}
 				}
 			}
@@ -488,12 +488,12 @@ public class DirectAction extends WODirectAction {
 			NSMutableDictionary queryWotaskdResponse = new NSMutableDictionary( 1 );
 
 			if( queryWotaskdString.equals( "SITE" ) ) {
-				theApplication.appTaskd().lock().readLock().lock();
+				appTaskd.lock().readLock().lock();
 				try {
 					queryWotaskdResponse.takeValueForKey( aConfig.toDto(), "SiteConfig" );
 				}
 				finally {
-					theApplication.appTaskd().lock().readLock().unlock();
+					appTaskd.lock().readLock().unlock();
 				}
 			}
 			else if( queryWotaskdString.equals( "HOST" ) ) {
@@ -505,7 +505,7 @@ public class DirectAction extends WODirectAction {
 
 					hostResponse = new NSMutableDictionary( new Object[] { runningInstances, processorType, operatingSystem }, HOST_QUERY_KEYS );
 				}
-				theApplication.appTaskd().lock().readLock().lock();
+				appTaskd.lock().readLock().lock();
 				try {
 					if( aConfig.localHost() != null ) {
 						hostResponse.takeValueForKey( aConfig.localHost().runningInstancesCount_W(), "runningInstances" );
@@ -515,13 +515,13 @@ public class DirectAction extends WODirectAction {
 					}
 				}
 				finally {
-					theApplication.appTaskd().lock().readLock().unlock();
+					appTaskd.lock().readLock().unlock();
 				}
 				queryWotaskdResponse.takeValueForKey( hostResponse, "hostResponse" );
 			}
 			else if( queryWotaskdString.equals( "APPLICATION" ) ) {
 				NSMutableArray applicationResponse = null;
-				theApplication.appTaskd().lock().readLock().lock();
+				appTaskd.lock().readLock().lock();
 				try {
 					List<MApplication> appArray = aConfig.applicationArray();
 					int appArrayCount = appArray.size();
@@ -542,14 +542,14 @@ public class DirectAction extends WODirectAction {
 					}
 				}
 				finally {
-					theApplication.appTaskd().lock().readLock().unlock();
+					appTaskd.lock().readLock().unlock();
 				}
 
 				queryWotaskdResponse.takeValueForKey( applicationResponse, "applicationResponse" );
 			}
 			else if( queryWotaskdString.equals( "INSTANCE" ) ) {
 				NSMutableArray instanceResponse = null;
-				theApplication.appTaskd().lock().readLock().lock();
+				appTaskd.lock().readLock().lock();
 				try {
 					List<MInstance> instanceArray = (aConfig.localHost() != null) ? aConfig.localHost().instanceArray() : Collections.emptyList();
 					int instanceArrayCount = instanceArray.size();
@@ -602,7 +602,7 @@ public class DirectAction extends WODirectAction {
 					}
 				}
 				finally {
-					theApplication.appTaskd().lock().readLock().unlock();
+					appTaskd.lock().readLock().unlock();
 				}
 
 				queryWotaskdResponse.takeValueForKey( instanceResponse, "instanceResponse" );
