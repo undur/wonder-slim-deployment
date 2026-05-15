@@ -78,7 +78,7 @@ public class RollingShutdownBouncer extends ApplicationStarter {
 		}
 	}
 
-	protected int numInstancesToStartPerHost( List<MInstance> runningInstances, List<MHost> activeHosts ) {
+	private int numInstancesToStartPerHost( List<MInstance> runningInstances, List<MHost> activeHosts ) {
 		int numToStartPerHost = 1;
 
 		if( activeHosts.size() > 0 ) {
@@ -92,7 +92,7 @@ public class RollingShutdownBouncer extends ApplicationStarter {
 		return numToStartPerHost;
 	}
 
-	protected List<MInstance> instancesToStart( List<MInstance> inactiveInstances, List<MHost> activeHosts, int numInstancesToStartPerHost ) {
+	private List<MInstance> instancesToStart( List<MInstance> inactiveInstances, List<MHost> activeHosts, int numInstancesToStartPerHost ) {
 
 		final List<MInstance> startingInstances = new ArrayList<>();
 
@@ -117,7 +117,7 @@ public class RollingShutdownBouncer extends ApplicationStarter {
 		return startingInstances;
 	}
 
-	protected boolean doAllRunningInstancesUseScheduling( List<MInstance> runningInstances ) {
+	private boolean doAllRunningInstancesUseScheduling( List<MInstance> runningInstances ) {
 		boolean useScheduling = true;
 
 		for( MInstance instance : runningInstances ) {
@@ -127,7 +127,7 @@ public class RollingShutdownBouncer extends ApplicationStarter {
 		return useScheduling;
 	}
 
-	protected void startInstances( List<MInstance> startingInstances, List<MHost> activeHosts, boolean useScheduling ) {
+	private void startInstances( List<MInstance> startingInstances, List<MHost> activeHosts, boolean useScheduling ) {
 
 		for( MInstance instance : startingInstances ) {
 			if( useScheduling ) {
@@ -141,7 +141,7 @@ public class RollingShutdownBouncer extends ApplicationStarter {
 		handler().sendStartInstancesToWotaskds( startingInstances, activeHosts );
 	}
 
-	protected void waitForInactiveInstancesToStart( List<MInstance> startingInstances, List<MHost> activeHosts ) throws InterruptedException {
+	private void waitForInactiveInstancesToStart( List<MInstance> startingInstances, List<MHost> activeHosts ) throws InterruptedException {
 		boolean waiting = true;
 
 		// wait until apps have started
@@ -168,14 +168,14 @@ public class RollingShutdownBouncer extends ApplicationStarter {
 		log( "Started inactive instances sucessfully" );
 	}
 
-	protected void refuseNewSessions( List<MInstance> restartingInstances, List<MHost> activeHosts ) {
+	private void refuseNewSessions( List<MInstance> restartingInstances, List<MHost> activeHosts ) {
 		for( MInstance instance : restartingInstances ) {
 			instance.setRefusingNewSessions( true );
 		}
 		handler().sendRefuseSessionToWotaskds( restartingInstances, activeHosts, true );
 	}
 
-	protected void restartInstances( List<MInstance> runningInstances, List<MHost> activeHosts, boolean useScheduling ) throws InterruptedException {
+	private void restartInstances( List<MInstance> runningInstances, List<MHost> activeHosts, boolean useScheduling ) throws InterruptedException {
 
 		for( MInstance instance : runningInstances ) {
 			List<MInstance> instanceInArray = new ArrayList<>( List.of( instance ) );
@@ -191,7 +191,7 @@ public class RollingShutdownBouncer extends ApplicationStarter {
 		}
 	}
 
-	protected void stopInstances( List<MInstance> stoppingInstances, List<MHost> activeHosts ) {
+	private void stopInstances( List<MInstance> stoppingInstances, List<MHost> activeHosts ) {
 
 		for( MInstance instance : stoppingInstances ) {
 			instance.setSchedulingEnabled( Boolean.FALSE );
