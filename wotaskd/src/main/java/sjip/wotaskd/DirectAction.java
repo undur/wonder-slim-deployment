@@ -79,8 +79,6 @@ public class DirectAction extends WODirectAction {
 	// This is the biggie - this processes all requests from Monitor
 	public WOActionResults monitorRequestAction() {
 
-		NSDictionary element;
-
 		final Application theApplication = (Application)WOApplication.application();
 		final AppTaskd appTaskd = theApplication.appTaskd();
 		final MSiteConfig aConfig = appTaskd.siteConfig();
@@ -186,8 +184,7 @@ public class DirectAction extends WODirectAction {
 								String name = (String)aHost.valueForKey( "name" );
 								MHost anMHost = aConfig.hostWithName( name );
 								if( anMHost == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + name + " not found; REMOVE failed" }, ERROR_KEYS );
-									hostArrayResponse.addObject( element );
+									hostArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + name + " not found; REMOVE failed" }, ERROR_KEYS ) );
 								}
 								else {
 									if( anMHost == aConfig.localHost() ) {
@@ -211,8 +208,7 @@ public class DirectAction extends WODirectAction {
 								String name = (String)anApp.valueForKey( "name" );
 								MApplication anMApplication = aConfig.applicationWithName( name );
 								if( anMApplication == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Application " + name + " not found; REMOVE failed" }, ERROR_KEYS );
-									applicationArrayResponse.addObject( element );
+									applicationArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Application " + name + " not found; REMOVE failed" }, ERROR_KEYS ) );
 								}
 								else {
 									aConfig.removeApplication_W( aConfig.applicationWithName( name ) );
@@ -231,8 +227,7 @@ public class DirectAction extends WODirectAction {
 								Integer port = (Integer)anInst.valueForKey( "port" );
 								MInstance anMInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
 								if( anMInstance == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + hostName + "-" + port + " not found; REMOVE failed" }, ERROR_KEYS );
-									instanceArrayResponse.addObject( element );
+									instanceArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + hostName + "-" + port + " not found; REMOVE failed" }, ERROR_KEYS ) );
 								}
 								else {
 									aConfig.removeInstance_W( anMInstance );
@@ -318,8 +313,7 @@ public class DirectAction extends WODirectAction {
 								final MHostDto dto = new FoundationCoder().decodeRecord( (Map<String, Object>)aHost, MHostDto.class );
 								MHost anMHost = aConfig.hostWithName( dto.name() );
 								if( anMHost == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + dto.name() + " not found; UPDATE failed" }, ERROR_KEYS );
-									hostArrayResponse.addObject( element );
+									hostArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Host " + dto.name() + " not found; UPDATE failed" }, ERROR_KEYS ) );
 								}
 								else {
 									anMHost.updateValues( dto );
@@ -345,8 +339,7 @@ public class DirectAction extends WODirectAction {
 								}
 
 								if( anMApplication == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Application " + name + " not found; UPDATE failed" }, ERROR_KEYS );
-									applicationArrayResponse.addObject( element );
+									applicationArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Application " + name + " not found; UPDATE failed" }, ERROR_KEYS ) );
 								}
 								else {
 									anMApplication.updateValues( dto );
@@ -371,8 +364,7 @@ public class DirectAction extends WODirectAction {
 									anMInstance = aConfig.instanceWithHostnameAndPort( dto.hostName(), port );
 								}
 								if( anMInstance == null ) {
-									element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + dto.hostName() + "-" + port + " not found; UPDATE failed" }, ERROR_KEYS );
-									instanceArrayResponse.addObject( element );
+									instanceArrayResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": Instance " + dto.hostName() + "-" + port + " not found; UPDATE failed" }, ERROR_KEYS ) );
 								}
 								else {
 									anMInstance.updateValues( dto );
@@ -408,8 +400,7 @@ public class DirectAction extends WODirectAction {
 					commandWotaskdResponse.addObject( SUCCESS_ELEMENT );
 				}
 				else {
-					element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Invalid Command " + command }, ERROR_KEYS );
-					commandWotaskdResponse.addObject( element );
+					commandWotaskdResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Invalid Command " + command }, ERROR_KEYS ) );
 				}
 
 				// Go through each instance and do whatever it is that we do
@@ -425,8 +416,7 @@ public class DirectAction extends WODirectAction {
 								if( command.equals( "START" ) ) {
 									String errorMsg = appTaskd.instanceController().startInstance( anInstance );
 									if( errorMsg != null ) {
-										element = new NSDictionary( new Object[] { Boolean.FALSE, errorMsg }, ERROR_KEYS );
-										commandWotaskdResponse.addObject( element );
+										commandWotaskdResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, errorMsg }, ERROR_KEYS ) );
 									}
 								}
 								else if( command.equals( "CLEAR" ) ) {
@@ -457,20 +447,16 @@ public class DirectAction extends WODirectAction {
 										commandWotaskdResponse.addObject( SUCCESS_ELEMENT );
 									}
 									catch( SjipException me ) {
-										element = new NSDictionary( new Object[] { Boolean.FALSE, me.getMessage() }, ERROR_KEYS );
-										commandWotaskdResponse.addObject( element );
+										commandWotaskdResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, me.getMessage() }, ERROR_KEYS ) );
 									}
 								}
 							}
 							else {
-								//element = new NSDictionary(new Object[]{Boolean.FALSE, anInstance.displayName() + " does not exist on " + _hostName + "; " + command + " failed"}, errorKeys);
-								//commandWotaskdResponse.addObject(element);
 								commandWotaskdResponse.addObject( SUCCESS_ELEMENT );
 							}
 						}
 						else {
-							element = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": No instance found for Host " + hostName + " and Port: " + port + "; " + command + " failed" }, ERROR_KEYS );
-							commandWotaskdResponse.addObject( element );
+							commandWotaskdResponse.addObject( new NSDictionary( new Object[] { Boolean.FALSE, _hostName + ": No instance found for Host " + hostName + " and Port: " + port + "; " + command + " failed" }, ERROR_KEYS ) );
 						}
 					}
 					finally {
