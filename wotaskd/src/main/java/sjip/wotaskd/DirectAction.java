@@ -68,7 +68,6 @@ public class DirectAction extends WODirectAction {
 	private static final String XML_ACCESS_DENIED = XUtil.errorResponseXML( "monitorResponse", _hostName + ": wotaskd may not be accessed through a Web server - Access Denied" );
 	private static final String XML_INVALID_PASSWORD = XUtil.errorResponseXML( "monitorResponse", _hostName + ": Invalid Password - Access Denied" );
 	private static final String XML_INVALID_XML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" );
-	private static final String XML_EMPTY_XML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Empty" );
 	private static final NSDictionary ARGUMENT_NUMBER_COMMAND_ERROR = new NSDictionary( new Object[] { Boolean.FALSE, _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" }, ERROR_KEYS );
 	private static final DateTimeFormatter HTTP_DATE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME.withZone( ZoneOffset.UTC );
 
