@@ -77,52 +77,22 @@ public class Application extends ERXApplication {
 		return true;
 	}
 
-	@Deprecated
-	public String multicastAddress() {
-		return appTaskd().multicastAddress();
-	}
-
-	@Deprecated
-	public MSiteConfig siteConfig() {
-		return appTaskd().siteConfig();
-	}
-
-	@Deprecated
-	public void setSiteConfig( MSiteConfig aConfig ) {
-		// Don't need to call dataHasChanged, since a new MSiteConfig is already dirty
-		appTaskd().setSiteConfig( aConfig );
-	}
-
-	@Deprecated
-	public InstanceController instanceController() {
-		return appTaskd().instanceController();
-	}
-
-	@Deprecated
-	public boolean shouldWriteAdaptorConfig() {
-		return appTaskd().shouldWriteAdaptorConfig();
-	}
-
-	@Deprecated
-	public boolean shouldRespondToMulticast() {
-		return appTaskd().shouldRespondToMulticast();
-	}
-
 	// sleep will check if there have been changes to the siteConfig.
 	// if so, it will write the new siteConfig to disk as SiteConfig.xml
 	// if requested, it will also write the new adaptorConfig to disk as WOConfig.xml
 	// FIXME: This is horrid. Serialization should be triggered by changes in the model. See https://github.com/undur/wonder-slim-deployment/issues/18 // Hugi 2026-05-05
 	@Override
 	public void sleep() {
+		final MSiteConfig siteConfig = appTaskd().siteConfig();
+
 		appTaskd().lock().readLock().lock();
 		try {
-			if( (siteConfig() != null) && siteConfig().hasChanges() ) {
-				// archiving the siteConfig
-				siteConfig().archiveSiteConfig();
-				if( shouldWriteAdaptorConfig() ) {
-					siteConfig().archiveAdaptorConfig();
+			if( siteConfig != null && siteConfig.hasChanges() ) {
+				siteConfig.archiveSiteConfig();
+				if( appTaskd().shouldWriteAdaptorConfig() ) {
+					siteConfig.archiveAdaptorConfig();
 				}
-				siteConfig().resetChanges();
+				siteConfig.resetChanges();
 			}
 		}
 		finally {

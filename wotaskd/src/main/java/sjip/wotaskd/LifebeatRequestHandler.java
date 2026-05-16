@@ -56,7 +56,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		// Sadly, we do regenerate in the case of random lifebeats. Hopefully this won't be too often.
 		// Didn't pull this out so that we can rely on isUsingWebServer to catch some bad requests
 		if( !FHosts.isUsingWebServer( aRequest.headers() ) && FHosts.isConfiguredHostAddress( aRequest._originatingAddress(), true ) ) {
-			final Object lock = theApplication().requestHandlingLock();
+			final Object lock = WOApplication.application().requestHandlingLock();
 
 			if( lock != null ) {
 				synchronized( lock ) {
@@ -236,19 +236,19 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		return null;
 	}
 
-	private static Application theApplication() {
-		return (Application)WOApplication.application();
+	private static AppTaskd appTaskd() {
+		return ((Application)WOApplication.application()).appTaskd();
 	}
 	
 	private static MSiteConfig appSiteConfig() {
-		return theApplication().siteConfig();
+		return appTaskd().siteConfig();
 	}
-	
+
 	private static ReentrantReadWriteLock appLock() {
-		return theApplication().appTaskd().lock();
+		return appTaskd().lock();
 	}
 	
 	private static InstanceController appInstanceController() {
-		return theApplication().instanceController();
+		return appTaskd().instanceController();
 	}
 }

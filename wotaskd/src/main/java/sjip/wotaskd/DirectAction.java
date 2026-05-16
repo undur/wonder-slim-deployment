@@ -159,7 +159,8 @@ public class DirectAction extends WODirectAction {
 				// "overwrite" carrying an empty SiteConfig. // Hugi 2026-05-11
 				if( clearString != null ) {
 					stopAllInstances();
-					((Application)WOApplication.application()).setSiteConfig( new MSiteConfig( null ) );
+					// Don't need to call dataHasChanged, since a new MSiteConfig is already dirty
+					appTaskd.setSiteConfig( new MSiteConfig( null ) );
 					updateWotaskdResponse.put( "clear", SUCCESS_ELEMENT );
 				}
 				else if( overwriteDict != null ) {
@@ -167,7 +168,8 @@ public class DirectAction extends WODirectAction {
 					@SuppressWarnings("unchecked")
 					final Map<String, Object> siteConfigDict = (Map<String, Object>)overwriteDict.get( "SiteConfig" );
 					final MSiteConfigDto dto = new FoundationCoder().decodeRecord( siteConfigDict, MSiteConfigDto.class );
-					((Application)WOApplication.application()).setSiteConfig( new MSiteConfig( dto ) );
+					// Don't need to call dataHasChanged, since a new MSiteConfig is already dirty
+					appTaskd.setSiteConfig( new MSiteConfig( dto ) );
 					updateWotaskdResponse.put( "overwrite", SUCCESS_ELEMENT );
 				}
 				else if( syncDict != null ) {
@@ -199,7 +201,8 @@ public class DirectAction extends WODirectAction {
 								else {
 									if( anMHost == aConfig.localHost() ) {
 										stopAllInstances();
-										((Application)WOApplication.application()).setSiteConfig( new MSiteConfig( null ) );
+										// Don't need to call dataHasChanged, since a new MSiteConfig is already dirty
+										appTaskd.setSiteConfig( new MSiteConfig( null ) );
 									}
 									else {
 										aConfig.removeHost_W( anMHost );
@@ -586,9 +589,9 @@ public class DirectAction extends WODirectAction {
 
 		// getting the errors
 		final List<String> globalErrors;
-		synchronized( theApplication.siteConfig().globalErrorDictionary ) {
-			globalErrors = new ArrayList<>( theApplication.siteConfig().globalErrorDictionary.values() );
-			theApplication.siteConfig().globalErrorDictionary.clear();
+		synchronized( appTaskd.siteConfig().globalErrorDictionary ) {
+			globalErrors = new ArrayList<>( appTaskd.siteConfig().globalErrorDictionary.values() );
+			appTaskd.siteConfig().globalErrorDictionary.clear();
 		}
 		if( !globalErrors.isEmpty() ) {
 			errorResponse.addAll( globalErrors );
@@ -605,7 +608,7 @@ public class DirectAction extends WODirectAction {
 	}
 
 	private void getStatisticsForInstanceArray( final List<MInstance> instArray, List<String> errorResponse ) {
-		final InstanceController instanceController = ((Application)WOApplication.application()).instanceController();
+		final InstanceController instanceController = ((Application)WOApplication.application()).appTaskd().instanceController();
 
 		final List<MInstance> instanceArray = instArray;
 		int theCount = instanceArray.size();
@@ -727,8 +730,8 @@ public class DirectAction extends WODirectAction {
 	}
 
 	private void syncSiteConfig( Map<String, Object> config ) {
-		Application theApplication = (Application)WOApplication.application();
-		MSiteConfig aConfig = theApplication.siteConfig();
+		final AppTaskd appTaskd = ((Application)WOApplication.application()).appTaskd();
+		final MSiteConfig aConfig = appTaskd.siteConfig();
 
 		@SuppressWarnings("unchecked")
 		final Map<String, Object> siteDict = (Map<String, Object>)config.get( "site" );
@@ -767,7 +770,8 @@ public class DirectAction extends WODirectAction {
 		for( final MHost anMHost : currentHosts ) {
 			if( anMHost == aConfig.localHost() ) {
 				stopAllInstances();
-				((Application)WOApplication.application()).setSiteConfig( new MSiteConfig( null ) );
+				// Don't need to call dataHasChanged, since a new MSiteConfig is already dirty
+				appTaskd.setSiteConfig( new MSiteConfig( null ) );
 				break;
 			}
 			aConfig.removeHost_W( anMHost );
@@ -834,15 +838,16 @@ public class DirectAction extends WODirectAction {
 
 	// This will stop all instances in parallel, and return after each stopInstance call has returned.
 	private void stopAllInstances() {
-		final InstanceController instanceController = ((Application)WOApplication.application()).instanceController();
+		final AppTaskd appTaskd = ((Application)WOApplication.application()).appTaskd();
+		final InstanceController instanceController = appTaskd.instanceController();
+		final List<MInstance> instanceArray = appTaskd.siteConfig().instanceArray();
 
-		final List<MInstance> instanceArray = ((Application)WOApplication.application()).siteConfig().instanceArray();
-		int theCount = instanceArray.size();
+		final int theCount = instanceArray.size();
 
 		if( theCount == 0 )
 			return;
 
-		Thread[] workers = new Thread[theCount];
+		final Thread[] workers = new Thread[theCount];
 
 		for( int i = 0; i < theCount; i++ ) {
 			final int j = i;
@@ -864,18 +869,18 @@ public class DirectAction extends WODirectAction {
 				workers[i].join();
 			}
 		}
-		catch( InterruptedException ie ) {
-		}
+		catch( InterruptedException ie ) {}
 	}
 
 	@Override
 	public WOActionResults defaultAction() {
-		final Application theApplication = (Application)WOApplication.application();
 		final WOResponse aResponse = new WOResponse();
 		final WORequest aRequest = request();
-		final MSiteConfig aConfig = theApplication.siteConfig();
 
-		theApplication.appTaskd().lock().readLock().lock();
+		final AppTaskd appTaskd = ((Application)WOApplication.application()).appTaskd();
+		final MSiteConfig aConfig = appTaskd.siteConfig();
+
+		appTaskd.lock().readLock().lock();
 
 		try {
 			final String passwordHeader = aRequest.headerForKey( "password" );
@@ -901,18 +906,18 @@ public class DirectAction extends WODirectAction {
 
 			aResponse.appendContentString( "The Configuration Directory is: " + MSiteConfig.configDirectoryPath() );
 			aResponse.appendContentString( "<br>" );
-			if( ((Application)WOApplication.application()).shouldWriteAdaptorConfig() ) {
+			if( appTaskd.shouldWriteAdaptorConfig() ) {
 				aResponse.appendContentString( "Wotaskd is writing WOConfig.xml to disk" );
 			}
 			else {
 				aResponse.appendContentString( "Wotaskd is NOT writing WOConfig.xml to disk" );
 			}
 			aResponse.appendContentString( "<br>" );
-			aResponse.appendContentString( "The multicast address is: " + ((Application)WOApplication.application()).multicastAddress() );
+			aResponse.appendContentString( "The multicast address is: " + appTaskd.multicastAddress() );
 			aResponse.appendContentString( "<br>" );
 			aResponse.appendContentString( "This wotaskd is running on Port: " + WOApplication.application().port() );
 			aResponse.appendContentString( "<br>" );
-			if( ((Application)WOApplication.application()).shouldRespondToMulticast() ) {
+			if( appTaskd.shouldRespondToMulticast() ) {
 				aResponse.appendContentString( "Wotaskd is responding to Multicast" );
 			}
 			else {
@@ -926,7 +931,7 @@ public class DirectAction extends WODirectAction {
 			aResponse.appendContentString( "</pre><br><br></body></html>" );
 		}
 		finally {
-			theApplication.appTaskd().lock().readLock().unlock();
+			appTaskd.lock().readLock().unlock();
 		}
 
 		return aResponse;
@@ -934,7 +939,7 @@ public class DirectAction extends WODirectAction {
 
 	// Adaptor Config Response
 	public WOResponse woconfigAction() {
-		final Application theApplication = (Application)WOApplication.application();
+		final AppTaskd appTaskd = ((Application)WOApplication.application()).appTaskd();
 		final WORequest aRequest = request();
 
 		// FIXME: WO-era cargo with a weak rationale — same-host adaptors get to see manually-started
@@ -944,13 +949,13 @@ public class DirectAction extends WODirectAction {
 		// We aren't going to regenerate the list, though, since this gets called a lot.
 		boolean shouldIncludeUnregisteredInstances = FHosts.isAnyMachineLocalAddress( aRequest._originatingAddress(), false );
 
-		theApplication.appTaskd().lock().readLock().lock();
+		appTaskd.lock().readLock().lock();
 		String xml;
 		try {
-			xml = AdaptorConfigSerialization.generateAdaptorConfigXML( ((Application)WOApplication.application()).siteConfig(), true, shouldIncludeUnregisteredInstances );
+			xml = AdaptorConfigSerialization.generateAdaptorConfigXML( appTaskd.siteConfig(), true, shouldIncludeUnregisteredInstances );
 		}
 		finally {
-			theApplication.appTaskd().lock().readLock().unlock();
+			appTaskd.lock().readLock().unlock();
 		}
 		WOResponse aResponse = WOApplication.application().createResponseInContext( null );
 		aResponse.appendContentString( xml );
@@ -960,5 +965,4 @@ public class DirectAction extends WODirectAction {
 
 		return aResponse;
 	}
-
 }

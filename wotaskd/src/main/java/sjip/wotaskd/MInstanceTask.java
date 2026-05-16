@@ -56,7 +56,7 @@ public abstract class MInstanceTask extends TimerTask {
 		public void run() {
 			Application app = (Application)WOApplication.application();
 			app.appTaskd().lock().readLock().lock();
-			InstanceController instanceController = app.instanceController();
+			InstanceController instanceController = app.appTaskd().instanceController();
 			try {
 
 				if( retries >= _numberOfRetriesBeforeForceQuit ) {
