@@ -8,6 +8,7 @@ import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.routes.RouteTable;
 import sjip.core.model.MSiteConfig;
+import sjip.core.x.FApplication;
 import sjip.core.x.FProperties;
 
 public class Application extends ERXApplication {
@@ -21,7 +22,12 @@ public class Application extends ERXApplication {
 	}
 
 	public Application() {
-		
+
+		// Announce this process's identity to sjip-core's MSiteConfig — gates the
+		// config-dir write-permission check on boot. Must happen before AppTaskd
+		// is constructed, since AppTaskd's constructor calls unarchiveSiteConfig().
+		FApplication.setIsWotaskd( true );
+
 		// Required: keeps zero-length lifebeat responses small enough for the WOApp's
 		// fixed-width parser in WOApplication._LifebeatThread.sendMessage() to read without
 		// desyncing. See issue #21.
@@ -65,11 +71,6 @@ public class Application extends ERXApplication {
 
 	public AppTaskd appTaskd() {
 		return _appTaskd;
-	}
-
-	@Override
-	public String name() {
-		return "wotaskd";
 	}
 
 	@Override

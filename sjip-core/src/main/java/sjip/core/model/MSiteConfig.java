@@ -720,7 +720,7 @@ public class MSiteConfig extends MObject {
 					logger.error( "Don't have permission to read from Configuration Directory {} as this user, please change the permissions or restart {} as another user.", _configDirectoryPath, FApplication.name() );
 					System.exit( 1 );
 				}
-				if( (FApplication.name().equals( "wotaskd" )) && (!configDir.canWrite()) ) {
+				if( FApplication.isWotaskd() && !configDir.canWrite() ) {
 					logger.error( "Don't have permission to write to Configuration Directory {} as this user; please change the permissions.", _configDirectoryPath );
 					System.exit( 1 );
 				}

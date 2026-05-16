@@ -55,12 +55,38 @@ public final class FApplication {
 
 	/**
 	 * Process identity — {@code "wotaskd"}, {@code "JavaMonitor"}, etc.
-	 * ({@code WOApplication.application().name()}). Used for error-message prefixing
-	 * and for {@code MSiteConfig}'s "am I wotaskd?" discrimination on disk permissions.
+	 * ({@code WOApplication.application().name()}). Used for error-message prefixing.
+	 * For "am I wotaskd?" discrimination, use {@link #isWotaskd()} — that's a capability
+	 * check, not an identity check.
 	 */
 	public static String name() {
 		return WOApplication.application().name();
 	}
+
+	/**
+	 * Whether the surrounding application is wotaskd (rather than JavaMonitor or
+	 * something else). Used by {@code MSiteConfig} to gate config-dir write-permission
+	 * checks — only wotaskd is responsible for writing config back to disk.
+	 *
+	 * <p>Service-locator pattern: wotaskd's bootstrap calls {@link #setIsWotaskd(boolean)}
+	 * once during startup. Defaults to {@code false} (the JavaMonitor case).
+	 *
+	 * <p>FIXME: Intermediate measure. The honest shape is a responsibility declared by
+	 * the registering application (e.g. {@code ownsConfigPersistence()}, "this process is
+	 * the one that writes SiteConfig back to disk") rather than an identity question.
+	 * Wotaskd writes config; JavaMonitor doesn't. The location and naming are wrong; the
+	 * functionality — removing sjip-core's dependency on sniffing the application's name —
+	 * is what matters today. Revisit alongside #50.
+	 */
+	public static boolean isWotaskd() {
+		return _isWotaskd;
+	}
+
+	public static void setIsWotaskd( boolean isWotaskd ) {
+		_isWotaskd = isWotaskd;
+	}
+
+	private static volatile boolean _isWotaskd;
 
 	/**
 	 * The {@link IInstanceController} the surrounding application has registered, or
