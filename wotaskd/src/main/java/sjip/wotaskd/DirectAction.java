@@ -57,12 +57,6 @@ public class DirectAction extends WODirectAction {
 
 	private static final Map<String, Object> SUCCESS_ELEMENT = Map.of( "success", Boolean.TRUE );
 
-	private static Map<String, Object> errorElement( String message ) {
-		final Map<String, Object> m = new LinkedHashMap<>();
-		m.put( "success", Boolean.FALSE );
-		m.put( "errorMessage", message );
-		return m;
-	}
 	private static final DateTimeFormatter HTTP_DATE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME.withZone( ZoneOffset.UTC );
 
 	public DirectAction( WORequest aRequest ) {
@@ -959,5 +953,12 @@ public class DirectAction extends WODirectAction {
 		logger.debug( "woConfigAction returned: " + xml );
 
 		return aResponse;
+	}
+	
+	private static Map<String, Object> errorElement( String message ) {
+		final Map<String, Object> m = new LinkedHashMap<>();
+		m.put( "success", Boolean.FALSE );
+		m.put( "errorMessage", message );
+		return m;
 	}
 }
