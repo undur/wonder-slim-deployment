@@ -53,7 +53,7 @@ WOShouldUseSpawn=true
 # WOTaskd.killTimeout=120000
 
 
-# The number of milliseconds before a timeout occurs for requests sent from WOTaskD to WOApplication instances. 
+# The number of milliseconds before a timeout occurs for requests sent from WOTaskd to application instances. 
 # WOTaskd.receiveTimeout=5000
 
 log4j.rootCategory=INFO, A1
