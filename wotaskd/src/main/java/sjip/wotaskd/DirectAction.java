@@ -43,6 +43,7 @@ import sjip.core.model.MSiteConfig;
 import sjip.core.model.MSiteConfigDto;
 import sjip.core.model.MSiteConfigSiteDto;
 import sjip.core.x.AdaptorConfigSerialization;
+import sjip.core.x.FApplication;
 import sjip.core.x.FHosts;
 import sjip.core.x.FProperties;
 import sjip.core.x.FoundationCoder;
@@ -54,13 +55,7 @@ public class DirectAction extends WODirectAction {
 
 	private static final Logger logger = LoggerFactory.getLogger( DirectAction.class );
 
-	private static final String _hostName = WOApplication.application().host();
-
 	private static final Map<String, Object> SUCCESS_ELEMENT = Map.of( "success", Boolean.TRUE );
-	private static final String XML_ACCESS_DENIED = XUtil.errorResponseXML( "monitorResponse", _hostName + ": wotaskd may not be accessed through a Web server - Access Denied" );
-	private static final String XML_INVALID_PASSWORD = XUtil.errorResponseXML( "monitorResponse", _hostName + ": Invalid Password - Access Denied" );
-	private static final String XML_INVALID_XML = XUtil.errorResponseXML( "monitorResponse", _hostName + " - INTERNAL ERROR: Request from Monitor was Invalid" );
-	private static final Map<String, Object> ARGUMENT_NUMBER_COMMAND_ERROR = errorElement( _hostName + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" );
 
 	private static Map<String, Object> errorElement( String message ) {
 		final Map<String, Object> m = new LinkedHashMap<>();
@@ -87,7 +82,7 @@ public class DirectAction extends WODirectAction {
 			logger.debug( request().contentString() );
 			final WOResponse forbiddenResponse = new WOResponse();
 			forbiddenResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
-			forbiddenResponse.appendContentString( XML_ACCESS_DENIED );
+			forbiddenResponse.appendContentString( XUtil.errorResponseXML( "monitorResponse", FApplication.host() + ": wotaskd may not be accessed through a Web server - Access Denied" ) );
 			return forbiddenResponse;
 		}
 
@@ -99,7 +94,7 @@ public class DirectAction extends WODirectAction {
 				logger.debug( "Attempt to call DirectAction: monitorRequestAction with incorrect password." );
 				final WOResponse forbiddenResponse = new WOResponse();
 				forbiddenResponse.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
-				forbiddenResponse.appendContentString( XML_INVALID_PASSWORD );
+				forbiddenResponse.appendContentString( XUtil.errorResponseXML( "monitorResponse", FApplication.host() + ": Invalid Password - Access Denied" ) );
 				// the read lock is released in the finally block
 				return forbiddenResponse;
 			}
@@ -118,7 +113,7 @@ public class DirectAction extends WODirectAction {
 			logger.error( "Wotaskd monitorRequestAction: Error parsing request" );
 			logger.debug( "Wotaskd monitorRequestAction: " + request().contentString() );
 			final WOResponse invalidXMLResponse = new WOResponse();
-			invalidXMLResponse.appendContentString( XML_INVALID_XML );
+			invalidXMLResponse.appendContentString( XUtil.errorResponseXML( "monitorResponse", FApplication.host() + " - INTERNAL ERROR: Request from Monitor was Invalid" ) );
 			return invalidXMLResponse;
 		}
 
@@ -196,7 +191,7 @@ public class DirectAction extends WODirectAction {
 								String name = (String)aHost.get( "name" );
 								MHost anMHost = aConfig.hostWithName( name );
 								if( anMHost == null ) {
-									hostArrayResponse.add( errorElement( _hostName + ": Host " + name + " not found; REMOVE failed" ) );
+									hostArrayResponse.add( errorElement( FApplication.host() + ": Host " + name + " not found; REMOVE failed" ) );
 								}
 								else {
 									if( anMHost == aConfig.localHost() ) {
@@ -220,7 +215,7 @@ public class DirectAction extends WODirectAction {
 								String name = (String)anApp.get( "name" );
 								MApplication anMApplication = aConfig.applicationWithName( name );
 								if( anMApplication == null ) {
-									applicationArrayResponse.add( errorElement( _hostName + ": Application " + name + " not found; REMOVE failed" ) );
+									applicationArrayResponse.add( errorElement( FApplication.host() + ": Application " + name + " not found; REMOVE failed" ) );
 								}
 								else {
 									aConfig.removeApplication_W( aConfig.applicationWithName( name ) );
@@ -238,7 +233,7 @@ public class DirectAction extends WODirectAction {
 								Integer port = (Integer)anInst.get( "port" );
 								MInstance anMInstance = aConfig.instanceWithHostnameAndPort( hostName, port );
 								if( anMInstance == null ) {
-									instanceArrayResponse.add( errorElement( _hostName + ": Instance " + hostName + "-" + port + " not found; REMOVE failed" ) );
+									instanceArrayResponse.add( errorElement( FApplication.host() + ": Instance " + hostName + "-" + port + " not found; REMOVE failed" ) );
 								}
 								else {
 									aConfig.removeInstance_W( anMInstance );
@@ -322,7 +317,7 @@ public class DirectAction extends WODirectAction {
 								final MHostDto dto = new FoundationCoder().decodeRecord( aHost, MHostDto.class );
 								MHost anMHost = aConfig.hostWithName( dto.name() );
 								if( anMHost == null ) {
-									hostArrayResponse.add( errorElement( _hostName + ": Host " + dto.name() + " not found; UPDATE failed" ) );
+									hostArrayResponse.add( errorElement( FApplication.host() + ": Host " + dto.name() + " not found; UPDATE failed" ) );
 								}
 								else {
 									anMHost.updateValues( dto );
@@ -346,7 +341,7 @@ public class DirectAction extends WODirectAction {
 								}
 
 								if( anMApplication == null ) {
-									applicationArrayResponse.add( errorElement( _hostName + ": Application " + name + " not found; UPDATE failed" ) );
+									applicationArrayResponse.add( errorElement( FApplication.host() + ": Application " + name + " not found; UPDATE failed" ) );
 								}
 								else {
 									anMApplication.updateValues( dto );
@@ -369,7 +364,7 @@ public class DirectAction extends WODirectAction {
 									anMInstance = aConfig.instanceWithHostnameAndPort( dto.hostName(), port );
 								}
 								if( anMInstance == null ) {
-									instanceArrayResponse.add( errorElement( _hostName + ": Instance " + dto.hostName() + "-" + port + " not found; UPDATE failed" ) );
+									instanceArrayResponse.add( errorElement( FApplication.host() + ": Instance " + dto.hostName() + "-" + port + " not found; UPDATE failed" ) );
 								}
 								else {
 									anMInstance.updateValues( dto );
@@ -394,7 +389,7 @@ public class DirectAction extends WODirectAction {
 			final List<Object> commandWotaskdResponse = new ArrayList<>( instArrayCount );
 
 			if( instArrayCount < 2 ) {
-				commandWotaskdResponse.add( ARGUMENT_NUMBER_COMMAND_ERROR );
+				commandWotaskdResponse.add( errorElement( FApplication.host() + " - INTERNAL ERROR: Not enough elements: Need 'commandString' + 'arrayOfInstances'" ) );
 			}
 			else {
 				String command = (String)commandWotaskdArray.get( 0 );
@@ -405,7 +400,7 @@ public class DirectAction extends WODirectAction {
 					commandWotaskdResponse.add( SUCCESS_ELEMENT );
 				}
 				else {
-					commandWotaskdResponse.add( errorElement( _hostName + " - INTERNAL ERROR: Invalid Command " + command ) );
+					commandWotaskdResponse.add( errorElement( FApplication.host() + " - INTERNAL ERROR: Invalid Command " + command ) );
 				}
 
 				// Go through each instance and do whatever it is that we do
@@ -462,7 +457,7 @@ public class DirectAction extends WODirectAction {
 							}
 						}
 						else {
-							commandWotaskdResponse.add( errorElement( _hostName + ": No instance found for Host " + hostName + " and Port: " + port + "; " + command + " failed" ) );
+							commandWotaskdResponse.add( errorElement( FApplication.host() + ": No instance found for Host " + hostName + " and Port: " + port + "; " + command + " failed" ) );
 						}
 					}
 					finally {
@@ -582,7 +577,7 @@ public class DirectAction extends WODirectAction {
 				queryWotaskdResponse.put( "instanceResponse", instanceResponse );
 			}
 			else {
-				errorResponse.add( _hostName + ": Unrecognized Query: " + queryWotaskdString );
+				errorResponse.add( FApplication.host() + ": Unrecognized Query: " + queryWotaskdString );
 			}
 			monitorResponse.put( "queryWotaskdResponse", queryWotaskdResponse );
 		}
@@ -893,7 +888,7 @@ public class DirectAction extends WODirectAction {
 			}
 
 			aResponse.appendContentString( "<html><head><title>Wotaskd for WebObjects 5</title></head><body>" );
-			aResponse.appendContentString( "<center><b>Wotaskd for WebObjects 5: " + _hostName + "</b></center>" );
+			aResponse.appendContentString( "<center><b>Wotaskd for WebObjects 5: " + FApplication.host() + "</b></center>" );
 			aResponse.appendContentString( "<br><br><hr><br>Site Config as written to disk<br><hr><br><pre>" );
 			aResponse.appendContentString( WOMessage.stringByEscapingHTMLString( aConfig.generateSiteConfigXML() ) );
 			aResponse.appendContentString( "</pre><br><br><hr><br>Adaptor Config as sent to Local WOAdaptors - All Running Applications and Instances<br><hr><br><pre>" );
