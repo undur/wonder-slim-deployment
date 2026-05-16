@@ -717,7 +717,7 @@ public class MSiteConfig extends MObject {
 					System.exit( 1 );
 				}
 				if( !configDir.canRead() ) {
-					logger.error( "Don't have permission to read from Configuration Directory {} as this user, please change the permissions or restart {} as another user.", _configDirectoryPath, FApplication.name() );
+					logger.error( "Don't have permission to read from Configuration Directory {} as this user, please change the permissions or restart {} as another user.", _configDirectoryPath, FApplication.role() );
 					System.exit( 1 );
 				}
 				if( FApplication.isWotaskd() && !configDir.canWrite() ) {
@@ -835,7 +835,7 @@ public class MSiteConfig extends MObject {
 		try {
 			if( siteConfigFile.exists() && !siteConfigFile.canWrite() ) {
 				logger.error( "Don't have permission to write to file {} as this user, please change the permissions.", siteConfigFile.getAbsolutePath() );
-				final String pre = FApplication.name() + " - " + _localHostName;
+				final String pre = FApplication.role() + " - " + _localHostName;
 				globalErrorDictionary.put( "archiveSiteConfig", pre + " Don't have permission to write to file " + siteConfigFile.getAbsolutePath() + " as this user, please change the permissions." );
 				return;
 			}
@@ -853,7 +853,7 @@ public class MSiteConfig extends MObject {
 		catch( final IOException e ) {
 			final String message = "Cannot write to file " + siteConfigFile.getAbsolutePath() + ". IOException: " + e.getLocalizedMessage();
 			logger.error( message );
-			final String pre = FApplication.name() + " - " + _localHostName;
+			final String pre = FApplication.role() + " - " + _localHostName;
 			globalErrorDictionary.put( "archiveSiteConfig", pre + message );
 		}
 	}
@@ -875,7 +875,7 @@ public class MSiteConfig extends MObject {
 			final File ac = fileForAdaptorConfig();
 			if( ac.exists() && !ac.canWrite() ) {
 				logger.error( "Don't have permission to write to file {} as this user, please change the permissions.", fileForAdaptorConfig() );
-				final String pre = FApplication.name() + " - " + _localHostName;
+				final String pre = FApplication.role() + " - " + _localHostName;
 				globalErrorDictionary.put( "archiveSiteConfig", pre + " Don't have permission to write to file " + fileForAdaptorConfig() + "as this user, please change the permissions." );
 				return;
 			}
@@ -885,7 +885,7 @@ public class MSiteConfig extends MObject {
 		catch( final IOException e ) {
 			final String message = "Cannot write to file " + pathForAdaptorConfig() + ". IOException: " + e.getLocalizedMessage();
 			logger.error( message );
-			final String pre = FApplication.name() + " - " + _localHostName;
+			final String pre = FApplication.role() + " - " + _localHostName;
 			globalErrorDictionary.put( "archiveAdaptorConfig", pre + " " + message );
 		}
 	}

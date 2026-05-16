@@ -4,24 +4,25 @@ import com.webobjects.appserver.WOApplication;
 
 import sjip.core.IInstanceController;
 
+
 /**
- * Single point of contact between {@code sjip-core} model code and the surrounding
- * {@link WOApplication} singleton.
+ * Temporary holder class for ambient process-level data that {@code sjip-core} code
+ * needs to read — the surrounding application's host name, role, registered
+ * {@code InstanceController}, and so on. Today these are reached as static accessors;
+ * eventually each piece of data should be passed to its use sites explicitly, at which
+ * point this class goes away.
  *
- * <p>Every read from {@code WOApplication.application()} that originates in
- * {@code sjip-core} routes through here. The goal isn't yet to break the dependency
- * on {@code WOApplication} — it's to <strong>localize</strong> it. Once every
- * sjip-core call site is consolidated here, the eventual move to a framework-neutral
- * {@code DeploymentContext} (or to a different framework altogether) has one place
- * to change instead of being scattered across {@code MInstance}, {@code MSiteConfig},
+ * <p>Until then, this class serves as a single point of contact between {@code sjip-core}
+ * and the surrounding {@link WOApplication} singleton: every read from
+ * {@code WOApplication.application()} that originates in {@code sjip-core} routes through
+ * here, and bits of data that aren't on {@code WOApplication} at all (process role,
+ * the {@code InstanceController}) are registered into here at boot. Localizing the
+ * coupling rather than smearing it across {@code MInstance}, {@code MSiteConfig},
  * {@code AdaptorConfigSerialization}, etc.
  *
  * <p>Similar deployment-context-shaped concepts already exist in {@code AppTaskd} and
  * {@code WOTaskdHandler} but live on the producing side, not the consumer side. Those
- * will be candidates for consolidation when the seam is designed for real.
- *
- * <p>FIXME: This is a step on the way to a proper {@code DeploymentContext} abstraction —
- * a value/interface threaded through the model rather than fetched from a global. // Hugi
+ * are candidates for consolidation when the seam is designed for real.
  */
 public final class FApplication {
 
@@ -54,13 +55,19 @@ public final class FApplication {
 	}
 
 	/**
-	 * Process identity — {@code "wotaskd"}, {@code "JavaMonitor"}, etc.
-	 * ({@code WOApplication.application().name()}). Used for error-message prefixing.
-	 * For "am I wotaskd?" discrimination, use {@link #isWotaskd()} — that's a capability
-	 * check, not an identity check.
+	 * The role this process plays in the deployment system — {@code "wotaskd"} (the
+	 * host-local daemon that manages instances and persists config) or {@code "monitor"}
+	 * (the operator UI that edits config and ships it to wotaskds). Used for
+	 * error-message prefixing so an operator reading a globalErrorDictionary entry can
+	 * tell which kind of process emitted it.
+	 *
+	 * <p>"Role" rather than "name" because the actual WO application name has drifted
+	 * historically (the monitor was renamed Monitor → JavaMonitor when ported to Java);
+	 * the role this process plays in the deployment is more stable than the executable
+	 * name it happens to ship under.
 	 */
-	public static String name() {
-		return WOApplication.application().name();
+	public static String role() {
+		return isWotaskd() ? "wotaskd" : "monitor";
 	}
 
 	/**
