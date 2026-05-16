@@ -14,7 +14,6 @@ SUCH DAMAGE.
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
@@ -26,9 +25,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -46,7 +43,6 @@ import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
-import sjip.core.x.FHosts;
 import sjip.core.x.FProperties;
 import sjip.core.x.FoundationCoder;
 import sjip.core.x.ResponseWrapper;
@@ -82,55 +78,11 @@ public class InstanceController implements IInstanceController {
 	} );
 
 	/**
-	 * Registry of running app instances that wotaskd <em>didn't</em> start — apps that
-	 * showed up via lifebeat (heartbeat) without a corresponding entry in the SiteConfig.
-	 *
-	 * <h4>How an instance ends up here</h4>
-	 * <p>The lifebeat handler accepts pings from any instance running on the local
-	 * machine, even ones wotaskd has no record of, and stuffs them in here. That happens
-	 * in two scenarios:
-	 * <ul>
-	 *   <li>An admin started a {@code .woa} from the shell directly instead of through
-	 *       JavaMonitor.</li>
-	 *   <li>A leftover JVM from a previous SiteConfig is still alive and pinging after
-	 *       its instance entry was removed from the config.</li>
-	 * </ul>
-	 *
-	 * <h4>What we do with them</h4>
-	 * <p><b>Adaptor routing.</b> {@link #generateAdaptorConfigXML()} emits these as
-	 * {@code <application>}/{@code <instance>} entries (with a negative {@code id}
-	 * sentinel) so the {@code mod_WebObjects} adaptor can route incoming HTTP
-	 * requests to manually-started apps too.
-	 *
-	 * <h4>Triage</h4>
-	 * <p>{@link #triageUnknownInstances()} runs periodically and drops entries whose last
-	 * lifebeat is older than 45 seconds — twice the default 30-second lifebeat interval,
-	 * so two missed pings count as dead. Keeps the registry from growing without bound.
-	 *
-	 * <h4>Shape</h4>
-	 * <p>Two-level nested map:
-	 * {@snippet :
-	 * appName (String) -> { port (String) -> lastLifebeat (Instant) }
-	 * }
-	 * <p>The outer key is the application name (e.g. {@code "Hugi"}), the inner key
-	 * is the port the instance is listening on (e.g. {@code "2001"}, kept as a String
-	 * since nothing parses it as an int), and the inner value is the timestamp of
-	 * the last lifebeat received from that instance. The two-level shape lines up
-	 * with the grouped-by-app structure {@link #generateAdaptorConfigXML()} emits.
-	 *
-	 * <p>FIXME: replace the inner map's value with an {@code UnknownApplication} record
-	 * once we get there; the current shape predates records and uses Strings/Instant
-	 * directly. // Hugi 2026-04-30
-	 *
-	 * <p>Concurrent access is gated by {@link #_unknownAppLock}.
-	 *
-	 * <h4>Is it pulling its weight?</h4>
-	 * <p>If your deployment is JavaMonitor-only and nobody starts apps from the shell,
-	 * this whole subsystem is dead weight. It only matters when something runs a WO app
-	 * outside wotaskd's control.
+	 * Registry of running app instances that wotaskd <em>didn't</em> start (manual launches,
+	 * leftover JVMs from removed SiteConfig entries). Maintained for adaptor routing of
+	 * unknown apps; see {@link UnknownInstanceRegistry} for the full story.
 	 */
-	private final Map<String, Map<String, Instant>> _unknownApplications = new LinkedHashMap<>();
-	private final ReentrantReadWriteLock _unknownAppLock = new ReentrantReadWriteLock();
+	private final UnknownInstanceRegistry _unknownRegistry;
 
 	/**
 	 * Resolves the launch wrapper (if {@code WOShouldUseSpawn} is set), records the local
@@ -169,150 +121,20 @@ public class InstanceController implements IInstanceController {
 			spawningGrounds = null;
 		}
 
+		_hostName = hostName;
+		_unknownRegistry = new UnknownInstanceRegistry( hostName );
+
 		// Used to do phased startup the first time startup
 		_scheduler.schedule( this::_checkAutoRecoverStartup, aConfig.autoRecoverInterval(), TimeUnit.MILLISECONDS );
-
-		_hostName = hostName;
 	}
 
-	/**
-	 * Records or refreshes a lifebeat from an instance that wotaskd doesn't have a
-	 * SiteConfig entry for. Called from {@code LifebeatRequestHandler} for any "lifebeat"
-	 * notification whose instance name doesn't match a registered {@link MInstance}.
-	 *
-	 * <p>Only applies to instances on the local machine — a remote address silently no-ops,
-	 * since wotaskd has no business tracking foreign hosts' processes.
-	 *
-	 * <p>Failures (DNS lookup of {@code host}, locking, anything) are swallowed. Unknown
-	 * instances are best-effort bookkeeping; losing one is harmless.
-	 *
-	 * <p>See the {@link #_unknownApplications} field doc for the bigger picture.
-	 */
 	public void registerUnknownInstance( String name, String host, String port ) {
-		_unknownAppLock.writeLock().lock();
-
-		try {
-			Instant currentTime = Instant.now();
-			// Don't regenerate the localhost list for random applications
-			if( FHosts.isConfiguredHostAddress( InetAddress.getByName( host ), false ) ) {
-				Map<String, Instant> appDict = _unknownApplications.get( name );
-				if( appDict != null ) {
-					appDict.put( port, currentTime );
-				}
-				else {
-					final Map<String, Instant> created = new LinkedHashMap<>();
-					created.put( port, currentTime );
-					_unknownApplications.put( name, created );
-				}
-			}
-		}
-		catch( Exception e ) {
-			// Just ignore it - unregistered instances are second class citizens anyway
-		}
-		finally {
-			_unknownAppLock.writeLock().unlock();
-		}
+		_unknownRegistry.register( name, host, port );
 	}
 
-	/**
-	 * Drops {@link #_unknownApplications} entries whose last lifebeat is older than 45
-	 * seconds — twice the default 30-second lifebeat interval, so two missed pings count
-	 * as dead. Called from {@link #_checkAutoRecover}'s periodic timer; keeps the registry
-	 * from growing without bound when manually-started apps come and go.
-	 *
-	 * <p>The 45-second cutoff is hardcoded; making it configurable hasn't been worth the
-	 * effort given how marginal this whole subsystem is.
-	 */
-	private void triageUnknownInstances() {
-		_unknownAppLock.writeLock().lock();
-
-		try {
-			final Map<String, Map<String, Instant>> unknownApps = _unknownApplications;
-			// Should make this configurable?
-			Instant cutOffDate = Instant.now().minusSeconds( 45 );
-
-			final List<String> unknownAppKeys = new ArrayList<>( unknownApps.keySet() );
-
-			for( String unknownAppKey : unknownAppKeys ) {
-				Map<String, Instant> appDict = unknownApps.get( unknownAppKey );
-
-				if( appDict != null ) {
-					final List<String> appDictKeys = new ArrayList<>( appDict.keySet() );
-
-					for( String appDictKey : appDictKeys ) {
-						Instant lastLifebeat = appDict.get( appDictKey );
-						if( (lastLifebeat != null) && (lastLifebeat.isBefore( cutOffDate )) ) {
-							appDict.remove( appDictKey );
-						}
-					}
-					if( appDict.isEmpty() ) {
-						unknownApps.remove( unknownAppKey );
-					}
-				}
-			}
-		}
-		finally {
-			_unknownAppLock.writeLock().unlock();
-		}
-	}
-
-	/**
-	 * Emits {@code <application>}/{@code <instance>} XML fragments for every unknown
-	 * instance currently in {@link #_unknownApplications}, formatted for inclusion in
-	 * {@code WOConfig.xml} so the {@code mod_WebObjects} adaptor can route requests to
-	 * manually-started apps too. The "config" of the method's name refers to the adaptor's
-	 * {@code WOConfig.xml}, not wotaskd's {@code SiteConfig.xml}.
-	 *
-	 * <p>Despite the generic name, this method only handles the unknown-instance leg —
-	 * the registered-instance fragments are emitted separately by {@code MSiteConfig}.
-	 *
-	 * <p>Each {@code <instance>} gets a sentinel {@code id="-<port>"} (the negative-port
-	 * convention is how the adaptor distinguishes unknown from registered), and the host
-	 * is always wotaskd's own (an unknown instance is by definition local).
-	 */
 	@Override
 	public String generateAdaptorConfigXML() {
-		StringBuilder sb = null;
-
-		_unknownAppLock.readLock().lock();
-
-		try {
-			final Map<String, Map<String, Instant>> unknownApps = _unknownApplications;
-			sb = new StringBuilder();
-
-			if( unknownApps.isEmpty() ) {
-				return sb.toString();
-			}
-
-			for( Map.Entry<String, Map<String, Instant>> appEntry : unknownApps.entrySet() ) {
-				final String appName = appEntry.getKey();
-				final Map<String, Instant> appDict = appEntry.getValue();
-
-				sb.append( "  <application name=\"" );
-				sb.append( appName );
-				sb.append( "\">\n" );
-
-				for( String port : appDict.keySet() ) {
-					sb.append( "    <instance" );
-
-					sb.append( " id=\"-" );
-					sb.append( port );
-					sb.append( "\" port=\"" );
-					sb.append( port );
-					sb.append( "\" host=\"" );
-					sb.append( _hostName );
-
-					sb.append( "\"/>\n" );
-				}
-
-				sb.append( "  </application>\n" );
-			}
-		}
-		finally {
-			_unknownAppLock.readLock().unlock();
-		}
-
-		return sb.toString();
+		return _unknownRegistry.generateAdaptorConfigXML();
 	}
 
 	/********** Timer Targets **********/
@@ -320,8 +142,8 @@ public class InstanceController implements IInstanceController {
 	/**
 	 * Periodic auto-recovery sweep. For every local instance flagged as auto-recovering
 	 * or scheduled, restarts it if it isn't currently running and isn't already in the
-	 * STARTING state. Also calls {@link #triageUnknownInstances()} on each pass to expire
-	 * stale unknown-app entries.
+	 * STARTING state. Also triages {@link #_unknownRegistry} on each pass to expire stale
+	 * unknown-app entries.
 	 *
 	 * <p>Runs at the interval configured by {@code MSiteConfig.autoRecoverInterval}.
 	 * Holds the application read lock for the duration; instance starts happen synchronously
@@ -347,7 +169,7 @@ public class InstanceController implements IInstanceController {
 					}
 				}
 			}
-			triageUnknownInstances();
+			_unknownRegistry.triage();
 		}
 		finally {
 			appLock().readLock().unlock();
