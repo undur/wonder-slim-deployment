@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sjip.core.model.MSiteConfig;
+import sjip.core.x.FApplication;
 import sjip.core.x.FProperties;
 
 public class AppTaskd {
@@ -53,6 +54,7 @@ public class AppTaskd {
 		
 		// creating an InstanceController to control and query instances
 		_instanceController = new InstanceController( hostName, this );
+		FApplication.setInstanceController( _instanceController );
 	}
 
 	public ReentrantReadWriteLock lock() {

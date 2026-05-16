@@ -63,15 +63,23 @@ public final class FApplication {
 	}
 
 	/**
-	 * The {@link IInstanceController} the surrounding application exposes under the
-	 * KVC key {@code "instanceController"}, or {@code null} if the application
-	 * doesn't have one (JavaMonitor doesn't; only wotaskd does).
+	 * The {@link IInstanceController} the surrounding application has registered, or
+	 * {@code null} if none has been registered (JavaMonitor doesn't; only wotaskd does).
 	 *
-	 * <p>The KVC lookup is preserved as-is — it's a runtime service-locator hook and
-	 * the alternative requires threading the controller through every model
-	 * construction path.
+	 * <p>Service-locator pattern: wotaskd's bootstrap calls
+	 * {@link #setInstanceController(IInstanceController)} once during startup, after
+	 * which the two sjip-core consumers ({@code AdaptorConfigSerialization}, {@code
+	 * MSiteConfig.removeInstance_W}) can reach it. Still a global, but typed and
+	 * grep-able — was a KVC {@code valueForKey("instanceController")} lookup until
+	 * the framework-touchpoint sweep made that lookup brittle.
 	 */
 	public static IInstanceController instanceController() {
-		return (IInstanceController)WOApplication.application().valueForKey( "instanceController" );
+		return _instanceController;
 	}
+
+	public static void setInstanceController( IInstanceController instanceController ) {
+		_instanceController = instanceController;
+	}
+
+	private static volatile IInstanceController _instanceController;
 }
