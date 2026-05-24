@@ -706,9 +706,24 @@ public class MSiteConfig extends MObject {
 			final File configDir = new File( _configDirectoryPath );
 
 			if( !configDir.exists() ) {
-				if( !configDir.mkdirs() ) {
-					logger.error( "Configuration Directory {} does not exist, and cannot be created.", _configDirectoryPath );
-					System.exit( 1 );
+				// Same reasoning as the gated SiteConfig.xml creation in
+				// unarchiveSiteConfig: only wotaskd owns the config dir on disk.
+				// JavaMonitor pointed at a non-existent config dir should not
+				// silently create one — that misleads operators into thinking
+				// JavaMonitor is the authority. (See wonder-slim-deployment #51.)
+				//
+				// JavaMonitor continues to proceed in this case, mirroring its
+				// existing "no SiteConfig file → empty in-memory config" tolerance;
+				// the broader "JavaMonitor stops reading from disk altogether"
+				// shift is deferred to the source-of-truth cut tracked in #51.
+				if( FApplication.isWotaskd() ) {
+					if( !configDir.mkdirs() ) {
+						logger.error( "Configuration Directory {} does not exist, and cannot be created.", _configDirectoryPath );
+						System.exit( 1 );
+					}
+				}
+				else {
+					logger.warn( "Configuration Directory {} does not exist. Continuing with empty in-memory config.", _configDirectoryPath );
 				}
 			}
 			else {
