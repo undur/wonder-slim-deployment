@@ -761,12 +761,18 @@ public class MSiteConfig extends MObject {
 	public static MSiteConfig unarchiveSiteConfig( boolean isWotaskd ) {
 		MSiteConfig aConfig = null;
 
-		// The file may not exist, but we can create it.
-		// It is awkward to do the file creation here, in this way, but this stuff needs to be factored properly.
-		// If creation fails (typically a permission problem on the parent directory) we
-		// rethrow as RuntimeException — same effective behaviour as before, with a
-		// proper cause chain.
-		if( !fileForSiteConfig().exists() ) {
+		// Gate the "create empty SiteConfig.xml if missing" behaviour on isWotaskd.
+		// Only wotaskd owns the config dir on disk; JavaMonitor is the admin UI for
+		// the locally-co-located wotaskd and has no business writing config files of
+		// its own. (See wonder-slim-deployment #51 for the broader source-of-truth
+		// framing.) Without this gate, a freshly-started JavaMonitor pointed at an
+		// empty config directory silently creates an empty SiteConfig.xml — which
+		// then misleads operators into thinking JavaMonitor is the authority.
+		//
+		// FIXME: file creation in unarchive is awkward in the first place; this
+		// whole code path wants to move into a SiteConfigStore as part of the
+		// MSiteConfig cleanup.
+		if( isWotaskd && !fileForSiteConfig().exists() ) {
 			final String emptySiteConfig = new FoundationCoder().encodeRootObjectForKey( Map.of(), "SiteConfig" );
 			try {
 				Files.writeString( fileForSiteConfig().toPath(), emptySiteConfig, StandardCharsets.UTF_8 );
