@@ -16,7 +16,7 @@
 		<webobjects.version>5.4.3</webobjects.version>
 
 		<wonder.group>is.rebbi.slim</wonder.group>
-		<wonder.version>8.0.2</wonder.version>
+		<wonder.version>8.0.3</wonder.version>
 	</properties>
 
 	<build>
