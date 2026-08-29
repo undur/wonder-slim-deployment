@@ -133,8 +133,8 @@ public class InstanceController implements IInstanceController {
 	}
 
 	@Override
-	public String generateAdaptorConfigXML() {
-		return _unknownRegistry.generateAdaptorConfigXML();
+	public java.util.List<sjip.core.IInstanceController.UnknownInstance> unknownInstances() {
+		return _unknownRegistry.snapshot();
 	}
 
 	/********** Timer Targets **********/

@@ -22,6 +22,23 @@ public class AdaptorConfigSerialization {
 	public static String generateAdaptorConfigXML( MSiteConfig siteConfig, boolean onlyIncludeRunningInstances, boolean shouldIncludeUnregisteredInstances ) {
 		final StringBuilder sb = new StringBuilder( "<?xml version=\"1.0\" encoding=\"ASCII\"?>\n<adaptor>\n" );
 
+		// Unknown (lifebeating but unconfigured) instances, grouped by app
+		// name. They MERGE into same-named registered application elements —
+		// emitting them as separate duplicate elements made adaptors that key
+		// applications by name (modulo did) drop one of the two, hiding
+		// perfectly healthy instances. Leftover unknown-only apps are emitted
+		// as their own elements after the registered ones.
+		final java.util.Map<String, java.util.List<IInstanceController.UnknownInstance>> unknownByApp = new java.util.LinkedHashMap<>();
+
+		if( shouldIncludeUnregisteredInstances ) {
+			final IInstanceController instanceController = FApplication.instanceController();
+			if( instanceController != null ) {
+				for( final IInstanceController.UnknownInstance unknown : instanceController.unknownInstances() ) {
+					unknownByApp.computeIfAbsent( unknown.applicationName(), name -> new java.util.ArrayList<>() ).add( unknown );
+				}
+			}
+		}
+
 		for( final MApplication anApp : siteConfig.applicationArray() ) {
 
 			if( !(onlyIncludeRunningInstances && !anApp.isRunning_W()) ) {
@@ -113,22 +130,42 @@ public class AdaptorConfigSerialization {
 					}
 				}
 
+				appendUnknownInstances( sb, unknownByApp.remove( anApp.name() ) );
+
 				sb.append( "  </application>\n" );
 			}
 		}
 
-		if( shouldIncludeUnregisteredInstances ) {
-			final IInstanceController instanceController = FApplication.instanceController();
-			if( instanceController != null ) {
-				final String unknownSB = instanceController.generateAdaptorConfigXML();
-				if( unknownSB.length() > 0 ) {
-					sb.append( unknownSB );
-				}
-			}
+		// Unknown instances of apps with no (emitted) registered counterpart
+		for( final java.util.Map.Entry<String, java.util.List<IInstanceController.UnknownInstance>> entry : unknownByApp.entrySet() ) {
+			sb.append( "  <application name=\"" );
+			sb.append( entry.getKey() );
+			sb.append( "\">\n" );
+			appendUnknownInstances( sb, entry.getValue() );
+			sb.append( "  </application>\n" );
 		}
 
 		sb.append( "</adaptor>\n" );
 		return sb.toString();
+	}
+
+	/**
+	 * Emits unknown instances with the negative-port id sentinel (how
+	 * adaptors distinguish unknown from registered instances).
+	 */
+	private static void appendUnknownInstances( final StringBuilder sb, final java.util.List<IInstanceController.UnknownInstance> unknownInstances ) {
+		if( unknownInstances == null ) {
+			return;
+		}
+		for( final IInstanceController.UnknownInstance unknown : unknownInstances ) {
+			sb.append( "    <instance id=\"-" );
+			sb.append( unknown.port() );
+			sb.append( "\" port=\"" );
+			sb.append( unknown.port() );
+			sb.append( "\" host=\"" );
+			sb.append( unknown.host() );
+			sb.append( "\"/>\n" );
+		}
 	}
 
 	/**

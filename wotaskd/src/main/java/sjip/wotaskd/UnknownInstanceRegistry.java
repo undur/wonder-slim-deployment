@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import sjip.core.IInstanceController;
 import sjip.core.x.FHosts;
 
 /**
@@ -26,7 +27,7 @@ import sjip.core.x.FHosts;
  * </ul>
  *
  * <h2>What we do with them</h2>
- * <p><b>Adaptor routing.</b> {@link #generateAdaptorConfigXML()} emits these as
+ * <p><b>Adaptor routing.</b> {@link #snapshot()} feeds these to the adaptor-config serializer as
  * {@code <application>}/{@code <instance>} entries (with a negative {@code id}
  * sentinel) so the {@code mod_WebObjects} adaptor can route incoming HTTP
  * requests to manually-started apps too.
@@ -45,7 +46,7 @@ import sjip.core.x.FHosts;
  * is the port the instance is listening on (e.g. {@code "2001"}, kept as a String
  * since nothing parses it as an int), and the inner value is the timestamp of
  * the last lifebeat received from that instance. The two-level shape lines up
- * with the grouped-by-app structure {@link #generateAdaptorConfigXML()} emits.
+ * with the grouped-by-app structure the adaptor config serializer emits.
  *
  * <p>FIXME: replace the inner map's value with an {@code UnknownApplication} record
  * once we get there; the current shape predates records and uses Strings/Instant
@@ -147,57 +148,31 @@ final class UnknownInstanceRegistry {
 	}
 
 	/**
-	 * Emits {@code <application>}/{@code <instance>} XML fragments for every unknown
-	 * instance currently registered, formatted for inclusion in {@code WOConfig.xml} so
-	 * the {@code mod_WebObjects} adaptor can route requests to manually-started apps too.
-	 * The "config" of the method's name refers to the adaptor's {@code WOConfig.xml},
-	 * not wotaskd's {@code SiteConfig.xml}.
-	 *
-	 * <p>Despite the generic name, this method only handles the unknown-instance leg —
-	 * the registered-instance fragments are emitted separately by {@code MSiteConfig}.
-	 *
-	 * <p>Each {@code <instance>} gets a sentinel {@code id="-<port>"} (the negative-port
-	 * convention is how the adaptor distinguishes unknown from registered), and the host
-	 * is always wotaskd's own (an unknown instance is by definition local).
+	 * A snapshot of the currently registered unknown instances, for the
+	 * adaptor-config serializer. Structured rather than pre-rendered XML so
+	 * the serializer can merge these into same-named registered application
+	 * elements — emitting duplicate {@code <application>} elements made
+	 * adaptors that key applications by name drop one of the two, which once
+	 * hid a perfectly healthy registered instance behind its dying siblings.
+	 * The host is always wotaskd's own (an unknown instance is by definition
+	 * local).
 	 */
-	String generateAdaptorConfigXML() {
-		final StringBuilder sb = new StringBuilder();
+	List<IInstanceController.UnknownInstance> snapshot() {
+		final List<IInstanceController.UnknownInstance> result = new ArrayList<>();
 
 		_lock.readLock().lock();
 
 		try {
-			if( _unknownApplications.isEmpty() ) {
-				return sb.toString();
-			}
-
 			for( Map.Entry<String, Map<String, Instant>> appEntry : _unknownApplications.entrySet() ) {
-				final String appName = appEntry.getKey();
-				final Map<String, Instant> appDict = appEntry.getValue();
-
-				sb.append( "  <application name=\"" );
-				sb.append( appName );
-				sb.append( "\">\n" );
-
-				for( String port : appDict.keySet() ) {
-					sb.append( "    <instance" );
-
-					sb.append( " id=\"-" );
-					sb.append( port );
-					sb.append( "\" port=\"" );
-					sb.append( port );
-					sb.append( "\" host=\"" );
-					sb.append( _hostName );
-
-					sb.append( "\"/>\n" );
+				for( String port : appEntry.getValue().keySet() ) {
+					result.add( new IInstanceController.UnknownInstance( appEntry.getKey(), port, _hostName ) );
 				}
-
-				sb.append( "  </application>\n" );
 			}
 		}
 		finally {
 			_lock.readLock().unlock();
 		}
 
-		return sb.toString();
+		return result;
 	}
 }

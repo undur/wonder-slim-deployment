@@ -12,6 +12,8 @@ SUCH DAMAGE.
  */
 package sjip.core;
 
+import java.util.List;
+
 import sjip.core.model.MInstance;
 import sjip.core.x.ResponseWrapper;
 
@@ -25,5 +27,19 @@ public interface IInstanceController {
 
 	public ResponseWrapper queryInstance( MInstance anInstance ) throws SjipException;
 
-	public String generateAdaptorConfigXML();
+	/**
+	 * A running local instance known only from its lifebeats — no SiteConfig
+	 * entry. Adaptor config emits these with the negative-port id sentinel.
+	 */
+	public record UnknownInstance( String applicationName, String port, String host ) {}
+
+	/**
+	 * @return The currently known unknown (lifebeating but unconfigured)
+	 *         instances. Structured rather than pre-rendered XML so the
+	 *         adaptor-config serializer can merge them into same-named
+	 *         registered application elements — duplicate application
+	 *         elements made adaptors that key applications by name drop
+	 *         whichever element came first.
+	 */
+	public List<UnknownInstance> unknownInstances();
 }
