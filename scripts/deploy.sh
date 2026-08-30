@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
-# Deploy wotaskd and JavaMonitor to hz1.rebbi.is.
+# Deploy wotaskd and JavaMonitor to a server using the standard layout
+# (/opt/webobjects/apps + systemd wotaskd/javamonitor services —
+# hz1.rebbi.is and linode-4.rebbi.is both qualify since 2026-08-30).
+#
+# Usage: deploy.sh <server-hostname>
+#   e.g. deploy.sh hz1.rebbi.is
+#        deploy.sh linode-4.rebbi.is
 #
 # Steps:
 #   1. Local: install fresh sjip-core
@@ -8,10 +14,10 @@
 #   4. scp: upload the new bundles
 #   5. Server: restart the services — JavaMonitor first (harmless),
 #      wotaskd second (apps keep running; adaptors keep serving their
-#      last-known config and re-poll within seconds)
+#      last-known config and re-poll as lifebeats re-register)
 set -euo pipefail
 
-SERVER="root@hz1.rebbi.is"
+SERVER="root@${1:?usage: deploy.sh <server-hostname>   (hz1.rebbi.is | linode-4.rebbi.is)}"
 REMOTE_APPS_DIR="/opt/webobjects/apps"
 JVM_PATH="/opt/jdk-26/bin/java"
 
@@ -35,7 +41,7 @@ for APP in wotaskd JavaMonitor; do
 	fi
 done
 
-echo "==> [3/5] Moving existing remote bundles aside (pruning older backups)"
+echo "==> [3/5] Moving existing remote bundles aside on ${SERVER} (pruning older backups)"
 for APP in wotaskd JavaMonitor; do
 	LIVE="${REMOTE_APPS_DIR}/${APP}.woa"
 	ssh "${SERVER}" "if [ -e '${LIVE}' ]; then mv '${LIVE}' '${LIVE}.prev-${STAMP}'; fi
@@ -49,7 +55,7 @@ for APP in wotaskd JavaMonitor; do
 done
 
 echo "==> [5/5] Restarting services (JavaMonitor, then wotaskd)"
-ssh "${SERVER}" "service javamonitor stop && service javamonitor start"
-ssh "${SERVER}" "service wotaskd stop && service wotaskd start"
+ssh "${SERVER}" "systemctl restart javamonitor"
+ssh "${SERVER}" "systemctl restart wotaskd"
 
 echo "==> Done. Previous bundles preserved as *.woa.prev-${STAMP} on the server."
