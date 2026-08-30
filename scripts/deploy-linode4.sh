@@ -1,28 +1,14 @@
 #!/usr/bin/env bash
 # Deploy wotaskd and JavaMonitor to linode-4.rebbi.is.
 #
-# linode-4's layout differs from hz1's:
-#   - wotaskd lives in /opt/Apple/Library/WebObjects/JavaApplications/,
-#     launched by the SysV script /etc/init.d/webobjects
-#   - JavaMonitor lives in /rebbi/is.rebbi.javamonitor/wo/ and is
-#     wotaskd-MANAGED (a registered app, instance 2 on port 2021, with
-#     autoRecover=YES) — so it is updated by swapping the bundle and
-#     killing the process; wotaskd relaunches it from the new bundle
-#
-# Steps:
-#   1. Local: install fresh sjip-core
-#   2. Local: package wotaskd and JavaMonitor (pinned to /opt/jdk-26)
-#   3. Server: move the existing bundles aside (x-*-prev-STAMP, matching
-#      the box's convention), upload the new ones
-#   4. Server: restart wotaskd (service webobjects) — apps keep running;
-#      the config is empty for ~30-40s until lifebeats re-register
-#   5. Server: kill the JavaMonitor process; wotaskd autoRecover
-#      relaunches it from the new bundle
+# Since 2026-08-30 linode-4 uses the standard hz1 layout: both bundles
+# in /opt/webobjects/apps, systemd services wotaskd + javamonitor,
+# SiteConfig in /opt/webobjects/conf. Same steps as deploy.sh.
 set -euo pipefail
 
 SERVER="root@linode-4.rebbi.is"
-WOTASKD_DIR="/opt/Apple/Library/WebObjects/JavaApplications"
-JAVAMONITOR_DIR="/rebbi/is.rebbi.javamonitor/wo"
+WOTASKD_DIR="/opt/webobjects/apps"
+JAVAMONITOR_DIR="/opt/webobjects/apps"
 JVM_PATH="/opt/jdk-26/bin/java"
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -55,12 +41,11 @@ ssh "${SERVER}" "mv '${JAVAMONITOR_DIR}/JavaMonitor.woa' '${JAVAMONITOR_DIR}/x-J
 scp -q -r "${REPO_ROOT}/JavaMonitor/target/JavaMonitor.woa" "${SERVER}:${JAVAMONITOR_DIR}/JavaMonitor.woa"
 ssh "${SERVER}" "chmod -R 777 '${JAVAMONITOR_DIR}/JavaMonitor.woa'"
 
-echo "==> [4/5] Restarting wotaskd (service webobjects)"
-ssh "${SERVER}" "service webobjects stop; sleep 2; service webobjects start"
+echo "==> [4/5] Restarting javamonitor"
+ssh "${SERVER}" "systemctl restart javamonitor"
 
-echo "==> [5/5] Restarting JavaMonitor (kill; wotaskd autoRecover relaunches)"
-ssh "${SERVER}" "JM_PID=\$(ps aux | awk '/JavaMonitor.woa/ && /java/ && !/awk/ {print \$2}' | head -1)
-	if [ -n \"\${JM_PID}\" ]; then kill \"\${JM_PID}\"; echo \"killed JavaMonitor pid \${JM_PID}\"; else echo 'JavaMonitor was not running'; fi"
+echo "==> [5/5] Restarting wotaskd (apps keep running; lifebeats repopulate within ~40s)"
+ssh "${SERVER}" "systemctl restart wotaskd"
 
 echo "==> Done. Previous bundles preserved as x-*-prev-${STAMP} on the server."
 echo "    Verify: config repopulated at http://linode-4.rebbi.is:1085/cgi-bin/WebObjects/wotaskd.woa/wa/woconfig"
