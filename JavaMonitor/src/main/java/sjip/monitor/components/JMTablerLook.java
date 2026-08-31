@@ -61,7 +61,7 @@ public class JMTablerLook extends MonitorComponent {
 	 * @return Display name for the <title> tag
 	 */
 	public String pageTitle() {
-		return "Monitor: " + title;
+		return title == null ? "Monitor" : "Monitor: " + title;
 	}
 
 	/**
