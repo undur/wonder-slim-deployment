@@ -63,6 +63,53 @@ public class DirectAction extends WODirectAction {
 		super( aRequest );
 	}
 
+	/**
+	 * Deploys a new build of an application on this host. The request body is a
+	 * .tar.gz containing {@code <App>.woa}; {@code app} names the application.
+	 * Normally invoked by JavaMonitor's {@code admin/deploy}, which fans the
+	 * archive out to every host the app runs on. See {@link Deployer}.
+	 */
+	public WOActionResults deployAction() {
+		final AppTaskd appTaskd = ((Application)WOApplication.application()).appTaskd();
+		final MSiteConfig aConfig = appTaskd.siteConfig();
+		final WOResponse response = new WOResponse();
+
+		if( !aConfig.checkPasswordEncrypted( request().headerForKey( "password" ) ) ) {
+			logger.debug( "Attempt to call DirectAction: deployAction with incorrect password." );
+			response.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
+			response.appendContentString( FApplication.host() + ": Invalid Password - Access Denied" );
+			return response;
+		}
+
+		final String appName = request().stringFormValueForKey( "app" );
+		final MApplication application = appName == null ? null : aConfig.applicationWithName( appName );
+
+		if( application == null ) {
+			response.setStatus( WOMessage.HTTP_STATUS_NOT_FOUND );
+			response.appendContentString( FApplication.host() + ": Unknown application '" + appName + "'" );
+			return response;
+		}
+
+		final byte[] archive = request().content() == null ? null : request().content().bytes();
+
+		if( archive == null || archive.length == 0 ) {
+			response.setStatus( 400 );
+			response.appendContentString( FApplication.host() + ": Request body must be a .tar.gz containing " + appName + ".woa" );
+			return response;
+		}
+
+		try {
+			response.appendContentString( Deployer.deploy( appTaskd, application, archive ) );
+		}
+		catch( final Exception e ) {
+			logger.error( "Deploying {} failed", appName, e );
+			response.setStatus( 500 );
+			response.appendContentString( FApplication.host() + ": deploying " + appName + " failed: " + e.getMessage() );
+		}
+
+		return response;
+	}
+
 	// This is the biggie - this processes all requests from Monitor
 	public WOActionResults monitorRequestAction() {
 

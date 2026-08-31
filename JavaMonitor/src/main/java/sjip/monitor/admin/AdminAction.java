@@ -1,15 +1,24 @@
 package sjip.monitor.admin;
 
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.webobjects.appserver.WOActionResults;
+import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
 import sjip.core.MUtil;
 import sjip.core.model.MApplication;
+import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
 import sjip.monitor.Session;
@@ -543,6 +552,80 @@ public class AdminAction extends WODirectAction {
 
 	public void startAction() {
 		applicationsPage().start( instances );
+	}
+
+	/**
+	 * Deploys a new build of an application to every host it has instances on.
+	 * The request body is a .tar.gz containing {@code <App>.woa}; it is handed
+	 * to each host's wotaskd, which swaps the bundle into place and bounces the
+	 * instances running there. The response is each host's report, and the
+	 * status is 500 if any host failed.
+	 *
+	 * <pre>
+	 * tar -czf App.tar.gz -C target App.woa
+	 * curl -X POST --data-binary @App.tar.gz \
+	 *   "http://monitor:56789/Apps/WebObjects/JavaMonitor.woa/admin/deploy?type=app&amp;name=App&amp;pw=..."
+	 * </pre>
+	 */
+	public WOActionResults deployAction() {
+		if( applications.size() != 1 ) {
+			throw new DirectActionException( "deploy takes exactly one application (type=app&name=<App>)", 406 );
+		}
+
+		final MApplication application = applications.get( 0 );
+		final WORequest request = context().request();
+		final byte[] archive = request.content() == null ? null : request.content().bytes();
+
+		if( archive == null || archive.length == 0 ) {
+			throw new DirectActionException( "Request body must be a .tar.gz containing " + application.name() + ".woa", 400 );
+		}
+
+		final List<MHost> hosts = application.instanceArray()
+				.stream()
+				.map( MInstance::host )
+				.distinct()
+				.toList();
+
+		if( hosts.isEmpty() ) {
+			throw new DirectActionException( application.name() + " has no instances — nothing to deploy to", 406 );
+		}
+
+		final int port = WOApplication.application().lifebeatDestinationPort();
+		final String password = siteConfig().passwordForRequest();
+		final HttpClient client = HttpClient.newHttpClient();
+		final StringBuilder report = new StringBuilder();
+		boolean failed = false;
+
+		for( final MHost host : hosts ) {
+			final HttpRequest.Builder builder = HttpRequest.newBuilder()
+					.uri( URI.create( "http://%s:%s/cgi-bin/WebObjects/wotaskd.woa/wa/deploy?app=%s".formatted( host.name(), port, URLEncoder.encode( application.name(), StandardCharsets.UTF_8 ) ) ) )
+					.header( "Content-Type", "application/gzip" )
+					.timeout( Duration.ofMinutes( 5 ) )
+					.POST( HttpRequest.BodyPublishers.ofByteArray( archive ) );
+
+			if( password != null ) {
+				builder.header( "password", password );
+			}
+
+			try {
+				final HttpResponse<String> response = client.send( builder.build(), HttpResponse.BodyHandlers.ofString() );
+				failed |= response.statusCode() != 200;
+				report.append( host.name() ).append( ":\n  " ).append( response.body().strip().replace( "\n", "\n  " ) ).append( '\n' );
+			}
+			catch( final Exception e ) {
+				failed = true;
+				report.append( host.name() ).append( ":\n  " ).append( e ).append( '\n' );
+			}
+		}
+
+		final WOResponse response = new WOResponse();
+		response.setContent( report.toString() );
+
+		if( failed ) {
+			response.setStatus( 500 );
+		}
+
+		return response;
 	}
 
 	private void prepareApplications( List<String> appNames ) {
