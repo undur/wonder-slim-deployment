@@ -10,6 +10,9 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSArray;
 
+import sjip.core.model.MApplication;
+import sjip.core.model.MHost;
+import sjip.core.model.MInstance;
 import sjip.monitor.MonitorComponent;
 import sjip.monitor.util.Icon;
 
@@ -19,6 +22,18 @@ public class JMTablerLook extends MonitorComponent {
 	 * Bound to by wrapped components to set the actual page <title>
 	 */
 	public String title;
+
+	/**
+	 * Breadcrumb context, bound to by wrapped components; rendered in the look's fixed trail slot.
+	 * A page states whichever of these it has — see JMBreadcrumbs.
+	 *
+	 * ("crumb"-prefixed to dodge KVC collisions with WOComponent — a plain "application"
+	 * field loses to WOComponent.application() when the binding is resolved)
+	 */
+	public MApplication crumbApplication;
+	public MInstance crumbInstance;
+	public MHost crumbHost;
+	public String crumb;
 
 	/**
 	 * Currently active page (purely for indicating currently selected page in menu)

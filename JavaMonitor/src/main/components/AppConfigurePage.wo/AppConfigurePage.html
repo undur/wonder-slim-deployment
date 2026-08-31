@@ -1,16 +1,4 @@
-<wo:JMTablerLook selectedPage="$APP_PAGE" title="$appDefaults.name">
-	<div class="page-header d-print-none">
-		<div class="row g-2 align-items-center">
-			<div class="col">
-				<div class="page-pretitle">Application configuration</div>
-				<h2 class="page-title"><wo:str value="$appDefaults.name" /></h2>
-			</div>
-			<div class="col-auto ms-auto d-print-none">
-				<wo:link action="$detailPageClicked" class="btn">All instances</wo:link>
-			</div>
-		</div>
-	</div>
-
+<wo:JMTablerLook selectedPage="$APP_PAGE" title="$appDefaults.name" crumbApplication="$myApplication" crumb="Configuration">
 	<div class="row row-cards">
 		<div class="col-12">
 			<div class="card">

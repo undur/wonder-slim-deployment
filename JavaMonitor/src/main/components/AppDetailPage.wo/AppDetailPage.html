@@ -1,4 +1,4 @@
-<wo:JMTablerLook selectedPage="$APP_PAGE" title="$myApplication.name">
+<wo:JMTablerLook selectedPage="$APP_PAGE" title="$myApplication.name" crumbApplication="$myApplication">
 	<!-- FIXME:  Having the meta-refresh here is...odd. Needs to get moved into the look/<head> -->
 	<wo:if condition="$isRefreshEnabled">
 		<wo:WOMetaRefresh action="$refreshClicked" seconds="$siteConfig.viewRefreshRate" />
@@ -6,19 +6,12 @@
 
 	<div class="page-header d-print-none">
 		<div class="row g-2 align-items-center">
-			<div class="col">
-				<div class="page-pretitle">Application</div>
-				<h2 class="page-title">
-					<wo:if condition="$myApplication.isRunning_M">
-						<wo:link href="$linkToApp" target="new" class="text-reset"><wo:str value="$myApplication.name" /></wo:link>
-					</wo:if>
-					<wo:if condition="$myApplication.isRunning_M" negate="$true">
-						<wo:str value="$myApplication.name" />
-					</wo:if>
-				</h2>
-			</div>
+			<div class="col"></div>
 			<div class="col-auto ms-auto d-print-none">
 				<div class="btn-list">
+					<wo:if condition="$myApplication.isRunning_M">
+						<wo:link href="$linkToApp" target="new" class="btn">Open app</wo:link>
+					</wo:if>
 					<wo:link action="$refreshClicked" class="btn">Refresh</wo:link>
 					<wo:link action="$showStatisticsClicked" class="btn">
 						<wo:if condition="$showDetailStatistics">Hide stats</wo:if>

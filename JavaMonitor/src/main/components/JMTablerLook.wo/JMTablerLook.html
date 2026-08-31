@@ -7,6 +7,29 @@
 		<wo:ERXStyleSheet filename="tabler/css/tabler.min.css" />
 		<wo:ERXStyleSheet rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" /> <!-- FIXME: Include in framework -->
 		<style>
+			/* The breadcrumb trail slot: fixed position and height on every page, empty or not.
+			   The trail is the page's primary statement of where the user is, so it gets title-like presence. */
+			.jm-crumbbar {
+				min-height: 3rem;
+				display: flex;
+				align-items: center;
+			}
+
+			.jm-crumbbar .breadcrumb {
+				margin: 0;
+				font-size: 1.25rem;
+			}
+
+			.jm-crumbbar .breadcrumb-item.active {
+				color: var(--tblr-body-color);
+				font-weight: 600;
+			}
+
+			.page-header {
+				margin-top: 0;
+				margin-bottom: 1.5rem;
+			}
+
 			.card details[data-ajaxslim-expansion] summary {
 				padding: 1rem 1.25rem;
 				font-weight: 600;
@@ -241,6 +264,9 @@
         </p:comment>
         <div class="page-body">
           <div class="container-xl">
+			<div class="jm-crumbbar">
+				<wo:JMBreadcrumbs application="$crumbApplication" instance="$crumbInstance" host="$crumbHost" current="$crumb" />
+			</div>
           	<!-- FIXME: Feels like we have some type of error display on every page. Might want to simplyfy that // Hugi 2024-10-25 -->
 			<wo:if condition="$message.length">
 				<div class="alert alert-important alert-danger">

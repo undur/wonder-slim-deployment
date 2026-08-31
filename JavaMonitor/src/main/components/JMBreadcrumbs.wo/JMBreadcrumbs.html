@@ -1,0 +1,12 @@
+<wo:if condition="$hasTrail">
+	<ol class="breadcrumb" aria-label="breadcrumbs">
+		<wo:repetition list="$trail" item="$currentCrumb" index="$currentIndex">
+			<wo:if condition="$currentCrumbIsLink">
+				<li class="breadcrumb-item"><wo:link action="$currentCrumbClicked"><wo:str value="$currentCrumb.label" /></wo:link></li>
+			</wo:if>
+			<wo:if condition="$currentCrumbIsLink" negate="$true">
+				<li class="breadcrumb-item active" aria-current="page"><wo:str value="$currentCrumb.label" /></li>
+			</wo:if>
+		</wo:repetition>
+	</ol>
+</wo:if>

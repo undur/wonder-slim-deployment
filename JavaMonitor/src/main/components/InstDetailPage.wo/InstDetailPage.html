@@ -1,4 +1,4 @@
-<wo:JMTablerLook selectedPage="$APP_PAGE" title="$myInstance.displayName">
+<wo:JMTablerLook selectedPage="$APP_PAGE" title="$myInstance.displayName" crumbInstance="$myInstance">
 	<wo:if condition="$errorMessage.length">
 		<div class="alert alert-danger">
 			<wo:str value="$errorMessage" />
@@ -8,8 +8,7 @@
 	<div class="page-header d-print-none">
 		<div class="row g-2 align-items-center">
 			<div class="col">
-				<div class="page-pretitle">Instance on <wo:str value="$myInstance.hostName" /></div>
-				<h2 class="page-title"><wo:str value="$myInstance.displayName" /></h2>
+				<div class="text-secondary">Instance on <wo:str value="$myInstance.hostName" /></div>
 			</div>
 			<div class="col-auto ms-auto d-print-none">
 				<div class="btn-list">

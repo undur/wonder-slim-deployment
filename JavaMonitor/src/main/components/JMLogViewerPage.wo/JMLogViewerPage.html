@@ -1,4 +1,4 @@
-<wo:JMTablerLook selectedPage="0">
+<wo:JMTablerLook selectedPage="0" crumb="Log viewer">
 	<style>
 		#logfile {
 			font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -47,8 +47,7 @@
 	<div class="page-header d-print-none">
 		<div class="row g-2 align-items-center">
 			<div class="col">
-				<div class="page-pretitle">Log</div>
-				<h2 class="page-title text-truncate"><wo:str value="$file.absolutePath" /></h2>
+				<div class="text-secondary text-truncate"><wo:str value="$file.absolutePath" /></div>
 			</div>
 			<div class="col-auto ms-auto d-print-none">
 				<wo:link action="$download" class="btn">Download file</wo:link>
