@@ -80,11 +80,13 @@ public class Application extends ERXApplication {
 		// FIXME: This should be handled by ERExtensions // Hugi 2026-05-05
 		// Routes are exact-match, so cover both URL prefixes in circulation — adaptorPath()'s
 		// (default /cgi-bin/WebObjects) and /Apps/WebObjects as served by wo-adaptor-jetty/modulo —
-		// each with and without a trailing slash (browsers request both forms)
+		// with and without the .woa extension, each with and without a trailing slash
 		for( final String prefix : List.of( adaptorPath(), "/Apps/WebObjects" ) ) {
-			final String appRoute = prefix + "/" + name() + ".woa";
-			RouteTable.defaultRouteTable().map( appRoute, routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
-			RouteTable.defaultRouteTable().map( appRoute + "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
+			for( final String appSegment : List.of( name() + ".woa", name() ) ) {
+				final String appRoute = prefix + "/" + appSegment;
+				RouteTable.defaultRouteTable().map( appRoute, routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
+				RouteTable.defaultRouteTable().map( appRoute + "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
+			}
 		}
 
 		FProperties.logCurrentValues( logger );
