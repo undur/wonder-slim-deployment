@@ -60,21 +60,21 @@
 								<th class="w-1"></th>
 								<th>Instance</th>
 								<th>Host : Port</th>
-								<th class="w-1">Status</th>
-								<th class="w-1 text-nowrap">Start / Stop</th>
-								<th class="w-1 text-nowrap">Auto recover</th>
-								<th class="w-1 text-nowrap">Sessions</th>
-								<th class="w-1 text-nowrap">Scheduled</th>
-								<th class="text-nowrap">Next shutdown</th>
-								<th class="w-1 text-nowrap text-end">Deaths</th>
+								<th class="w-1 text-center">Status</th>
+								<th class="w-1 text-nowrap text-center">Start / Stop</th>
+								<th class="w-1 text-nowrap text-center">Auto recover</th>
+								<th class="w-1 text-nowrap text-center">Sessions</th>
+								<th class="w-1 text-nowrap text-center">Scheduled</th>
+								<th class="text-nowrap text-center">Next shutdown</th>
+								<th class="w-1 text-nowrap text-center">Deaths</th>
 								<wo:if condition="$showDetailStatistics">
-									<th class="text-end">Trans.</th>
-									<th class="text-end">Active</th>
-									<th class="text-end">Avg tx</th>
-									<th class="text-end">Avg idle</th>
+									<th class="text-center">Trans.</th>
+									<th class="text-center">Active</th>
+									<th class="text-center">Avg tx</th>
+									<th class="text-center">Avg idle</th>
 								</wo:if>
 								<wo:if condition="$showDetailStatistics" negate="$true">
-									<th class="text-end">WOStats</th>
+									<th class="text-center">WOStats</th>
 								</wo:if>
 								<th class="w-1"></th>
 							</tr>
@@ -82,7 +82,7 @@
 						<tbody>
 							<wo:repetition list="$allInstances" item="$currentInstance">
 								<tr>
-									<td>
+									<td class="text-center">
 										<wo:form action="$selectOne"><wo:AjaxObserveField action="$selectOne"><wo:checkbox checked="$isSelectedInstance" class="form-check-input m-0" /></wo:AjaxObserveField></wo:form>
 									</td>
 									<td>
@@ -97,16 +97,16 @@
 											<wo:link href="$hrefToInstDirect" target="new" class="ms-2 text-secondary" title="Direct connect"><wo:JMIcon name="Link" /></wo:link>
 										</wo:if>
 									</td>
-									<td>
+									<td class="text-center">
 										<wo:img filename="$instanceStatusImage" alt="$instanceStatusImageText" title="$instanceStatusImageText" height="40" width="40" />
 									</td>
-									<td class="text-nowrap">
-										<div class="btn-list flex-nowrap">
+									<td class="text-nowrap text-center">
+										<div class="btn-list flex-nowrap justify-content-center">
 											<wo:link action="$startInstance" class="btn btn-sm" title="Start"><wo:img filename="start.png" alt="Start" height="14" width="14" /></wo:link>
 											<wo:link action="$stopInstance" class="btn btn-sm" title="Stop"><wo:img filename="stop.png" alt="Stop" height="14" width="14" /></wo:link>
 										</div>
 									</td>
-									<td>
+									<td class="text-center">
 										<wo:if condition="$currentInstance.schedulingEnabled">
 											<span class="badge bg-info text-white">Scheduled</span>
 										</wo:if>
@@ -114,7 +114,7 @@
 											<wo:link action="$toggleAutoRecover"><wo:container elementName="span" class="$autoRecoverDivClass"><wo:str value="$autoRecoverLabel" /></wo:container></wo:link>
 										</wo:if>
 									</td>
-									<td>
+									<td class="text-center">
 										<wo:if condition="$currentInstance.schedulingEnabled">
 											<wo:container elementName="span" class="$refuseNewSessionsClass"><wo:str value="$refuseNewSessionsLabel" /></wo:container>
 										</wo:if>
@@ -129,13 +129,13 @@
 											</wo:if>
 										</wo:if>
 									</td>
-									<td>
+									<td class="text-center">
 										<wo:link action="$toggleScheduling">
 											<wo:container elementName="span" class="$schedulingDivClass"><wo:str value="$schedulingLabel" /></wo:container>
 										</wo:link>
 									</td>
-									<td class="text-secondary text-nowrap"><wo:str value="$nextShutdown" /></td>
-									<td class="text-end text-nowrap">
+									<td class="text-secondary text-nowrap text-center"><wo:str value="$nextShutdown" /></td>
+									<td class="text-center text-nowrap">
 										<wo:if condition="$shouldDisplayDeathDetailLink">
 											<wo:link action="$instanceDeathDetailClicked" class="text-reset">
 												<span class="badge bg-red-lt"><wo:str value="$currentInstance.deathCount" numberformat="0" /></span>
@@ -144,21 +144,21 @@
 										<wo:if condition="$shouldDisplayDeathDetailLink" negate="$true"><span class="text-secondary">—</span></wo:if>
 									</td>
 									<wo:if condition="$showDetailStatistics">
-										<td class="text-end text-secondary"><wo:str value="$currentInstance.statistics.transactionsString" /></td>
-										<td class="text-end text-secondary"><wo:str value="$currentInstance.statistics.activeSessionsString" /></td>
-										<td class="text-end text-secondary"><wo:str value="$currentInstance.statistics.avgTransactionTimeString" /></td>
-										<td class="text-end text-secondary"><wo:str value="$currentInstance.statistics.averageIdlePeriodString" /></td>
+										<td class="text-center text-secondary"><wo:str value="$currentInstance.statistics.transactionsString" /></td>
+										<td class="text-center text-secondary"><wo:str value="$currentInstance.statistics.activeSessionsString" /></td>
+										<td class="text-center text-secondary"><wo:str value="$currentInstance.statistics.avgTransactionTimeString" /></td>
+										<td class="text-center text-secondary"><wo:str value="$currentInstance.statistics.averageIdlePeriodString" /></td>
 									</wo:if>
 									<wo:if condition="$showDetailStatistics" negate="$true">
-										<td class="text-end">
+										<td class="text-center">
 											<wo:if condition="$currentInstance.isRunning_M">
 												<wo:link href="$linkToWOStats" target="_blank" class="text-secondary">WOStats</wo:link>
 											</wo:if>
 											<wo:if condition="$currentInstance.isRunning_M" negate="$true"><span class="text-secondary">—</span></wo:if>
 										</td>
 									</wo:if>
-									<td class="text-end">
-										<div class="btn-list flex-nowrap justify-content-end">
+									<td class="text-center">
+										<div class="btn-list flex-nowrap justify-content-center">
 											<wo:link action="$instanceDetailClicked" class="btn btn-sm">Details</wo:link>
 											<wo:link action="$configureInstanceClicked" class="btn btn-sm">Config</wo:link>
 											<wo:link action="$deleteInstanceClicked" class="btn btn-sm btn-outline-danger">Delete</wo:link>
@@ -188,55 +188,55 @@
 											</wo:if>
 										</wo:form>
 									</td>
-									<td class="text-nowrap">
-										<div class="btn-list flex-nowrap">
+									<td class="text-nowrap text-center">
+										<div class="btn-list flex-nowrap justify-content-center">
 											<wo:link action="$startAllClicked" class="btn btn-sm" title="Start selected"><wo:img filename="start.png" alt="Start selected" height="14" width="14" /></wo:link>
 											<wo:link action="$stopAllClicked" class="btn btn-sm" title="Stop selected"><wo:img filename="stop.png" alt="Stop selected" height="14" width="14" /></wo:link>
 										</div>
 									</td>
-									<td class="text-nowrap">
-										<div class="btn-list flex-nowrap">
+									<td class="text-nowrap text-center">
+										<div class="btn-list flex-nowrap justify-content-center">
 											<wo:link action="$autoRecoverEnableAllClicked" class="btn btn-sm" title="Enable auto recover on selected"><wo:img filename="start.png" alt="Enable auto recover" height="14" width="14" /></wo:link>
 											<wo:link action="$autoRecoverDisableAllClicked" class="btn btn-sm" title="Disable auto recover on selected"><wo:img filename="stop.png" alt="Disable auto recover" height="14" width="14" /></wo:link>
 										</div>
 									</td>
-									<td class="text-nowrap">
-										<div class="btn-list flex-nowrap">
+									<td class="text-nowrap text-center">
+										<div class="btn-list flex-nowrap justify-content-center">
 											<wo:link action="$refuseNewSessionsAllClicked" class="btn btn-sm" title="Refuse new sessions on selected"><wo:img filename="start.png" alt="Refuse new sessions" height="14" width="14" /></wo:link>
 											<wo:link action="$acceptNewSessionsAllClicked" class="btn btn-sm" title="Accept new sessions on selected"><wo:img filename="stop.png" alt="Accept new sessions" height="14" width="14" /></wo:link>
 										</div>
 									</td>
-									<td class="text-nowrap">
-										<div class="btn-list flex-nowrap">
+									<td class="text-nowrap text-center">
+										<div class="btn-list flex-nowrap justify-content-center">
 											<wo:link action="$schedulingEnableAllClicked" class="btn btn-sm" title="Enable scheduling on selected"><wo:img filename="start.png" alt="Enable scheduling" height="14" width="14" /></wo:link>
 											<wo:link action="$schedulingDisableAllClicked" class="btn btn-sm" title="Disable scheduling on selected"><wo:img filename="stop.png" alt="Disable scheduling" height="14" width="14" /></wo:link>
 										</div>
 									</td>
-									<td class="text-nowrap">
+									<td class="text-nowrap text-center">
 										<wo:link action="$bounceClicked" class="btn btn-sm" title="Bounce selected">Bounce</wo:link>
 										<wo:link pageName="HelpPage" fragmentIdentifier="18" title="What is bounce?"><wo:img filename="help.png" height="16" width="16" alt="What is bounce?" /></wo:link>
 									</td>
-									<td class="text-end">
+									<td class="text-center">
 										<wo:link action="$clearAllDeathsClicked" class="btn btn-sm text-nowrap" title="Clear death history on selected">Clear</wo:link>
 									</td>
 									<wo:if condition="$showDetailStatistics">
-										<td class="text-end text-secondary"><wo:str value="$totalTransactions" numberformat="#,##0" /></td>
-										<td class="text-end text-secondary"><wo:str value="$totalActiveSessions" numberformat="#,##0" /></td>
-										<td class="text-end text-secondary"><wo:str value="$totalAverageTransaction" numberformat="0.000" /></td>
-										<td class="text-end text-secondary"><wo:str value="$totalAverageIdleTime" numberformat="0.000" /></td>
+										<td class="text-center text-secondary"><wo:str value="$totalTransactions" numberformat="#,##0" /></td>
+										<td class="text-center text-secondary"><wo:str value="$totalActiveSessions" numberformat="#,##0" /></td>
+										<td class="text-center text-secondary"><wo:str value="$totalAverageTransaction" numberformat="0.000" /></td>
+										<td class="text-center text-secondary"><wo:str value="$totalAverageIdleTime" numberformat="0.000" /></td>
 									</wo:if>
 									<wo:if condition="$showDetailStatistics" negate="$true">
-										<td class="text-end text-secondary text-nowrap"><wo:str value="$actualRatePerMinute" numberformat="0.00" /> TPM</td>
+										<td class="text-center text-secondary text-nowrap"><wo:str value="$actualRatePerMinute" numberformat="0.00" /> TPM</td>
 									</wo:if>
-									<td class="text-end">
+									<td class="text-center">
 										<wo:link action="$deleteAllInstancesClicked" class="btn btn-sm btn-outline-danger" title="Delete selected instances">Delete</wo:link>
 									</td>
 								</tr>
 								<wo:if condition="$showDetailStatistics">
 									<tr>
 										<td colspan="10" class="text-secondary text-end">Running instances only:</td>
-										<td class="text-end text-secondary"><wo:str value="$totalTransactionsForActiveInstances" numberformat="#,##0" /></td>
-										<td class="text-end text-secondary"><wo:str value="$totalActiveSessionsForActiveInstances" numberformat="#,##0" /></td>
+										<td class="text-center text-secondary"><wo:str value="$totalTransactionsForActiveInstances" numberformat="#,##0" /></td>
+										<td class="text-center text-secondary"><wo:str value="$totalActiveSessionsForActiveInstances" numberformat="#,##0" /></td>
 										<td></td>
 										<td></td>
 										<td></td>
