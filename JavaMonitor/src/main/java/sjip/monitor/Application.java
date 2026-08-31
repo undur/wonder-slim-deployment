@@ -18,10 +18,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WORequest;
+import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
 
 import er.extensions.appserver.ERXApplication;
+import er.extensions.routes.RouteHandler;
 import er.extensions.routes.RouteTable;
 import sjip.core.x.FProperties;
 import sjip.monitor.admin.AdminAction;
@@ -80,13 +82,22 @@ public class Application extends ERXApplication {
 		// FIXME: This should be handled by ERExtensions // Hugi 2026-05-05
 		// Routes are exact-match, so cover both URL prefixes in circulation — adaptorPath()'s
 		// (default /cgi-bin/WebObjects) and /Apps/WebObjects as served by wo-adaptor-jetty/modulo —
-		// with and without the .woa extension, each with and without a trailing slash
+		// each with and without a trailing slash. Extensionless forms (…/JavaMonitor) redirect to
+		// the canonical .woa URL instead of handling in place: WO's request parsing needs the
+		// extension, and without it the direct action renders an empty response.
 		for( final String prefix : List.of( adaptorPath(), "/Apps/WebObjects" ) ) {
-			for( final String appSegment : List.of( name() + ".woa", name() ) ) {
-				final String appRoute = prefix + "/" + appSegment;
-				RouteTable.defaultRouteTable().map( appRoute, routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
-				RouteTable.defaultRouteTable().map( appRoute + "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
-			}
+			final String appRoute = prefix + "/" + name() + ".woa";
+			RouteTable.defaultRouteTable().map( appRoute, routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
+			RouteTable.defaultRouteTable().map( appRoute + "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
+
+			final RouteHandler redirectToCanonical = routeInvocation -> {
+				final WOResponse response = new WOResponse();
+				response.setStatus( 302 );
+				response.setHeader( appRoute, "Location" );
+				return response;
+			};
+			RouteTable.defaultRouteTable().map( prefix + "/" + name(), redirectToCanonical );
+			RouteTable.defaultRouteTable().map( prefix + "/" + name() + "/", redirectToCanonical );
 		}
 
 		FProperties.logCurrentValues( logger );
