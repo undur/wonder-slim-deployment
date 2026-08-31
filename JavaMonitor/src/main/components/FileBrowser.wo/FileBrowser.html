@@ -1,35 +1,52 @@
-<h2>Choose a path:</h2>
+<h3 class="card-title mb-3">Choose a path</h3>
 
-<wo:form action="$directoryClicked">
-	<p>Jump to: <wo:textfield value="$startingPath" /> <wo:submit action="$jumpToClicked" /></p>
-	<p class="Warning"><wo:str value="$errorMsg" /></p>
+<wo:form action="$directoryClicked" class="mb-3">
+	<label class="form-label">Jump to</label>
+	<div class="input-group">
+		<wo:textfield value="$startingPath" class="form-control" />
+		<wo:submit action="$jumpToClicked" value="Go" class="btn" />
+	</div>
+	<wo:if condition="$hasErrorMsg">
+		<div class="text-danger small mt-1"><wo:str value="$errorMsg" /></div>
+	</wo:if>
 </wo:form>
 
 <wo:if condition="$hasErrorMsg" negate="$true">
-	<p>Current directory: <code><wo:str value="$startingPath" /></code> <wo:link action="$selectCurrentDirClicked"><span>Select Current</span></wo:link></p>
-	
-	<table class="table table-striped table-sm">
-		<tr>
-			<th>Name</th>
-			<th>Size</th>
-			<th>Selection</th>
-		</tr>
-		<tr>
-			<td colspan="3"><wo:link action="$backClicked">.. Back (Up one directory level)</wo:link></td>
-		</tr>
-		<wo:repetition list="$fileList" item="$aCurrentFile">
-			<tr>
-				<td>
-					<wo:if condition="$isCurrentFileDirectory">
-						<wo:link action="$directoryClicked"><wo:img filename="DirectoryIcon.gif" width="12" height="12" /> <wo:str value="$aCurrentFile.file" /></wo:link>
-					</wo:if>
-					<wo:if condition="$isCurrentFileDirectory" negate="$true">
-						<wo:img filename="TransparentPixel.gif" width="12" height="1" /> <wo:str value="$aCurrentFile.file" />
-					</wo:if>
-				</td>
-				<td><wo:str value="$aCurrentFile.fileSize" /></td>
-				<td><wo:link action="$selectClicked">Select</wo:link></td>
-			</tr>
-		</wo:repetition>
-	</table>
+	<div class="d-flex justify-content-between align-items-center mb-2">
+		<div class="text-secondary">
+			Current directory: <code><wo:str value="$startingPath" /></code>
+		</div>
+		<wo:link action="$selectCurrentDirClicked" class="btn btn-sm btn-primary">Select current</wo:link>
+	</div>
+
+	<div class="table-responsive">
+		<table class="table table-vcenter table-sm">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th class="w-1 text-end">Size</th>
+					<th class="w-1"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td colspan="3"><wo:link action="$backClicked" class="text-secondary">.. (up one directory)</wo:link></td>
+				</tr>
+				<wo:repetition list="$fileList" item="$aCurrentFile">
+					<tr>
+						<td>
+							<wo:if condition="$isCurrentFileDirectory">
+								<wo:link action="$directoryClicked"><wo:img filename="DirectoryIcon.gif" width="12" height="12" /> <wo:str value="$aCurrentFile.file" /></wo:link>
+							</wo:if>
+							<wo:if condition="$isCurrentFileDirectory" negate="$true">
+								<span class="text-secondary"><wo:img filename="TransparentPixel.gif" width="12" height="1" /> <wo:str value="$aCurrentFile.file" /></span>
+							</wo:if>
+						</td>
+						<td class="text-end text-secondary"><wo:str value="$aCurrentFile.fileSize" /></td>
+						<td class="text-end"><wo:link action="$selectClicked" class="btn btn-sm">Select</wo:link></td>
+					</tr>
+				</wo:repetition>
+			</tbody>
+		</table>
+	</div>
 </wo:if>

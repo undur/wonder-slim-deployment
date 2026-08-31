@@ -4,302 +4,323 @@
 		<wo:WOMetaRefresh action="$refreshClicked" seconds="$siteConfig.viewRefreshRate" />
 	</wo:if>
 
-	<!-- FIXME: These styles should be in a global CSS, just here while we work on fixing up the UI -->
-	<style>
-		.AppControlOff, .AppControlNotRefusingNewSessions, .AppControlScheduleEnabledNotRefusingNewSessions, .AppControlAutoRecoverOff, .AppControlScheduleOff {
-			padding: 3px;
-			background-color: rgba(150,150,150,0.5);
-			color: white;
-			text-align: center;
-		}
-
-		.AppControlAutoRecoverOn, .AppControlScheduleOn, .AppControlAutoRecoverSchedulingOn {
-			padding: 3px;
-			background-color: rgb(47,179,68);
-			color: white;
-			text-align: center;
-			border-radius: 5;
-		}
-
-		.AppControlRefusingNewSessions {
-			padding: 3px;
-			background-color: rgb(214,57,57);
-			color: white;
-			text-align: center;
-		}
-		
-		.toggle-image {
-			height: 28px;
-			width: auto;
-		}
-	</style>
-
-	<wo:if condition="$hasHosts" negate="$true">
-		<div class="alert alert-important alert-warning">
-			<h1>There are no hosts configured.</h1>
-			<p>You must add hosts before adding instances. Software doesn't run itself.</p>
-			<p><wo:link action="$hostsPageClicked" class="btn btn-primary">Add hosts</wo:link></p>
-		</div>
-	</wo:if>
-	
-	<div class="card p-3 pb-1 mb-3">
-		<div class="row">
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
 			<div class="col">
-				<h1> 
+				<div class="page-pretitle">Application</div>
+				<h2 class="page-title">
 					<wo:if condition="$myApplication.isRunning_M">
-						"<wo:link href="$linkToApp" target="new"><wo:str value="$myApplication.name" /></wo:link>"
+						<wo:link href="$linkToApp" target="new" class="text-reset"><wo:str value="$myApplication.name" /></wo:link>
 					</wo:if>
 					<wo:if condition="$myApplication.isRunning_M" negate="$true">
-						"<wo:str value="$myApplication.name" />"
-					</wo:if> instances
-				</h1>
+						<wo:str value="$myApplication.name" />
+					</wo:if>
+				</h2>
 			</div>
-			<div class="col" align="right">		
-				<wo:link action="$configureApplicationClicked" class="btn btn-primary">Application configuration</wo:link>
+			<div class="col-auto ms-auto d-print-none">
+				<div class="btn-list">
+					<wo:link action="$refreshClicked" class="btn">Refresh</wo:link>
+					<wo:link action="$showStatisticsClicked" class="btn">
+						<wo:if condition="$showDetailStatistics">Hide stats</wo:if>
+						<wo:if condition="$showDetailStatistics" negate="$true">Show stats</wo:if>
+					</wo:link>
+					<wo:link action="$configureApplicationClicked" class="btn btn-primary">Configure application</wo:link>
+				</div>
 			</div>
 		</div>
-	</div>
-
-	<div class="card p-3 mb-3">
-		<div class="row">
-			<div class="col">
-				<wo:if condition="$currentBouncer"><div>Bouncer: <wo:str value="$currentBouncer.status" /></div></wo:if>
-				<wo:link action="$refreshClicked" class="btn btn-sm">Refresh</wo:link> <wo:link action="$showStatisticsClicked" class="btn btn-sm"><wo:if condition="$showDetailStatistics">Hide Stats</wo:if><wo:if condition="$showDetailStatistics" negate="$true">Show Stats</wo:if></wo:link>
-			</div>
-			<div class="col" align="right">
-				<wo:if condition="$isRefreshEnabled">
-					This page automatically updates every <wo:str value="$siteConfig.viewRefreshRate" /> seconds.
-				</wo:if>
-			</div>
-		</div>	
-	</div>
-
-	<div class="card mb-3">	
-		<wo:if condition="$session.message.length">
-			<div class="alert alert-important alert-danger">
-				<wo:str value="$session.message" />
-			</div>
+		<wo:if condition="$isRefreshEnabled">
+			<div class="text-secondary small mt-1">This page auto-updates every <wo:str value="$siteConfig.viewRefreshRate" /> seconds.</div>
 		</wo:if>
-		
-		<table class="table table-sm table-bordered mb-0">
-			<tr>
-				<th width="50">Select</th>
-				<th>Name</th>
-				<th>Host: Port</th>
-				<th width="120">Status</th>
-				<th width="120">Start / Stop</th>
-				<th width="120">Auto Recover</th>
-				<th width="120">Refuse New Sessions</th>
-				<th width="120">Scheduled</th>
-				<th width="120">Next shutdown</th>
-				<th width="120">Deaths</th>
-				<wo:if condition="$showDetailStatistics">
-					<th>Transactions</th>
-					<th>Active Sessions</th>
-					<th>Average Transactions</th>
-					<th>Average Idle Period</th>
-				</wo:if>
-				<wo:if condition="$showDetailStatistics" negate="$true">
-					<th>WOStats</th>
-				</wo:if>
-				<th width="70">Details</th>
-				<th width="70">Configure</th>
-				<th width="70">Delete</th>
-			</tr>
-			<wo:repetition list="$allInstances" item="$currentInstance">
-				<tr>
-					<td class="InstanceSelect">
-						<wo:form action="$selectOne"><wo:AjaxObserveField action="$selectOne"><wo:checkbox checked="$isSelectedInstance"/></wo:AjaxObserveField></wo:form>
-					</td>
-					<td>
-						<wo:link action="$instanceDetailClicked"><wo:str value="$currentInstance.displayName" /></wo:link>
-						<wo:if condition="$currentInstance.isRunning_M">
-							<wo:link href="$linkToInstance" target="new" title="Open through proxy/adaptor/webserver" style="float: right"><wo:JMIcon name="Link" /></wo:link>
-						</wo:if>
-					</td>
-					<td class="InstanceHostPort">
-						<wo:str value="$currentInstance.displayHostAndPort" />
-						<wo:if condition="$currentInstance.isRunning_M">
-							<wo:link href="$hrefToInstDirect" target="new" title="Open through direct connect" style="float: right"><wo:JMIcon name="Link" /></wo:link>
-						</wo:if>
-					</td>
-					<td class="InstanceStatusColumn">
-						<wo:img filename="$instanceStatusImage" alt="$instanceStatusImageText" class="toggle-image" />
-					</td>
-					<td class="InstanceStartStop">
-						<div class="Balls">
-							<wo:link action="$startInstance"><wo:img filename="start.png" alt="Start" height="19" width="19" /></wo:link>
-							&nbsp;
-							<wo:link action="$stopInstance"><wo:img filename="stop.png" alt="Stop" height="19" width="19" /></wo:link>
-						</div>
-					</td>
-					<td class="InstanceAutoRecover">
-						<wo:if condition="$currentInstance.schedulingEnabled">
-							<div class="AppControl AppControlAutoRecoverSchedulingOn">On</div>
-						</wo:if>
-						<wo:if condition="$currentInstance.schedulingEnabled" negate="$true">
-							<wo:link action="$toggleAutoRecover"><wo:container elementName="div" class="$autoRecoverDivClass"><wo:str value="$autoRecoverLabel" /></wo:container></wo:link>
-						</wo:if>
-					</td>
-					<td class="InstanceRefuseNewSessions">
-						<wo:if condition="$currentInstance.schedulingEnabled">
-							<wo:container elementName="div" class="$refuseNewSessionsClass"><wo:str value="$refuseNewSessionsLabel" escapeHTML="$false" /></wo:container>
-						</wo:if>
-						<wo:if condition="$currentInstance.schedulingEnabled" negate="$true">
-							<wo:if condition="$currentInstance.isRunning_M">
-								<wo:link action="$toggleRefuseNewSessions">
-									<wo:container elementName="div" class="$refuseNewSessionsClass"><wo:str value="$refuseNewSessionsLabel" escapeHTML="$false" /></wo:container>
-								</wo:link>
-							</wo:if>
-							<wo:if condition="$currentInstance.isRunning_M" negate="$true">
-								<div class="AppControl AppControlOff">Off</div>
-							</wo:if>
-						</wo:if>
-					</td>
-					<td class="InstanceSchedule">
-						<wo:link action="$toggleScheduling" class="AppControlLink">
-							<wo:container elementName="div" class="$schedulingDivClass"><wo:str value="$schedulingLabel" escapeHTML="$false" /></wo:container>
-						</wo:link>
-					</td>
-					<td class="NextShutDown">
-						<wo:str value="$nextShutdown" />
-					</td>
-					<td class="DeathCount">
-						<wo:if condition="$shouldDisplayDeathDetailLink">
-							<span class="Deaths"><wo:str value="$currentInstance.deathCount" numberformat="0" /></span>
-							<wo:link action="$instanceDeathDetailClicked">(Details)</wo:link>
-						</wo:if>
-						<wo:if condition="$shouldDisplayDeathDetailLink" negate="$true">-</wo:if>
-					</td>
-					<wo:if condition="$showDetailStatistics">
-						<td class="TransactionsCount">
-							<wo:str value="$currentInstance.statistics.transactionsString" />
-						</td>
-						<td class="ActiveSessionCount">
-							<wo:str value="$currentInstance.statistics.activeSessionsString" />
-						</td>
-						<td class="AverageTransactionsCount">
-							<wo:str value="$currentInstance.statistics.avgTransactionTimeString" />
-						</td>
-						<td class="AverageIdlePeriod">
-							<wo:str value="$currentInstance.statistics.averageIdlePeriodString" />
-						</td>
-					</wo:if>
-					<wo:if condition="$showDetailStatistics" negate="$true">
-						<td class="InstanceWOStats">
-							<wo:if condition="$currentInstance.isRunning_M">
-								<wo:link href="$linkToWOStats" target="_blank">WOStats</wo:link>
-							</wo:if>
-							<wo:if condition="$currentInstance.isRunning_M" negate="$true">
-								-
-							</wo:if>
-						</td>
-					</wo:if>
-					<td>
-						<wo:link action="$instanceDetailClicked" class="btn btn-sm">Details</wo:link>
-					</td>
-					<td>
-						<wo:link action="$configureInstanceClicked" class="btn btn-sm">Config</wo:link>
-					</td>
-					<td>
-						<wo:link action="$deleteInstanceClicked" class="btn btn-sm btn-outline-danger">Delete</wo:link>
-					</td>
-				</tr>
-			</wo:repetition>
-
-			<wo:if condition="$hasInstances">
-				<tr style="background-color: rgb(245,245,245)">
-					<td colspan="4">
-						<strong>Select instances:</strong><br>
-						<br>
-						<wo:link action="$selectAllAction" class="btn btn-sm">All</wo:link> <wo:link action="$selectNoneAction" class="btn btn-sm">None</wo:link> <wo:link action="$selectRunning" class="btn btn-sm">Running</wo:link> <wo:link action="$selectNotRunning" class="btn btn-sm">Not Running</wo:link>
-						<br>
-						<br>
-						<wo:form multipleSubmit="$true">
-							Named: <wo:textfield value="$instanceNameFilterValue" placeholder="Regular Expression" />
-							<wo:submit action="$selectInstanceNamesMatchingFilter" value="Select" />
-						</wo:form>
-						<div id="FilterByInstanceName__error">
-							<wo:str value="$filterErrorMessage"></wo:str>
-						</div>
-					</td>
-					<td class="AllStartStop">
-						<div class="Balls">
-							<wo:link action="$startAllClicked"><wo:img filename="start.png" alt="Start" height="19" width="19" /></wo:link>
-							&nbsp;
-							<wo:link action="$stopAllClicked"><wo:img filename="stop.png" alt="Stop" height="19" width="19" /></wo:link>
-						</div>
-					</td>
-					<td class="AllAutoRecover">
-						<div class="Balls">
-							<wo:link action="$autoRecoverEnableAllClicked"><wo:img filename="start.png" alt="Start" height="19" width="19" /></wo:link>
-							&nbsp;
-							<wo:link action="$autoRecoverDisableAllClicked"><wo:img filename="stop.png" alt="Stop" height="19" width="19" /></wo:link>
-						</div>
-					</td>
-					<td class="AllRefuseNewSessions">
-						<div class="Balls">
-							<wo:link action="$refuseNewSessionsAllClicked"><wo:img filename="start.png" alt="Start" height="19" width="19" /></wo:link>
-							&nbsp;
-							<wo:link action="$acceptNewSessionsAllClicked"><wo:img filename="stop.png" alt="Stop" height="19" width="19" /></wo:link>
-						</div>
-					</td>
-					<td class="AllScheduling">
-						<div class="Balls">
-							<wo:link action="$schedulingEnableAllClicked"><wo:img filename="start.png" alt="Start" height="19" width="19" /></wo:link>
-							&nbsp;
-							<wo:link action="$schedulingDisableAllClicked"><wo:img filename="stop.png" alt="Stop" height="19" width="19" /></wo:link>
-						</div>
-					</td>
-					<td class="AllBounce">
-						<wo:link action="$bounceClicked" class="btn btn-sm">Bounce</wo:link><br>
-						<br>
-						<wo:link pageName="HelpPage" fragmentIdentifier="18"><wo:img filename="help.png" height="24" width="24" /></wo:link>
-					</td>
-					<td class="AllClearDeaths"><wo:link action="$clearAllDeathsClicked" class="btn btn-sm">Clear Deaths</wo:link></td>
-					<wo:if condition="$showDetailStatistics">
-						<td class="TotalTransactionCount">
-							<wo:str value="$totalTransactions" numberformat="0" />
-						</td>
-						<td class="TotalActiveSessions">
-							<wo:str value="$totalActiveSessions" numberformat="0" />
-						</td>
-						<td class="TotalAverageTransaction">
-							<wo:str value="$totalAverageTransaction" numberformat="0.000" />
-						</td>
-						<td class="TotalAverageIdleTime">
-							<wo:str value = "$totalAverageIdleTime" numberformat="0.000" />
-						</td>
-					</wo:if>
-					<wo:if condition="$showDetailStatistics" negate="$true">
-						<td>
-							<wo:str value="$actualRatePerMinute" numberformat="0.00" /> TPM
-						</td>
-					</wo:if>
-					<td></td>
-					<td><wo:link action="$configureApplicationClicked"  class="btn btn-sm"><span>App Config</span></wo:link></td>
-					<td><wo:link action="$deleteAllInstancesClicked"  class="btn btn-sm btn-outline-danger"><span>Delete</span></wo:link></td>
-				</tr>
-			
-				<wo:if condition="$showDetailStatistics">
-					<tr class="TotalsForRunningInstances">
-						<td colspan="10" class="label">Running Sessions</td>
-						<td class="TotalTransactionCount"><wo:str value="$totalTransactionsForActiveInstances" numberformat="#,##0" /></td>
-						<td class="TotalActiveSessions"><wo:str value="$totalActiveSessionsForActiveInstances" numberformat = "#,##0" /></td>
-						<td class="TotalAverageTransaction"></td>
-						<td class="TotalAverageIdleTime"></td>
-						<td colspan="2"></td>
-					</tr>
-				</wo:if>
-			</wo:if>
-		</table>
+		<wo:if condition="$currentBouncer">
+			<div class="mt-2"><span class="badge bg-blue-lt">Bouncer</span> <wo:str value="$currentBouncer.status" /></div>
+		</wo:if>
 	</div>
-	
-	<wo:if condition="$hasHosts">
-		<div class="card p-3">
-			<wo:form class="mb-0">
-				Add: <wo:textfield value="$numberOfInstancesToAdd" numberformat="0" size="3" /> instance(s) on host: <wo:popUpButton list="$siteConfig.hostArray" item="$currentHost" displayString="$currentHost.name" selection="$selectedHost" /> <wo:submit action="$addInstanceClicked" value="Add" />
-			</wo:form>
+
+	<wo:if condition="$hasHosts" negate="$true">
+		<div class="alert alert-warning" role="alert">
+			<h4 class="alert-title">No hosts configured</h4>
+			<div class="text-secondary">You must add hosts before adding instances.</div>
+			<div class="mt-2"><wo:link action="$hostsPageClicked" class="btn btn-warning">Add hosts</wo:link></div>
 		</div>
 	</wo:if>
+
+	<wo:if condition="$session.message.length">
+		<div class="alert alert-danger">
+			<wo:str value="$session.message" />
+		</div>
+	</wo:if>
+
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="table-responsive">
+					<table class="table table-vcenter card-table">
+						<thead>
+							<tr>
+								<th class="w-1"></th>
+								<th>Instance</th>
+								<th>Host : Port</th>
+								<th class="w-1">Status</th>
+								<th class="w-1 text-nowrap">Start / Stop</th>
+								<th class="w-1 text-nowrap">Auto recover</th>
+								<th class="w-1 text-nowrap">Sessions</th>
+								<th class="w-1 text-nowrap">Scheduled</th>
+								<th class="text-nowrap">Next shutdown</th>
+								<th class="w-1 text-nowrap text-end">Deaths</th>
+								<wo:if condition="$showDetailStatistics">
+									<th class="text-end">Trans.</th>
+									<th class="text-end">Active</th>
+									<th class="text-end">Avg tx</th>
+									<th class="text-end">Avg idle</th>
+								</wo:if>
+								<wo:if condition="$showDetailStatistics" negate="$true">
+									<th class="text-end">WOStats</th>
+								</wo:if>
+								<th class="w-1"></th>
+							</tr>
+						</thead>
+						<tbody>
+							<wo:repetition list="$allInstances" item="$currentInstance">
+								<tr>
+									<td>
+										<wo:form action="$selectOne"><wo:AjaxObserveField action="$selectOne"><wo:checkbox checked="$isSelectedInstance" class="form-check-input m-0" /></wo:AjaxObserveField></wo:form>
+									</td>
+									<td>
+										<wo:link action="$instanceDetailClicked" class="text-reset"><strong><wo:str value="$currentInstance.displayName" /></strong></wo:link>
+										<wo:if condition="$currentInstance.isRunning_M">
+											<wo:link href="$linkToInstance" target="new" class="ms-2 text-secondary" title="Open through adaptor"><wo:JMIcon name="Link" /></wo:link>
+										</wo:if>
+									</td>
+									<td class="text-secondary text-nowrap">
+										<wo:str value="$currentInstance.displayHostAndPort" />
+										<wo:if condition="$currentInstance.isRunning_M">
+											<wo:link href="$hrefToInstDirect" target="new" class="ms-2 text-secondary" title="Direct connect"><wo:JMIcon name="Link" /></wo:link>
+										</wo:if>
+									</td>
+									<td>
+										<wo:img filename="$instanceStatusImage" alt="$instanceStatusImageText" title="$instanceStatusImageText" height="20" width="20" />
+									</td>
+									<td class="text-nowrap">
+										<div class="btn-list flex-nowrap">
+											<wo:link action="$startInstance" class="btn btn-sm" title="Start"><wo:img filename="start.png" alt="Start" height="14" width="14" /></wo:link>
+											<wo:link action="$stopInstance" class="btn btn-sm" title="Stop"><wo:img filename="stop.png" alt="Stop" height="14" width="14" /></wo:link>
+										</div>
+									</td>
+									<td>
+										<wo:if condition="$currentInstance.schedulingEnabled">
+											<span class="badge bg-info text-white">Scheduled</span>
+										</wo:if>
+										<wo:if condition="$currentInstance.schedulingEnabled" negate="$true">
+											<wo:link action="$toggleAutoRecover"><wo:container elementName="span" class="$autoRecoverDivClass"><wo:str value="$autoRecoverLabel" /></wo:container></wo:link>
+										</wo:if>
+									</td>
+									<td>
+										<wo:if condition="$currentInstance.schedulingEnabled">
+											<wo:container elementName="span" class="$refuseNewSessionsClass"><wo:str value="$refuseNewSessionsLabel" /></wo:container>
+										</wo:if>
+										<wo:if condition="$currentInstance.schedulingEnabled" negate="$true">
+											<wo:if condition="$currentInstance.isRunning_M">
+												<wo:link action="$toggleRefuseNewSessions">
+													<wo:container elementName="span" class="$refuseNewSessionsClass"><wo:str value="$refuseNewSessionsLabel" /></wo:container>
+												</wo:link>
+											</wo:if>
+											<wo:if condition="$currentInstance.isRunning_M" negate="$true">
+												<span class="badge bg-secondary text-white">Off</span>
+											</wo:if>
+										</wo:if>
+									</td>
+									<td>
+										<wo:link action="$toggleScheduling">
+											<wo:container elementName="span" class="$schedulingDivClass"><wo:str value="$schedulingLabel" /></wo:container>
+										</wo:link>
+									</td>
+									<td class="text-secondary text-nowrap"><wo:str value="$nextShutdown" /></td>
+									<td class="text-end text-nowrap">
+										<wo:if condition="$shouldDisplayDeathDetailLink">
+											<wo:link action="$instanceDeathDetailClicked" class="text-reset">
+												<span class="badge bg-red-lt"><wo:str value="$currentInstance.deathCount" numberformat="0" /></span>
+											</wo:link>
+										</wo:if>
+										<wo:if condition="$shouldDisplayDeathDetailLink" negate="$true"><span class="text-secondary">—</span></wo:if>
+									</td>
+									<wo:if condition="$showDetailStatistics">
+										<td class="text-end text-secondary"><wo:str value="$currentInstance.statistics.transactionsString" /></td>
+										<td class="text-end text-secondary"><wo:str value="$currentInstance.statistics.activeSessionsString" /></td>
+										<td class="text-end text-secondary"><wo:str value="$currentInstance.statistics.avgTransactionTimeString" /></td>
+										<td class="text-end text-secondary"><wo:str value="$currentInstance.statistics.averageIdlePeriodString" /></td>
+									</wo:if>
+									<wo:if condition="$showDetailStatistics" negate="$true">
+										<td class="text-end">
+											<wo:if condition="$currentInstance.isRunning_M">
+												<wo:link href="$linkToWOStats" target="_blank" class="text-secondary">WOStats</wo:link>
+											</wo:if>
+											<wo:if condition="$currentInstance.isRunning_M" negate="$true"><span class="text-secondary">—</span></wo:if>
+										</td>
+									</wo:if>
+									<td class="text-end">
+										<div class="btn-list flex-nowrap justify-content-end">
+											<wo:link action="$instanceDetailClicked" class="btn btn-sm">Details</wo:link>
+											<wo:link action="$configureInstanceClicked" class="btn btn-sm">Config</wo:link>
+											<wo:link action="$deleteInstanceClicked" class="btn btn-sm btn-outline-danger">Delete</wo:link>
+										</div>
+									</td>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<wo:if condition="$hasInstances">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-header">
+						<h3 class="card-title">Bulk actions</h3>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-lg-4">
+								<label class="form-label">Selection</label>
+								<div class="btn-list mb-3">
+									<wo:link action="$selectAllAction" class="btn btn-sm">All</wo:link>
+									<wo:link action="$selectNoneAction" class="btn btn-sm">None</wo:link>
+									<wo:link action="$selectRunning" class="btn btn-sm">Running</wo:link>
+									<wo:link action="$selectNotRunning" class="btn btn-sm">Not running</wo:link>
+								</div>
+								<wo:form multipleSubmit="$true">
+									<label class="form-label">Select by name (regex)</label>
+									<div class="input-group">
+										<wo:textfield value="$instanceNameFilterValue" placeholder="e.g. ^prod-" class="form-control" />
+										<wo:submit action="$selectInstanceNamesMatchingFilter" value="Match" class="btn" />
+									</div>
+									<wo:if condition="$filterErrorMessage.length">
+										<div class="text-danger small mt-1"><wo:str value="$filterErrorMessage" /></div>
+									</wo:if>
+								</wo:form>
+							</div>
+
+							<div class="col-lg-8">
+								<label class="form-label">Actions on selection</label>
+								<table class="table table-sm table-vcenter mb-0">
+									<tbody>
+										<tr>
+											<th class="w-25">Instances</th>
+											<td>
+												<div class="btn-list">
+													<wo:link action="$startAllClicked" class="btn btn-sm"><wo:img filename="start.png" alt="Start" height="14" width="14" /> Start</wo:link>
+													<wo:link action="$stopAllClicked" class="btn btn-sm"><wo:img filename="stop.png" alt="Stop" height="14" width="14" /> Stop</wo:link>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>Auto recover</th>
+											<td>
+												<div class="btn-list">
+													<wo:link action="$autoRecoverEnableAllClicked" class="btn btn-sm">Enable</wo:link>
+													<wo:link action="$autoRecoverDisableAllClicked" class="btn btn-sm">Disable</wo:link>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>Sessions</th>
+											<td>
+												<div class="btn-list">
+													<wo:link action="$refuseNewSessionsAllClicked" class="btn btn-sm">Refuse new</wo:link>
+													<wo:link action="$acceptNewSessionsAllClicked" class="btn btn-sm">Accept new</wo:link>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>Scheduling</th>
+											<td>
+												<div class="btn-list">
+													<wo:link action="$schedulingEnableAllClicked" class="btn btn-sm">Enable</wo:link>
+													<wo:link action="$schedulingDisableAllClicked" class="btn btn-sm">Disable</wo:link>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>Bounce</th>
+											<td>
+												<div class="btn-list">
+													<wo:link action="$bounceClicked" class="btn btn-sm">Bounce</wo:link>
+													<wo:link pageName="HelpPage" fragmentIdentifier="18" class="btn btn-sm">What is bounce?</wo:link>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>Deaths</th>
+											<td>
+												<wo:link action="$clearAllDeathsClicked" class="btn btn-sm">Clear history</wo:link>
+											</td>
+										</tr>
+										<tr>
+											<th>Delete</th>
+											<td>
+												<wo:link action="$deleteAllInstancesClicked" class="btn btn-sm btn-outline-danger">Delete all instances</wo:link>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+						<wo:if condition="$showDetailStatistics">
+							<div class="row mt-3">
+								<div class="col">
+									<div class="text-secondary small">
+										Totals across all instances —
+										transactions: <strong><wo:str value="$totalTransactions" numberformat="#,##0" /></strong>,
+										active sessions: <strong><wo:str value="$totalActiveSessions" numberformat="#,##0" /></strong>,
+										avg tx time: <strong><wo:str value="$totalAverageTransaction" numberformat="0.000" /></strong>,
+										avg idle: <strong><wo:str value="$totalAverageIdleTime" numberformat="0.000" /></strong>.
+									</div>
+									<div class="text-secondary small">
+										Running only —
+										transactions: <strong><wo:str value="$totalTransactionsForActiveInstances" numberformat="#,##0" /></strong>,
+										active sessions: <strong><wo:str value="$totalActiveSessionsForActiveInstances" numberformat="#,##0" /></strong>.
+									</div>
+								</div>
+							</div>
+						</wo:if>
+						<wo:if condition="$showDetailStatistics" negate="$true">
+							<div class="row mt-3">
+								<div class="col">
+									<div class="text-secondary small">
+										<strong><wo:str value="$actualRatePerMinute" numberformat="0.00" /></strong> transactions per minute across all instances.
+									</div>
+								</div>
+							</div>
+						</wo:if>
+					</div>
+				</div>
+			</div>
+		</wo:if>
+
+		<wo:if condition="$hasHosts">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-header">
+						<h3 class="card-title">Add instances</h3>
+					</div>
+					<div class="card-body">
+						<wo:form class="row g-2 align-items-end">
+							<div class="col-auto">
+								<label class="form-label">Count</label>
+								<wo:textfield value="$numberOfInstancesToAdd" numberformat="0" size="3" class="form-control" style="width: 6em;" />
+							</div>
+							<div class="col-auto">
+								<label class="form-label">Host</label>
+								<wo:popUpButton list="$siteConfig.hostArray" item="$currentHost" displayString="$currentHost.name" selection="$selectedHost" class="form-select" />
+							</div>
+							<div class="col-auto">
+								<wo:submit action="$addInstanceClicked" value="Add" class="btn btn-primary" />
+							</div>
+						</wo:form>
+					</div>
+				</div>
+			</div>
+		</wo:if>
+	</div>
 </wo:JMTablerLook>

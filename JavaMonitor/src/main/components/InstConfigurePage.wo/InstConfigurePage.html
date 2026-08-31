@@ -1,156 +1,162 @@
 <wo:JMTablerLook selectedPage="$APP_PAGE" title="$displayName">
-	<style>
-		.Warning {
-			color:red;
-		}
-		
-		.small-note {
-			color:Gray;
-			font-size: 12px;
-			font-weight: normal;
-		}
-	</style>
-	<div class="card p-3 pb-1 mb-3">
-		<div class="row">
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
 			<div class="col">
-				<h1>Instance <wo:str value="$myInstance.displayName" /> on <wo:str value="$myInstance.hostName" /></h1>
+				<div class="page-pretitle">Instance on <wo:str value="$myInstance.hostName" /></div>
+				<h2 class="page-title"><wo:str value="$myInstance.displayName" /></h2>
 			</div>
-			<div class="col" align="right">
-				<wo:link action="$returnClicked" class="btn btn-primary">All instances</wo:link>
+			<div class="col-auto ms-auto d-print-none">
+				<wo:link action="$returnClicked" class="btn">All instances</wo:link>
 			</div>
 		</div>
-	</div>
-	
-	<div class="card p-3 mb-3">
-		<div>
-			Changes made here apply only to this instance. To change all instances go to <wo:link action="$appConfigLinkClicked">Application Configuration</wo:link><br>
-			<br>
-			The Instance must be restarted for changes to take effect.
+		<div class="text-secondary small mt-1">
+			Changes made here apply only to this instance. To change all instances, see
+			<wo:link action="$appConfigLinkClicked">application configuration</wo:link>.
+			The instance must be restarted for changes to take effect.
 		</div>
 	</div>
 
-	<div class="card p-3 mb-3">
-		<h2>Instance Settings</h2>
-		<wo:form>
-			<table class="table table-sm">
-				<tr>
-					<th>Port:</th>
-					<td><wo:textfield value="$port" numberformat="0" size="8" /> (The instance must be off to change this setting)</td>
-				</tr>
-				<tr>
-					<th>ID:</th>
-					<td><wo:textfield value="$id" numberformat="0" size="8" /></td>
-				</tr>
-				<wo:if condition="$isWindowsHost">
-					<tr>
-						<th>&nbsp;</th>
-						<td><p><b>Note:</b> This instance is on a Microsoft Windows host. A drive letter (e.g. "D:") may be required to create a valid path.</p></td>
-					</tr>
-				</wo:if>
-				<tr>
-					<th width="250">
-						<wo:str value="$pathDiff" escapeHTML="$false" />Path:<br>
-						<span class="small-note">The path of the executable<br> (inside the '.woa' directory)</span>
-					</th>
-					<td>
-						<span class="input-group">
-							<wo:textfield value="$myInstance.path" size="50" class="form-control" />
-							<wo:link action="$pathPickerWizardClicked" class="btn">Pick...</wo:link>
-						</span>
-					</td>
-				</tr>
-				<tr>
-					<th>
-						<wo:str value="$outputDiff" escapeHTML="$false" />Output Path:<br>
-						<span class="small-note">
-							Path to a directory. Log files will be saved there as [ApplicationName]-[instanceID]
-						</span>
-					</th>
-					<td>
-						<span class="input-group">
-							<wo:textfield value="$myInstance.outputPath" size="50" class="form-control" />
-							<wo:link action="$pathPickerWizardClickedOutput" class="btn">Pick...</wo:link>
-						</span>
-					</td>
-				</tr>
-				<tr>
-					<th><wo:str value="$cachingDiff" escapeHTML="$false" />Caching enabled:</th>
-					<td><wo:checkbox checked="$myInstance.cachingEnabled" /></td>
-				</tr>
-				<tr>
-					<th><wo:str value="$debugDiff" escapeHTML="$false" />Debugging enabled:</th>
-					<td><wo:checkbox checked="$myInstance.debuggingEnabled" /></td>
-				</tr>
-				<tr>
-					<th><wo:str value="$browserDiff" escapeHTML="$false" />Auto Open In Browser:</th>
-					<td><wo:checkbox checked="$myInstance.autoOpenInBrowser" /></td>
-				</tr>
-				<tr>
-					<th><wo:str value="$minDiff" escapeHTML="$false" />Minimum Active Sessions:</th>
-					<td><wo:textfield value="$myInstance.minimumActiveSessionsCount" numberformat="0" size="8" /></td>
-				</tr>
-				<tr>
-					<th><wo:str value="$lifebeatDiff" escapeHTML="$false" />Lifebeat Interval:</th>
-					<td><wo:textfield value="$myInstance.lifebeatInterval" numberformat="0" size="8" /></td>
-				</tr>
-				<tr>
-					<th valign="top">
-						<wo:str value="$argsDiff" escapeHTML="$false" />
-						Additional Arguments:
-					</th>
-					<td><wo:text value="$myInstance.additionalArgs" class="form-control" rows="4" wrap="virtual" /></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td><wo:submit action="$startupUpdateClicked" value="Update Instance Settings" class="btn btn-success" /></td>
-				</tr>
-			</table>
-			<br>
-			<p>
-				If any settings are marked with <span class="Warning">**</span>, it means they differ from the Application level setting.
-			</p>
-			<p>Given the current settings, this instance will be started with the following arguments:</p>
-			<div><pre style="white-space: pre-wrap"><code><wo:str value="$myInstance.commandLineArguments" /></code></pre></div>
-		</wo:form>
-	</div>
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Instance settings</h3>
+				</div>
+				<div class="card-body">
+					<wo:form>
+						<table class="table table-vcenter mb-3">
+							<tbody>
+								<tr>
+									<th class="w-25">Port</th>
+									<td>
+										<wo:textfield value="$port" numberformat="0" size="8" class="form-control d-inline-block" style="width: 8em;" />
+										<span class="text-secondary small ms-2">The instance must be off to change this.</span>
+									</td>
+								</tr>
+								<tr>
+									<th>ID</th>
+									<td><wo:textfield value="$id" numberformat="0" size="8" class="form-control d-inline-block" style="width: 8em;" /></td>
+								</tr>
+								<wo:if condition="$isWindowsHost">
+									<tr>
+										<td></td>
+										<td class="text-secondary small">Windows host — a drive letter (e.g. <code>D:</code>) may be required for a valid path.</td>
+									</tr>
+								</wo:if>
+								<tr>
+									<th>
+										<wo:str value="$pathDiff" escapeHTML="$false" />Path
+										<div class="text-secondary small fw-normal">The executable path inside the <code>.woa</code> directory</div>
+									</th>
+									<td>
+										<div class="input-group">
+											<wo:textfield value="$myInstance.path" class="form-control" />
+											<wo:link action="$pathPickerWizardClicked" class="btn">Pick…</wo:link>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th>
+										<wo:str value="$outputDiff" escapeHTML="$false" />Output path
+										<div class="text-secondary small fw-normal">Directory. Log files saved as <code>[App]-[id]</code>.</div>
+									</th>
+									<td>
+										<div class="input-group">
+											<wo:textfield value="$myInstance.outputPath" class="form-control" />
+											<wo:link action="$pathPickerWizardClickedOutput" class="btn">Pick…</wo:link>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th><wo:str value="$cachingDiff" escapeHTML="$false" />Caching enabled</th>
+									<td><label class="form-check form-switch mb-0"><wo:checkbox checked="$myInstance.cachingEnabled" class="form-check-input" /></label></td>
+								</tr>
+								<tr>
+									<th><wo:str value="$debugDiff" escapeHTML="$false" />Debugging enabled</th>
+									<td><label class="form-check form-switch mb-0"><wo:checkbox checked="$myInstance.debuggingEnabled" class="form-check-input" /></label></td>
+								</tr>
+								<tr>
+									<th><wo:str value="$browserDiff" escapeHTML="$false" />Auto-open in browser</th>
+									<td><label class="form-check form-switch mb-0"><wo:checkbox checked="$myInstance.autoOpenInBrowser" class="form-check-input" /></label></td>
+								</tr>
+								<tr>
+									<th><wo:str value="$minDiff" escapeHTML="$false" />Minimum active sessions</th>
+									<td><wo:textfield value="$myInstance.minimumActiveSessionsCount" numberformat="0" size="8" class="form-control d-inline-block" style="width: 8em;" /></td>
+								</tr>
+								<tr>
+									<th><wo:str value="$lifebeatDiff" escapeHTML="$false" />Lifebeat interval</th>
+									<td><wo:textfield value="$myInstance.lifebeatInterval" numberformat="0" size="8" class="form-control d-inline-block" style="width: 8em;" /></td>
+								</tr>
+								<tr>
+									<th>
+										<wo:str value="$argsDiff" escapeHTML="$false" />Additional arguments
+									</th>
+									<td><wo:text value="$myInstance.additionalArgs" class="form-control" rows="4" wrap="virtual" /></td>
+								</tr>
+							</tbody>
+						</table>
 
-	<div class="card p-3 mb-3">
-		<h2>Adaptor Settings</h2>
-		<wo:form>
-			<table class="table table-sm">
-				<tr>
-					<th>Send timeout:</th>
-					<td><wo:textfield value="$myInstance.sendTimeout" numberformat="0" size="4" /></td>
-				</tr>
-				<tr>
-					<th>Receive timeout:</th>
-					<td><wo:textfield value="$myInstance.recvTimeout" numberformat="0" size="4" /></td>
-				</tr>
-				<tr>
-					<th>Connect timeout:</th>
-					<td><wo:textfield value="$myInstance.cnctTimeout" numberformat="0" size="4" /></td>
-				</tr>
-				<tr>
-					<th>Send Buffer Size:</th>
-					<td><wo:textfield value="$myInstance.sendBufSize" numberformat="0" size="4" /></td>
-				</tr>
-				<tr>
-					<th>Receive Buffer Size:</th>
-					<td><wo:textfield value="$myInstance.recvBufSize" numberformat="0" size="4" /></td>
-				</tr>
-			</table>
-			<p><wo:submit action="$adaptorSettingsUpdateClicked" value="Update Adaptor Settings" /></p>
-		</wo:form>
-	</div>
+						<div class="d-flex justify-content-between align-items-center">
+							<div class="text-secondary small">
+								Settings marked with <span class="text-danger">**</span> differ from the application-level setting.
+							</div>
+							<wo:submit action="$startupUpdateClicked" value="Save instance settings" class="btn btn-primary" />
+						</div>
+					</wo:form>
+				</div>
+			</div>
+		</div>
 
-	<div class="card p-3 mb-3">
-		<h2>Force Quit</h2>
-		<p>Clicking this button will force quit this instance.</p>
-		<p>The instance will do no error handling, nor will it attempt to finish processing requests in progress.</p>
-		<p>The instance should exit within <wo:str value="$instanceLifebeatInterval" /> seconds.</p>
-		<wo:form>
-			<p><wo:submit action="$forceQuitClicked" value="Force Quit This Instance" /></p>
-		</wo:form>
-		<p class="Comment">This only works on 5.2 applications or above.</p>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Command line preview</h3>
+				</div>
+				<div class="card-body">
+					<pre class="mb-0" style="white-space: pre-wrap;"><code><wo:str value="$myInstance.commandLineArguments" /></code></pre>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Adaptor settings</h3>
+				</div>
+				<div class="card-body">
+					<wo:form>
+						<table class="table table-vcenter mb-3">
+							<tbody>
+								<tr><th class="w-25">Send timeout</th><td><wo:textfield value="$myInstance.sendTimeout" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+								<tr><th>Receive timeout</th><td><wo:textfield value="$myInstance.recvTimeout" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+								<tr><th>Connect timeout</th><td><wo:textfield value="$myInstance.cnctTimeout" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+								<tr><th>Send buffer size</th><td><wo:textfield value="$myInstance.sendBufSize" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+								<tr><th>Receive buffer size</th><td><wo:textfield value="$myInstance.recvBufSize" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+							</tbody>
+						</table>
+						<div class="text-end">
+							<wo:submit action="$adaptorSettingsUpdateClicked" value="Save adaptor settings" class="btn btn-primary" />
+						</div>
+					</wo:form>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Force quit</h3>
+				</div>
+				<div class="card-body">
+					<p class="text-secondary">
+						Force quits this instance. The instance does no error handling and does not finish in-flight requests.
+						It should exit within <wo:str value="$instanceLifebeatInterval" /> seconds. Requires WO 5.2 or above.
+					</p>
+					<wo:form>
+						<wo:submit action="$forceQuitClicked" value="Force quit this instance" class="btn btn-danger" />
+					</wo:form>
+				</div>
+			</div>
+		</div>
 	</div>
 </wo:JMTablerLook>

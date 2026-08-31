@@ -1,20 +1,32 @@
-<wo:JMTablerLook selectedPage="$MOD_PROXY_PAGE" title="ModProxy">
-	<div class="card p-3 mb-3">
-		<h2>Parameter settings</h2>
-		<br />
-		<wo:form action="$reload">
-			<table class="FormFieldTable">
-				<tr>
-					<th>Timeout</th>
-					<td><wo:textfield value="$timeout" numberformat="0" /></td>
-				</tr>
-				<tr>
-					<th>Load Balancer</th>
-					<td><wo:popUpButton list="$loadBalencers" item="$loadBalancerItem" selection="$loadBalancer" /></td>
-				</tr>
-			</table>
-			<p><wo:submit action="$reload" value="Update Settings" /></p>
-		</wo:form>
+<wo:JMTablerLook selectedPage="$MOD_PROXY_PAGE" title="mod_proxy">
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">Apache</div>
+				<h2 class="page-title">mod_proxy configuration</h2>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<h3 class="card-title">Parameter settings</h3>
+		</div>
+		<div class="card-body">
+			<wo:form action="$reload">
+				<div class="row g-2 mb-3">
+					<div class="col-auto">
+						<label class="form-label">Timeout</label>
+						<wo:textfield value="$timeout" numberformat="0" class="form-control" style="width: 8em;" />
+					</div>
+					<div class="col-auto">
+						<label class="form-label">Load balancer</label>
+						<wo:popUpButton list="$loadBalencers" item="$loadBalancerItem" selection="$loadBalancer" class="form-select" />
+					</div>
+				</div>
+				<wo:submit action="$reload" value="Update" class="btn btn-primary" />
+			</wo:form>
+		</div>
 	</div>
 
 	<div class="card p-3 mb-3">

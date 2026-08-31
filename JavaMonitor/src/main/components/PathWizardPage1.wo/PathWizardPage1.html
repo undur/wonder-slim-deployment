@@ -1,18 +1,40 @@
 <wo:if condition="$onlyOneHost"><wo:WOMetaRefresh action="$onlyHostClicked" seconds="0" /></wo:if>
-<wo:JMTablerLook selectedPage="$APP_PAGE">
-	<div class="card p-3">
-		<wo:if condition="$onlyOneHost">
-			<p>Please wait while we fetch the file listing...</p>
-		</wo:if>
-		<wo:if condition="$multipleHosts">
-			<p>Choose the host on which you would like to select a path:</p>
-			<ul>
-				<wo:repetition list="$hostList" item="$aCurrentHost"><li><wo:link action="$hostClicked"><wo:str value="$aCurrentHost.name" /></wo:link></li></wo:repetition>
-			</ul>
-		</wo:if>
-		<wo:if condition="$noHosts">
-			<p>There are no hosts configured.</p>
-			<p>Please <wo:link pageName="HostsPage">add hosts</wo:link> before using the PathWizard.</p>
-		</wo:if>
+<wo:JMTablerLook selectedPage="$APP_PAGE" title="Choose path">
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">Path wizard</div>
+				<h2 class="page-title">Select host</h2>
+			</div>
+		</div>
+	</div>
+
+	<div class="row row-cards">
+		<div class="col-lg-8">
+			<div class="card">
+				<div class="card-body">
+					<wo:if condition="$onlyOneHost">
+						<p class="text-secondary">Fetching file listing…</p>
+					</wo:if>
+					<wo:if condition="$multipleHosts">
+						<p>Choose the host on which you would like to select a path:</p>
+						<div class="list-group list-group-flush">
+							<wo:repetition list="$hostList" item="$aCurrentHost">
+								<wo:link action="$hostClicked" class="list-group-item list-group-item-action"><wo:str value="$aCurrentHost.name" /></wo:link>
+							</wo:repetition>
+						</div>
+					</wo:if>
+					<wo:if condition="$noHosts">
+						<div class="empty">
+							<p class="empty-title">No hosts configured</p>
+							<p class="empty-subtitle text-secondary">Add hosts before using the path wizard.</p>
+							<div class="empty-action">
+								<wo:link pageName="HostsPage" class="btn btn-primary">Add hosts</wo:link>
+							</div>
+						</div>
+					</wo:if>
+				</div>
+			</div>
+		</div>
 	</div>
 </wo:JMTablerLook>

@@ -1,57 +1,81 @@
 <wo:JMTablerLook selectedPage="$APP_PAGE" title="Applications">
-	<div class="card mb-3">
-		<div class="card-header">
-			Applications
-		</div>
-		<table class="table table-sm table-striped mb-0">
-			<tr>
-				<th>Application</th>
-				<th colspan="2">
-					Instances<br>
-					Running / Configured
-				</th>
-			</tr>
-			<wo:repetition list="$applications" item="$currentApplication">
-				<tr>
-					<td>
-						<wo:link action="$appDetailsClicked"><wo:str value="$currentApplication.name" /></wo:link>
-						<wo:if condition="$currentApplication.isRunning">
-							<span style="float: right"><wo:link href="$hrefToApp" target="new"><wo:JMIcon name="Link" /></wo:link></span>
-						</wo:if>
-					</td>
-					<td><wo:str value="$currentApplication.runningInstancesCount" /> / <wo:str value="$currentApplication.instanceArray.size" /></td>
-					<td>
-						<wo:link action="$appDetailsClicked" class="btn btn-sm">Instances</wo:link>
-						<wo:link action="$configureClicked" class="btn btn-sm">Configuration</wo:link>
-						<wo:link action="$bounceClicked" class="btn btn-sm">Bounce</wo:link>
-						<wo:link action="$deleteClicked" class="btn btn-sm btn-danger">Delete</wo:link>
-					</td>
-				</tr>
-			</wo:repetition>
-			<tr style="color: gray">
-				<td></td>
-				<td><wo:str value="$totalInstancesRunning" /> / <wo:str value="$totalInstancesConfigured" /></td>
-				<td></td>
-			</tr>
-		</table>
-	</div>
-	<div class="card p-3">
-		<div class="row">
-			<div class="col-md-6">
-				<wo:form action="$addApplicationClicked">
-					<label class="mb-2"><strong>Add Application Named:</strong></label>
-					<span class="input-group">
-						<wo:textfield value="$newApplicationName" placeholder="new application name..." class="form-control" />
-						<wo:submit action="$addApplicationClicked" class="btn" value="Add Application" />
-					</span>
-				</wo:form>
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">Deployment</div>
+				<h2 class="page-title">Applications</h2>
 			</div>
-			<div class="col-md-6 pt-3">
-				<ul>
-					<li>Application names may only contain alpha-numeric or '-'.</li>
-			    	<li>Application names do not need to match the Application executable's filename.</li>
-			    	<li>Application names are used by the adaptor for load-balancing.</li>
-			    </ul>
+			<div class="col-auto ms-auto d-print-none">
+				<span class="text-secondary"><wo:str value="$totalInstancesRunning" /> / <wo:str value="$totalInstancesConfigured" /> instances running</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="table-responsive">
+					<table class="table table-vcenter card-table">
+						<thead>
+							<tr>
+								<th>Application</th>
+								<th class="w-1 text-nowrap">Running / Configured</th>
+								<th class="w-1"></th>
+							</tr>
+						</thead>
+						<tbody>
+							<wo:repetition list="$applications" item="$currentApplication">
+								<tr>
+									<td>
+										<wo:link action="$appDetailsClicked" class="text-reset"><strong><wo:str value="$currentApplication.name" /></strong></wo:link>
+										<wo:if condition="$currentApplication.isRunning">
+											<wo:link href="$hrefToApp" target="new" class="ms-2 text-secondary" title="Open in browser"><wo:JMIcon name="Link" /></wo:link>
+										</wo:if>
+									</td>
+									<td class="text-secondary text-nowrap">
+										<wo:str value="$currentApplication.runningInstancesCount" /> / <wo:str value="$currentApplication.instanceArray.size" />
+									</td>
+									<td class="text-end">
+										<div class="btn-list flex-nowrap justify-content-end">
+											<wo:link action="$appDetailsClicked" class="btn btn-sm">Instances</wo:link>
+											<wo:link action="$configureClicked" class="btn btn-sm">Configure</wo:link>
+											<wo:link action="$bounceClicked" class="btn btn-sm">Bounce</wo:link>
+											<wo:link action="$deleteClicked" class="btn btn-sm btn-outline-danger">Delete</wo:link>
+										</div>
+									</td>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Add application</h3>
+				</div>
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-6">
+							<wo:form action="$addApplicationClicked">
+								<label class="form-label">Application name</label>
+								<div class="input-group">
+									<wo:textfield value="$newApplicationName" placeholder="MyApp" class="form-control" />
+									<wo:submit action="$addApplicationClicked" class="btn btn-primary" value="Add" />
+								</div>
+							</wo:form>
+						</div>
+						<div class="col-md-6">
+							<ul class="text-secondary mb-0">
+								<li>Names may only contain alphanumeric characters or <code>-</code>.</li>
+								<li>The name does not need to match the <code>.woa</code> filename.</li>
+								<li>The name is used by the adaptor for routing.</li>
+							</ul>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

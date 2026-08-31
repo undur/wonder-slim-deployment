@@ -1,104 +1,120 @@
-<wo:JMTablerLook>
-	<style>	
+<wo:JMTablerLook selectedPage="0">
+	<style>
 		#logfile {
-		  font-family: courier, monospace;
-		  font-size: 12px;
-		  white-space: nowrap;
-		  line-height: 130%;
+			font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+			font-size: 12px;
+			white-space: nowrap;
+			line-height: 1.4;
+			background: var(--tblr-bg-surface-secondary);
+			padding: 0.5rem;
+			border-radius: 4px;
+			overflow-x: auto;
 		}
-		
-		#logfile>span {
+
+		#logfile > span {
 			white-space: pre;
 			display: block;
 		}
-		
-		#logfile span:nth-child(even) {
-			background: rgb(253,253,253)
+
+		#logfile span:nth-child(even) { background: rgba(0,0,0,0.02); }
+
+		#logfile > span > span {
+			color: var(--tblr-secondary);
+			background: rgba(0,0,0,0.05);
+			border-right: 1px solid var(--tblr-border-color);
+			text-align: right;
+			display: inline-block;
+			width: 50px;
+			padding-right: 6px;
+			margin-right: 6px;
 		}
 
-		#logfile span:nth-child(odd) {
-			background: rgb(245,245,245)
-		}
-
-		#logfile>span>span {
-		  color: gray;
-		  background-color: rgb(230,230,230);
-		  border-bottom: 1px solid rgb(220,220,220);
-		  text-align: right;
-		  display: inline-block;
-		  width: 50px;
-		}
-	
-		#logfile>span.nl>span {
-			background-color: #c8ffcd;
-		}
-
-		#logfile>span.ex {
-			background-color: rgb(255,200,200);
-		}
+		#logfile > span.nl > span { background: rgba(47,179,68,0.15); }
+		#logfile > span.ex { background: rgba(214,57,57,0.10); }
 	</style>
 	<script>
 		// Register "update" button for presses of the return button
 		// FIXME: We should really have some standard way to do this... // Hugi 2024-10-30
 		document.addEventListener("DOMContentLoaded", async () => {
-			document.getElementById('updateForm').onkeypress=function(e){
-			    if(e.keyCode==13){
-			        document.getElementById('updateButton').click();
-			    }
+			document.getElementById('updateForm').onkeypress = function( e ) {
+				if( e.keyCode == 13 ) {
+					document.getElementById('updateButton').click();
+				}
 			}
-		})
+		});
 	</script>
-	<div class="row mb-3">
-		<div class="col-4">
-			<div class="card p-3">
-				<h2><wo:str value="$file.absolutePath" size="100" /></h2>
-				<p><wo:link action="$download" class="btn">Download file</wo:link></p>
-		
-				<wo:form id="updateForm">
-					<wo:AjaxUpdateContainer id="regexUC">
-						<div class="row mb-3">
-							<span class="input-group">
-								<span class="input-group-text">Filter/search:</span>
-								<wo:textfield value="$filter" class="form-control" />
-							</span>
-						</div>
-					</wo:AjaxUpdateContainer>
-		
-					<div class="row mb-3">
-						<span class="input-group">
-							<span class="input-group-text">Starting line:</span>
-							<wo:textfield value="$startLine" numberformat="0" class="form-control" />
-							<span class="input-group-text">Ending line:</span>
-							<wo:textfield value="$endLine" numberformat="0" class="form-control" />
-						</span>
-					</div>
-		
-					<div class="row">
-						<label>
-							<wo:checkbox checked="$reverseLines" />
-							Reverse line order
-						</label>  
-					</div>
-					<br>
-					<div class="row">
-						<label>
-							<wo:checkbox checked="$showLineNumbers" />
-							Show line numbers
-						</label> 
-					</div>
-					<div class="row">
-						<label>&nbsp;</label> <wo:AjaxSubmitButton updateContainerID="logfile" action="$read" value="Update" id="updateButton" class="btn btn-primary" />
-					</div>
-				</wo:form>
+
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">Log</div>
+				<h2 class="page-title text-truncate"><wo:str value="$file.absolutePath" /></h2>
+			</div>
+			<div class="col-auto ms-auto d-print-none">
+				<wo:link action="$download" class="btn">Download file</wo:link>
 			</div>
 		</div>
 	</div>
-	<div class="card">
-		<span class="card-header">
-			<h3>Log contains <wo:str value="$numberOfLines" numberformat="#,00" /> lines. Showing <wo:str value="$lines.size" numberformat="#,00" /></h3>
-		</span>
-		<wo:AjaxUpdateContainer id="logfile">
-	 		<wo:repetition list="$lines" item="$currentLine" index="$currentIndex"><wo:container elementName="span" class="$currentLineClass"><wo:if condition="$showLineNumbers"><span><wo:str value="$currentLine.number" /></span> </wo:if><wo:str value="$currentLine.text" /><br /></wo:container></wo:repetition>
-		</wo:AjaxUpdateContainer>
+
+	<div class="row row-cards">
+		<div class="col-lg-4">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Filter</h3>
+				</div>
+				<div class="card-body">
+					<wo:form id="updateForm">
+						<wo:AjaxUpdateContainer id="regexUC">
+							<div class="mb-3">
+								<label class="form-label">Filter/search</label>
+								<wo:textfield value="$filter" class="form-control" />
+							</div>
+						</wo:AjaxUpdateContainer>
+
+						<div class="row g-2 mb-3">
+							<div class="col">
+								<label class="form-label">Start line</label>
+								<wo:textfield value="$startLine" numberformat="0" class="form-control" />
+							</div>
+							<div class="col">
+								<label class="form-label">End line</label>
+								<wo:textfield value="$endLine" numberformat="0" class="form-control" />
+							</div>
+						</div>
+
+						<div class="mb-2">
+							<label class="form-check">
+								<wo:checkbox checked="$reverseLines" class="form-check-input" />
+								<span class="form-check-label">Reverse line order</span>
+							</label>
+						</div>
+						<div class="mb-3">
+							<label class="form-check">
+								<wo:checkbox checked="$showLineNumbers" class="form-check-input" />
+								<span class="form-check-label">Show line numbers</span>
+							</label>
+						</div>
+
+						<wo:AjaxSubmitButton updateContainerID="logfile" action="$read" value="Update" id="updateButton" class="btn btn-primary w-100" />
+					</wo:form>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-lg-8">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Log contents</h3>
+					<div class="ms-auto text-secondary small">
+						<wo:str value="$numberOfLines" numberformat="#,##0" /> lines total; showing <wo:str value="$lines.size" numberformat="#,##0" />
+					</div>
+				</div>
+				<div class="card-body">
+					<wo:AjaxUpdateContainer id="logfile">
+						<wo:repetition list="$lines" item="$currentLine" index="$currentIndex"><wo:container elementName="span" class="$currentLineClass"><wo:if condition="$showLineNumbers"><span><wo:str value="$currentLine.number" /></span></wo:if><wo:str value="$currentLine.text" /><br /></wo:container></wo:repetition>
+					</wo:AjaxUpdateContainer>
+				</div>
+			</div>
+		</div>
 	</div>
 </wo:JMTablerLook>

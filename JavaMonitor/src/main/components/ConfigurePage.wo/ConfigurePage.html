@@ -1,117 +1,134 @@
-<wo:JMTablerLook selectedPage="$SITE_PAGE" title="Configure">
-	<div class="card p-3 mb-3">
-		<h2>HTTP Adaptor URL</h2>
-		<wo:form>
-			<p>Enter the complete URL to the WebObjects HTTP adaptor.<br /></p>
-			<p>Example: <code>http://store.apple.com/cgi-bin/WebObjects</code></p>
-			<p>URL to Adaptor: <wo:textfield value="$siteConfig.woAdaptor" size="60" /> <wo:submit action="$HTTPServerUpdateClicked" value="Update HTTP Adaptor URL" /></p>
-		</wo:form>
+<wo:JMTablerLook selectedPage="$SITE_PAGE" title="Site configuration">
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">Site</div>
+				<h2 class="page-title">Configuration</h2>
+			</div>
+		</div>
 	</div>
 
-	<div class="card p-3 mb-3">
-		<h2>View site statistics and WOAdaptor information</h2>
-		<p>The username and password are set in the WOAdaptor configuration file, typically "/System/Library/WebObjects/Adaptors/Apache2.2/apache.conf" using the directives WebObjectsAdminUsername and WebObjectsAdminPassword.</p>
-		<wo:form target="_blank">
-			<table>
-				<tr>
-					<th>Username:</th>
-					<td><wo:textfield value="$adaptorInfoUsername"/></td>
-				</tr>
-				<tr>
-					<th>Password:</th>
-					<td><wo:textfield value="$adaptorInfoPassword"/></td>
-				</tr>
-				<tr>
-					<th></th>
-					<td><wo:submit action="$adaptorInfoLoginClicked" value="Log In" /></td>
-				</tr>
-			</table>
-		</wo:form>
-	</div>
-	
-	<div class="card p-3 mb-3">
-		<wo:AjaxExpansion id="AdaptorSettingsExpansion" insertion="Effect.blind" insertionDuration="0.1" string="HTTP Adaptor Settings" expanded="$isAdaptorSettingsSectionVisible">
-			<wo:form>
-				<table>
-					<tr>
-						<th>Load balancing scheme:</th>
-						<td>
-							<wo:popUpButton item="$loadSchedulerItem" list="$loadSchedulerList" selection="$loadSchedulerSelection" /><br />
-							Custom Scheduler Name: <wo:textfield value="$customSchedulerName" /> (Optional)
-						</td>
-					</tr>
-					<tr>
-						<th>Retries:</th>
-						<td><wo:textfield  value="$siteConfig.retries" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Redirection URL:</th>
-						<td><wo:textfield value="$siteConfig.redir" size="60" /></td>
-					</tr>
-					<tr>
-						<th>Dormant:</th>
-						<td><wo:textfield value="$siteConfig.dormant" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Send Timeout:</th>
-						<td><wo:textfield value="$siteConfig.sendTimeout" numberformat="0"	size="4" /></td>
-					</tr>
-					<tr>
-						<th>Receive Timeout:</th>
-						<td><wo:textfield value="$siteConfig.recvTimeout" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Connect Timeout:</th>
-						<td><wo:textfield value="$siteConfig.cnctTimeout" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Send Buffer Size:</th>
-						<td><wo:textfield value="$siteConfig.sendBufSize" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Receive Buffer Size:</th>
-						<td><wo:textfield value="$siteConfig.recvBufSize" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Connection Pool Size:</th>
-						<td><wo:textfield value="$siteConfig.poolsize" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>URL Version:</th>
-						<td><wo:popUpButton list="$urlVersionList" item="$urlVersionItem" selection="$urlVersionSelection" /></td>
-					</tr>
-				</table>
-				<p><wo:submit action="$adaptorUpdateClicked" value="Update Adaptor Settings" /></p>
-			</wo:form>
-		</wo:AjaxExpansion>
-	</div>
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">HTTP adaptor URL</h3>
+				</div>
+				<div class="card-body">
+					<wo:form>
+						<p class="text-secondary">The complete URL to the WebObjects HTTP adaptor. Example: <code>http://store.apple.com/cgi-bin/WebObjects</code></p>
+						<label class="form-label">Adaptor URL</label>
+						<div class="input-group">
+							<wo:textfield value="$siteConfig.woAdaptor" class="form-control" />
+							<wo:submit action="$HTTPServerUpdateClicked" value="Save" class="btn btn-primary" />
+						</div>
+					</wo:form>
+				</div>
+			</div>
+		</div>
 
-	<div class="card p-3 mb-3">
-		<wo:AjaxExpansion id="EmailNotificationExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Email Notifications" expanded="$isEmailSectionVisible">
-			<p>Monitor can send email notifications if an SMTP host is supplied.<br />
-			To use email notifications, go to the application configuration page to set email addresses for each of your applications.</p>
-			<wo:form>
-				<table class="FormFieldTable">
-					<tr>
-						<th>SMTP host:</th>
-						<td><wo:textfield value="$siteConfig.SMTPhost" /></td>
-					</tr>
-					<tr>
-						<th>Return address:</th>
-						<td><wo:textfield value="$siteConfig.emailReturnAddr" /></td>
-					</tr>
-				</table>
-				<p><wo:submit action="$emailUpdateClicked" value="Update Email Notification Settings" /></p>
-			</wo:form>
-		</wo:AjaxExpansion>
-	</div>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Site statistics and adaptor information</h3>
+				</div>
+				<div class="card-body">
+					<p class="text-secondary">
+						Username and password are set in the adaptor configuration (typically <code>apache.conf</code>) via <code>WebObjectsAdminUsername</code> and <code>WebObjectsAdminPassword</code>.
+					</p>
+					<wo:form target="_blank">
+						<div class="row g-2">
+							<div class="col">
+								<label class="form-label">Username</label>
+								<wo:textfield value="$adaptorInfoUsername" class="form-control" />
+							</div>
+							<div class="col">
+								<label class="form-label">Password</label>
+								<wo:textfield value="$adaptorInfoPassword" class="form-control" />
+							</div>
+							<div class="col-auto d-flex align-items-end">
+								<wo:submit action="$adaptorInfoLoginClicked" value="Log in" class="btn btn-primary" />
+							</div>
+						</div>
+					</wo:form>
+				</div>
+			</div>
+		</div>
 
-	<div class="card p-3 mb-3">
-		<wo:AjaxExpansion id="BackupExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Backup Site Configuration" expanded="$isBackupSectionVisible">
-			<p>Makes a timestamped backup of SiteConfig.xml and appends an optional short note to the file name.</p>
-			<wo:form name="BackupForm">
-				<p>Note: <wo:textfield value="$backupNote" /> (optional) <wo:submit action="$backupConfiguration" value="Backup Now" /></p>
-			</wo:form>
-		</wo:AjaxExpansion>
+		<div class="col-12">
+			<div class="card">
+				<wo:AjaxExpansion id="AdaptorSettingsExpansion" insertion="Effect.blind" insertionDuration="0.1" string="HTTP adaptor settings" expanded="$isAdaptorSettingsSectionVisible">
+					<div class="card-body">
+						<wo:form>
+							<table class="table table-vcenter mb-3">
+								<tbody>
+									<tr>
+										<th class="w-25">Load balancing scheme</th>
+										<td>
+											<wo:popUpButton item="$loadSchedulerItem" list="$loadSchedulerList" selection="$loadSchedulerSelection" class="form-select mb-2" />
+											<label class="form-label">Custom scheduler name (optional)</label>
+											<wo:textfield value="$customSchedulerName" class="form-control" />
+										</td>
+									</tr>
+									<tr><th>Retries</th><td><wo:textfield value="$siteConfig.retries" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Redirection URL</th><td><wo:textfield value="$siteConfig.redir" class="form-control" /></td></tr>
+									<tr><th>Dormant</th><td><wo:textfield value="$siteConfig.dormant" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Send timeout</th><td><wo:textfield value="$siteConfig.sendTimeout" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Receive timeout</th><td><wo:textfield value="$siteConfig.recvTimeout" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Connect timeout</th><td><wo:textfield value="$siteConfig.cnctTimeout" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Send buffer size</th><td><wo:textfield value="$siteConfig.sendBufSize" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Receive buffer size</th><td><wo:textfield value="$siteConfig.recvBufSize" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Connection pool size</th><td><wo:textfield value="$siteConfig.poolsize" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>URL version</th><td><wo:popUpButton list="$urlVersionList" item="$urlVersionItem" selection="$urlVersionSelection" class="form-select" style="width: auto;" /></td></tr>
+								</tbody>
+							</table>
+							<div class="text-end">
+								<wo:submit action="$adaptorUpdateClicked" value="Save adaptor settings" class="btn btn-primary" />
+							</div>
+						</wo:form>
+					</div>
+				</wo:AjaxExpansion>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<wo:AjaxExpansion id="EmailNotificationExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Email notifications" expanded="$isEmailSectionVisible">
+					<div class="card-body">
+						<p class="text-secondary">
+							Monitor sends email notifications when configured with an SMTP host. Per-application email addresses live on the application configuration page.
+						</p>
+						<wo:form>
+							<div class="mb-3">
+								<label class="form-label">SMTP host</label>
+								<wo:textfield value="$siteConfig.SMTPhost" class="form-control" />
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Return address</label>
+								<wo:textfield value="$siteConfig.emailReturnAddr" class="form-control" />
+							</div>
+							<wo:submit action="$emailUpdateClicked" value="Save email settings" class="btn btn-primary" />
+						</wo:form>
+					</div>
+				</wo:AjaxExpansion>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<wo:AjaxExpansion id="BackupExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Backup site configuration" expanded="$isBackupSectionVisible">
+					<div class="card-body">
+						<p class="text-secondary">Creates a timestamped backup of <code>SiteConfig.xml</code>.</p>
+						<wo:form name="BackupForm">
+							<label class="form-label">Note (optional)</label>
+							<div class="input-group">
+								<wo:textfield value="$backupNote" class="form-control" />
+								<wo:submit action="$backupConfiguration" value="Back up now" class="btn btn-primary" />
+							</div>
+						</wo:form>
+					</div>
+				</wo:AjaxExpansion>
+			</div>
+		</div>
 	</div>
 </wo:JMTablerLook>

@@ -1,310 +1,349 @@
 <wo:JMTablerLook selectedPage="$APP_PAGE" title="$appDefaults.name">
-	<style>
-		.expansion {
-			font-size: 20px;
-			color: black;
-			font-weight: 600;
-			color: rgb(24, 36, 51);
-		}
-		
-		.small-note {
-			color:Gray;
-			font-size: 12px;
-			font-weight: normal;
-		}
-	</style>
-	<div class="card p-3 pb-1 mb-3">
-		<div class="row">
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
 			<div class="col">
-				<h1>&quot;<wo:str value="$appDefaults.name" />&quot; configuration</h1>
+				<div class="page-pretitle">Application configuration</div>
+				<h2 class="page-title"><wo:str value="$appDefaults.name" /></h2>
 			</div>
-			<div class="col" align="right">
-				<wo:link action="$detailPageClicked" class="btn btn-primary">Instances</wo:link>
+			<div class="col-auto ms-auto d-print-none">
+				<wo:link action="$detailPageClicked" class="btn">All instances</wo:link>
 			</div>
 		</div>
 	</div>
 
-	<div class="card p-3 mb-3">
-		<wo:AjaxExpansion id="NewInstanceConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="New Instance Defaults" expanded="$isNewInstanceSectionVisible">
-			<p>New Instances will be automatically configured to have the following settings. Defaults may be pushed individually (or together) to existing instances using the &quot;Push&quot; buttons in the far right column. To only set defaults for new instances (existing instances remain unchanged), use the &quot;Update for New Instances Only&quot; button at the bottom.</p>
-			<wo:form multipleSubmit="$true">
-				<table class="table table-sm">
-					<tr>
-						<th width="250">
-							Path:<br>
-							<span class="small-note">The path of the executable<br> (inside the '.woa' directory)</span>
-						</th>
-						<td>
-							<span class="input-group mb-1">
-								<span class="input-group-text" style="width: 100px">Unix:</span>
-								<wo:textfield value="$appDefaults.unixPath" class="form-control" />
-								<wo:link action="$pathPickerWizardClickedUnix" class="btn">Pick...</wo:link>
-							</span>
-							<span class="input-group mb-1">
-								<span class="input-group-text" style="width: 100px">macOS:</span>
-								<wo:textfield value="$appDefaults.macPath" class="form-control" />
-								<wo:link action="$pathPickerWizardClickedMac" class="btn">Pick...</wo:link>
-							</span>
-							<span class="input-group mb-1">
-								<span class="input-group-text" style="width: 100px">Windows:</span>
-								<wo:textfield value="$appDefaults.winPath" class="form-control" />
-								<wo:link action="$pathPickerWizardClickedWindows" class="btn">Pick...</wo:link>
-							</span>
-						</td>
-						<td><wo:submit action="$updatePathOnly" value="Push" class="btn btn-sm btn-secondary" /></td>
-					</tr>
-					<tr>
-						<th>
-							Output Path:<br>
-							<span class="small-note">
-								Path to a directory. Log files will be saved there as [ApplicationName]-[instanceID]
-							</span>
-						</th>
-						<td>
-							<span class="input-group mb-1">
-								<span class="input-group-text" style="width: 100px">Unix:</span>
-								<wo:textfield value="$appDefaults.unixOutputPath" class="form-control" />
-								<wo:link action="$pathPickerWizardClickedUnixOutput" class="btn">Pick...</wo:link>
-							</span>
-							<span class="input-group mb-1">
-								<span class="input-group-text" style="width: 100px">macOS:</span>
-								<wo:textfield value="$appDefaults.macOutputPath" class="form-control" />
-								<wo:link action="$pathPickerWizardClickedMacOutput" class="btn">Pick...</wo:link>
-							</span>
-							<span class="input-group mb-1">
-								<span class="input-group-text" style="width: 100px">Windows:</span>
-								<wo:textfield value="$appDefaults.winOutputPath" class="form-control" />
-								<wo:link action="$pathPickerWizardClickedWindowsOutput" class="btn">Pick...</wo:link>
-							</span>
-						</td>
-						<td><wo:submit action="$updateOutputOnly" value="Push" class="btn btn-sm btn-secondary" /></td>
-					</tr>
-					<tr>
-						<th>Auto Recover:</th>
-						<td><wo:checkbox checked="$appDefaults.autoRecover" /> (Does not apply to scheduled instances)</td>
-						<td><wo:submit action="$updateAutoRecoverOnly" value="Push" class="btn btn-sm btn-secondary" /></td>
-					</tr>
-					<tr>
-						<th>Caching enabled: </th>
-						<td><wo:checkbox checked="$appDefaults.cachingEnabled" /></td>
-						<td><wo:submit action="$updateCachingOnly" value="Push" class="btn btn-sm btn-secondary" /></td>
-					</tr>
-					<tr>
-						<th>Debugging enabled: </th>
-						<td><wo:checkbox checked="$appDefaults.debuggingEnabled" /></td>
-						<td><wo:submit action="$updateDebuggingOnly" value="Push" class="btn btn-sm btn-secondary" /></td>
-					</tr>
-					<tr>
-						<th>Auto Open In Browser<br />Auto Open Client Application:</th>
-						<td><wo:checkbox checked="$appDefaults.autoOpenInBrowser" /></td>
-						<td><wo:submit action="$updateAutoOpenOnly" value="Push" class="btn btn-sm btn-secondary" /></td>
-					</tr>
-					<tr>
-						<th>Minimum Active Sessions: </th>
-						<td><wo:textfield value="$appDefaults.minimumActiveSessionsCount" numberformat="0" size="5" /></td>
-						<td><wo:submit action="$updateMinimumOnly" value="Push" class="btn btn-sm btn-secondary" /></td>
-					</tr>
-					<tr>
-						<th>Lifebeat Interval:</th>
-						<td><wo:textfield value="$appDefaults.lifebeatInterval" numberformat="0" size="5" /></td>
-						<td><wo:submit action="$updateLifebeatOnly" value="Push" class="btn btn-sm btn-secondary" /></td>
-					</tr>
-					<tr>
-						<th>Additional Arguments:</th>
-						<td><wo:text value="$appDefaults.additionalArgs" class="form-control" rows="4" wrap="virtual" /></td>
-						<td><wo:submit action="$updateAddArgsOnly" value="Push" class="btn btn-sm btn-secondary" /></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td><wo:submit action="$defaultsUpdateClicked" value="Update for new instances only" class="btn btn-success" /></td>
-						<td><wo:submit action="$defaultsPushClicked" value="Push All" class="btn btn-sm btn-secondary" /></td>
-					</tr>
-				</table>
-			</wo:form>
-		</wo:AjaxExpansion>
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<wo:AjaxExpansion id="NewInstanceConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="New instance defaults" expanded="$isNewInstanceSectionVisible">
+					<div class="card-body">
+						<p class="text-secondary">
+							New instances get these settings. Push a value to existing instances with the <em>Push</em> button in its row; push everything with <em>Push all</em> at the bottom; save without pushing with <em>Save for new only</em>.
+						</p>
+						<wo:form multipleSubmit="$true">
+							<table class="table table-vcenter mb-3">
+								<tbody>
+									<tr>
+										<th class="w-25">
+											Path
+											<div class="text-secondary small fw-normal">Executable inside the <code>.woa</code></div>
+										</th>
+										<td>
+											<div class="input-group mb-1">
+												<span class="input-group-text" style="min-width: 90px;">Unix</span>
+												<wo:textfield value="$appDefaults.unixPath" class="form-control" />
+												<wo:link action="$pathPickerWizardClickedUnix" class="btn">Pick…</wo:link>
+											</div>
+											<div class="input-group mb-1">
+												<span class="input-group-text" style="min-width: 90px;">macOS</span>
+												<wo:textfield value="$appDefaults.macPath" class="form-control" />
+												<wo:link action="$pathPickerWizardClickedMac" class="btn">Pick…</wo:link>
+											</div>
+											<div class="input-group">
+												<span class="input-group-text" style="min-width: 90px;">Windows</span>
+												<wo:textfield value="$appDefaults.winPath" class="form-control" />
+												<wo:link action="$pathPickerWizardClickedWindows" class="btn">Pick…</wo:link>
+											</div>
+										</td>
+										<td class="w-1"><wo:submit action="$updatePathOnly" value="Push" class="btn btn-sm" /></td>
+									</tr>
+									<tr>
+										<th>
+											Output path
+											<div class="text-secondary small fw-normal">Log directory; files saved as <code>[App]-[id]</code></div>
+										</th>
+										<td>
+											<div class="input-group mb-1">
+												<span class="input-group-text" style="min-width: 90px;">Unix</span>
+												<wo:textfield value="$appDefaults.unixOutputPath" class="form-control" />
+												<wo:link action="$pathPickerWizardClickedUnixOutput" class="btn">Pick…</wo:link>
+											</div>
+											<div class="input-group mb-1">
+												<span class="input-group-text" style="min-width: 90px;">macOS</span>
+												<wo:textfield value="$appDefaults.macOutputPath" class="form-control" />
+												<wo:link action="$pathPickerWizardClickedMacOutput" class="btn">Pick…</wo:link>
+											</div>
+											<div class="input-group">
+												<span class="input-group-text" style="min-width: 90px;">Windows</span>
+												<wo:textfield value="$appDefaults.winOutputPath" class="form-control" />
+												<wo:link action="$pathPickerWizardClickedWindowsOutput" class="btn">Pick…</wo:link>
+											</div>
+										</td>
+										<td><wo:submit action="$updateOutputOnly" value="Push" class="btn btn-sm" /></td>
+									</tr>
+									<tr>
+										<th>Auto recover</th>
+										<td>
+											<label class="form-check form-switch mb-0">
+												<wo:checkbox checked="$appDefaults.autoRecover" class="form-check-input" />
+												<span class="form-check-label text-secondary">Does not apply to scheduled instances</span>
+											</label>
+										</td>
+										<td><wo:submit action="$updateAutoRecoverOnly" value="Push" class="btn btn-sm" /></td>
+									</tr>
+									<tr>
+										<th>Caching enabled</th>
+										<td><label class="form-check form-switch mb-0"><wo:checkbox checked="$appDefaults.cachingEnabled" class="form-check-input" /></label></td>
+										<td><wo:submit action="$updateCachingOnly" value="Push" class="btn btn-sm" /></td>
+									</tr>
+									<tr>
+										<th>Debugging enabled</th>
+										<td><label class="form-check form-switch mb-0"><wo:checkbox checked="$appDefaults.debuggingEnabled" class="form-check-input" /></label></td>
+										<td><wo:submit action="$updateDebuggingOnly" value="Push" class="btn btn-sm" /></td>
+									</tr>
+									<tr>
+										<th>
+											Auto-open in browser
+											<div class="text-secondary small fw-normal">Also affects Auto-open client application</div>
+										</th>
+										<td><label class="form-check form-switch mb-0"><wo:checkbox checked="$appDefaults.autoOpenInBrowser" class="form-check-input" /></label></td>
+										<td><wo:submit action="$updateAutoOpenOnly" value="Push" class="btn btn-sm" /></td>
+									</tr>
+									<tr>
+										<th>Minimum active sessions</th>
+										<td><wo:textfield value="$appDefaults.minimumActiveSessionsCount" numberformat="0" size="5" class="form-control d-inline-block" style="width: 7em;" /></td>
+										<td><wo:submit action="$updateMinimumOnly" value="Push" class="btn btn-sm" /></td>
+									</tr>
+									<tr>
+										<th>Lifebeat interval</th>
+										<td><wo:textfield value="$appDefaults.lifebeatInterval" numberformat="0" size="5" class="form-control d-inline-block" style="width: 7em;" /></td>
+										<td><wo:submit action="$updateLifebeatOnly" value="Push" class="btn btn-sm" /></td>
+									</tr>
+									<tr>
+										<th>Additional arguments</th>
+										<td><wo:text value="$appDefaults.additionalArgs" class="form-control" rows="4" wrap="virtual" /></td>
+										<td><wo:submit action="$updateAddArgsOnly" value="Push" class="btn btn-sm" /></td>
+									</tr>
+								</tbody>
+							</table>
+
+							<div class="d-flex justify-content-end gap-2">
+								<wo:submit action="$defaultsUpdateClicked" value="Save for new only" class="btn" />
+								<wo:submit action="$defaultsPushClicked" value="Save and push all" class="btn btn-primary" />
+							</div>
+						</wo:form>
+					</div>
+				</wo:AjaxExpansion>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<wo:AjaxExpansion id="ApplicationConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Application settings" expanded="$isAppConfigureSectionVisible">
+					<div class="card-body">
+						<wo:form multipleSubmit="$true" id="appSettingsForm">
+							<table class="table table-vcenter mb-3">
+								<tbody>
+									<tr>
+										<th class="w-25">Name</th>
+										<td>
+											<wo:textfield value="$appDefaults.name" class="form-control" />
+											<div class="text-secondary small mt-1">All instances must be off to change the name.</div>
+										</td>
+									</tr>
+									<tr><th>Starting port</th><td><wo:textfield value="$appDefaults.startingPort" numberformat="0" size="5" class="form-control d-inline-block" style="width: 7em;" /></td></tr>
+									<tr><th>Startup grace period</th><td><wo:textfield value="$appDefaults.timeForStartup" numberformat="0" size="5" class="form-control d-inline-block" style="width: 7em;" /></td></tr>
+									<tr>
+										<th>Phased startup</th>
+										<td><label class="form-check form-switch mb-0"><wo:checkbox checked="$appDefaults.phasedStartup" class="form-check-input" /></label></td>
+									</tr>
+									<tr>
+										<th>Adaptor</th>
+										<td>
+											<wo:textfield value="$myApplication.adaptor" class="form-control" />
+											<div class="text-secondary small mt-1">Default: <code>WODefaultAdaptor</code></div>
+										</td>
+									</tr>
+									<tr>
+										<th>Min adaptor threads</th>
+										<td>
+											<wo:textfield value="$appDefaults.adaptorThreadsMin" numberformat="0" size="5" class="form-control d-inline-block" style="width: 7em;" />
+											<span class="text-secondary small ms-2">WODefaultAdaptor / WO 5.x</span>
+										</td>
+									</tr>
+									<tr>
+										<th>Max adaptor threads</th>
+										<td>
+											<wo:textfield value="$appDefaults.adaptorThreadsMax" numberformat="0" size="5" class="form-control d-inline-block" style="width: 7em;" />
+											<span class="text-secondary small ms-2">WODefaultAdaptor / WO 5.x</span>
+										</td>
+									</tr>
+									<tr>
+										<th>Adaptor threads (legacy)</th>
+										<td>
+											<wo:textfield value="$appDefaults.adaptorThreads" numberformat="0" size="5" class="form-control d-inline-block" style="width: 7em;" />
+											<span class="text-secondary small ms-2">WODefaultAdaptor / WO 4.5.x</span>
+										</td>
+									</tr>
+									<tr><th>Listen queue size</th><td><wo:textfield value="$appDefaults.listenQueueSize" numberformat="0" size="5" class="form-control d-inline-block" style="width: 7em;" /></td></tr>
+									<tr><th>Project search path</th><td><wo:textfield value="$appDefaults.projectSearchPath" class="form-control" /></td></tr>
+									<tr><th>Session timeout (sec)</th><td><wo:textfield value="$appDefaults.sessionTimeOut" numberformat="0" size="5" class="form-control d-inline-block" style="width: 7em;" /></td></tr>
+									<tr><th>Statistics page password</th><td><wo:textfield value="$appDefaults.statisticsPassword" class="form-control" id="statsPassword" /></td></tr>
+								</tbody>
+							</table>
+							<div class="text-end">
+								<wo:submit action="$updateAppDefaultsOnly" value="Save application settings" class="btn btn-primary" />
+							</div>
+						</wo:form>
+					</div>
+				</wo:AjaxExpansion>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<wo:AjaxExpansion id="SchedulingConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Scheduling" expanded="$isSchedulingSectionVisible">
+					<div class="card-body">
+						<p class="text-secondary">
+							Monitor can restart instances on a schedule. Scheduled instances automatically behave as if auto-recovering.
+						</p>
+						<wo:if condition="$shouldSchedule" negate="$true">
+							<div class="empty">
+								<p class="empty-title">No instances configured</p>
+								<p class="empty-subtitle text-secondary">There are no instances configured for this application yet.</p>
+							</div>
+						</wo:if>
+						<wo:if condition="$shouldSchedule">
+							<wo:form multipleSubmit="$true">
+								<div class="table-responsive">
+									<table class="table table-vcenter mb-3">
+										<thead>
+											<tr>
+												<th>ID</th>
+												<th>Host : Port</th>
+												<th>Scheduled</th>
+												<th>Graceful</th>
+												<th colspan="3">Type</th>
+											</tr>
+										</thead>
+										<tbody>
+											<wo:repetition list="$myApplication.instanceArray" item="$currentScheduledInstance">
+												<tr>
+													<td><wo:str value="$currentScheduledInstance.id" /></td>
+													<td class="text-secondary"><wo:str value="$currentScheduledInstance.displayHostAndPort" /></td>
+													<td><label class="form-check mb-0"><wo:checkbox checked="$currentScheduledInstance.schedulingEnabled" class="form-check-input" /></label></td>
+													<td><label class="form-check mb-0"><wo:checkbox checked="$currentScheduledInstance.gracefulScheduling" class="form-check-input" /></label></td>
+													<td>
+														<label class="form-check">
+															<wo:radio name="$currentScheduledInstance.id" value="HOURLY" selection="$currentScheduledInstance.schedulingType" class="form-check-input" />
+															<span class="form-check-label">Hourly</span>
+														</label>
+														<div class="text-secondary small">
+															Every <wo:popUpButton list="$schedulingIntervalList" selection="$currentScheduledInstance.schedulingInterval" class="form-select form-select-sm d-inline-block" style="width: auto;" /> h,
+															starting at <wo:popUpButton list="$timeOfDayList" selection="$timeHourlySelection" class="form-select form-select-sm d-inline-block" style="width: auto;" />
+														</div>
+													</td>
+													<td>
+														<label class="form-check">
+															<wo:radio name="$currentScheduledInstance.id" value="DAILY" selection="$currentScheduledInstance.schedulingType" class="form-check-input" />
+															<span class="form-check-label">Daily</span>
+														</label>
+														<div class="text-secondary small">
+															At <wo:popUpButton list="$timeOfDayList" selection="$timeDailySelection" class="form-select form-select-sm d-inline-block" style="width: auto;" />
+														</div>
+													</td>
+													<td>
+														<label class="form-check">
+															<wo:radio name="$currentScheduledInstance.id" value="WEEKLY" selection="$currentScheduledInstance.schedulingType" class="form-check-input" />
+															<span class="form-check-label">Weekly</span>
+														</label>
+														<div class="text-secondary small">
+															<wo:popUpButton list="$weekList" selection="$weekSelection" class="form-select form-select-sm d-inline-block" style="width: auto;" /> at
+															<wo:popUpButton list="$timeOfDayList" selection="$timeWeeklySelection" class="form-select form-select-sm d-inline-block" style="width: auto;" />
+														</div>
+													</td>
+												</tr>
+											</wo:repetition>
+										</tbody>
+									</table>
+								</div>
+								<div class="text-end">
+									<wo:submit action="$schedulingUpdateClicked" value="Save scheduling" class="btn btn-primary" />
+								</div>
+							</wo:form>
+						</wo:if>
+					</div>
+				</wo:AjaxExpansion>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<wo:AjaxExpansion id="EmailConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Email notifications" expanded="$isEmailSectionVisible">
+					<div class="card-body">
+						<wo:if condition="$isMailingConfigured" negate="$true">
+							<p class="text-secondary">
+								Monitor needs an SMTP host and return address to send email notifications.
+								Configure them on the <wo:link action="$configurePageClicked">site configuration page</wo:link>.
+							</p>
+						</wo:if>
+						<wo:if condition="$isMailingConfigured">
+							<p class="text-secondary">
+								When instances of this application terminate unexpectedly, Monitor sends email notifications.
+								Manual shutdowns and scheduled restarts do not count as unexpected terminations.
+							</p>
+							<wo:form>
+								<label class="form-check form-switch mb-3">
+									<wo:checkbox checked="$myApplication.notificationEmailEnabled" class="form-check-input" />
+									<span class="form-check-label"><strong>Enable email notifications</strong></span>
+								</label>
+								<div class="mb-3">
+									<label class="form-label">Email addresses</label>
+									<wo:textfield value="$myApplication.notificationEmailAddr" class="form-control" placeholder="ops@example.com, oncall@example.com" />
+									<div class="text-secondary small mt-1">Comma-separated.</div>
+								</div>
+								<wo:submit action="$emailUpdateClicked" value="Save email settings" class="btn btn-primary" />
+							</wo:form>
+						</wo:if>
+					</div>
+				</wo:AjaxExpansion>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<wo:AjaxExpansion id="AdaptorSpecificConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Load balancing and adaptor settings" expanded="$isAdaptorSettingsSectionVisible">
+					<div class="card-body">
+						<wo:form>
+							<table class="table table-vcenter mb-3">
+								<tbody>
+									<tr>
+										<th class="w-25">Load balancing scheme</th>
+										<td>
+											<wo:popUpButton item="$loadSchedulerItem" list="$loadSchedulerList" selection="$loadSchedulerSelection" class="form-select mb-2" />
+											<label class="form-label">Custom scheduler name (optional)</label>
+											<wo:textfield value="$customSchedulerName" class="form-control" />
+										</td>
+									</tr>
+									<tr><th>Retries</th><td><wo:textfield value="$myApplication.retries" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Redirection URL</th><td><wo:textfield value="$myApplication.redir" class="form-control" /></td></tr>
+									<tr><th>Dormant</th><td><wo:textfield value="$myApplication.dormant" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Send timeout</th><td><wo:textfield value="$myApplication.sendTimeout" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Receive timeout</th><td><wo:textfield value="$myApplication.recvTimeout" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Connect timeout</th><td><wo:textfield value="$myApplication.cnctTimeout" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Send buffer size</th><td><wo:textfield value="$myApplication.sendBufSize" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Receive buffer size</th><td><wo:textfield value="$myApplication.recvBufSize" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>Connection pool size</th><td><wo:textfield value="$myApplication.poolsize" numberformat="0" size="4" class="form-control d-inline-block" style="width: 6em;" /></td></tr>
+									<tr><th>URL version</th><td><wo:popUpButton item="$urlVersionItem" list="$urlVersionList" selection="$urlVersionSelection" class="form-select" style="width: auto;" /></td></tr>
+								</tbody>
+							</table>
+							<div class="text-end">
+								<wo:submit action="$adaptorUpdateClicked" value="Save adaptor settings" class="btn btn-primary" />
+							</div>
+						</wo:form>
+					</div>
+				</wo:AjaxExpansion>
+			</div>
+		</div>
 	</div>
-	<div class="card p-3 mb-3">
-		<wo:AjaxExpansion id="ApplicationConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Application Settings" expanded="$isAppConfigureSectionVisible">
-			<p>&nbsp;</p>
-			<wo:form multipleSubmit="$true" id="appSettingsForm">
-				<table class="table table-sm">
-					<tr>
-						<th>Name: </th>
-						<td><wo:textfield value="$appDefaults.name" size="40" /> (All instances of this application must be off to change the name)</td>
-					</tr>
-					<tr>
-						<th>Starting Port: </th>
-						<td><wo:textfield value="$appDefaults.startingPort" numberformat="0" size="5" /></td>
-					</tr>
-					<tr>
-						<th>Time Allowed For Startup: </th>
-						<td><wo:textfield value="$appDefaults.timeForStartup" numberformat="0" size="5" /></td>
-					</tr>
-					<tr>
-						<th>Phased Startup: </th>
-						<td><wo:checkbox checked="$appDefaults.phasedStartup" /></td>
-					</tr>
-					<tr>
-						<th>Adaptor: </th>
-						<td><wo:textfield value="$myApplication.adaptor" size="40" /> ('WODefaultAdaptor' is the default)</td> <!-- FIXME: Shouldn't this be referencing appDefaults? // Hugi 2024-10-25 -->
-					</tr>
-					<tr>
-						<th>Minimum Adaptor threads: </th>
-						<td><wo:textfield value="$appDefaults.adaptorThreadsMin" numberformat="0" size="5" /> (Applies only to the WODefaultAdaptor for WO 5.x)</td>
-					</tr>
-					<tr>
-						<th>Maximum Adaptor threads: </th>
-						<td><wo:textfield value="$appDefaults.adaptorThreadsMax" numberformat="0" size="5" /> (Applies only to the WODefaultAdaptor for WO 5.x)</td>
-					</tr>
-					<tr>
-						<th>Adaptor threads: </th>
-						<td><wo:textfield value="$appDefaults.adaptorThreads" numberformat="0" size="5" /> (Applies only to the WODefaultAdaptor for WO 4.5.x)</td>
-					</tr>
-					<tr>
-						<th>Listen Queue Size: </th>
-						<td><wo:textfield value="$appDefaults.listenQueueSize" numberformat="0" size="5" /></td>
-					</tr>
-					<tr>
-						<th>Project Search Path: </th>
-						<td><wo:textfield value="$appDefaults.projectSearchPath" size="40" /></td>
-					</tr>
-					<tr>
-						<th>Session TimeOut (sec): </th>
-						<td><wo:textfield value="$appDefaults.sessionTimeOut" numberformat="0" size="5" /></td>
-					</tr>
-					<tr>
-						<th>Statistics Page Password: </th>
-						<td><wo:textfield value="$appDefaults.statisticsPassword" size="40" id="statsPassword" /></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td><wo:submit action="$updateAppDefaultsOnly" value="Update Application Settings" class="btn btn-success" /></td>
-					</tr>
-				</table>
-			</wo:form>
-		</wo:AjaxExpansion>
-	</div>
-	<div class="card p-3 mb-3">
-		<wo:AjaxExpansion id="SchedulingConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Scheduling" expanded="$isSchedulingSectionVisible">
-			<p>With this feature you can have Monitor schedule your instances to restart instances at regular intervals.</p>
-			<p>Note that all scheduled instances automatically act as if they are AutoRecovering.</p>
-			<wo:if condition="$shouldSchedule" negate="$true">
-				<p>There are no Instances configured for this Application.</p>
-			</wo:if>
-			<wo:if condition="$shouldSchedule">
-				<wo:form multipleSubmit="$true">
-					<table class="table table-sm table-bordered">
-						<tr>
-							<th>ID</th>
-							<th>Host : Port</th>
-							<th>Is<br />Scheduled</th>
-							<th>Graceful<br />Scheduling</th>
-							<th colspan="3">Scheduling Type</th>
-						</tr>
-						<wo:repetition list="$myApplication.instanceArray" item="$currentScheduledInstance">
-							<tr>
-								<td><wo:str value="$currentScheduledInstance.id" /></td>
-								<td><wo:str value="$currentScheduledInstance.displayHostAndPort" /></td>
-								<td><wo:checkbox checked="$currentScheduledInstance.schedulingEnabled" /></td>
-								<td><wo:checkbox checked="$currentScheduledInstance.gracefulScheduling" /></td>
-								<td>
-									<div class="ControlColOne"><wo:radio name="$currentScheduledInstance.id" value="HOURLY" selection="$currentScheduledInstance.schedulingType" /></div>
-									<div class="ControlColTwo">Every <wo:popUpButton list="$schedulingIntervalList" selection="$currentScheduledInstance.schedulingInterval" /> hours,<br />starting at <wo:popUpButton list="$timeOfDayList" selection="$timeHourlySelection" /> hours.</div>
-								</td>
-								<td><wo:radio name="$currentScheduledInstance.id" value="DAILY" selection="$currentScheduledInstance.schedulingType" /> Every day at <wo:popUpButton list="$timeOfDayList" selection="$timeDailySelection" /> hours.</td>
-								<td>
-									<div class="ControlColOne"><wo:radio name="$currentScheduledInstance.id" value="WEEKLY" selection="$currentScheduledInstance.schedulingType" /></div>
-									<div class="ControlColTwo">Every week on  <wo:popUpButton list="$weekList" selection="$weekSelection" />,<br />at <wo:popUpButton list="$timeOfDayList" selection="$timeWeeklySelection" /> hours.</div>
-								</td>
-							</tr>
-						</wo:repetition>
-					</table>
-					<br />
-					<wo:submit action="$schedulingUpdateClicked" value="Update Scheduling" />
-				</wo:form>
-			</wo:if>
-		</wo:AjaxExpansion>
-	</div>
-	<div class="card p-3 mb-3">
-		<wo:AjaxExpansion id="EmailConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Email Notifications" expanded="$isEmailSectionVisible">
-			<wo:if condition="$isMailingConfigured" negate="$true">
-				<p>Monitor needs an SMTP host and a Return Address configured in order to send email notifications.</p>
-				<p>Go to the <wo:link action="$configurePageClicked">Configure Page</wo:link> to setup an SMTP host and specify a Return Address.</p>
-			</wo:if>
-			<wo:if condition="$isMailingConfigured">
-				<p>When instances of this application terminate unexpectedly, Monitor will send an email notification to the email addresses below.</p>
-				<p>Instance terminations from manual shutdowns (through Monitor) or scheduling are not counted as unexpected terminations.</p>
-				<wo:form>
-					<p><wo:checkbox checked="$myApplication.notificationEmailEnabled" /> <strong>Email Notifications are Enabled</strong></p>
-					<p>Enter multiple email addresses separated by commas: <wo:textfield value="$myApplication.notificationEmailAddr" size="60" /></p>
-					<br />
-					<p><wo:submit action="$emailUpdateClicked" value="Update Settings" /></p>
-				</wo:form>
-			</wo:if>
-		</wo:AjaxExpansion>
-	</div>
-	<div class="card p-3 mb-3">
-		<wo:AjaxExpansion id="AdaptorSpecificConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Load Balancing and Adaptor Settings" expanded="$isAdaptorSettingsSectionVisible">
-			<p>&nbsp;</p>
-			<wo:form>
-				<table class="table table-sm">
-					<tr>
-						<th>Load balancing scheme:</th>
-						<td><wo:popUpButton item="$loadSchedulerItem" list="$loadSchedulerList" selection="$loadSchedulerSelection" /><br />Custom Scheduler Name: <wo:textfield value="$customSchedulerName" /> (optional)</td>
-					</tr>
-					<tr>
-						<th>Retries:</th>
-						<td><wo:textfield value="$myApplication.retries" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Redirection URL:</th>
-						<td><wo:textfield value="$myApplication.redir" size="60" /></td>
-					</tr>
-					<tr>
-						<th>Dormant:</th>
-						<td><wo:textfield value="$myApplication.dormant" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Send timeout:</th>
-						<td><wo:textfield value="$myApplication.sendTimeout" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Receive timeout:</th>
-						<td><wo:textfield value="$myApplication.recvTimeout" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Connect timeout:</th>
-						<td><wo:textfield value="$myApplication.cnctTimeout" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Send Buffer Size:</th>
-						<td><wo:textfield value="$myApplication.sendBufSize" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Receive Buffer Size:</th>
-						<td><wo:textfield value="$myApplication.recvBufSize" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>Connection pool size:</th>
-						<td><wo:textfield value="$myApplication.poolsize" numberformat="0" size="4" /></td>
-					</tr>
-					<tr>
-						<th>URL Version:</th>
-						<td><wo:popUpButton item="$urlVersionItem" list="$urlVersionList" selection="$urlVersionSelection" /></td>
-					</tr>
-				</table>
-				<p><wo:submit action="$adaptorUpdateClicked" value="Change Adaptor Settings" /></p>
-			</wo:form>
-		</wo:AjaxExpansion>
-	</div>
+
 	<script type="text/javascript">
-		document.getElementById('appSettingsForm').onsubmit = function(event) {
+		document.getElementById('appSettingsForm').onsubmit = function( event ) {
 			var statsPassword = document.getElementById('statsPassword').value;
-			if (statsPassword && statsPassword.length != 0) {
-				var badChars = ['$', '&', '+', ',' ,'/' ,':', ';', '=', '?', '@', ' ', '<', '>', '#', '%'];
-				for (var i=0; i<badChars.length; i++) {
-					if (statsPassword.indexOf(badChars[i]) != -1) {
-						alert('WARNING: "Statistics Page Password" should not contain characters and have special meaning in URLs.');
+			if( statsPassword && statsPassword.length != 0 ) {
+				var badChars = ['$', '&', '+', ',', '/', ':', ';', '=', '?', '@', ' ', '<', '>', '#', '%'];
+				for( var i = 0; i < badChars.length; i++ ) {
+					if( statsPassword.indexOf( badChars[i] ) != -1 ) {
+						alert( 'WARNING: "Statistics page password" should not contain characters with special meaning in URLs.' );
 						break;
 					}
 				}

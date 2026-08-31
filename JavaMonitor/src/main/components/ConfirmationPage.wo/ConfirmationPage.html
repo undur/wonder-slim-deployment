@@ -1,14 +1,12 @@
-<wo:JMTablerLook selectedPage="$delegate.pageType" title="Confirmation Request">
-	<div class="text-center mb-4">
-		<div clas="row">
-			<div class="col">
-				<div class="container container-tight py-4" style="width: 500px">
-					<div class="card p-3">
-						<h1><wo:str value="$delegate.question" escapeHTML="$false" /></h1>
-						<p><wo:str value="$delegate.explaination" escapeHTML="$false" /></p>
-						<wo:link action="$delegate.confirm" class="btn btn-success m-1">Yes</wo:link><wo:link action="$delegate.cancel" class="btn btn-secondary m-1">No</wo:link>
-					</div>
-				</div>
+<wo:JMTablerLook selectedPage="$delegate.pageType" title="Are you sure?">
+	<div class="empty">
+		<div class="empty-header text-warning">?</div>
+		<p class="empty-title h3"><wo:str value="$delegate.question" escapeHTML="$false" /></p>
+		<p class="empty-subtitle text-secondary"><wo:str value="$delegate.explaination" escapeHTML="$false" /></p>
+		<div class="empty-action">
+			<div class="btn-list justify-content-center">
+				<wo:link action="$delegate.cancel" class="btn">No, cancel</wo:link>
+				<wo:link action="$delegate.confirm" class="btn btn-danger">Yes, do it</wo:link>
 			</div>
 		</div>
 	</div>

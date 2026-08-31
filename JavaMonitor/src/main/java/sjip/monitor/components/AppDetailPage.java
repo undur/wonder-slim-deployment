@@ -611,39 +611,19 @@ public class AppDetailPage extends AppComponent {
 	}
 
 	public String autoRecoverDivClass() {
-		String base = "AppControl";
-		String results = base + " " + base + "AutoRecoverOff";
-
-		if( isTrueNullSafe( currentInstance.autoRecover() ) ) {
-			results = base + " " + base + "AutoRecoverOn";
-		}
-
-		return results;
+		return isTrueNullSafe( currentInstance.autoRecover() )
+				? "badge bg-success text-white"
+				: "badge bg-secondary text-white";
 	}
 
 	public String refuseNewSessionsClass() {
-		String base = "AppControl";
-		String result = base + " " + base + "NotRefusingNewSessions";
-
-		if( isTrueNullSafe( currentInstance.schedulingEnabled() ) ) {
-			if( currentInstance.isRefusingNewSessions() ) {
-				result = base + " " + base + "ScheduleEnabledRefusingNewSessions";
-			}
-			else {
-				result = base + " " + base + "ScheduleEnabledNotRefusingNewSessions";
-			}
-		}
-		else {
-			if( currentInstance.isRefusingNewSessions() ) {
-				result = base + " " + base + "RefusingNewSessions";
-			}
-		}
-
-		return result;
+		return currentInstance.isRefusingNewSessions()
+				? "badge bg-danger text-white"
+				: "badge bg-secondary text-white";
 	}
 
 	public String refuseNewSessionsLabel() {
-		return currentInstance.isRefusingNewSessions() ? "On" : "Off";
+		return currentInstance.isRefusingNewSessions() ? "Refusing" : "Accepting";
 	}
 
 	public String schedulingLabel() {
@@ -651,14 +631,9 @@ public class AppDetailPage extends AppComponent {
 	}
 
 	public String schedulingDivClass() {
-		String base = "AppControl";
-		String result = base + " " + base + "ScheduleOff";
-
-		if( isTrueNullSafe( currentInstance.schedulingEnabled() ) ) {
-			result = base + " " + base + "ScheduleOn";
-		}
-
-		return result;
+		return isTrueNullSafe( currentInstance.schedulingEnabled() )
+				? "badge bg-info text-white"
+				: "badge bg-secondary text-white";
 	}
 
 	public String nextShutdown() {

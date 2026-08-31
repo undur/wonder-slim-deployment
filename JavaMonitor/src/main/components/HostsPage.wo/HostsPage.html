@@ -1,55 +1,92 @@
 <wo:JMTablerLook selectedPage="$HOST_PAGE" title="Hosts">
-	<div class="card mb-3">
-		<div class="card-header">
-			Hosts
-		</div>
-		<table class="table table-sm table-striped mb-0">
-			<tr>
-				<th>Host name</th>
-				<th>Available*</th>
-				<th>Host Type</th>
-				<th>Running Instances</th>
-				<th>Processor Description</th>
-				<th>OS / Platform</th>
-				<th>&nbsp;</th>
-				<th>&nbsp;</th>
-			</tr>
-			<wo:repetition list="$siteConfig.hostArray" item="$currentHost">
-				<tr>
-					<td><wo:link action="$configureHostClicked"><wo:str value="$currentHost.name" /> / <wo:str value="$currentHost.addressAsString" /></wo:link></td>
-					<td>
-						<wo:if condition="$currentHost.isAvailable">YES | <wo:link action="$displayWotaskdInfoClicked" target="_blank">View Config</wo:link></wo:if>
-						<wo:if condition="$currentHost.isAvailable" negate="$true"> <span class="HostNotAvailable">NO</span></wo:if>
-					</td>
-					<td><wo:str value="$currentHost.osType" /></td>
-					<td><wo:str value="$currentHost.runningInstances" /></td>
-					<td><wo:str value="$currentHost.processorType" /></td>
-					<td><wo:str value="$currentHost.operatingSystem" /></td>
-					<td><wo:link action="$configureHostClicked" class="btn btn-sm">Configure</wo:link></td>
-					<td><wo:link action="$removeHostClicked" class="btn btn-sm btn-danger">Delete</wo:link></td>
-				</tr>
-			</wo:repetition>
-		</table>
-	</div>
-	<div class="card p-3">
-		<div class="row">
-			<div class="col-md-6">
-				<wo:form>
-					<label class="mb-2"><strong>Add Host:</strong></label>
-					<span class="input-group">
-						<wo:textfield value="$newHostName" placeholder="hostname or IP address..." class="form-control" />
-						<span class="input-group-text"> of type </span>
-						<wo:popUpButton list="$hostTypeList" selection="$hostTypeSelection" class="form-control" />
-						<wo:submit action="$addHostClicked" value="Add Host" class="btn" />
-					</span> 
-				</wo:form>
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">Deployment</div>
+				<h2 class="page-title">Hosts</h2>
 			</div>
-			<div class="col-md-6 pt-3">
-				<ul>
-					<li>Hosts may be added as either hostnames or IP addresses**</li>
-					<li>* A host is <i>available</i> if it is running the <b>wotaskd</b> service/daemon.</li>
-					<li>** If "localhost" or "127.0.0.1" is a host, it must be the <b>only</b> host.</li>
-				</ul>
+			<div class="col-auto ms-auto d-print-none">
+				<span class="text-secondary">A host is <em>available</em> when it is running the <code>wotaskd</code> service.</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="table-responsive">
+					<table class="table table-vcenter card-table">
+						<thead>
+							<tr>
+								<th>Host</th>
+								<th class="w-1 text-nowrap">Available</th>
+								<th class="w-1 text-nowrap">Type</th>
+								<th class="w-1 text-nowrap text-end">Running</th>
+								<th>Processor</th>
+								<th>OS</th>
+								<th class="w-1"></th>
+							</tr>
+						</thead>
+						<tbody>
+							<wo:repetition list="$siteConfig.hostArray" item="$currentHost">
+								<tr>
+									<td>
+										<wo:link action="$configureHostClicked" class="text-reset"><strong><wo:str value="$currentHost.name" /></strong></wo:link>
+										<div class="text-secondary small"><wo:str value="$currentHost.addressAsString" /></div>
+									</td>
+									<td>
+										<wo:if condition="$currentHost.isAvailable">
+											<span class="badge bg-success-lt">Yes</span>
+											<wo:link action="$displayWotaskdInfoClicked" target="_blank" class="ms-2 text-secondary small">View config</wo:link>
+										</wo:if>
+										<wo:if condition="$currentHost.isAvailable" negate="$true">
+											<span class="badge bg-danger-lt">No</span>
+										</wo:if>
+									</td>
+									<td class="text-secondary text-nowrap"><wo:str value="$currentHost.osType" /></td>
+									<td class="text-secondary text-nowrap text-end"><wo:str value="$currentHost.runningInstances" /></td>
+									<td class="text-secondary"><wo:str value="$currentHost.processorType" /></td>
+									<td class="text-secondary"><wo:str value="$currentHost.operatingSystem" /></td>
+									<td class="text-end">
+										<div class="btn-list flex-nowrap justify-content-end">
+											<wo:link action="$configureHostClicked" class="btn btn-sm">Configure</wo:link>
+											<wo:link action="$removeHostClicked" class="btn btn-sm btn-outline-danger">Delete</wo:link>
+										</div>
+									</td>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Add host</h3>
+				</div>
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-6">
+							<wo:form>
+								<label class="form-label">Hostname or IP address</label>
+								<div class="input-group">
+									<wo:textfield value="$newHostName" placeholder="host.example.com" class="form-control" />
+									<span class="input-group-text">Type</span>
+									<wo:popUpButton list="$hostTypeList" selection="$hostTypeSelection" class="form-select" />
+									<wo:submit action="$addHostClicked" value="Add" class="btn btn-primary" />
+								</div>
+							</wo:form>
+						</div>
+						<div class="col-md-6">
+							<ul class="text-secondary mb-0">
+								<li>Hosts may be added as hostnames or IP addresses.</li>
+								<li>If <code>localhost</code> or <code>127.0.0.1</code> is a host, it must be the only one.</li>
+							</ul>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

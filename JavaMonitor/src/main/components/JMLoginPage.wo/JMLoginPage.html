@@ -1,26 +1,34 @@
-<html>
+<!doctype html>
+<html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1.0">
-		<title>Monitor</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+		<title>Monitor — Sign in</title>
 		<wo:ERXStyleSheet filename="tabler/css/tabler.min.css" />
 	</head>
 	<body class="d-flex flex-column" onload="document.getElementById('password').focus()">
-		<div class="text-center mb-4">
-			<div clas="row">
-				<div class="col">
-					<div class="container container-tight py-4">
-						<div class="card p-3">
-							<h1>Monitor Login</h1>
-							<wo:if condition="$message.length">
-								<div class="alert alert-danger"><wo:str value="$message" /></div>
-							</wo:if>
-							<wo:form>
-								<h4>A password is required to access this application</h4>
-								<p><wo:password value="$password" placeholder="Password" id="password" class="form-control" /></p>
-					        	<p class="button_bar"><wo:submit action="$login" value="Login" class="btn" /></p>
-							</wo:form>
-						</div>
+		<div class="page page-center">
+			<div class="container container-tight py-4">
+				<div class="text-center mb-4">
+					<a href="/" class="navbar-brand navbar-brand-autodark">
+						<wo:img filename="gears.jpg" alt="Monitor" height="36" /> Monitor
+					</a>
+				</div>
+				<div class="card card-md">
+					<div class="card-body">
+						<h2 class="h2 text-center mb-4">Sign in</h2>
+						<wo:if condition="$message.length">
+							<div class="alert alert-danger"><wo:str value="$message" /></div>
+						</wo:if>
+						<wo:form>
+							<div class="mb-3">
+								<label class="form-label">Password</label>
+								<wo:password value="$password" placeholder="Password" id="password" class="form-control" />
+							</div>
+							<div class="form-footer">
+								<wo:submit action="$login" value="Sign in" class="btn btn-primary w-100" />
+							</div>
+						</wo:form>
 					</div>
 				</div>
 			</div>

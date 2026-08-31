@@ -1,16 +1,51 @@
 <wo:JMTablerLook selectedPage="$HOST_PAGE" title="$myHost.name">
-	<div class="card p-3 mb-3">
-		<h2>Configuring Host "<wo:str value="$myHost.name" />"</h2>
-		<wo:form>
-			<p>The Host Type  determines the Path and OutputPath settings for an instance. The defaults are set at the application level. Changing the Type of this host will not automatically cause instances to update their Path and OutputPath settings. The new settings can be pushed from the Applications page.</p>
-			<p>Select the new Host Type: <wo:popUpButton list="$hostTypeList" selection="$hostTypeSelection" /> <wo:submit action="$configureHostClicked" value="Configure Host" /></p>
-		</wo:form>
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">Host</div>
+				<h2 class="page-title"><wo:str value="$myHost.name" /></h2>
+			</div>
+			<div class="col-auto ms-auto d-print-none">
+				<wo:link pageName="HostsPage" class="btn">All hosts</wo:link>
+			</div>
+		</div>
 	</div>
-	<div class="card p-3 mb-3">
-		<h2>Synchronize Host "<wo:str value="$myHost.name" />"</h2>
-		<wo:form>
-			<p>If this host is behaving strangely, it is possible that the host's configuration information is out of sync with the rest of your site or Monitor. Click the button to try to resync configuration information.</p>
-			<p><wo:submit action="$syncHostClicked" value="Synchronize Host" /></p>
-		</wo:form>
+
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Host type</h3>
+				</div>
+				<div class="card-body">
+					<p class="text-secondary">
+						The host type determines default <em>Path</em> and <em>OutputPath</em> settings for new instances. Changing the type here does not update existing instances — push the new defaults from the application configuration page.
+					</p>
+					<wo:form>
+						<label class="form-label">Type</label>
+						<div class="input-group">
+							<wo:popUpButton list="$hostTypeList" selection="$hostTypeSelection" class="form-select" />
+							<wo:submit action="$configureHostClicked" value="Save" class="btn btn-primary" />
+						</div>
+					</wo:form>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Synchronize</h3>
+				</div>
+				<div class="card-body">
+					<p class="text-secondary">
+						If the host is behaving strangely, its configuration may have drifted from the rest of the site. Resync to force a fresh push of the current site config.
+					</p>
+					<wo:form>
+						<wo:submit action="$syncHostClicked" value="Synchronize host" class="btn" />
+					</wo:form>
+				</div>
+			</div>
+		</div>
 	</div>
 </wo:JMTablerLook>

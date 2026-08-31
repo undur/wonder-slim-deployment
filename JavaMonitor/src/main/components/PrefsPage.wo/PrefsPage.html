@@ -1,32 +1,67 @@
 <wo:JMTablerLook selectedPage="$PREF_PAGE" title="Preferences">
-	<div class="card p-3 mb-3">
-		<h2>Monitor Password</h2>
-		<p>
-			<wo:if condition="$siteConfig.isPasswordRequired">The password is currently set.</wo:if>
-			<wo:if condition="$siteConfig.isPasswordRequired" negate="$true">The password is currently <b>NOT</b> set. </wo:if>
-		</p>
-		<wo:form multipleSubmit="$true">
-			<table>
-				<tr>
-					<th>Enter New Password:</th>
-					<td><wo:textfield value="$adminPassword1" /></td>
-				</tr>
-				<tr>
-					<th>Confirm New Password:</th>
-					<td><wo:textfield value="$adminPassword2" /></td>
-				</tr>
-			</table>
-			<p><wo:submit action="$passwordChangeClicked" value="Change Password" /> <wo:submit action="$passwordResetClicked" value="Reset Password" /></p>
-		</wo:form>
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">JavaMonitor</div>
+				<h2 class="page-title">Preferences</h2>
+			</div>
+		</div>
 	</div>
 
-	<div class="card p-3 mb-3">
-		<h2>Detail View Refesh Settings</h2>
-		<p>The Detail View page can be configured to automatically refresh itself in your browser's window.</p>
-		<wo:form>
-			<p><wo:checkbox checked="$siteConfig.viewRefreshEnabled" /> Auto-Refresh the Detail View</p>
-			<p><wo:textfield value="$siteConfig.viewRefreshRate" numberformat="0" size="3" /> second delay before refreshing.</p>
-			<p><wo:submit action="$detailViewUpdateClicked" value="Update Settings" /></p>
-		</wo:form>
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Monitor password</h3>
+				</div>
+				<div class="card-body">
+					<div class="mb-3 text-secondary">
+						<wo:if condition="$siteConfig.isPasswordRequired">A password is currently set.</wo:if>
+						<wo:if condition="$siteConfig.isPasswordRequired" negate="$true">No password is currently set.</wo:if>
+					</div>
+					<wo:form multipleSubmit="$true">
+						<div class="mb-3">
+							<label class="form-label">New password</label>
+							<wo:textfield value="$adminPassword1" class="form-control" />
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Confirm new password</label>
+							<wo:textfield value="$adminPassword2" class="form-control" />
+						</div>
+						<div class="btn-list">
+							<wo:submit action="$passwordChangeClicked" value="Change password" class="btn btn-primary" />
+							<wo:submit action="$passwordResetClicked" value="Reset password" class="btn btn-outline-danger" />
+						</div>
+					</wo:form>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Detail view refresh</h3>
+				</div>
+				<div class="card-body">
+					<p class="text-secondary">The application detail page can auto-refresh in your browser.</p>
+					<wo:form>
+						<div class="mb-3">
+							<label class="form-check form-switch">
+								<wo:checkbox checked="$siteConfig.viewRefreshEnabled" class="form-check-input" />
+								<span class="form-check-label">Auto-refresh the detail view</span>
+							</label>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Refresh delay</label>
+							<div class="input-group" style="max-width: 200px;">
+								<wo:textfield value="$siteConfig.viewRefreshRate" numberformat="0" size="3" class="form-control" />
+								<span class="input-group-text">seconds</span>
+							</div>
+						</div>
+						<wo:submit action="$detailViewUpdateClicked" value="Save" class="btn btn-primary" />
+					</wo:form>
+				</div>
+			</div>
+		</div>
 	</div>
 </wo:JMTablerLook>

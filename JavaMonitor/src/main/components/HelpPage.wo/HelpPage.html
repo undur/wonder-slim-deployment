@@ -1,8 +1,17 @@
 <wo:JMTablerLook selectedPage="$HELP_PAGE" title="Help">
-	<div class="row">
-		<div class="col">
-			<div class="card p-3">
-				<h1><a name="00">Help</a></h1>
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">JavaMonitor</div>
+				<h2 class="page-title"><a name="00" class="text-reset">Help</a></h2>
+			</div>
+		</div>
+	</div>
+
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-body">
 				<ul>
 					<li><a href="#01"><b>What are Monitor and wotaskd?</b></a></li>
 					<li><a href="#02"><b>What is the difference between <code>http://host:2001/cgi-bin/WebObjects/MyApp.woa</code>, <code>http://host/cgi-bin/WebObjects/MyApp.woa</code>, and <code>http://host/cgi-bin/WebObjects/MyApp.woa/-2001</code> ?</b></a></li>
@@ -912,6 +921,7 @@
 				    <B>A:</B> If you are deploying in a JSP/Servlet container (such as Tomcat or WebLogic), you do not need (and cannot use) wotaskd, Monitor or the HTTP adaptors. However, WebObjects must be installed on the application server. <br />
 				    <br />
 				</blockquote>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -1,5 +1,20 @@
-<wo:JMTablerLook selectedPage="$APP_PAGE">
-	<div class="card p-3">
-		<wo:FileBrowser startingPath="$aPath" host="$host" callbackUpdateAction="updateClicked" callbackSelectionAction="selectionClicked" showFiles="$showFiles" />
+<wo:JMTablerLook selectedPage="$APP_PAGE" title="Browse files">
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">Path wizard</div>
+				<h2 class="page-title">Browse</h2>
+			</div>
+		</div>
+	</div>
+
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-body">
+					<wo:FileBrowser startingPath="$aPath" host="$host" callbackUpdateAction="updateClicked" callbackSelectionAction="selectionClicked" showFiles="$showFiles" />
+				</div>
+			</div>
+		</div>
 	</div>
 </wo:JMTablerLook>

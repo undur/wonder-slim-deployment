@@ -1,28 +1,51 @@
 <wo:JMTablerLook selectedPage="$APP_PAGE">
 	<wo:if condition="$errorMessage.length">
 		<div class="alert alert-danger">
-			<p><wo:str value="$errorMessage" /></p>
+			<wo:str value="$errorMessage" />
 		</div>
 	</wo:if>
-	<div class="card p-3 pb-1 mb-3">
-		<div class="card-header">
-			<h1>Instance <wo:str value="$myInstance.displayName" /> on <wo:str value="$myInstance.hostName" /></h1>
-		</div>
-		<div class="card-body">
-			<div class="row">
-				<div class="col">
-					<wo:link action="$configureInstanceClicked" class="btn btn-primary">Configure instance</wo:link> <wo:link action="$returnClicked" class="btn btn-primary">All instances</wo:link>
-				</div>
+
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">Instance on <wo:str value="$myInstance.hostName" /></div>
+				<h2 class="page-title"><wo:str value="$myInstance.displayName" /></h2>
 			</div>
-			<div class="row mt-3">
-				<div class="col">
-					<wo:link action="$jstack" class="btn btn-primary">jstack</wo:link> <wo:link action="$viewLog" class="btn btn-primary">Log file</wo:link>
+			<div class="col-auto ms-auto d-print-none">
+				<div class="btn-list">
+					<wo:link action="$returnClicked" class="btn">All instances</wo:link>
+					<wo:link action="$configureInstanceClicked" class="btn btn-primary">Configure</wo:link>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<wo:if condition="$jstackString.length">
-		<pre><wo:str value="$jstackString" /></pre>
-	</wo:if>
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Diagnostics</h3>
+				</div>
+				<div class="card-body">
+					<div class="btn-list">
+						<wo:link action="$jstack" class="btn">jstack</wo:link>
+						<wo:link action="$viewLog" class="btn">View log</wo:link>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<wo:if condition="$jstackString.length">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-header">
+						<h3 class="card-title">jstack output</h3>
+					</div>
+					<div class="card-body">
+						<pre class="mb-0" style="max-height: 60vh; overflow: auto; font-size: 12px;"><wo:str value="$jstackString" /></pre>
+					</div>
+				</div>
+			</div>
+		</wo:if>
+	</div>
 </wo:JMTablerLook>

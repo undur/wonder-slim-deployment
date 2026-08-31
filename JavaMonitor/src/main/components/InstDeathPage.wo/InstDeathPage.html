@@ -1,20 +1,38 @@
 <wo:JMTablerLook selectedPage="$APP_PAGE">
-	<div class="row">
-		<div class="col-md-6">
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<div class="page-pretitle">Instance history</div>
+				<h2 class="page-title">Deaths</h2>
+			</div>
+			<div class="col-auto ms-auto d-print-none">
+				<div class="btn-list">
+					<wo:link action="$returnClicked" class="btn">Back to application</wo:link>
+					<wo:link action="$clearDeathsClicked" class="btn btn-outline-danger">Clear history</wo:link>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row row-cards">
+		<div class="col-lg-8">
 			<div class="card">
-				<div class="card-body">
-					<h2>Instance deaths</h2>
-					<p><wo:link action="$clearDeathsClicked" class="btn btn-sm">Clear History</wo:link> <wo:link action="$returnClicked" class="btn btn-sm">Back to App Detail View</wo:link></p>
-					<table class="table table-sm table-striped mb-0">
-						<tr>
-							<th colspan="2">Date/Time Occurred</th>
-						</tr>
-						<wo:repetition list="$myInstance.deaths" item="$currentDeath" index="$index">
+				<div class="table-responsive">
+					<table class="table table-vcenter card-table">
+						<thead>
 							<tr>
-								<td><wo:str value="$indexPlusOne" /> </td>
-								<td><wo:str value="$currentDeath" /> </td>
+								<th class="w-1">#</th>
+								<th>Occurred</th>
 							</tr>
-						</wo:repetition>
+						</thead>
+						<tbody>
+							<wo:repetition list="$myInstance.deaths" item="$currentDeath" index="$index">
+								<tr>
+									<td class="text-secondary"><wo:str value="$indexPlusOne" /></td>
+									<td><wo:str value="$currentDeath" /></td>
+								</tr>
+							</wo:repetition>
+						</tbody>
 					</table>
 				</div>
 			</div>
