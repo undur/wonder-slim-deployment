@@ -167,136 +167,87 @@
 								</tr>
 							</wo:repetition>
 						</tbody>
+						<wo:if condition="$hasInstances">
+							<tfoot class="table-light">
+								<tr>
+									<td colspan="4" class="align-top">
+										<div class="mb-2"><strong>Select instances:</strong></div>
+										<div class="btn-list mb-2">
+											<wo:link action="$selectAllAction" class="btn btn-sm">All</wo:link>
+											<wo:link action="$selectNoneAction" class="btn btn-sm">None</wo:link>
+											<wo:link action="$selectRunning" class="btn btn-sm">Running</wo:link>
+											<wo:link action="$selectNotRunning" class="btn btn-sm">Not running</wo:link>
+										</div>
+										<wo:form multipleSubmit="$true" class="mb-0">
+											<div class="input-group input-group-sm" style="max-width: 22em;">
+												<wo:textfield value="$instanceNameFilterValue" placeholder="Regular expression" class="form-control" />
+												<wo:submit action="$selectInstanceNamesMatchingFilter" value="Select" class="btn" />
+											</div>
+											<wo:if condition="$filterErrorMessage.length">
+												<div class="text-danger small mt-1"><wo:str value="$filterErrorMessage" /></div>
+											</wo:if>
+										</wo:form>
+									</td>
+									<td class="text-nowrap">
+										<div class="btn-list flex-nowrap">
+											<wo:link action="$startAllClicked" class="btn btn-sm" title="Start selected"><wo:img filename="start.png" alt="Start selected" height="14" width="14" /></wo:link>
+											<wo:link action="$stopAllClicked" class="btn btn-sm" title="Stop selected"><wo:img filename="stop.png" alt="Stop selected" height="14" width="14" /></wo:link>
+										</div>
+									</td>
+									<td class="text-nowrap">
+										<div class="btn-list flex-nowrap">
+											<wo:link action="$autoRecoverEnableAllClicked" class="btn btn-sm" title="Enable auto recover on selected"><wo:img filename="start.png" alt="Enable auto recover" height="14" width="14" /></wo:link>
+											<wo:link action="$autoRecoverDisableAllClicked" class="btn btn-sm" title="Disable auto recover on selected"><wo:img filename="stop.png" alt="Disable auto recover" height="14" width="14" /></wo:link>
+										</div>
+									</td>
+									<td class="text-nowrap">
+										<div class="btn-list flex-nowrap">
+											<wo:link action="$refuseNewSessionsAllClicked" class="btn btn-sm" title="Refuse new sessions on selected"><wo:img filename="start.png" alt="Refuse new sessions" height="14" width="14" /></wo:link>
+											<wo:link action="$acceptNewSessionsAllClicked" class="btn btn-sm" title="Accept new sessions on selected"><wo:img filename="stop.png" alt="Accept new sessions" height="14" width="14" /></wo:link>
+										</div>
+									</td>
+									<td class="text-nowrap">
+										<div class="btn-list flex-nowrap">
+											<wo:link action="$schedulingEnableAllClicked" class="btn btn-sm" title="Enable scheduling on selected"><wo:img filename="start.png" alt="Enable scheduling" height="14" width="14" /></wo:link>
+											<wo:link action="$schedulingDisableAllClicked" class="btn btn-sm" title="Disable scheduling on selected"><wo:img filename="stop.png" alt="Disable scheduling" height="14" width="14" /></wo:link>
+										</div>
+									</td>
+									<td class="text-nowrap">
+										<wo:link action="$bounceClicked" class="btn btn-sm" title="Bounce selected">Bounce</wo:link>
+										<wo:link pageName="HelpPage" fragmentIdentifier="18" title="What is bounce?"><wo:img filename="help.png" height="16" width="16" alt="What is bounce?" /></wo:link>
+									</td>
+									<td class="text-end">
+										<wo:link action="$clearAllDeathsClicked" class="btn btn-sm text-nowrap" title="Clear death history on selected">Clear</wo:link>
+									</td>
+									<wo:if condition="$showDetailStatistics">
+										<td class="text-end text-secondary"><wo:str value="$totalTransactions" numberformat="#,##0" /></td>
+										<td class="text-end text-secondary"><wo:str value="$totalActiveSessions" numberformat="#,##0" /></td>
+										<td class="text-end text-secondary"><wo:str value="$totalAverageTransaction" numberformat="0.000" /></td>
+										<td class="text-end text-secondary"><wo:str value="$totalAverageIdleTime" numberformat="0.000" /></td>
+									</wo:if>
+									<wo:if condition="$showDetailStatistics" negate="$true">
+										<td class="text-end text-secondary text-nowrap"><wo:str value="$actualRatePerMinute" numberformat="0.00" /> TPM</td>
+									</wo:if>
+									<td class="text-end">
+										<wo:link action="$deleteAllInstancesClicked" class="btn btn-sm btn-outline-danger" title="Delete selected instances">Delete</wo:link>
+									</td>
+								</tr>
+								<wo:if condition="$showDetailStatistics">
+									<tr>
+										<td colspan="10" class="text-secondary text-end">Running instances only:</td>
+										<td class="text-end text-secondary"><wo:str value="$totalTransactionsForActiveInstances" numberformat="#,##0" /></td>
+										<td class="text-end text-secondary"><wo:str value="$totalActiveSessionsForActiveInstances" numberformat="#,##0" /></td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+								</wo:if>
+							</tfoot>
+						</wo:if>
 					</table>
 				</div>
 			</div>
 		</div>
-
-		<wo:if condition="$hasInstances">
-			<div class="col-12">
-				<div class="card">
-					<div class="card-header">
-						<h3 class="card-title">Bulk actions</h3>
-					</div>
-					<div class="card-body">
-						<div class="row">
-							<div class="col-lg-4">
-								<label class="form-label">Selection</label>
-								<div class="btn-list mb-3">
-									<wo:link action="$selectAllAction" class="btn btn-sm">All</wo:link>
-									<wo:link action="$selectNoneAction" class="btn btn-sm">None</wo:link>
-									<wo:link action="$selectRunning" class="btn btn-sm">Running</wo:link>
-									<wo:link action="$selectNotRunning" class="btn btn-sm">Not running</wo:link>
-								</div>
-								<wo:form multipleSubmit="$true">
-									<label class="form-label">Select by name (regex)</label>
-									<div class="input-group">
-										<wo:textfield value="$instanceNameFilterValue" placeholder="e.g. ^prod-" class="form-control" />
-										<wo:submit action="$selectInstanceNamesMatchingFilter" value="Match" class="btn" />
-									</div>
-									<wo:if condition="$filterErrorMessage.length">
-										<div class="text-danger small mt-1"><wo:str value="$filterErrorMessage" /></div>
-									</wo:if>
-								</wo:form>
-							</div>
-
-							<div class="col-lg-8">
-								<label class="form-label">Actions on selection</label>
-								<table class="table table-sm table-vcenter mb-0">
-									<tbody>
-										<tr>
-											<th class="w-25">Instances</th>
-											<td>
-												<div class="btn-list">
-													<wo:link action="$startAllClicked" class="btn btn-sm"><wo:img filename="start.png" alt="Start" height="14" width="14" /> Start</wo:link>
-													<wo:link action="$stopAllClicked" class="btn btn-sm"><wo:img filename="stop.png" alt="Stop" height="14" width="14" /> Stop</wo:link>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<th>Auto recover</th>
-											<td>
-												<div class="btn-list">
-													<wo:link action="$autoRecoverEnableAllClicked" class="btn btn-sm">Enable</wo:link>
-													<wo:link action="$autoRecoverDisableAllClicked" class="btn btn-sm">Disable</wo:link>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<th>Sessions</th>
-											<td>
-												<div class="btn-list">
-													<wo:link action="$refuseNewSessionsAllClicked" class="btn btn-sm">Refuse new</wo:link>
-													<wo:link action="$acceptNewSessionsAllClicked" class="btn btn-sm">Accept new</wo:link>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<th>Scheduling</th>
-											<td>
-												<div class="btn-list">
-													<wo:link action="$schedulingEnableAllClicked" class="btn btn-sm">Enable</wo:link>
-													<wo:link action="$schedulingDisableAllClicked" class="btn btn-sm">Disable</wo:link>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<th>Bounce</th>
-											<td>
-												<div class="btn-list">
-													<wo:link action="$bounceClicked" class="btn btn-sm">Bounce</wo:link>
-													<wo:link pageName="HelpPage" fragmentIdentifier="18" class="btn btn-sm">What is bounce?</wo:link>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<th>Deaths</th>
-											<td>
-												<wo:link action="$clearAllDeathsClicked" class="btn btn-sm">Clear history</wo:link>
-											</td>
-										</tr>
-										<tr>
-											<th>Delete</th>
-											<td>
-												<wo:link action="$deleteAllInstancesClicked" class="btn btn-sm btn-outline-danger">Delete all instances</wo:link>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-
-						<wo:if condition="$showDetailStatistics">
-							<div class="row mt-3">
-								<div class="col">
-									<div class="text-secondary small">
-										Totals across all instances —
-										transactions: <strong><wo:str value="$totalTransactions" numberformat="#,##0" /></strong>,
-										active sessions: <strong><wo:str value="$totalActiveSessions" numberformat="#,##0" /></strong>,
-										avg tx time: <strong><wo:str value="$totalAverageTransaction" numberformat="0.000" /></strong>,
-										avg idle: <strong><wo:str value="$totalAverageIdleTime" numberformat="0.000" /></strong>.
-									</div>
-									<div class="text-secondary small">
-										Running only —
-										transactions: <strong><wo:str value="$totalTransactionsForActiveInstances" numberformat="#,##0" /></strong>,
-										active sessions: <strong><wo:str value="$totalActiveSessionsForActiveInstances" numberformat="#,##0" /></strong>.
-									</div>
-								</div>
-							</div>
-						</wo:if>
-						<wo:if condition="$showDetailStatistics" negate="$true">
-							<div class="row mt-3">
-								<div class="col">
-									<div class="text-secondary small">
-										<strong><wo:str value="$actualRatePerMinute" numberformat="0.00" /></strong> transactions per minute across all instances.
-									</div>
-								</div>
-							</div>
-						</wo:if>
-					</div>
-				</div>
-			</div>
-		</wo:if>
 
 		<wo:if condition="$hasHosts">
 			<div class="col-12">
