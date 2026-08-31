@@ -629,8 +629,11 @@ Available actions (from `AdminAction.java`'s `xxxAction()` methods): `info`, `ru
 
 ```
 POST /cgi-bin/WebObjects/JavaMonitor.woa/admin/deploy?type=app&name=<App>&pw=<plaintext>
+Content-Type: application/octet-stream
 Body: a .tar.gz containing <App>.woa
 ```
+
+The content type is load-bearing: `WORequest.formValues()` parses the body as form data for `x-www-form-urlencoded` (curl's default for `--data-binary`) and multipart, and even for unknown types falls through to the URL-encoding parser; only `application/octet-stream` reads form values from the URL alone. Anything else turns a 40 MB archive into an `OutOfMemoryError` in JavaMonitor.
 
 JavaMonitor hands the archive to the wotaskd on every host the app has instances on (`wa/deploy?app=<App>` on the wotaskd port, `password` header carrying the encrypted site password, same as the monitor channel). Each wotaskd (`Deployer.java`) unpacks the archive in a staging directory beside the current bundle, moves the current bundle aside as `x<App>_<yyyy_MM_dd_HH_mm_ss>.woa`, moves the new bundle into place, then terminates and restarts every local instance that was running. The swap precedes the bounce on purpose: a running JVM keeps its jars open by descriptor, so the rename is harmless, and whatever starts the instance afterwards — the deploy or the autoRecover sweep — starts the new build.
 
@@ -644,7 +647,7 @@ hz1.rebbi.is:
   restarted AjaxPlayground-1
 ```
 
-The archive is buffered in memory on both sides — size the heaps of JavaMonitor and wotaskd accordingly (the setup script uses 256m). Nothing is bounced if unpacking or the swap fails. First iteration: every instance goes down and comes back; graceful/rolling variants are future work.
+The archive is buffered in memory on both sides — size the heaps of JavaMonitor and wotaskd accordingly (the setup script uses 512m). Nothing is bounced if unpacking or the swap fails. First iteration: every instance goes down and comes back; graceful/rolling variants are future work.
 
 ### `/wa/statistics` on JavaMonitor
 

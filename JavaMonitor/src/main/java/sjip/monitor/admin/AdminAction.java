@@ -563,9 +563,14 @@ public class AdminAction extends WODirectAction {
 	 *
 	 * <pre>
 	 * tar -czf App.tar.gz -C target App.woa
-	 * curl -X POST --data-binary @App.tar.gz \
+	 * curl -X POST -H 'Content-Type: application/octet-stream' --data-binary @App.tar.gz \
 	 *   "http://monitor:56789/Apps/WebObjects/JavaMonitor.woa/admin/deploy?type=app&amp;name=App&amp;pw=..."
 	 * </pre>
+	 *
+	 * The content type matters: for anything else WORequest tries to parse the
+	 * body as form data (curl's default for --data-binary is form-urlencoded),
+	 * which turns a 40 MB archive into an OutOfMemoryError. octet-stream is the
+	 * one type where form values are read from the URL alone.
 	 */
 	public WOActionResults deployAction() {
 		if( applications.size() != 1 ) {
@@ -599,7 +604,7 @@ public class AdminAction extends WODirectAction {
 		for( final MHost host : hosts ) {
 			final HttpRequest.Builder builder = HttpRequest.newBuilder()
 					.uri( URI.create( "http://%s:%s/cgi-bin/WebObjects/wotaskd.woa/wa/deploy?app=%s".formatted( host.name(), port, URLEncoder.encode( application.name(), StandardCharsets.UTF_8 ) ) ) )
-					.header( "Content-Type", "application/gzip" )
+					.header( "Content-Type", "application/octet-stream" )
 					.timeout( Duration.ofMinutes( 5 ) )
 					.POST( HttpRequest.BodyPublishers.ofByteArray( archive ) );
 
