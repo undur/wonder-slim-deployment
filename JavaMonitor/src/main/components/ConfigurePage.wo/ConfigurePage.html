@@ -57,7 +57,7 @@
 
 		<div class="col-12">
 			<div class="card">
-				<wo:AjaxExpansion id="AdaptorSettingsExpansion" insertion="Effect.blind" insertionDuration="0.1" string="HTTP adaptor settings" expanded="$isAdaptorSettingsSectionVisible">
+				<wo:AjaxExpansion id="AdaptorSettingsExpansion" label="HTTP adaptor settings" expanded="$isAdaptorSettingsSectionVisible">
 					<div class="card-body">
 						<wo:form>
 							<table class="table table-vcenter mb-3">
@@ -93,7 +93,7 @@
 
 		<div class="col-12">
 			<div class="card">
-				<wo:AjaxExpansion id="EmailNotificationExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Email notifications" expanded="$isEmailSectionVisible">
+				<wo:AjaxExpansion id="EmailNotificationExpansion" label="Email notifications" expanded="$isEmailSectionVisible">
 					<div class="card-body">
 						<p class="text-secondary">
 							Monitor sends email notifications when configured with an SMTP host. Per-application email addresses live on the application configuration page.
@@ -116,7 +116,7 @@
 
 		<div class="col-12">
 			<div class="card">
-				<wo:AjaxExpansion id="BackupExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Backup site configuration" expanded="$isBackupSectionVisible">
+				<wo:AjaxExpansion id="BackupExpansion" label="Backup site configuration" expanded="$isBackupSectionVisible">
 					<div class="card-body">
 						<p class="text-secondary">Creates a timestamped backup of <code>SiteConfig.xml</code>.</p>
 						<wo:form name="BackupForm">

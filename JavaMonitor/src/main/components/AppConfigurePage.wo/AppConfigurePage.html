@@ -14,7 +14,7 @@
 	<div class="row row-cards">
 		<div class="col-12">
 			<div class="card">
-				<wo:AjaxExpansion id="NewInstanceConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="New instance defaults" expanded="$isNewInstanceSectionVisible">
+				<wo:AjaxExpansion id="NewInstanceConfigExpansion" label="New instance defaults" expanded="$isNewInstanceSectionVisible">
 					<div class="card-body">
 						<p class="text-secondary">
 							New instances get these settings. Push a value to existing instances with the <em>Push</em> button in its row; push everything with <em>Push all</em> at the bottom; save without pushing with <em>Save for new only</em>.
@@ -128,7 +128,7 @@
 
 		<div class="col-12">
 			<div class="card">
-				<wo:AjaxExpansion id="ApplicationConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Application settings" expanded="$isAppConfigureSectionVisible">
+				<wo:AjaxExpansion id="ApplicationConfigExpansion" label="Application settings" expanded="$isAppConfigureSectionVisible">
 					<div class="card-body">
 						<wo:form multipleSubmit="$true" id="appSettingsForm">
 							<table class="table table-vcenter mb-3">
@@ -191,7 +191,7 @@
 
 		<div class="col-12">
 			<div class="card">
-				<wo:AjaxExpansion id="SchedulingConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Scheduling" expanded="$isSchedulingSectionVisible">
+				<wo:AjaxExpansion id="SchedulingConfigExpansion" label="Scheduling" expanded="$isSchedulingSectionVisible">
 					<div class="card-body">
 						<p class="text-secondary">
 							Monitor can restart instances on a schedule. Scheduled instances automatically behave as if auto-recovering.
@@ -268,7 +268,7 @@
 
 		<div class="col-12">
 			<div class="card">
-				<wo:AjaxExpansion id="EmailConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Email notifications" expanded="$isEmailSectionVisible">
+				<wo:AjaxExpansion id="EmailConfigExpansion" label="Email notifications" expanded="$isEmailSectionVisible">
 					<div class="card-body">
 						<wo:if condition="$isMailingConfigured" negate="$true">
 							<p class="text-secondary">
@@ -301,7 +301,7 @@
 
 		<div class="col-12">
 			<div class="card">
-				<wo:AjaxExpansion id="AdaptorSpecificConfigExpansion" insertion="Effect.blind" insertionDuration="0.1" string="Load balancing and adaptor settings" expanded="$isAdaptorSettingsSectionVisible">
+				<wo:AjaxExpansion id="AdaptorSpecificConfigExpansion" label="Load balancing and adaptor settings" expanded="$isAdaptorSettingsSectionVisible">
 					<div class="card-body">
 						<wo:form>
 							<table class="table table-vcenter mb-3">
