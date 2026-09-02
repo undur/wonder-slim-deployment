@@ -6,9 +6,14 @@
 WODirectConnectEnabled=true
 WOPort=1085
 
-# The Jetty adaptor hands request bodies over stream-backed, which is what
-# lets admin/deploy spool archives to disk instead of buffering them.
-WOAdaptor=WOAdaptorJetty
+# wotaskd stays on the classic adaptor, deliberately. It is the one process
+# that receives lifebeats, and WO's lifebeat thread sends them as HTTP/1.1
+# without a Host header — which Jetty 12 rejects outright (400 "No Host",
+# an unconditional check in its parser, no compliance mode relaxes it). So
+# on WOAdaptorJetty no instance ever registers and the adaptor config comes
+# out empty. Deploy streaming doesn't need Jetty here: the classic adaptor
+# hands wa/deploy a stream-backed body too (verified 2026-09-02).
+# WOAdaptor=WOAdaptorJetty
 
 # FIXME: WTF is this? // Hugi 2026-05-02
 er.extensions.ERXMessageEncoding.Enabled=false
