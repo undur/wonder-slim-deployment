@@ -105,6 +105,17 @@ public final class FProperties {
 		/** When true, instance launches go through the per-platform spawn helper ({@code SpawnOfWotaskd.sh}/{@code .exe}) if it exists. */
 		public static final BooleanProperty SHOULD_USE_SPAWN = new BooleanProperty( "WOShouldUseSpawn", false );
 
+		// === wotaskd Deployer ===
+
+		/**
+		 * How many previous builds a deploy keeps beside the live bundle (the
+		 * {@code x<App>_<timestamp>.woa} directories the swap moves aside), oldest
+		 * pruned first once the count is exceeded. Negative keeps every build.
+		 * The first knob of the deployment process; it moves with the rest of them
+		 * when the deploy configuration gets a home of its own.
+		 */
+		public static final IntProperty DEPLOY_RETAINED_BUILDS = new IntProperty( "WOTaskd.deploy.retainedBuilds", 5 );
+
 		// === wotaskd Application ===
 
 		/** Multicast group address for the legacy adaptor discovery channel. See issue #20 about retiring this. */

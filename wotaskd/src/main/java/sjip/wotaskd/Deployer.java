@@ -21,13 +21,15 @@ import org.slf4j.LoggerFactory;
 
 import sjip.core.model.MApplication;
 import sjip.core.model.MInstance;
+import sjip.core.x.FProperties;
 
 /**
  * Deploys a new build of an application on this host: given a .tar.gz
  * containing {@code <App>.woa}, unpacks it beside the current bundle, moves
  * the current bundle aside as {@code x<App>_<timestamp>.woa} (the convention
- * the post_build scripts established), moves the new one into place, and
- * bounces every local instance that was running.
+ * the post_build scripts established), moves the new one into place, prunes
+ * moved-aside builds beyond {@code WOTaskd.deploy.retainedBuilds} (default
+ * 5, negative keeps all), and bounces every local instance that was running.
  *
  * The swap happens <em>before</em> the instances are touched. A running JVM
  * holds its jars open by descriptor, so renaming the directory under it is
@@ -89,6 +91,17 @@ public class Deployer {
 		}
 		finally {
 			deleteRecursively( staging );
+		}
+
+		// 2b. Prune: old builds have little value far into the future, unlike logs
+		final int retained = FProperties.K.DEPLOY_RETAINED_BUILDS.value();
+
+		if( retained >= 0 ) {
+			final List<Path> pruned = pruneRetainedBuilds( directory, appName, retained );
+
+			if( !pruned.isEmpty() ) {
+				report.add( "pruned %d older build%s, keeping %d (%s)".formatted( pruned.size(), pruned.size() == 1 ? "" : "s", retained, FProperties.K.DEPLOY_RETAINED_BUILDS.name() ) );
+			}
 		}
 
 		// 3. Bounce the local instances that were running
@@ -177,6 +190,36 @@ public class Deployer {
 		catch( final IOException e ) {
 			return false;
 		}
+	}
+
+	/**
+	 * Deletes the oldest {@code x<App>_<timestamp>.woa} directories beside the
+	 * bundle until at most {@code retained} remain. The timestamp format sorts
+	 * chronologically as text, so the name order is the age order.
+	 *
+	 * @return The directories deleted, oldest first
+	 */
+	static List<Path> pruneRetainedBuilds( final Path directory, final String appName, final int retained ) throws IOException {
+		final String prefix = "x" + appName + "_";
+		final List<Path> builds;
+
+		try( Stream<Path> entries = Files.list( directory ) ) {
+			builds = entries
+					.filter( Files::isDirectory )
+					.filter( p -> p.getFileName().toString().startsWith( prefix ) && p.getFileName().toString().endsWith( ".woa" ) )
+					.sorted( Comparator.comparing( p -> p.getFileName().toString() ) )
+					.toList();
+		}
+
+		final List<Path> pruned = new ArrayList<>();
+
+		for( int i = 0; i < builds.size() - retained; i++ ) {
+			deleteRecursively( builds.get( i ) );
+			pruned.add( builds.get( i ) );
+			logger.info( "Pruned old build {}", builds.get( i ) );
+		}
+
+		return pruned;
 	}
 
 	private static void deleteRecursively( final Path path ) throws IOException {
