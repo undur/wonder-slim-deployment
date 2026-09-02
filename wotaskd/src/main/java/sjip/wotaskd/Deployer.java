@@ -1,6 +1,7 @@
 package sjip.wotaskd;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -48,7 +49,7 @@ public class Deployer {
 	 * @return A human-readable report, one line per step
 	 * @throws IOException if unpacking or the swap fails — nothing has been bounced in that case
 	 */
-	public static String deploy( final AppTaskd appTaskd, final MApplication application, final byte[] archive ) throws IOException, InterruptedException {
+	public static String deploy( final AppTaskd appTaskd, final MApplication application, final InputStream archive ) throws IOException, InterruptedException {
 		final String appName = application.name();
 
 		// The configured path is the launcher inside the bundle: /dir/<App>.woa/<App>
@@ -67,14 +68,14 @@ public class Deployer {
 		try {
 			Files.createDirectories( staging );
 			final Path tarball = staging.resolve( bundleName + ".tar.gz" );
-			Files.write( tarball, archive );
+			Files.copy( archive, tarball ); // copies the stream to disk as it arrives — the archive never lives in memory
 			untar( tarball, staging );
 
 			if( !Files.isRegularFile( unpacked.resolve( launcher.getFileName() ) ) ) {
 				throw new IOException( "Archive does not contain " + bundleName + "/" + launcher.getFileName() );
 			}
 
-			report.add( "unpacked %s (%d bytes)".formatted( bundleName, archive.length ) );
+			report.add( "unpacked %s (%d bytes)".formatted( bundleName, Files.size( tarball ) ) );
 
 			// 2. Swap: current bundle aside, new bundle into place
 			if( Files.exists( bundle ) ) {

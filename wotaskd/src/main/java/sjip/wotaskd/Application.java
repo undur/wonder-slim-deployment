@@ -47,6 +47,15 @@ public class Application extends ERXApplication {
 		_setLifebeatDestinationPort( port().intValue() );
 
 		registerRequestHandler( new LifebeatRequestHandler( host() ), "wlb" );
+
+		// Keep wa/deploy's request body streamable. WORequest.contentInputStream()
+		// refuses the stream once form values were read, and two things read them
+		// before the action exists: the direct action handler's WOSubmitAction sniff
+		// (switched off here) and the session-id lookup in WOContext's constructor
+		// (which ERXRequest skips for registered streaming handler keys). wotaskd's
+		// actions are addressed by URL path and query, so nothing is lost.
+		((WODirectActionRequestHandler)requestHandlerForKey( directActionRequestHandlerKey() )).setAllowsContentInputStream( true );
+		registerStreamingRequestHandlerKey( directActionRequestHandlerKey() );
 		
 		// unregistering the WOComponent / WOResource request handlers
 		removeRequestHandlerForKey( "wo" );

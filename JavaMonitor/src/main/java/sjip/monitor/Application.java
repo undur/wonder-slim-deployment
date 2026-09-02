@@ -50,14 +50,25 @@ public class Application extends ERXApplication {
 
 		setAllowsConcurrentRequestHandling( true );
 
-		registerRequestHandler( new WODirectActionRequestHandler() {
+		final WODirectActionRequestHandler adminHandler = new WODirectActionRequestHandler() {
 			@Override
 			public NSArray getRequestHandlerPathForRequest( WORequest worequest ) {
 				NSArray nsarray = new NSArray( AdminAction.class.getName() );
 				return nsarray.arrayByAddingObject( worequest.requestHandlerPath() );
 			}
+		};
 
-		}, "admin" );
+		// Keep admin/deploy's request body streamable. WORequest.contentInputStream()
+		// refuses the stream once form values were read, and two things read them
+		// before the action exists: the direct action handler's WOSubmitAction sniff
+		// (switched off here) and the session-id lookup in WOContext's constructor
+		// (which ERXRequest skips for registered streaming handler keys). Admin
+		// actions are addressed by URL path and the pw query parameter, so nothing
+		// is lost — form values still resolve from the URL afterwards.
+		adminHandler.setAllowsContentInputStream( true );
+		registerStreamingRequestHandlerKey( "admin" );
+
+		registerRequestHandler( adminHandler, "admin" );
 
 		// Convenience prefix for TestDirectAction's endpoints so test URLs read
 		// `/test/<action>` instead of `/wa/TestDirectAction/<action>`. The prefix is

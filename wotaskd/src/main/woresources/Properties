@@ -6,6 +6,10 @@
 WODirectConnectEnabled=true
 WOPort=1085
 
+# The Jetty adaptor hands request bodies over stream-backed, which is what
+# lets admin/deploy spool archives to disk instead of buffering them.
+WOAdaptor=WOAdaptorJetty
+
 # FIXME: WTF is this? // Hugi 2026-05-02
 er.extensions.ERXMessageEncoding.Enabled=false
 

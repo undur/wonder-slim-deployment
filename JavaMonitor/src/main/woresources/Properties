@@ -5,6 +5,10 @@
 
 WODirectConnectEnabled=true
 WOSessionTimeOut=1800
+
+# The Jetty adaptor hands request bodies over stream-backed, which is what
+# lets admin/deploy spool archives to disk instead of buffering them.
+WOAdaptor=WOAdaptorJetty
 WOMonitorEnabled=true
 WOLifebeatDestinationPort=1085
 WOLifebeatEnabled=true

@@ -1,11 +1,18 @@
 package sjip.monitor.admin;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +22,10 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.webobjects.foundation.NSData;
 
 import sjip.core.MUtil;
 import sjip.core.model.MApplication;
@@ -329,6 +340,11 @@ import sjip.monitor.util.WOTaskdHandler;
  */
 public class AdminAction extends WODirectAction {
 
+	private static final Logger logger = LoggerFactory.getLogger( AdminAction.class );
+
+	/** deploy's request body, captured before form-value reads close the streaming window */
+	private InputStream _archiveStream;
+
 	public class DirectActionException extends RuntimeException {
 
 		public int status;
@@ -358,6 +374,7 @@ public class AdminAction extends WODirectAction {
 		applications = new ArrayList();
 		_handler = new WOTaskdHandler( (Session)session() );
 	}
+
 
 	private AdminApplicationsPage applicationsPage() {
 		if( applicationsPage == null ) {
@@ -578,10 +595,9 @@ public class AdminAction extends WODirectAction {
 		}
 
 		final MApplication application = applications.get( 0 );
-		final WORequest request = context().request();
-		final byte[] archive = request.content() == null ? null : request.content().bytes();
+		final InputStream archiveStream = _archiveStream; // captured in performActionNamed, before the pw form value was read
 
-		if( archive == null || archive.length == 0 ) {
+		if( archiveStream == null ) {
 			throw new DirectActionException( "Request body must be a .tar.gz containing " + application.name() + ".woa", 400 );
 		}
 
@@ -595,31 +611,59 @@ public class AdminAction extends WODirectAction {
 			throw new DirectActionException( application.name() + " has no instances — nothing to deploy to", 406 );
 		}
 
+		// The archive is spooled to disk as it arrives and forwarded to each
+		// host from the file — it never lives in memory (given an adaptor that
+		// hands the body over stream-backed; see contentStream()).
+		final Path spool;
+
+		try {
+			spool = Files.createTempFile( "deploy-" + application.name() + "-", ".tar.gz" );
+			Files.copy( archiveStream, spool, StandardCopyOption.REPLACE_EXISTING );
+
+			if( Files.size( spool ) == 0 ) {
+				Files.deleteIfExists( spool );
+				throw new DirectActionException( "Request body must be a .tar.gz containing " + application.name() + ".woa", 400 );
+			}
+		}
+		catch( final IOException e ) {
+			throw new DirectActionException( "Spooling the archive to disk failed: " + e.getMessage(), 500 );
+		}
+
 		final int port = WOApplication.application().lifebeatDestinationPort();
 		final String password = siteConfig().passwordForRequest();
 		final HttpClient client = HttpClient.newHttpClient();
 		final StringBuilder report = new StringBuilder();
 		boolean failed = false;
 
-		for( final MHost host : hosts ) {
-			final HttpRequest.Builder builder = HttpRequest.newBuilder()
-					.uri( URI.create( "http://%s:%s/cgi-bin/WebObjects/wotaskd.woa/wa/deploy?app=%s".formatted( host.name(), port, URLEncoder.encode( application.name(), StandardCharsets.UTF_8 ) ) ) )
-					.header( "Content-Type", "application/octet-stream" )
-					.timeout( Duration.ofMinutes( 5 ) )
-					.POST( HttpRequest.BodyPublishers.ofByteArray( archive ) );
+		try {
+			for( final MHost host : hosts ) {
+				final HttpRequest.Builder builder = HttpRequest.newBuilder()
+						.uri( URI.create( "http://%s:%s/cgi-bin/WebObjects/wotaskd.woa/wa/deploy?app=%s".formatted( host.name(), port, URLEncoder.encode( application.name(), StandardCharsets.UTF_8 ) ) ) )
+						.header( "Content-Type", "application/octet-stream" )
+						.timeout( Duration.ofMinutes( 5 ) )
+						.POST( fileBodyPublisher( spool ) );
 
-			if( password != null ) {
-				builder.header( "password", password );
+				if( password != null ) {
+					builder.header( "password", password );
+				}
+
+				try {
+					final HttpResponse<String> response = client.send( builder.build(), HttpResponse.BodyHandlers.ofString() );
+					failed |= response.statusCode() != 200;
+					report.append( host.name() ).append( ":\n  " ).append( response.body().strip().replace( "\n", "\n  " ) ).append( '\n' );
+				}
+				catch( final Exception e ) {
+					failed = true;
+					report.append( host.name() ).append( ":\n  " ).append( e ).append( '\n' );
+				}
 			}
-
+		}
+		finally {
 			try {
-				final HttpResponse<String> response = client.send( builder.build(), HttpResponse.BodyHandlers.ofString() );
-				failed |= response.statusCode() != 200;
-				report.append( host.name() ).append( ":\n  " ).append( response.body().strip().replace( "\n", "\n  " ) ).append( '\n' );
+				Files.deleteIfExists( spool );
 			}
-			catch( final Exception e ) {
-				failed = true;
-				report.append( host.name() ).append( ":\n  " ).append( e ).append( '\n' );
+			catch( final IOException e ) {
+				logger.warn( "Could not delete deploy spool file {}", spool, e );
 			}
 		}
 
@@ -752,6 +796,14 @@ public class AdminAction extends WODirectAction {
 
 	@Override
 	public WOActionResults performActionNamed( String s ) {
+
+		// The body must be captured before the pw form value is read below —
+		// WORequest.contentInputStream() refuses the stream once form values
+		// were touched. Only deploy carries a body, so only deploy pays this.
+		if( "deploy".equals( s ) ) {
+			_archiveStream = contentStream( context().request() );
+		}
+
 		WOResponse woresponse = new WOResponse();
 		if( !siteConfig().isPasswordRequired() || siteConfig().checkPasswordPlaintext( context().request().stringFormValueForKey( "pw" ) ) ) {
 			try {
@@ -778,5 +830,45 @@ public class AdminAction extends WODirectAction {
 			woresponse.setContent( "Monitor is password protected - password missing or incorrect." );
 		}
 		return woresponse;
+	}
+
+	/**
+	 * The request body as a stream. Under an adaptor that hands the body over
+	 * stream-backed (WOAdaptorJetty), this reads straight off the wire and the
+	 * body never materializes in memory; under a buffering adaptor it falls
+	 * back to the buffered bytes. null when the body is absent or empty.
+	 */
+	private static InputStream contentStream( final WORequest request ) {
+
+		// The official accessor for stream-backed requests — non-null only
+		// when the adaptor delivered the body without materializing it
+		final InputStream stream = request.contentInputStream();
+
+		if( stream != null ) {
+			logger.info( "Request body is stream-backed — reading it off the wire" );
+			return stream;
+		}
+
+		final NSData content = request.content();
+
+		if( content == null || content.length() == 0 ) {
+			return null;
+		}
+
+		logger.info( "Request body arrived buffered ({} bytes in memory)", content.length() );
+		return new ByteArrayInputStream( content.bytes() );
+	}
+
+	/**
+	 * BodyPublishers.ofFile with its checked FileNotFoundException adapted to
+	 * our error reporting.
+	 */
+	private static HttpRequest.BodyPublisher fileBodyPublisher( final Path file ) {
+		try {
+			return HttpRequest.BodyPublishers.ofFile( file );
+		}
+		catch( final IOException e ) {
+			throw new UncheckedIOException( e );
+		}
 	}
 }

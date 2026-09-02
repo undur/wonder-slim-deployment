@@ -12,6 +12,8 @@ IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL OR CONSE
 SUCH DAMAGE.
  */
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -30,6 +32,7 @@ import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.foundation.NSData;
 
 import sjip.core.MUtil;
 import sjip.core.SjipException;
@@ -74,6 +77,10 @@ public class DirectAction extends WODirectAction {
 		final MSiteConfig aConfig = appTaskd.siteConfig();
 		final WOResponse response = new WOResponse();
 
+		// Captured before the app form value is read below — WORequest.contentInputStream()
+		// refuses the stream once form values were touched (the password is a header, safe)
+		final InputStream archive = contentStream( request() );
+
 		if( !aConfig.checkPasswordEncrypted( request().headerForKey( "password" ) ) ) {
 			logger.debug( "Attempt to call DirectAction: deployAction with incorrect password." );
 			response.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
@@ -90,9 +97,7 @@ public class DirectAction extends WODirectAction {
 			return response;
 		}
 
-		final byte[] archive = request().content() == null ? null : request().content().bytes();
-
-		if( archive == null || archive.length == 0 ) {
+		if( archive == null ) {
 			response.setStatus( 400 );
 			response.appendContentString( FApplication.host() + ": Request body must be a .tar.gz containing " + appName + ".woa" );
 			return response;
@@ -1007,5 +1012,32 @@ public class DirectAction extends WODirectAction {
 		m.put( "success", Boolean.FALSE );
 		m.put( "errorMessage", message );
 		return m;
+	}
+
+	/**
+	 * The request body as a stream. Under an adaptor that hands the body over
+	 * stream-backed (WOAdaptorJetty), this reads straight off the wire and the
+	 * body never materializes in memory; under a buffering adaptor it falls
+	 * back to the buffered bytes. null when the body is absent or empty.
+	 */
+	private static InputStream contentStream( final WORequest request ) {
+
+		// The official accessor for stream-backed requests — non-null only
+		// when the adaptor delivered the body without materializing it
+		final InputStream stream = request.contentInputStream();
+
+		if( stream != null ) {
+			logger.info( "Request body is stream-backed — reading it off the wire" );
+			return stream;
+		}
+
+		final NSData content = request.content();
+
+		if( content == null || content.length() == 0 ) {
+			return null;
+		}
+
+		logger.info( "Request body arrived buffered ({} bytes in memory)", content.length() );
+		return new ByteArrayInputStream( content.bytes() );
 	}
 }
