@@ -93,15 +93,13 @@ public class Deployer {
 			deleteRecursively( staging );
 		}
 
-		// 2b. Prune: old builds have little value far into the future, unlike logs
+		// 2b. Prune: old builds have little value far into the future, unlike logs.
+		// Housekeeping only — a build that won't delete (a root-owned relic of the
+		// rsync era, say) is reported and left; it must never stop the bounce below.
 		final int retained = FProperties.K.DEPLOY_RETAINED_BUILDS.value();
 
 		if( retained >= 0 ) {
-			final List<Path> pruned = pruneRetainedBuilds( directory, appName, retained );
-
-			if( !pruned.isEmpty() ) {
-				report.add( "pruned %d older build%s, keeping %d (%s)".formatted( pruned.size(), pruned.size() == 1 ? "" : "s", retained, FProperties.K.DEPLOY_RETAINED_BUILDS.name() ) );
-			}
+			report.addAll( pruneRetainedBuilds( directory, appName, retained ) );
 		}
 
 		// 3. Bounce the local instances that were running
@@ -195,12 +193,14 @@ public class Deployer {
 	/**
 	 * Deletes the oldest {@code x<App>_<timestamp>.woa} directories beside the
 	 * bundle until at most {@code retained} remain. The timestamp format sorts
-	 * chronologically as text, so the name order is the age order.
+	 * chronologically as text, so the name order is the age order. Never throws:
+	 * a directory that won't delete is reported and skipped.
 	 *
-	 * @return The directories deleted, oldest first
+	 * @return Report lines — one summary for what was pruned, one per failure
 	 */
-	static List<Path> pruneRetainedBuilds( final Path directory, final String appName, final int retained ) throws IOException {
+	static List<String> pruneRetainedBuilds( final Path directory, final String appName, final int retained ) {
 		final String prefix = "x" + appName + "_";
+		final List<String> report = new ArrayList<>();
 		final List<Path> builds;
 
 		try( Stream<Path> entries = Files.list( directory ) ) {
@@ -210,16 +210,33 @@ public class Deployer {
 					.sorted( Comparator.comparing( p -> p.getFileName().toString() ) )
 					.toList();
 		}
-
-		final List<Path> pruned = new ArrayList<>();
-
-		for( int i = 0; i < builds.size() - retained; i++ ) {
-			deleteRecursively( builds.get( i ) );
-			pruned.add( builds.get( i ) );
-			logger.info( "Pruned old build {}", builds.get( i ) );
+		catch( final IOException e ) {
+			logger.warn( "Could not list {} for pruning", directory, e );
+			report.add( "pruning skipped: " + e );
+			return report;
 		}
 
-		return pruned;
+		int pruned = 0;
+
+		for( int i = 0; i < builds.size() - retained; i++ ) {
+			final Path build = builds.get( i );
+
+			try {
+				deleteRecursively( build );
+				pruned++;
+				logger.info( "Pruned old build {}", build );
+			}
+			catch( final IOException e ) {
+				logger.warn( "Could not prune old build {}", build, e );
+				report.add( "could not prune %s: %s".formatted( build.getFileName(), e ) );
+			}
+		}
+
+		if( pruned > 0 ) {
+			report.add( "pruned %d older build%s, keeping %d (%s)".formatted( pruned, pruned == 1 ? "" : "s", retained, FProperties.K.DEPLOY_RETAINED_BUILDS.name() ) );
+		}
+
+		return report;
 	}
 
 	private static void deleteRecursively( final Path path ) throws IOException {
