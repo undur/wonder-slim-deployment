@@ -6,6 +6,7 @@ import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -14,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -199,14 +201,16 @@ public class Deployer {
 	 * @return Report lines — one summary for what was pruned, one per failure
 	 */
 	static List<String> pruneRetainedBuilds( final Path directory, final String appName, final int retained ) {
-		final String prefix = "x" + appName + "_";
+		// Exactly the names this class writes — x<App>_yyyy_MM_dd_HH_mm_ss.woa — and
+		// nothing looser: this may run as root, so the match is the only safety net.
+		final Pattern movedAside = Pattern.compile( "x" + Pattern.quote( appName ) + "_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}\\.woa" );
 		final List<String> report = new ArrayList<>();
 		final List<Path> builds;
 
 		try( Stream<Path> entries = Files.list( directory ) ) {
 			builds = entries
-					.filter( Files::isDirectory )
-					.filter( p -> p.getFileName().toString().startsWith( prefix ) && p.getFileName().toString().endsWith( ".woa" ) )
+					.filter( p -> Files.isDirectory( p, LinkOption.NOFOLLOW_LINKS ) ) // a symlink is never ours to delete through
+					.filter( p -> movedAside.matcher( p.getFileName().toString() ).matches() )
 					.sorted( Comparator.comparing( p -> p.getFileName().toString() ) )
 					.toList();
 		}
@@ -240,8 +244,14 @@ public class Deployer {
 	}
 
 	private static void deleteRecursively( final Path path ) throws IOException {
-		if( !Files.exists( path ) ) {
+		if( !Files.exists( path, LinkOption.NOFOLLOW_LINKS ) ) {
 			return;
+		}
+
+		// Files.walk doesn't follow links, but a symlinked root would still be
+		// descended through; refuse outright rather than delete through it.
+		if( Files.isSymbolicLink( path ) ) {
+			throw new IOException( path + " is a symbolic link — refusing to delete through it" );
 		}
 
 		try( Stream<Path> walk = Files.walk( path ) ) {
