@@ -9,7 +9,7 @@
 #
 # Steps:
 #   1. Local: install fresh sjip-core
-#   2. Local: package wotaskd and JavaMonitor (pinned to /opt/jdk-26)
+#   2. Local: package wotaskd and JavaMonitor (pinned to the newest /opt/jdk-* on the server, or $JVM_PATH)
 #   3. Server: move the existing .woa bundles aside (pruning older backups)
 #   4. scp: upload the new bundles
 #   5. Server: restart the services — JavaMonitor first (harmless),
@@ -19,7 +19,13 @@ set -euo pipefail
 
 SERVER="root@${1:?usage: deploy.sh <server-hostname>   (hz1.rebbi.is | linode-4.rebbi.is)}"
 REMOTE_APPS_DIR="/opt/webobjects/apps"
-JVM_PATH="/opt/jdk-26/bin/java"
+# The bundles bake their JVM path in at package time (config.txt), so it has to
+# be the path on the *target*: the newest /opt/jdk-<version> installed there,
+# unless JVM_PATH is given explicitly (JVM_PATH=/opt/jdk-26/bin/java deploy.sh …).
+if [ -z "${JVM_PATH:-}" ]; then
+	JVM_PATH="$(ssh "${SERVER}" "ls -d /opt/jdk-*/bin/java 2>/dev/null | sort -V | tail -n 1")"
+	[ -n "${JVM_PATH}" ] || { echo "No /opt/jdk-*/bin/java found on ${SERVER}; pass JVM_PATH explicitly" >&2; exit 1; }
+fi
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 STAMP="$(date +%Y%m%d-%H%M%S)"
