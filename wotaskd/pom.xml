@@ -16,7 +16,7 @@
 		<webobjects.version>5.4.3</webobjects.version>
 
 		<wonder.group>is.rebbi.slim</wonder.group>
-		<wonder.version>8.0.4</wonder.version>
+		<wonder.version>8.0.5</wonder.version>
 	</properties>
 
 	<build>
@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>is.rebbi</groupId>
 			<artifactId>wo-adaptor-jetty</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>${wonder.group}</groupId>

@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>is.rebbi</groupId>
 			<artifactId>wo-adaptor-jetty</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>${wonder.group}</groupId>
