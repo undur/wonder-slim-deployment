@@ -103,6 +103,7 @@ public class JMTablerLook extends MonitorComponent {
 		items.add( new MenuItem( APP_PAGE, "Applications", Icon.Cube, () -> ApplicationsPage.create( context() ) ) );
 		items.add( new MenuItem( HOST_PAGE, "Hosts", Icon.Server, () -> HostsPage.create( context() ) ) );
 		items.add( new MenuItem( SITE_PAGE, "Site", Icon.Home, () -> ConfigurePage.create( context() ) ) );
+		items.add( new MenuItem( LIVE_LOG_PAGE, "Live log", Icon.Terminal, () -> JMLiveLogPage.create( context() ) ) );
 		items.add( new MenuItem( PREF_PAGE, "Preferences", Icon.Adjustments, () -> PrefsPage.create( context() ) ) );
 		items.add( new MenuItem( HELP_PAGE, "Help", Icon.Help, () -> pageWithName( HelpPage.class ) ) );
 		items.add( new MenuItem( MOD_PROXY_PAGE, "mod_proxy", Icon.Polygon, () -> pageWithName( ModProxyPage.class )) );

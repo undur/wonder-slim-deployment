@@ -43,6 +43,11 @@
 			<version>0.10.0</version>
 		</dependency>
 		<dependency>
+			<groupId>is.rebbi</groupId>
+			<artifactId>wo-adaptor-jetty-push</artifactId>
+			<version>0.10.0</version>
+		</dependency>
+		<dependency>
 			<groupId>${wonder.group}</groupId>
 			<artifactId>ERLoggingReload4j</artifactId>
 			<version>${wonder.version}</version>

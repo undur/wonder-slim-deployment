@@ -19,6 +19,7 @@ import com.webobjects.appserver.WOResponse;
 import er.extensions.appserver.ERXDirectAction;
 import sjip.monitor.components.ApplicationsPage;
 import sjip.monitor.components.JMLoginPage;
+import sjip.monitor.util.JMLogFeed;
 import sjip.monitor.util.StatsUtilitiesEvenMore;
 import sjip.monitor.util.WOTaskdHandler;
 
@@ -61,5 +62,25 @@ public class DirectAction extends ERXDirectAction {
 		}
 
 		return response;
+	}
+
+	/**
+	 * The SSE stream behind the "Live log" page: subscribes the caller to JMLogFeed's broadcast of the
+	 * application's log. Gated like the regular UI - if a password is set, only a logged-in session may
+	 * subscribe (EventSource sends the session cookie, so a session browsing the UI passes).
+	 */
+	public WOActionResults liveLogAction() {
+
+		if( WOTaskdHandler.siteConfig().isPasswordRequired() ) {
+			final Session session = (Session)existingSession();
+
+			if( session == null || !session.isLoggedIn() ) {
+				final WOResponse response = new WOResponse();
+				response.setStatus( 403 );
+				return response;
+			}
+		}
+
+		return JMLogFeed.subscribe();
 	}
 }

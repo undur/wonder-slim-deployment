@@ -28,6 +28,7 @@ import er.extensions.routes.RouteTable;
 import sjip.core.x.FProperties;
 import sjip.monitor.admin.AdminAction;
 import sjip.monitor.test.TestDirectAction;
+import sjip.monitor.util.JMLogFeed;
 import sjip.monitor.util.WOTaskdHandler;
 
 public class Application extends ERXApplication {
@@ -49,6 +50,9 @@ public class Application extends ERXApplication {
 		WOTaskdHandler.createSiteConfig();
 
 		setAllowsConcurrentRequestHandling( true );
+
+		// Everything logged on the root logger streams to the "Live log" page's SSE subscribers
+		org.apache.log4j.Logger.getRootLogger().addAppender( new JMLogFeed() );
 
 		final WODirectActionRequestHandler adminHandler = new WODirectActionRequestHandler() {
 			@Override

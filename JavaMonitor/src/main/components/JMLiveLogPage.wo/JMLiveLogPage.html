@@ -1,0 +1,135 @@
+<wo:JMTablerLook selectedPage="$LIVE_LOG_PAGE" title="Live log" crumb="Live log">
+	<style>
+		#livelog {
+			font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+			font-size: 12px;
+			line-height: 1.5;
+			background: var(--tblr-bg-surface-secondary);
+			padding: 0.5rem;
+			border-radius: 4px;
+			min-height: 20rem;
+			max-height: 70vh;
+			overflow: auto;
+			white-space: pre-wrap;
+			overflow-wrap: anywhere;
+		}
+
+		#livelog .ll-time { color: var(--tblr-secondary); margin-right: 0.75em; }
+		#livelog .ll-level { display: inline-block; width: 4em; font-weight: 600; }
+		#livelog .ll-logger { color: var(--tblr-secondary); margin-right: 0.75em; }
+
+		#livelog .ll-warn .ll-level { color: #b26205; }
+		#livelog .ll-error .ll-level { color: rgb(214,57,57); }
+		#livelog .ll-error { background: rgba(214,57,57,0.06); }
+		#livelog .ll-debug { color: var(--tblr-secondary); }
+
+		#livelog .ll-trace { color: rgb(214,57,57); padding-left: 2em; }
+	</style>
+
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<span id="ll-status" class="badge bg-secondary text-white">Connecting…</span>
+			</div>
+			<div class="col-auto ms-auto d-print-none">
+				<div class="btn-list align-items-center">
+					<label class="form-check form-switch mb-0 me-2">
+						<input type="checkbox" id="ll-follow" class="form-check-input" checked />
+						<span class="form-check-label">Follow</span>
+					</label>
+					<button type="button" id="ll-pause" class="btn">Pause</button>
+					<button type="button" id="ll-clear" class="btn">Clear</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="card">
+		<div class="card-body">
+			<wo:container elementName="div" id="livelog" data-feed-url="$liveLogURL"></wo:container>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener( "DOMContentLoaded", () => {
+			const pane = document.getElementById( "livelog" );
+			const status = document.getElementById( "ll-status" );
+			const followBox = document.getElementById( "ll-follow" );
+			const pauseButton = document.getElementById( "ll-pause" );
+
+			const MAX_LINES = 2000;
+			let paused = false;
+			const buffered = [];
+
+			function setStatus( text, badgeClass ) {
+				status.textContent = text;
+				status.className = "badge text-white " + badgeClass;
+			}
+
+			function span( className, text ) {
+				const el = document.createElement( "span" );
+				el.className = className;
+				el.textContent = text;
+				return el;
+			}
+
+			function append( data ) {
+				const event = JSON.parse( data );
+				const line = document.createElement( "div" );
+				line.className = "ll-line ll-" + event.level.toLowerCase();
+				line.appendChild( span( "ll-time", event.time ) );
+				line.appendChild( span( "ll-level", event.level ) );
+				line.appendChild( span( "ll-logger", event.logger ) );
+				line.appendChild( span( "ll-msg", event.message ) );
+
+				if( event.trace ) {
+					const trace = document.createElement( "div" );
+					trace.className = "ll-trace";
+					trace.textContent = event.trace;
+					line.appendChild( trace );
+				}
+
+				pane.appendChild( line );
+
+				while( pane.childElementCount > MAX_LINES ) {
+					pane.firstElementChild.remove();
+				}
+
+				if( followBox.checked ) {
+					pane.scrollTop = pane.scrollHeight;
+				}
+			}
+
+			pauseButton.addEventListener( "click", () => {
+				paused = !paused;
+				pauseButton.textContent = paused ? "Resume" : "Pause";
+
+				if( !paused ) {
+					buffered.forEach( append );
+					buffered.length = 0;
+				}
+			} );
+
+			document.getElementById( "ll-clear" ).addEventListener( "click", () => {
+				pane.replaceChildren();
+				buffered.length = 0;
+			} );
+
+			// The nonce keeps each connection's URL unique - see JMLiveLogPage.liveLogURL()
+			const feedURL = pane.dataset.feedUrl + "?t=" + Date.now();
+			const events = new EventSource( feedURL );
+
+			events.onopen = () => setStatus( "Connected", "bg-success" );
+			events.onerror = () => setStatus( "Reconnecting…", "bg-warning" );
+
+			events.addEventListener( "log", ( e ) => {
+				if( paused ) {
+					buffered.push( e.data );
+				}
+				else {
+					append( e.data );
+				}
+			} );
+		} );
+	</script>
+</wo:JMTablerLook>

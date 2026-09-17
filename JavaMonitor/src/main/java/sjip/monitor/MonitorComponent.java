@@ -20,6 +20,7 @@ public abstract class MonitorComponent extends ERXComponent {
 	public final int PREF_PAGE = 3;
 	public final int HELP_PAGE = 4;
 	public final int MOD_PROXY_PAGE = 6;
+	public final int LIVE_LOG_PAGE = 7;
 
 	private WOTaskdHandler _handler;
 	
