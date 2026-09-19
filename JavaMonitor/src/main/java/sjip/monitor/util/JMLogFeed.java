@@ -10,7 +10,6 @@ import org.apache.log4j.spi.LoggingEvent;
 
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.sse.SSEHub;
-import com.webobjects.appserver.sse.SSEStream;
 
 /**
  * A log4j appender that broadcasts every log event to SSE subscribers - the feed behind the "Live log" page.
@@ -40,14 +39,7 @@ public class JMLogFeed extends AppenderSkeleton {
 	 * @return The open-ended SSE response subscribing the caller to the feed
 	 */
 	public static WOResponse subscribe() {
-		final SSEStream stream = HUB.open( KEEP_ALIVE_INTERVAL );
-
-		// The first byte is what commits the response - until something is written, the adaptor sends no
-		// headers, proxies forward nothing, and the browser sits in "connecting" rather than "open". A quiet
-		// log can take arbitrarily long to produce that first byte, so provide it here.
-		stream.comment( "connected" );
-
-		return stream.response();
+		return HUB.open( KEEP_ALIVE_INTERVAL ).response();
 	}
 
 	@Override
