@@ -846,7 +846,20 @@ public class MInstance extends MObject {
 
 		// application stuff
 		String adaptorString = toNullOrString( _application.adaptor() );
-		if( adaptorString != null && adaptorString.length() > 0 ) {
+
+		// The adaptor field is free text in the UI, so trim before comparing - an invisible trailing space
+		// must not turn "unset" into a launch argument (and a padded name would never resolve as a class anyway)
+		if( adaptorString != null ) {
+			adaptorString = adaptorString.trim();
+		}
+
+		// "WODefaultAdaptor" is not a choice, it's the absence of one: WO ships the WOAdaptor property commented out with
+		// exactly that value, so naming it asks for whatever the application would have used anyway. Passing it on regardless
+		// is not harmless, though, since a launch argument outranks every way an application can select an adaptor for itself
+		// - an adaptor that registers itself as the application's default (wo-adaptor-jetty does, from a framework principal
+		// class) would be silently overridden. So we treat it as unset and say nothing, which is what it means.
+		// Anyone who really wants the classic adaptor can name WOClassicAdaptor, which is unambiguous.
+		if( adaptorString != null && adaptorString.length() > 0 && !"WODefaultAdaptor".equals( adaptorString ) ) {
 			anArray.add( "-WOAdaptor" );
 			anArray.add( adaptorString );
 		}
