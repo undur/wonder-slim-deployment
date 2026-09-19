@@ -1016,9 +1016,12 @@ public class DirectAction extends WODirectAction {
 
 	/**
 	 * The request body as a stream. Under an adaptor that hands the body over
-	 * stream-backed (WOAdaptorJetty), this reads straight off the wire and the
-	 * body never materializes in memory; under a buffering adaptor it falls
-	 * back to the buffered bytes. null when the body is absent or empty.
+	 * stream-backed, this reads straight off the wire and the body never
+	 * materializes in memory; under a buffering adaptor it falls back to the
+	 * buffered bytes. The classic adaptor hands wa/deploy a stream-backed
+	 * body too (verified 2026-09-02), so deploy streaming is no reason to put
+	 * WOAdaptorJetty on wotaskd — which must stay on the classic adaptor
+	 * anyway; see LifebeatRequestHandler. null when the body is absent or empty.
 	 */
 	private static InputStream contentStream( final WORequest request ) {
 

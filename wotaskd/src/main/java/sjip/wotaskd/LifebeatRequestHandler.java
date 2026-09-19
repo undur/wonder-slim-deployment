@@ -29,6 +29,15 @@ import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
 import sjip.core.x.FHosts;
 
+/**
+ * Receives the lifebeats WO instances send to register themselves and report liveness.
+ *
+ * This handler is why wotaskd stays on the classic adaptor, deliberately: WO's lifebeat thread sends its
+ * beats as HTTP/1.1 without a Host header, which Jetty 12 rejects outright (400 "No Host" — an unconditional
+ * check in its parser, no compliance mode relaxes it). On WOAdaptorJetty no instance ever registers and the
+ * adaptor config comes out empty. Since the Jetty adaptor selects itself whenever it is on the classpath,
+ * the guard is wotaskd's pom: it must not depend on wo-adaptor-jetty.
+ */
 public class LifebeatRequestHandler extends WORequestHandler {
 
 	private static final Logger log = LoggerFactory.getLogger( LifebeatRequestHandler.class );
