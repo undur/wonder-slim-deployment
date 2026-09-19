@@ -1,6 +1,5 @@
 package sjip.monitor.util;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -28,18 +27,10 @@ public class JMLogFeed extends AppenderSkeleton {
 	private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern( "HH:mm:ss.SSS" ).withZone( ZoneId.systemDefault() );
 
 	/**
-	 * The keep-alive must stay well below every idle timeout between us and the browser. The tightest one in
-	 * our deployments is the adaptor-config recvTimeout, which Modulo applies as its upstream idle timeout and
-	 * whose classic default is 30 seconds - the same as SSEStream's default keep-alive, a race the timeout wins
-	 * on a quiet log.
-	 */
-	private static final Duration KEEP_ALIVE_INTERVAL = Duration.ofSeconds( 10 );
-
-	/**
 	 * @return The open-ended SSE response subscribing the caller to the feed
 	 */
 	public static WOResponse subscribe() {
-		return HUB.open( KEEP_ALIVE_INTERVAL ).response();
+		return HUB.open().response();
 	}
 
 	@Override
