@@ -606,11 +606,11 @@ public class WOTaskdHandler {
 								anInstance.setDeaths( deaths == null ? new ArrayList<>() : new ArrayList<>( deaths ) );
 								anInstance.setNextScheduledShutdownString_M( nextShutdown );
 
-								// Conditional so a wotaskd that hasn't re-discovered yet (restart) doesn't erase a known type
-								final ApplicationType applicationType = ApplicationType.fromWireValue( (String)instanceDict.get( "applicationType" ) );
+								// Conditional so a wotaskd that hasn't re-discovered yet (restart) doesn't erase known types
+								final List<ApplicationType> instanceTypes = ApplicationType.fromWireValues( instanceDict.get( "applicationTypes" ) );
 
-								if( applicationType != null ) {
-									anInstance.setApplicationType( applicationType );
+								if( instanceTypes != null ) {
+									anInstance.setApplicationTypes( instanceTypes );
 								}
 							}
 						}
@@ -710,11 +710,11 @@ public class WOTaskdHandler {
 						if( anApplication != null ) {
 							anApplication.setRunningInstancesCount( anApplication.runningInstancesCount() + runningInstances.intValue() );
 
-							// Conditional so a wotaskd that hasn't re-discovered yet doesn't erase a known type
-							final ApplicationType applicationType = ApplicationType.fromWireValue( (String)appDict.get( "applicationType" ) );
+							// Conditional so a wotaskd that hasn't re-discovered yet doesn't erase known types
+							final List<ApplicationType> applicationTypes = ApplicationType.fromWireValues( appDict.get( "applicationTypes" ) );
 
-							if( applicationType != null ) {
-								anApplication.setApplicationType( applicationType );
+							if( applicationTypes != null ) {
+								anApplication.setApplicationTypes( applicationTypes );
 							}
 						}
 					}

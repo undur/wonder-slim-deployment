@@ -13,6 +13,7 @@ SUCH DAMAGE.
 package sjip.core.model;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import sjip.core.MUtil;
@@ -608,33 +609,35 @@ public class MApplication extends MObject {
 	}
 
 	/**
-	 * The application's type, when set directly - in JavaMonitor it arrives with the application query
-	 * response, since the wotaskd that probed the instance derives the app's type before answering.
+	 * The application's types, when set directly - in JavaMonitor they arrive with the application query
+	 * response, since the wotaskd that probed the instances derives the app's types before answering.
 	 */
-	private ApplicationType _applicationType;
+	private List<ApplicationType> _applicationTypes;
 
-	public void setApplicationType( final ApplicationType applicationType ) {
-		_applicationType = applicationType;
+	public void setApplicationTypes( final List<ApplicationType> applicationTypes ) {
+		_applicationTypes = applicationTypes;
 	}
 
 	/**
-	 * @return The application's type - as set directly, or discovered from any of its instances; null
-	 *         while undiscovered. All instances of an app are the same type, so the first typed one
-	 *         answers for the app.
+	 * @return The application's types - as set directly, or the union of what its instances turned out
+	 *         to be (plural, since a hybrid application can serve multiple frameworks at once); null
+	 *         while undiscovered. Enum-ordered, so badge rows render consistently.
 	 */
-	public ApplicationType applicationType() {
+	public List<ApplicationType> applicationTypes() {
 
-		if( _applicationType != null ) {
-			return _applicationType;
+		if( _applicationTypes != null ) {
+			return _applicationTypes;
 		}
 
+		final EnumSet<ApplicationType> union = EnumSet.noneOf( ApplicationType.class );
+
 		for( final MInstance instance : _instanceArray ) {
-			if( instance.applicationType() != null ) {
-				return instance.applicationType();
+			if( instance.applicationTypes() != null ) {
+				union.addAll( instance.applicationTypes() );
 			}
 		}
 
-		return null;
+		return union.isEmpty() ? null : List.copyOf( union );
 	}
 
 	public List<MHost> hostArray() {

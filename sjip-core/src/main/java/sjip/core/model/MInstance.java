@@ -104,7 +104,7 @@ public class MInstance extends MObject {
 	private String _statisticsError = null;
 	private int _connectFailureCount = 0;
 	private boolean _shouldDie = false;
-	private ApplicationType _applicationType;
+	private List<ApplicationType> _applicationTypes;
 
 	// This constructor is for adding new instances through the UI
 	public MInstance( MHost aHost, MApplication anApplication, Integer anID, MSiteConfig aConfig ) {
@@ -596,15 +596,17 @@ public class MInstance extends MObject {
 	}
 
 	/**
-	 * @return The kind of application this instance turned out to be, null while undiscovered. Probed by
-	 *         wotaskd when the instance registers; reaches JavaMonitor through the instance query response.
+	 * @return The kinds of application this instance turned out to be - plural, since a hybrid instance
+	 *         can serve multiple frameworks at once. Null while undiscovered; never empty once set.
+	 *         Probed by wotaskd when the instance registers; reaches JavaMonitor through the instance
+	 *         query response.
 	 */
-	public ApplicationType applicationType() {
-		return _applicationType;
+	public List<ApplicationType> applicationTypes() {
+		return _applicationTypes;
 	}
 
-	public void setApplicationType( final ApplicationType applicationType ) {
-		_applicationType = applicationType;
+	public void setApplicationTypes( final List<ApplicationType> applicationTypes ) {
+		_applicationTypes = applicationTypes;
 	}
 
 	public void setStatisticsError( String errorString ) {

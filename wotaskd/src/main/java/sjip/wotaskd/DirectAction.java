@@ -567,8 +567,8 @@ public class DirectAction extends WODirectAction {
 						appDict.put( "runningInstances", anApp.runningInstancesCount_W() );
 
 						// Additive: absent while no local instance has been typed (see ApplicationTypeProber)
-						if( anApp.applicationType() != null ) {
-							appDict.put( "applicationType", anApp.applicationType().name() );
+						if( anApp.applicationTypes() != null ) {
+							appDict.put( "applicationTypes", anApp.applicationTypes().stream().map( Enum::name ).toList() );
 						}
 
 						applicationResponse.add( appDict );
@@ -619,9 +619,9 @@ public class DirectAction extends WODirectAction {
 						instanceDict.put( "deaths", anInstance.deaths() );
 						instanceDict.put( "nextShutdown", anInstance.nextScheduledShutdownString() );
 
-						// Additive: absent when the type hasn't been discovered (see ApplicationTypeProber)
-						if( anInstance.applicationType() != null ) {
-							instanceDict.put( "applicationType", anInstance.applicationType().name() );
+						// Additive: absent while undiscovered (see ApplicationTypeProber)
+						if( anInstance.applicationTypes() != null ) {
+							instanceDict.put( "applicationTypes", anInstance.applicationTypes().stream().map( Enum::name ).toList() );
 						}
 
 						instanceResponse.add( instanceDict );

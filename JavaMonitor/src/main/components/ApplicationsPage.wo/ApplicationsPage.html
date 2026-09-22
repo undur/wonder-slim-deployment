@@ -25,9 +25,9 @@
 								<tr>
 									<td>
 										<wo:link action="$appDetailsClicked" class="text-reset"><strong><wo:str value="$currentApplication.name" /></strong></wo:link>
-										<wo:if condition="$currentApplication.applicationType">
-											<span class="badge bg-azure-lt ms-2"><wo:str value="$currentApplication.applicationType.displayName" /></span>
-										</wo:if>
+										<wo:repetition list="$currentApplication.applicationTypes" item="$currentBadgeType">
+											<wo:container elementName="span" class="$currentBadgeClass"><wo:str value="$currentBadgeType.displayName" /></wo:container>
+										</wo:repetition>
 										<wo:if condition="$currentApplication.isRunning">
 											<wo:link href="$hrefToApp" target="new" class="ms-2 text-secondary" title="Open in browser"><wo:JMIcon name="Link" /></wo:link>
 										</wo:if>

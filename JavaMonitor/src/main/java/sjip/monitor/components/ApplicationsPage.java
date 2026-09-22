@@ -22,6 +22,7 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 
+import sjip.core.model.ApplicationType;
 import sjip.core.model.MApplication;
 import sjip.core.x.XUtil;
 import sjip.monitor.MonitorComponent;
@@ -33,6 +34,22 @@ public class ApplicationsPage extends MonitorComponent {
 	 * Application currently being iterated over in the UI
 	 */
 	public MApplication currentApplication;
+
+	/** Item of the badge repetition: one of currentApplication's discovered types */
+	public ApplicationType currentBadgeType;
+
+	/**
+	 * @return The badge class for currentBadgeType, colored by framework: green for ng-objects, blue for
+	 *         wonder-slim, orange for Project Wonder, gray for anything else
+	 */
+	public String currentBadgeClass() {
+		return "ms-2 badge " + switch( currentBadgeType ) {
+			case NG_OBJECTS -> "bg-green-lt";
+			case WONDER_SLIM -> "bg-blue-lt";
+			case PROJECT_WONDER -> "bg-orange-lt";
+			case OTHER -> "bg-secondary-lt";
+		};
+	}
 	
 	/**
 	 * Name of new application (when adding an application)
