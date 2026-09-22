@@ -43,7 +43,7 @@ public class ApplicationsPage extends MonitorComponent {
 	 *         wonder-slim, orange for Project Wonder, gray for anything else
 	 */
 	public String currentBadgeClass() {
-		return "ms-2 badge " + switch( currentBadgeType ) {
+		return "badge me-1 " + switch( currentBadgeType ) {
 			case NG_OBJECTS -> "bg-green-lt";
 			case WONDER_SLIM -> "bg-blue-lt";
 			case PROJECT_WONDER -> "bg-orange-lt";
