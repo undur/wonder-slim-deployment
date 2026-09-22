@@ -607,6 +607,36 @@ public class MApplication extends MObject {
 		return _instanceArray;
 	}
 
+	/**
+	 * The application's type, when set directly - in JavaMonitor it arrives with the application query
+	 * response, since the wotaskd that probed the instance derives the app's type before answering.
+	 */
+	private ApplicationType _applicationType;
+
+	public void setApplicationType( final ApplicationType applicationType ) {
+		_applicationType = applicationType;
+	}
+
+	/**
+	 * @return The application's type - as set directly, or discovered from any of its instances; null
+	 *         while undiscovered. All instances of an app are the same type, so the first typed one
+	 *         answers for the app.
+	 */
+	public ApplicationType applicationType() {
+
+		if( _applicationType != null ) {
+			return _applicationType;
+		}
+
+		for( final MInstance instance : _instanceArray ) {
+			if( instance.applicationType() != null ) {
+				return instance.applicationType();
+			}
+		}
+
+		return null;
+	}
+
 	public List<MHost> hostArray() {
 		return _hostArray;
 	}

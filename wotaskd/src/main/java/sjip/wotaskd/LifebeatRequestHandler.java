@@ -158,6 +158,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			if( instance != null ) {
 				instance.startRegistration();
 				instance.setShouldDie( false );
+				ApplicationTypeProber.probeIfNeeded( instance );
 			}
 			else {
 				appInstanceController().registerUnknownInstance( instanceName, host, port );
@@ -180,6 +181,7 @@ public class LifebeatRequestHandler extends WORequestHandler {
 
 			if( instance != null ) {
 				instance.updateRegistration();
+				ApplicationTypeProber.probeIfNeeded( instance );
 				// This call will reset shouldDie status!;
 				return !instance.shouldDieAndReset();
 			}

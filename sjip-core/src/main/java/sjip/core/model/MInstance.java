@@ -104,6 +104,7 @@ public class MInstance extends MObject {
 	private String _statisticsError = null;
 	private int _connectFailureCount = 0;
 	private boolean _shouldDie = false;
+	private ApplicationType _applicationType;
 
 	// This constructor is for adding new instances through the UI
 	public MInstance( MHost aHost, MApplication anApplication, Integer anID, MSiteConfig aConfig ) {
@@ -592,6 +593,18 @@ public class MInstance extends MObject {
 
 	public void setStatistics( Map<String, String> newStatistics ) {
 		_statistics = InstanceStatistics.fromDictionary( newStatistics );
+	}
+
+	/**
+	 * @return The kind of application this instance turned out to be, null while undiscovered. Probed by
+	 *         wotaskd when the instance registers; reaches JavaMonitor through the instance query response.
+	 */
+	public ApplicationType applicationType() {
+		return _applicationType;
+	}
+
+	public void setApplicationType( final ApplicationType applicationType ) {
+		_applicationType = applicationType;
 	}
 
 	public void setStatisticsError( String errorString ) {

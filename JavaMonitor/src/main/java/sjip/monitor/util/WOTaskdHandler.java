@@ -13,6 +13,7 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 
 import sjip.core.MUtil;
+import sjip.core.model.ApplicationType;
 import sjip.core.model.MApplication;
 import sjip.core.model.MApplicationDto;
 import sjip.core.model.MHost;
@@ -604,6 +605,13 @@ public class WOTaskdHandler {
 								anInstance.setStatistics( statistics );
 								anInstance.setDeaths( deaths == null ? new ArrayList<>() : new ArrayList<>( deaths ) );
 								anInstance.setNextScheduledShutdownString_M( nextShutdown );
+
+								// Conditional so a wotaskd that hasn't re-discovered yet (restart) doesn't erase a known type
+								final ApplicationType applicationType = ApplicationType.fromWireValue( (String)instanceDict.get( "applicationType" ) );
+
+								if( applicationType != null ) {
+									anInstance.setApplicationType( applicationType );
+								}
 							}
 						}
 					}
@@ -701,6 +709,13 @@ public class WOTaskdHandler {
 						MApplication anApplication = siteConfig().applicationWithName( appName );
 						if( anApplication != null ) {
 							anApplication.setRunningInstancesCount( anApplication.runningInstancesCount() + runningInstances.intValue() );
+
+							// Conditional so a wotaskd that hasn't re-discovered yet doesn't erase a known type
+							final ApplicationType applicationType = ApplicationType.fromWireValue( (String)appDict.get( "applicationType" ) );
+
+							if( applicationType != null ) {
+								anApplication.setApplicationType( applicationType );
+							}
 						}
 					}
 				}

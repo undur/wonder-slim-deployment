@@ -565,6 +565,12 @@ public class DirectAction extends WODirectAction {
 						final Map<String, Object> appDict = new LinkedHashMap<>();
 						appDict.put( "name", anApp.name() );
 						appDict.put( "runningInstances", anApp.runningInstancesCount_W() );
+
+						// Additive: absent while no local instance has been typed (see ApplicationTypeProber)
+						if( anApp.applicationType() != null ) {
+							appDict.put( "applicationType", anApp.applicationType().name() );
+						}
+
 						applicationResponse.add( appDict );
 					}
 				}
@@ -612,6 +618,11 @@ public class DirectAction extends WODirectAction {
 						instanceDict.put( "statistics", anInstance.statistics().toDictionary() );
 						instanceDict.put( "deaths", anInstance.deaths() );
 						instanceDict.put( "nextShutdown", anInstance.nextScheduledShutdownString() );
+
+						// Additive: absent when the type hasn't been discovered (see ApplicationTypeProber)
+						if( anInstance.applicationType() != null ) {
+							instanceDict.put( "applicationType", anInstance.applicationType().name() );
+						}
 
 						instanceResponse.add( instanceDict );
 					}
