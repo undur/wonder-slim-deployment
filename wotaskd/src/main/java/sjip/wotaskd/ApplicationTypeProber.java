@@ -43,6 +43,16 @@ public class ApplicationTypeProber {
 	private static final Set<MInstance> IN_FLIGHT = ConcurrentHashMap.newKeySet();
 
 	/**
+	 * An instance announced hasStarted: a fresh JVM, possibly a new build with different answers.
+	 * Discard what we knew and re-discover. (If a probe against the previous process is somehow still
+	 * in flight, this round is skipped - the types stay null and the next lifebeat re-probes.)
+	 */
+	public static void reprobe( final MInstance instance ) {
+		instance.setApplicationTypes( null );
+		probeIfNeeded( instance );
+	}
+
+	/**
 	 * Kick off a probe for the instance unless its types are already known or a probe is already running.
 	 * Returns immediately; the result lands on the instance via setApplicationTypes.
 	 */

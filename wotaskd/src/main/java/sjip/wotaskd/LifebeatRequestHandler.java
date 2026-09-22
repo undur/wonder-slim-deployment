@@ -158,7 +158,8 @@ public class LifebeatRequestHandler extends WORequestHandler {
 			if( instance != null ) {
 				instance.startRegistration();
 				instance.setShouldDie( false );
-				ApplicationTypeProber.probeIfNeeded( instance );
+				// hasStarted means a fresh JVM - possibly a new build, so the type cache is discarded
+				ApplicationTypeProber.reprobe( instance );
 			}
 			else {
 				appInstanceController().registerUnknownInstance( instanceName, host, port );
