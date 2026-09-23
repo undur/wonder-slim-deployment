@@ -12,8 +12,11 @@ import org.simplejavamail.api.mailer.config.TransportStrategy;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
 import org.simplejavamail.mailer.internal.MailerRegularBuilderImpl;
+import org.simplejavamail.recipient.RecipientsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.mail.Message.RecipientType;
 
 
 /**
@@ -110,17 +113,12 @@ public class Emailer {
 				emailBuilder.withBounceTo( emailWrapper.bounceToEmailAddress );
 			}
 
-			for( final String toAddress : emailWrapper.toAddresses ) {
-				emailBuilder.to( toAddress );
-			}
-
-			for( final String ccAddress : emailWrapper.ccAddresses ) {
-				emailBuilder.to( ccAddress );
-			}
-
-			for( final String bccAddress : emailWrapper.bccAddresses ) {
-				emailBuilder.to( bccAddress );
-			}
+			// FIXME: CC and BCC addresses go out as To recipients, so BCC addresses are visible to everyone. Kept as-is through the simple-java-mail 9 upgrade
+			emailBuilder.withRecipients( new RecipientsBuilder()
+					.withRecipientsWithDefaultName( null, emailWrapper.toAddresses, RecipientType.TO )
+					.withRecipientsWithDefaultName( null, emailWrapper.ccAddresses, RecipientType.TO )
+					.withRecipientsWithDefaultName( null, emailWrapper.bccAddresses, RecipientType.TO )
+					.buildRecipients() );
 
 			emailBuilder.withSubject( emailWrapper.subject );
 
