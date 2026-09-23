@@ -113,11 +113,10 @@ public class Emailer {
 				emailBuilder.withBounceTo( emailWrapper.bounceToEmailAddress );
 			}
 
-			// FIXME: CC and BCC addresses go out as To recipients, so BCC addresses are visible to everyone. Kept as-is through the simple-java-mail 9 upgrade
 			emailBuilder.withRecipients( new RecipientsBuilder()
 					.withRecipientsWithDefaultName( null, emailWrapper.toAddresses, RecipientType.TO )
-					.withRecipientsWithDefaultName( null, emailWrapper.ccAddresses, RecipientType.TO )
-					.withRecipientsWithDefaultName( null, emailWrapper.bccAddresses, RecipientType.TO )
+					.withRecipientsWithDefaultName( null, emailWrapper.ccAddresses, RecipientType.CC )
+					.withRecipientsWithDefaultName( null, emailWrapper.bccAddresses, RecipientType.BCC )
 					.buildRecipients() );
 
 			emailBuilder.withSubject( emailWrapper.subject );
