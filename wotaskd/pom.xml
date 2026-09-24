@@ -37,8 +37,11 @@
 			<artifactId>ERExtensions</artifactId>
 			<version>${wonder.version}</version>
 		</dependency>
-		<!-- Deliberately no wo-adaptor-jetty here: it selects itself whenever present, and
-		     wotaskd must stay on the classic adaptor - see LifebeatRequestHandler -->
+		<dependency>
+			<groupId>is.rebbi</groupId>
+			<artifactId>wo-adaptor-jetty</artifactId>
+			<version>0.12.0</version>
+		</dependency>
 		<dependency>
 			<groupId>${wonder.group}</groupId>
 			<artifactId>ERLoggingReload4j</artifactId>

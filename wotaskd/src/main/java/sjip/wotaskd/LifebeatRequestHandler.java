@@ -15,6 +15,8 @@ SUCH DAMAGE.
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.Logger;
@@ -30,13 +32,16 @@ import sjip.core.model.MSiteConfig;
 import sjip.core.x.FHosts;
 
 /**
- * Receives the lifebeats WO instances send to register themselves and report liveness.
+ * Receives the lifebeats instances send to register themselves and report liveness.
  *
- * This handler is why wotaskd stays on the classic adaptor, deliberately: WO's lifebeat thread sends its
- * beats as HTTP/1.1 without a Host header, which Jetty 12 rejects outright (400 "No Host" — an unconditional
- * check in its parser, no compliance mode relaxes it). On WOAdaptorJetty no instance ever registers and the
- * adaptor config comes out empty. Since the Jetty adaptor selects itself whenever it is on the classpath,
- * the guard is wotaskd's pom: it must not depend on wo-adaptor-jetty.
+ * Beats arrive by two routes, sharing {@link #process}:
+ *
+ * - Well-formed HTTP (ng-objects' lifebeat thread, or anything else that sends a Host header) is dispatched
+ *   to this request handler the ordinary way.
+ * - WO instances' lifebeats arrive as HTTP/1.1 *without* a Host header, which Jetty 12 rejects in its parser
+ *   (400 "No Host", unconditionally). Those connections are claimed before HTTP parsing by
+ *   {@link WOLifebeatDetector} and served by {@link WOLifebeatConnection}, which answers them exactly as the
+ *   classic adaptor does. Under the classic adaptor they simply land here.
  */
 public class LifebeatRequestHandler extends WORequestHandler {
 
@@ -59,39 +64,96 @@ public class LifebeatRequestHandler extends WORequestHandler {
 		return r;
 	}
 
+	/**
+	 * What a lifebeat amounts to, independent of the route it arrived by.
+	 */
+	public enum Verdict {
+
+		/** Registered - carry on */
+		OK,
+
+		/** Acknowledged, nothing to report back (willStop, willCrash) */
+		ACKNOWLEDGED,
+
+		/** Malformed beat - the sender should drop the connection and start over */
+		BAD,
+
+		/** The instance should die (force quit) */
+		DIE,
+
+		/** Not from a configured host - ignored, though still answered (as the classic adaptor did) with an empty acknowledgement */
+		REJECTED
+	}
+
+	/** Addresses whose beats have been rejected and warned about - once each, since a rejected instance keeps beating */
+	private final Set<InetAddress> _warnedAddresses = ConcurrentHashMap.newKeySet();
+
 	@Override
 	public WOResponse handleRequest( WORequest aRequest ) {
 
-		// Sadly, we do regenerate in the case of random lifebeats. Hopefully this won't be too often.
 		// Didn't pull this out so that we can rely on isUsingWebServer to catch some bad requests
-		if( !FHosts.isUsingWebServer( aRequest.headers() ) && FHosts.isConfiguredHostAddress( aRequest._originatingAddress(), true ) ) {
-			final Object lock = WOApplication.application().requestHandlingLock();
-
-			if( lock != null ) {
-				synchronized( lock ) {
-					return _handleRequest( aRequest );
-				}
-			}
-
-			return _handleRequest( aRequest );
+		if( FHosts.isUsingWebServer( aRequest.headers() ) ) {
+			return null;
 		}
 
-		return null;
+		final WOResponse response = switch( process( aRequest.queryString(), aRequest._originatingAddress() ) ) {
+			case OK -> GOOD_RESPONSE;
+			case DIE -> DIE_RESPONSE;
+			case BAD -> BAD_LIFEBEAT_RESPONSE;
+			case ACKNOWLEDGED, REJECTED -> null;
+		};
+
+		// Returning null here used to bypass response generation entirely, back when wotaskd's Application overrode dispatchRequest()
+		// to fast-path lifebeats (see commit 51c4677, issue #19). With the override gone, super.dispatchRequest upgrades null to
+		// an empty WOResponse, so this branch no longer expresses a meaningful behavior. Pending verification — issue #32.
+		if( "HTTP/1.0".equals( aRequest.httpVersion() ) ) {
+			return null;
+		}
+
+		return response;
 	}
 
-	private WOResponse _handleRequest( WORequest aRequest ) {
+	/**
+	 * Processes one lifebeat, whichever route it arrived by.
+	 *
+	 * @param queryString {@code <notification name>&<instance name>&<hostname>&<port>}, notification name being one of
+	 *                    "hasStarted", "lifebeat", "willStop", "willCrash"
+	 * @param originatingAddress The address the beat came from; only configured hosts are heard
+	 */
+	public Verdict process( final String queryString, final InetAddress originatingAddress ) {
 
-		WOResponse aResponse = BAD_LIFEBEAT_RESPONSE;
+		// Sadly, we do regenerate in the case of random lifebeats. Hopefully this won't be too often.
+		if( !FHosts.isConfiguredHostAddress( originatingAddress, true ) ) {
+			if( originatingAddress != null && _warnedAddresses.add( originatingAddress ) ) {
+				log.warn( "{}: Ignoring lifebeats from {} - not this host's configured address. With WOHost set, only that exact address is accepted", _hostName, originatingAddress );
+			}
+
+			return Verdict.REJECTED;
+		}
+
+		final Object lock = WOApplication.application().requestHandlingLock();
+
+		if( lock != null ) {
+			synchronized( lock ) {
+				return _process( queryString );
+			}
+		}
+
+		return _process( queryString );
+	}
+
+	private Verdict _process( final String queryString ) {
+
+		Verdict verdict = Verdict.BAD;
 
 		// http://localhost:1085/cgi-bin/WebObjects/wotaskd.woa/wlb?<notification name>&<instance name>&<hostname>&<port>
 		// <notification name> = "hasStarted", "lifebeat", "willStop", "willCrash"
 
-		final String queryString = aRequest.queryString();
 		final List<String> values = queryString == null ? null : List.of( queryString.split( "&", -1 ) );
 
 		if( (values == null) || (values.size() != 4) ) {
-			appSiteConfig().globalErrorDictionary.put( aRequest.queryString(), (_hostName + ": Received bad lifebeat: " + aRequest.queryString()) );
-			log.error( "{}: Received bad lifebeat: {}", _hostName, aRequest.queryString() );
+			appSiteConfig().globalErrorDictionary.put( queryString, (_hostName + ": Received bad lifebeat: " + queryString) );
+			log.error( "{}: Received bad lifebeat: {}", _hostName, queryString );
 		}
 		else {
 			final String notificationType = values.get( 0 );
@@ -108,41 +170,34 @@ public class LifebeatRequestHandler extends WORequestHandler {
 				// if app is not yet registered, register
 				// if the instance should die, return DieResponse
 				if( registerLifebeat( instanceName, host, port ) == false ) {
-					aResponse = DIE_RESPONSE;
+					verdict = Verdict.DIE;
 				}
 				else {
-					aResponse = GOOD_RESPONSE;
+					verdict = Verdict.OK;
 				}
 			}
 			else if( notificationType.equals( "hasStarted" ) ) {
 				// app has just started - register instance
 				registerStart( instanceName, host, port );
-				aResponse = GOOD_RESPONSE;
+				verdict = Verdict.OK;
 			}
 			else if( notificationType.equals( "willStop" ) ) {
 				// app will stop - mark as dead
 				registerStop( instanceName, host, port );
-				aResponse = null;
+				verdict = Verdict.ACKNOWLEDGED;
 			}
 			else if( notificationType.equals( "willCrash" ) ) {
 				// app will crash - mark as dead, email notification
 				registerCrash( instanceName, host, port );
-				aResponse = null;
+				verdict = Verdict.ACKNOWLEDGED;
 			}
 			else {
-				appSiteConfig().globalErrorDictionary.put( aRequest.queryString(), (_hostName + ": Received bad lifebeat: " + aRequest.queryString()) );
-				log.error( "{}: Received bad lifebeat: {}", _hostName, aRequest.queryString() );
+				appSiteConfig().globalErrorDictionary.put( queryString, (_hostName + ": Received bad lifebeat: " + queryString) );
+				log.error( "{}: Received bad lifebeat: {}", _hostName, queryString );
 			}
 		}
 
-		// Returning null here used to bypass response generation entirely, back when wotaskd's Application overrode dispatchRequest()
-		// to fast-path lifebeats (see commit 51c4677, issue #19). With the override gone, super.dispatchRequest upgrades null to
-		// an empty WOResponse, so this branch no longer expresses a meaningful behavior. Pending verification — issue #32.
-		if( "HTTP/1.0".equals( aRequest.httpVersion() ) ) {
-			aResponse = null;
-		}
-
-		return aResponse;
+		return verdict;
 	}
 
 	private void registerStart( String instanceName, String host, String port ) {
