@@ -110,8 +110,10 @@ public class ApplicationTypeProber {
 		// session, no password check) on every Project Wonder app for years. wonder-slim never had it -
 		// its ERXDirectAction answers the same URL with the "no such action" exception page - and on
 		// plain WO the class doesn't resolve at all. Routed by classname, so the check doesn't depend
-		// on what the application's own DirectAction class extends.
-		final ProbeResult wonder = get( base + "/cgi-bin/WebObjects/" + instance.applicationName() + ".woa/wa/ERXDirectAction/empty" );
+		// on what the application's own DirectAction class extends. Skipped for an instance that
+		// answered as wonder-slim: wonder-slim replaces Project Wonder, so it can't be both, and asking
+		// would only have the instance log that exception.
+		final ProbeResult wonder = types.contains( ApplicationType.WONDER_SLIM ) ? ProbeResult.SKIPPED : get( base + "/cgi-bin/WebObjects/" + instance.applicationName() + ".woa/wa/ERXDirectAction/empty" );
 
 		if( wonder.status() == 200 && (wonder.body() == null || wonder.body().isBlank()) ) {
 			types.add( ApplicationType.PROJECT_WONDER );
