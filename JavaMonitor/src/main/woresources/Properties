@@ -1,8 +1,3 @@
-# WOHost=localhost
-# WOAutoOpenInBrowser=true
-# WODebuggingEnabled=false
-# WOCachingEnabled=true
-
 WODirectConnectEnabled=true
 WOSessionTimeOut=1800
 
@@ -12,12 +7,3 @@ WOLifebeatEnabled=true
 WOAllowsConcurrentRequestHandling=true
 
 WODeploymentBackups=true
-
-log4j.rootCategory=INFO, A1
-
-# A1 is set to be a FileAppender which outputs to System.out.
-log4j.appender.A1=org.apache.log4j.ConsoleAppender
-
-# A1 uses PatternLayout.
-log4j.appender.A1.layout=er.extensions.logging.ERXPatternLayout
-log4j.appender.A1.layout.ConversionPattern=%d %-5p %V{u/f} [%t] %C{2} (%F:%L) - %m%n

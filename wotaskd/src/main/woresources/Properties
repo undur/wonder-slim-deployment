@@ -1,13 +1,5 @@
-# WOHost=localhost
-# WOAutoOpenInBrowser=false
-# WODebuggingEnabled=false
-# WOCachingEnabled=true
-
 WODirectConnectEnabled=true
 WOPort=1085
-
-# FIXME: WTF is this? // Hugi 2026-05-02
-er.extensions.ERXMessageEncoding.Enabled=false
 
 # deployment defaults
 WOMonitorEnabled=false
@@ -38,11 +30,9 @@ WOShouldUseSpawn=true
 # then it can be forcefully terminated after some time period if WOTaskd.forceQuitTaskEnabled is true
 # WOTaskd.forceQuitTaskEnabled=false
 
-
 # If an app instance has been told to "refuse new sessions" and it does not stop, 
 # then it can be forcefully terminated after this number of retries.
 # WOTaskd.refuseNumRetries=3
-
 
 # If WOTaskd.forceQuitTaskEnabled is true, setup a task to check the instance. 
 # If it still doesn't die, then force a QUIT command when the timer elapses.
@@ -52,15 +42,5 @@ WOShouldUseSpawn=true
 # The value is specified in milliseconds. The minimum is 60000 (60 seconds).
 # WOTaskd.killTimeout=120000
 
-
 # The number of milliseconds before a timeout occurs for requests sent from WOTaskd to application instances. 
 # WOTaskd.receiveTimeout=5000
-
-log4j.rootCategory=INFO, A1
-
-# A1 is set to be a FileAppender which outputs to System.out.
-log4j.appender.A1=org.apache.log4j.ConsoleAppender
-
-# A1 uses PatternLayout.
-log4j.appender.A1.layout=er.extensions.logging.ERXPatternLayout
-log4j.appender.A1.layout.ConversionPattern=%d %-5p %V{u/f} [%t] %C{2} (%F:%L) - %m%n
