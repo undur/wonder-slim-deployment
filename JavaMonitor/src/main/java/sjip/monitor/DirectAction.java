@@ -13,10 +13,13 @@ package sjip.monitor;
  SUCH DAMAGE.
  */
 import com.webobjects.appserver.WOActionResults;
+import com.webobjects.appserver.WOApplication;
+import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXDirectAction;
+import er.extensions.appserver.ERXWOContext;
 import sjip.monitor.components.ApplicationsPage;
 import sjip.monitor.components.JMLoginPage;
 import sjip.monitor.util.JMLogFeed;
@@ -31,26 +34,34 @@ public class DirectAction extends ERXDirectAction {
 
 	@Override
 	public WOActionResults defaultAction() {
+		return frontPage( context() );
+	}
 
+	/**
+	 * @return The front page, made in the given context: the applications, or the login page when a password is required
+	 *         and the session isn't logged in (and the request carries no valid pw)
+	 */
+	public static WOActionResults frontPage( final WOContext context ) {
+		final WOApplication application = WOApplication.application();
 		final boolean loginRequired = WOTaskdHandler.siteConfig().isPasswordRequired();
 
 		if( !loginRequired ) {
-			return pageWithName( ApplicationsPage.class );
+			return application.pageWithName( ApplicationsPage.class.getName(), context );
 		}
 
-		final Session session = (Session)existingSession();
+		final Session session = (Session)((ERXWOContext)context).existingSession();
 
 		if( session != null && session.isLoggedIn() ) {
-			return pageWithName( ApplicationsPage.class );
+			return application.pageWithName( ApplicationsPage.class.getName(), context );
 		}
 
-		final String password = request().stringFormValueForKey( "pw" );
+		final String password = context.request().stringFormValueForKey( "pw" );
 
 		if( password != null && WOTaskdHandler.siteConfig().checkPasswordPlaintext( password )) {
-			return pageWithName( ApplicationsPage.class );
+			return application.pageWithName( ApplicationsPage.class.getName(), context );
 		}
 
-		return pageWithName( JMLoginPage.class );
+		return application.pageWithName( JMLoginPage.class.getName(), context );
 	}
 
 	public WOResponse statisticsAction() {

@@ -86,10 +86,7 @@ public class Application extends ERXApplication {
 		}, "test" );
 
 		
-		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
-		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
-		final WODirectActionRequestHandler rootRequestHandler = new WODirectActionRequestHandler( DirectAction.class.getName(), "default", false );
-		ERXRouter.declare( routes -> routes.map( "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ) ) );
+		ERXRouter.declare( routes -> routes.map( "/", ri -> DirectAction.frontPage( ri.context() ) ) );
 
 		FProperties.logCurrentValues( logger );
 	}
