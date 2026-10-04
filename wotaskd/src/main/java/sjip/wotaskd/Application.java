@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.routes.RouteTable;
+import er.extensions.routing.ERXRouter;
 import sjip.core.model.MSiteConfig;
 import sjip.core.x.FApplication;
 import sjip.core.x.FProperties;
@@ -73,7 +73,7 @@ public class Application extends ERXApplication {
 		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
 		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
 		final WODirectActionRequestHandler rootRequestHandler = new WODirectActionRequestHandler( DirectAction.class.getName(), "default", false );
-		RouteTable.defaultRouteTable().map( "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
+		ERXRouter.declare( routes -> routes.map( "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ) ) );
 
 		FProperties.logCurrentValues( logger );
 	}

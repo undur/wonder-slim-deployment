@@ -23,8 +23,8 @@ import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.routes.RouteHandler;
-import er.extensions.routes.RouteTable;
+import er.extensions.routing.ERXRouter;
+import er.extensions.routing.RouteHandler;
 import sjip.core.x.FProperties;
 import sjip.monitor.admin.AdminAction;
 import sjip.monitor.test.TestDirectAction;
@@ -92,28 +92,27 @@ public class Application extends ERXApplication {
 		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
 		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
 		final WODirectActionRequestHandler rootRequestHandler = new WODirectActionRequestHandler( DirectAction.class.getName(), "default", false );
-		RouteTable.defaultRouteTable().map( "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
-		
-		// FIXME: This should be handled by ERExtensions // Hugi 2026-05-05
-		// Routes are exact-match, so cover both URL prefixes in circulation — adaptorPath()'s
-		// (default /cgi-bin/WebObjects) and /Apps/WebObjects as served by wo-adaptor-jetty/modulo —
-		// each with and without a trailing slash. Extensionless forms (…/JavaMonitor) redirect to
-		// the canonical .woa URL instead of handling in place: WO's request parsing needs the
-		// extension, and without it the direct action renders an empty response.
-		for( final String prefix : List.of( adaptorPath(), "/Apps/WebObjects" ) ) {
-			final String appRoute = prefix + "/" + name() + ".woa";
-			RouteTable.defaultRouteTable().map( appRoute, routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
-			RouteTable.defaultRouteTable().map( appRoute + "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ));
+		ERXRouter.declare( routes -> {
+			routes.map( "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ) );
 
-			final RouteHandler redirectToCanonical = routeInvocation -> {
-				final WOResponse response = new WOResponse();
-				response.setStatus( 302 );
-				response.setHeader( appRoute, "Location" );
-				return response;
-			};
-			RouteTable.defaultRouteTable().map( prefix + "/" + name(), redirectToCanonical );
-			RouteTable.defaultRouteTable().map( prefix + "/" + name() + "/", redirectToCanonical );
-		}
+			// FIXME: This should be handled by ERExtensions // Hugi 2026-05-05
+			// Cover both URL prefixes in circulation — adaptorPath()'s (default /cgi-bin/WebObjects) and /Apps/WebObjects as
+			// served by wo-adaptor-jetty/modulo. A route answers both trailing slash forms. Extensionless forms (…/JavaMonitor)
+			// redirect to the canonical .woa URL instead of handling in place: WO's request parsing needs the extension, and
+			// without it the direct action renders an empty response.
+			for( final String prefix : new java.util.LinkedHashSet<>( List.of( adaptorPath(), "/Apps/WebObjects" ) ) ) {
+				final String appRoute = prefix + "/" + name() + ".woa";
+				routes.map( appRoute, routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ) );
+
+				final RouteHandler redirectToCanonical = routeInvocation -> {
+					final WOResponse response = new WOResponse();
+					response.setStatus( 302 );
+					response.setHeader( appRoute, "Location" );
+					return response;
+				};
+				routes.map( prefix + "/" + name(), redirectToCanonical );
+			}
+		} );
 
 		FProperties.logCurrentValues( logger );
 	}
