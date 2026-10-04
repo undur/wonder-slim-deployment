@@ -12,19 +12,16 @@ package sjip.monitor;
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE, REPRODUCTION, MODIFICATION AND/OR DISTRIBUTION OF THE APPLE SOFTWARE, HOWEVER CAUSED AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN  ADVISED OF THE POSSIBILITY OF 
  SUCH DAMAGE.
  */
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WORequest;
-import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.routing.ERXRouter;
-import er.extensions.routing.RouteHandler;
 import sjip.core.x.FProperties;
 import sjip.monitor.admin.AdminAction;
 import sjip.monitor.test.TestDirectAction;
@@ -92,27 +89,7 @@ public class Application extends ERXApplication {
 		// Requests to the root URL "/" were handled using the default request handler, which returned DirectAction.defaultAction()
 		// Since wonder-slim uses routing for handling the root request, we register the root URL manually
 		final WODirectActionRequestHandler rootRequestHandler = new WODirectActionRequestHandler( DirectAction.class.getName(), "default", false );
-		ERXRouter.declare( routes -> {
-			routes.map( "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ) );
-
-			// FIXME: This should be handled by ERExtensions // Hugi 2026-05-05
-			// Cover both URL prefixes in circulation — adaptorPath()'s (default /cgi-bin/WebObjects) and /Apps/WebObjects as
-			// served by wo-adaptor-jetty/modulo. A route answers both trailing slash forms. Extensionless forms (…/JavaMonitor)
-			// redirect to the canonical .woa URL instead of handling in place: WO's request parsing needs the extension, and
-			// without it the direct action renders an empty response.
-			for( final String prefix : new java.util.LinkedHashSet<>( List.of( adaptorPath(), "/Apps/WebObjects" ) ) ) {
-				final String appRoute = prefix + "/" + name() + ".woa";
-				routes.map( appRoute, routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ) );
-
-				final RouteHandler redirectToCanonical = routeInvocation -> {
-					final WOResponse response = new WOResponse();
-					response.setStatus( 302 );
-					response.setHeader( appRoute, "Location" );
-					return response;
-				};
-				routes.map( prefix + "/" + name(), redirectToCanonical );
-			}
-		} );
+		ERXRouter.declare( routes -> routes.map( "/", routeInvocation -> rootRequestHandler.handleRequest( routeInvocation.request() ) ) );
 
 		FProperties.logCurrentValues( logger );
 	}
