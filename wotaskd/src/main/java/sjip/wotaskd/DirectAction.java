@@ -926,8 +926,14 @@ public class DirectAction extends WODirectAction {
 
 	@Override
 	public WOActionResults defaultAction() {
+		return statusPage( request() );
+	}
+
+	/**
+	 * @return The status page, for a request carrying the site's password in its password header
+	 */
+	public static WOResponse statusPage( final WORequest aRequest ) {
 		final WOResponse aResponse = new WOResponse();
-		final WORequest aRequest = request();
 
 		final AppTaskd appTaskd = ((Application)WOApplication.application()).appTaskd();
 		final MSiteConfig aConfig = appTaskd.siteConfig();
