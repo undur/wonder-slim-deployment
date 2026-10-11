@@ -463,6 +463,29 @@ class FoundationCoderTest {
 	@DisplayName("Wire-protocol message shapes")
 	class WireProtocolShapes {
 
+		/**
+		 * The file browser's file list (RemoteBrowse/getPath) carries filenames, which aren't ASCII everywhere.
+		 * The wire carries no XML prolog, and prolog-less XML is UTF-8, so non-ASCII names must survive both
+		 * decode entry points without any encoding declaration being added.
+		 */
+		@Test
+		void nonAsciiFilenamesSurviveWithoutProlog() {
+			final List<Map<String,Object>> files = new ArrayList<>();
+			for( final String name : List.of( "þetta-er-prófun.txt", "ðæö.txt" ) ) {
+				final Map<String,Object> file = new LinkedHashMap<>();
+				file.put( "file", name );
+				file.put( "fileSize", 0 );
+				file.put( "fileType", "NSFileTypeRegular" );
+				files.add( file );
+			}
+
+			final String xml = coder.encodeRootObjectForKey( files, "pathArray" );
+			assertTrue( !xml.startsWith( "<?xml" ), "the wire format carries no prolog" );
+
+			assertEquals( files, coder.decodeRootObjectFromString( xml ) );
+			assertEquals( files, coder.decodeRootObject( xml.getBytes( StandardCharsets.UTF_8 ) ) );
+		}
+
 		@Test
 		void monitorRequestUpdateShape() {
 			final NSMutableDictionary<String,Object> ref = new NSMutableDictionary<>();

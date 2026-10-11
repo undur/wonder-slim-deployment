@@ -159,9 +159,6 @@ public class FileBrowser extends MonitorComponent {
 		 */
 		private static String BROWSE_URL = "/cgi-bin/WebObjects/wotaskd.woa/wa/RemoteBrowse/getPath";
 
-		// FIXME: Dear lord. I feel the pain of whomever wrote this // Hugi 2024-11-10
-		private static String EVIL_HACK = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
-
 		private static RemoteResult extractFileListFromResponse( final ResponseWrapper response, final String sourcePath ) throws SjipException {
 
 			final String responseContentString = response.contentString();
@@ -174,7 +171,7 @@ public class FileBrowser extends MonitorComponent {
 				}
 
 				try {
-					deserializedResponseContent = (List<Map<String,?>>)new FoundationCoder().decodeRootObjectFromString( EVIL_HACK + responseContentString );
+					deserializedResponseContent = (List<Map<String,?>>)new FoundationCoder().decodeRootObjectFromString( responseContentString );
 				}
 				catch( Exception e ) {
 					logger.error( "RemoteBrowseClient _getFileListOutOfResponse Error decoding response: " + responseContentString );

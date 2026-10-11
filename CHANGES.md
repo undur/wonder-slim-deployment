@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **The file browser shows non-ASCII filenames correctly**
+  A name like `þetta-er-prófun.txt` used to show as `Ã¾etta-er-prÃ³fun.txt` when browsing a host for an
+  application's path. It's fixed in JavaMonitor alone, so it works against any wotaskd, old or new. (#12)
+
 - **Deploy a new build through JavaMonitor: `admin/deploy`**
   POST a `.tar.gz` containing `<App>.woa`, as `application/octet-stream`, to
   `…/JavaMonitor.woa/admin/deploy?type=app&name=<App>`. JavaMonitor hands it to the wotaskd on every host
