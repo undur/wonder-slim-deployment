@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import sjip.core.model.ApplicationType;
 import sjip.core.model.MInstance;
+import sjip.core.x.XUtil;
 
 /**
  * Discovers what kinds of application a registered instance is, by running detection checks against the
@@ -149,7 +150,7 @@ public class ApplicationTypeProber {
 
 	private static ProbeResult get( final String url ) {
 		try {
-			final HttpRequest request = HttpRequest.newBuilder()
+			final HttpRequest request = XUtil.newRequestBuilder()
 					.uri( URI.create( url ) )
 					.timeout( PROBE_TIMEOUT )
 					.GET()

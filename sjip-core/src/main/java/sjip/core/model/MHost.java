@@ -244,8 +244,8 @@ public class MHost extends MObject {
 
 		String responseContentString = null;
 
-		final Builder requestBuilder = HttpRequest
-				.newBuilder()
+		final Builder requestBuilder = XUtil
+				.newRequestBuilder()
 				.uri( URI.create( "http://%s:%s%s".formatted( name(), port, MUtil.WOTASKD_DIRECT_ACTION_URL ) ) )
 				.timeout( Duration.ofMillis( WOTASKD_RECEIVE_TIMEOUT ) )
 				.POST( BodyPublishers.ofString( contentString ) );

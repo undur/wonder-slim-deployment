@@ -32,6 +32,22 @@ public class XUtil {
 	private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder().build();
 
 	/**
+	 * @return A request builder carrying our {@link #userAgent()}. Every outgoing request starts here.
+	 */
+	public static HttpRequest.Builder newRequestBuilder() {
+		return HttpRequest.newBuilder().setHeader( "User-Agent", userAgent() );
+	}
+
+	/**
+	 * The User-Agent JavaMonitor and wotaskd identify themselves with: {@code slim-monitor} or
+	 * {@code slim-wotaskd}. HttpClient's default ({@code Java-http-client/<version>}) is commonly
+	 * blocked as bot traffic, which cuts wotaskd off from the instances it manages.
+	 */
+	public static String userAgent() {
+		return "slim-" + FApplication.role();
+	}
+
+	/**
 	 * Sends {@code request} through the shared {@link HttpClient} and returns the response with
 	 * its body decoded as UTF-8 text. All outbound HTTP traffic for the deployment tooling
 	 * routes through here; this is the chokepoint for future request logging, recording, and

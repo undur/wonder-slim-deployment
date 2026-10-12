@@ -649,8 +649,8 @@ public class InstanceController implements IInstanceController {
 		final String urlString = MUtil.ADMIN_ACTION_STRING_PREFIX + anInstance.applicationName() + MUtil.ADMIN_ACTION_STRING_POSTFIX;
 
 		try {
-			final Builder requestBuilder = HttpRequest
-					.newBuilder()
+			final Builder requestBuilder = XUtil
+					.newRequestBuilder()
 					.uri( URI.create( "http://%s:%s%s".formatted( anInstance.host().name(), anInstance.port(), urlString ) ) )
 					.timeout( Duration.ofMillis( RECEIVE_TIMEOUT ) )
 					.POST( BodyPublishers.ofString( requestContentXML ) );

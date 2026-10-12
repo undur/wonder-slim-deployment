@@ -44,8 +44,8 @@ public class ExperimentalUtilities {
 	 */
 	private static String fetchStringFromMonitorService( final String hostName, final int port, final String password, final String url ) {
 
-		final HttpRequest request = HttpRequest
-				.newBuilder()
+		final HttpRequest request = XUtil
+				.newRequestBuilder()
 				.uri( URI.create( "http://%s:%s%s".formatted( hostName, port, url ) ) )
 				.timeout( Duration.ofSeconds( 10 ) )
 				.header( "monitor-service-password", password )

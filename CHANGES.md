@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **wotaskd and JavaMonitor identify themselves: `slim-wotaskd` and `slim-monitor`**
+  Every request they make carries that User-Agent, in place of Java's default `Java-http-client/<version>`.
+  Applications that block the default as bot traffic no longer cut wotaskd off from their instances, which
+  made starting, stopping and statistics time out. (#58)
+
 - **The file browser shows non-ASCII filenames correctly**
   A name like `þetta-er-prófun.txt` used to show as `Ã¾etta-er-prÃ³fun.txt` when browsing a host for an
   application's path. It's fixed in JavaMonitor alone, so it works against any wotaskd, old or new. (#12)

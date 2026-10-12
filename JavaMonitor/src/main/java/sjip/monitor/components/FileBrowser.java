@@ -206,8 +206,8 @@ public class FileBrowser extends MonitorComponent {
 						WOApplication.application().lifebeatDestinationPort(),
 						RemoteBrowseClient.BROWSE_URL );
 
-				final Builder requestBuilder = HttpRequest
-						.newBuilder()
+				final Builder requestBuilder = XUtil
+						.newRequestBuilder()
 						.uri( URI.create( urlString ) )
 						.timeout( Duration.ofMillis( 5000 ) )
 						.GET();

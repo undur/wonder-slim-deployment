@@ -32,6 +32,7 @@ import sjip.core.model.MApplication;
 import sjip.core.model.MHost;
 import sjip.core.model.MInstance;
 import sjip.core.model.MSiteConfig;
+import sjip.core.x.XUtil;
 import sjip.monitor.Session;
 import sjip.monitor.components.AppDetailPage;
 import sjip.monitor.util.WOTaskdHandler;
@@ -637,7 +638,7 @@ public class AdminAction extends WODirectAction {
 
 		try {
 			for( final MHost host : hosts ) {
-				final HttpRequest.Builder builder = HttpRequest.newBuilder()
+				final HttpRequest.Builder builder = XUtil.newRequestBuilder()
 						.uri( URI.create( "http://%s:%s/cgi-bin/WebObjects/wotaskd.woa/wa/deploy?app=%s".formatted( host.name(), port, URLEncoder.encode( application.name(), StandardCharsets.UTF_8 ) ) ) )
 						.header( "Content-Type", "application/octet-stream" )
 						.timeout( Duration.ofMinutes( 5 ) )

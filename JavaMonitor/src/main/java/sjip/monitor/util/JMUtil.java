@@ -30,8 +30,8 @@ public class JMUtil {
 	 */
 	public static String fetchWotaskdConfigurationString( final String hostName, final int port, final String password ) {
 	
-		final HttpRequest.Builder requestBuilder = HttpRequest
-				.newBuilder()
+		final HttpRequest.Builder requestBuilder = XUtil
+				.newRequestBuilder()
 				.uri( URI.create( "http://%s:%s/".formatted( hostName, port ) ) )
 				.timeout( Duration.ofSeconds( 10 ) );
 		
